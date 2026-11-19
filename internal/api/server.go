@@ -36,6 +36,8 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("POST /api/v1/demo/pools/generate", s.generatePools)
 	mux.HandleFunc("GET /api/v1/demo/brackets", s.listBracketsHandler)
 	mux.HandleFunc("POST /api/v1/demo/brackets/build", s.buildBracket)
+	mux.HandleFunc("GET /api/v1/demo/medals", s.listMedalsHandler)
+	mux.HandleFunc("POST /api/v1/demo/medals/award", s.awardMedals)
 	mux.HandleFunc("GET /api/v1/demo/kata", s.listKataHandler)
 	mux.HandleFunc("POST /api/v1/demo/kata/performances", s.createKataPerformance)
 	mux.HandleFunc("POST /api/v1/demo/kata/{id}/scores", s.submitKataScore)

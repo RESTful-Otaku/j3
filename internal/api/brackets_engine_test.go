@@ -6,6 +6,43 @@ import (
 	"testing"
 )
 
+func TestBracketBuildWithOddField(t *testing.T) {
+	srv := seededServer(t)
+	rec := postJSON(t, srv, "/api/v1/demo/brackets/build", map[string]any{
+		"eventId": "ev-demo", "categoryId": "cat-youth-60",
+		"format": "Single elimination", "targetPoolSize": 4, "direct": true,
+		"maxPools": 4, "seed": 11, "thirdPlace": false,
+	})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("build = %d: %s", rec.Code, rec.Body.String())
+	}
+	var body struct {
+		Stages []struct {
+			Name  string `json:"name"`
+			Slots []struct {
+				FighterID string `json:"fighterId"`
+			} `json:"slots"`
+		} `json:"stages"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if len(body.Stages) == 0 {
+		t.Fatal("no stages generated")
+	}
+	emptySlots := 0
+	for _, stage := range body.Stages {
+		for _, slot := range stage.Slots {
+			if slot.FighterID == "" {
+				emptySlots++
+			}
+		}
+	}
+	if emptySlots == 0 {
+		t.Fatal("odd field should produce at least one BYE slot")
+	}
+}
+
 func TestBracketBuildAndPromote(t *testing.T) {
 	srv := seededServer(t)
 	built := postJSON(t, srv, "/api/v1/demo/brackets/build", map[string]any{

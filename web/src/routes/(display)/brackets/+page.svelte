@@ -29,11 +29,11 @@
     return () => { stopFights(); stopPools(); };
   });
 
-  async function buildOfficial() {
+  async function buildOfficial(direct = false) {
     try {
       const result = await api.buildBracket({
-        eventId: 'ev-demo', format: 'Double elimination', targetPoolSize: 4,
-        maxPools: 12, seed: 42, thirdPlace: true,
+        eventId: 'ev-demo', format: direct ? 'Single elimination' : 'Double elimination',
+        targetPoolSize: 4, maxPools: 12, seed: 42, thirdPlace: true, direct,
       });
       serverStages = result.stages;
       notifySuccess(`Official bracket built · ${result.format} · ${serverStages.length} stages`);
@@ -153,7 +153,8 @@
   {#if mode === 'official'}
     <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
       <p class="muted small">Server-generated stages · results and promotion retained in every round</p>
-      <button class="btn primary" on:click={buildOfficial}>⚙ Build official bracket</button>
+      <button class="btn" on:click={() => buildOfficial(true)}>⚡ Direct elimination (BYEs)</button>
+      <button class="btn primary" on:click={() => buildOfficial()}>⚙ Build official bracket</button>
     </div>
     <div style="display:flex; gap:clamp(14px,2vw,40px); overflow-x:auto; align-items:flex-start; padding-bottom:20px;">
       {#each serverStages as stage (stage.id)}

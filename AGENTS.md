@@ -784,6 +784,9 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-19** — Completion push: club-spread seeding, BYE padding and ordered tie-break chains
+  in `rules`; direct-elimination bracket option; dual-bronze medal awards; `bun run smoke` automated
+  end-to-end verification (41/41 passing across API and every UI route).
 - **2026-11-19** — Release push: persisted bracket stages/slots with promotion and result history,
   schedule with drift projections + live clock, kata panel judging with high/low drop, plus their
   API tests. Live scoring, simulator fix and Capacitor projects were already committed.
@@ -866,8 +869,9 @@ _Format: `D-### | date | decision | rationale | status`._
    and wired into the display. Still to finish: judge-role permissions, hold timers and full
    multi-mat operator console.
 2. **Production format engine — delivered**: server-side bracket stages/slots with format
-   suggestion, persisted results, winner promotion and per-round history; `/brackets` now has an
-   "Official bracket" tab. Still to add: BYEs, seeding and full tie-break chains.
+   suggestion, club-spread seeding, BYE padding for odd fields, persisted results, winner
+   promotion and per-round history; ordered tie-break chains and dual-bronze medal awards exist
+   as tested rules/API helpers. Still to finish: wiring every tie-break criterion into live results.
 3. **Scheduling authority — delivered**: persisted timeline with drift offsets, projected
    start/end times, mark-complete and a large live dashboard clock with "next up" on `/public`.
    Still to add: automatic rest-rule enforcement and TTS/PA announcements.
@@ -876,8 +880,9 @@ _Format: `D-### | date | decision | rationale | status`._
    compulsory/choice rounds, bunkai and drills/sparring rotation.
 5. **Setup completeness**: import clubs/fighters from templates, per-discipline rule snapshots,
    manual result entry and medal ceremony flow in one continuous path (Phase 1).
-6. **Verification**: browser E2E walkthrough of the wizard and multi-screen routes, API fuzz
-   corpus, load/race runs, no-bad-state audit and final QA sign-off (Phase 7).
+6. **Verification**: `bun run smoke` now boots the real server and checks 41 API/UI assertions
+   automatically. Still to add: browser-driven click-through E2E, load/race runs and accessibility
+   audit before final QA sign-off (Phase 7).
 
 ### Latest refinement batch (user QA, 2026-11-19)
 - **Setup QoL:** pagination, bulk create/delete, clone events, template presets, more optional

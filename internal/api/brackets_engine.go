@@ -15,6 +15,7 @@ type bracketRequest struct {
 	MaxPools       int    `json:"maxPools"`
 	Seed           int64  `json:"seed"`
 	ThirdPlace     bool   `json:"thirdPlace"`
+	Direct         bool   `json:"direct"`
 }
 
 type bracketSlotView struct {
@@ -87,6 +88,7 @@ func (s *Server) buildBracket(w http.ResponseWriter, r *http.Request) {
 	for i, e := range entrants {
 		input[i] = rules.Entrant{ID: e.ID, ClubID: e.ClubID, Seed: e.Seed}
 	}
+	input = rules.SeedEntrants(input, true)
 	pools := rules.GeneratePools(input, rules.PoolConstraints{
 		TargetPoolSize: req.TargetPoolSize, MaxPools: req.MaxPools,
 		SameClubSeparation: true, Seed: req.Seed,
@@ -98,17 +100,26 @@ func (s *Server) buildBracket(w http.ResponseWriter, r *http.Request) {
 		slots      []string
 	}
 	specs := []stageSpec{}
-	for _, pool := range pools {
-		specs = append(specs, stageSpec{pool.Name, "pool", pool.Members})
-	}
-	if format != "round_robin" {
-		advance := []string{}
+	direct := req.Direct || (req.TargetPoolSize >= len(entrants) && len(entrants) > 0)
+	if !direct {
 		for _, pool := range pools {
-			if len(pool.Members) > 0 {
-				advance = append(advance, pool.Members[0])
+			specs = append(specs, stageSpec{pool.Name, "pool", pool.Members})
+		}
+	}
+	if format != "round_robin" || direct {
+		advance := []string{}
+		if direct {
+			for _, entrant := range input {
+				advance = append(advance, entrant.ID)
 			}
-			if len(pool.Members) > 1 {
-				advance = append(advance, pool.Members[1])
+		} else {
+			for _, pool := range pools {
+				if len(pool.Members) > 0 {
+					advance = append(advance, pool.Members[0])
+				}
+				if len(pool.Members) > 1 {
+					advance = append(advance, pool.Members[1])
+				}
 			}
 		}
 		if len(advance) > 8 {
@@ -116,11 +127,16 @@ func (s *Server) buildBracket(w http.ResponseWriter, r *http.Request) {
 		}
 		stageNames := []string{"Quarter-final", "Semi-final", "Final"}
 		for len(advance) > 1 && len(stageNames) > 0 {
-			specs = append(specs, stageSpec{stageNames[0], "knockout", advance})
+			field := rules.WithByes(advance)
+			specs = append(specs, stageSpec{stageNames[0], "knockout", field})
 			stageNames = stageNames[1:]
 			next := []string{}
-			for i := 0; i+1 < len(advance); i += 2 {
-				next = append(next, advance[i])
+			for i := 0; i+1 < len(field); i += 2 {
+				if field[i] == "BYE" {
+					next = append(next, field[i+1])
+				} else {
+					next = append(next, field[i])
+				}
 			}
 			advance = next
 		}
@@ -154,9 +170,12 @@ func (s *Server) buildBracket(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for position, fighterID := range spec.slots {
+			if fighterID == "BYE" {
+				fighterID = ""
+			}
 			if _, err := tx.ExecContext(r.Context(), `
 				INSERT INTO bracket_slots (id, stage_id, position, fighter_id) VALUES (?, ?, ?, ?)`,
-				newID("slot"), stageID, position, fighterID); err != nil {
+				newID("slot"), stageID, position, nullIfEmpty(fighterID)); err != nil {
 				writeError(w, err)
 				return
 			}

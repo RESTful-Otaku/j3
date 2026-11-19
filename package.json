@@ -10,6 +10,7 @@
     "reset": "go run ./cmd/j3d reset -db ./data/j3-demo.db",
     "generate:types": "bun run --cwd web generate:types",
     "test": "go test ./... && bun run --cwd web test",
+    "smoke": "bash scripts/smoke.sh",
     "check": "bun run --cwd web check",
     "build": "go build ./... && bun run --cwd web build",
     "mobile:sync": "bun run --cwd web build && bunx --cwd web cap sync",
