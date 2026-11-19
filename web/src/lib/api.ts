@@ -65,6 +65,8 @@ export const api = {
   pools: () => getJson<PoolsResponse>('/api/v1/demo/pools?eventId=ev-demo'),
   generatePools: (body: GeneratePoolsRequest) =>
     postJson<PoolsResponse>('/api/v1/demo/pools/generate', body),
+  kataCatalogue: () => getJson<{ kata: { id: string; name: string; style: string; level: string; discipline: string; isWeapon: boolean }[] }>('/api/v1/demo/kata/catalogue'),
+  training: () => getJson<{ sessions: { id: string; title: string; kind: string; leader: string; startsAt: string; duration: number }[] }>('/api/v1/demo/training'),
   kata: () => getJson<{ performances: KataPerformance[] }>('/api/v1/demo/kata'),
   createKata: (body: Record<string, unknown>) =>
     postJson<{ performances: KataPerformance[] }>('/api/v1/demo/kata/performances', body),
@@ -88,6 +90,8 @@ export const api = {
   resumeFight: (id: string) => postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/resume`, {}),
   fightEvent: (id: string, body: Record<string, unknown>) =>
     postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/event`, body),
+  startHold: (id: string, corner: string, seconds = 20) =>
+    postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/hold`, { corner, seconds }),
   undoFightEvent: (id: string) => postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/undo`, {}),
   submitFight: (id: string, outcome: string) =>
     postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/submit`, { outcome }),
@@ -160,6 +164,7 @@ export type FightState = {
   fightId: string; state: string; outcome: string; running: boolean;
   seconds: number; round: number; redScore: number; blueScore: number;
   redPenalty: number; bluePenalty: number;
+  holdSeconds: number; holdCorner: string;
   events: { seq: number; kind: string; corner: string; points: number; technique: string; card: string; actor: string; createdAt: string }[];
 };
 

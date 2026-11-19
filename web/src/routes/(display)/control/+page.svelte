@@ -9,6 +9,7 @@
     { path: '/simulate', name: 'Tournament simulator', icon: '🎬', note: 'Replay a full event + charts' },
     { path: '/data', name: 'Data explorer', icon: '🔎', note: 'Search, filter, sort any dataset' },
     { path: '/audit', name: 'Audit trail', icon: '📜', note: 'Who did what, when and how' },
+    { path: '/mat', name: 'Mat scorekeeper console', icon: '🎛️', note: 'Authoritative control per mat' },
     { path: '/display', name: 'Full-screen scoreboard', icon: '🥊', note: 'Current fight, officials, moves' },
     { path: '/public', name: 'Public dashboard', icon: '📺', note: 'Live, next up, leaderboard' },
     { path: '/details', name: 'Event details', icon: '📋', note: 'Rules, protection, schedule, corners' },
@@ -46,6 +47,11 @@
   function announce() {
     if (!paMessage.trim()) return;
     broadcastPA(paMessage, paFighter, paSeconds);
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(paMessage);
+      utterance.rate = 1.05;
+      window.speechSynthesis.speak(utterance);
+    }
     paMessage = '';
     paFighter = '';
   }

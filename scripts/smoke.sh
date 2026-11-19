@@ -53,6 +53,8 @@ check "belts" "200" "$(status "$BASE/api/v1/demo/belts")"
 check "schedule" "200" "$(status "$BASE/api/v1/demo/schedule")"
 check "kata" "200" "$(status "$BASE/api/v1/demo/kata")"
 check "medals" "200" "$(status "$BASE/api/v1/demo/medals")"
+check "kata catalogue" "200" "$(status "$BASE/api/v1/demo/kata/catalogue")"
+check "training sessions" "200" "$(status "$BASE/api/v1/demo/training")"
 check "audit" "200" "$(status "$BASE/api/v1/demo/audit")"
 check "query" "200" "$(status "$BASE/api/v1/query?table=fighters&limit=5")"
 check "simulation" "200" "$(status "$BASE/api/v1/demo/simulate?fighters=50")"
@@ -65,6 +67,7 @@ check "pool generation" "200" "$(status -X POST "$BASE/api/v1/demo/pools/generat
 check "fight start" "200" "$(status -X POST "$BASE/api/v1/fights/fight-01/start" -H 'Content-Type: application/json' -d '{"seconds":120,"round":1}')"
 check "fight score" "200" "$(status -X POST "$BASE/api/v1/fights/fight-01/event" -H 'Content-Type: application/json' -d '{"corner":"red","points":2,"technique":"Takedown","kind":"score"}')"
 check "fight pause" "200" "$(status -X POST "$BASE/api/v1/fights/fight-01/pause" -H 'Content-Type: application/json' -d '{}')"
+check "fight hold" "200" "$(status -X POST "$BASE/api/v1/fights/fight-01/hold" -H 'Content-Type: application/json' -d '{"corner":"red","seconds":20}')"
 check "fight submit" "200" "$(status -X POST "$BASE/api/v1/fights/fight-01/submit" -H 'Content-Type: application/json' -d '{"outcome":"win_red"}')"
 check "schedule drift" "200" "$(status -X POST "$BASE/api/v1/demo/schedule/drift" -H 'Content-Type: application/json' -d '{"minutes":5}')"
 check "medal award" "200" "$(status -X POST "$BASE/api/v1/demo/medals/award" -H 'Content-Type: application/json' -d '{"gold":"f01","silver":"f02","bronze":["f03","f04"]}')"
@@ -73,6 +76,7 @@ echo "🔎 Data assertions"
 check "simulator has medals" "1" "$(has "$BASE/api/v1/demo/simulate?fighters=50" '"medals"')"
 check "query rejects bad table" "400" "$(status "$BASE/api/v1/query?table=sqlite_master")"
 check "signup rejects bad email" "400" "$(status -X POST "$BASE/api/v1/signup" -H 'Content-Type: application/json' -d '{"name":"A","email":"bad","dateOfBirth":"1990-01-01"}')"
+check "fighter cannot submit result" "403" "$(status -X POST "$BASE/api/v1/fights/fight-01/submit" -H 'Content-Type: application/json' -H 'X-J3-Role: fighter' -d '{"outcome":"win_red"}')"
 
 echo "🔎 UI routes"
 export PATH="$HOME/.bun/bin:$PATH"
@@ -83,7 +87,7 @@ if command -v bun >/dev/null 2>&1; then
     curl -fsS http://127.0.0.1:5173/ >/dev/null 2>&1 && break
     sleep 0.25
   done
-  for route in / /setup /display /public /brackets /tables /pools /control /data /audit /settings /details /simulate; do
+  for route in / /setup /display /mat /public /brackets /tables /pools /control /data /audit /settings /details /simulate; do
     check "UI $route" "200" "$(status "http://127.0.0.1:5173$route")"
   done
   kill "$WEB_PID" 2>/dev/null || true

@@ -171,6 +171,9 @@
         <div class="round">{matName} · {selected.round}</div>
         <div class="clock" class:paused-flash={liveState ? !liveState.running : paused}>{clockText(liveState?.seconds ?? seconds)}</div>
         <div class="meta">{(liveState ? !liveState.running : paused) ? 'Referee stoppage · timer paused' : 'Fight in progress'} · authoritative server clock</div>
+        {#if liveState && liveState.holdSeconds > 0}
+          <div class="hold-badge">HOLD · {liveState.holdCorner} · {liveState.holdSeconds}s</div>
+        {/if}
       </section>
 
       <section class="fighter-hero blue" class:celebrate={celebrate && method(selected, 'blue').startsWith('W')}>
@@ -247,6 +250,7 @@
   .celebration .portrait { width: clamp(160px, 24vw, 420px); height: clamp(160px, 24vw, 420px); margin: 22px auto; border-radius: 24%; display: grid; place-items: center; font-family: var(--font-display); font-size: clamp(4rem, 10vw, 10rem); font-weight: 800; color: #fff; background: linear-gradient(145deg, var(--brand-primary), var(--brand-accent)); }
   .celebration p { color: var(--brand-muted); font-size: 1.2rem; }
   .foul-card { display:inline-grid; place-items:center; width:34px; height:26px; border-radius:6px; font-size:.72rem; font-weight:900; color:#fff; box-shadow:0 4px 14px rgba(0,0,0,.35); }
+  .hold-badge { display:inline-block; margin-top:8px; padding:6px 12px; border-radius:10px; background:var(--brand-accent); color:#0f172a; font-weight:800; }
   .foul-card.yellow { background:#facc15; color:#422006; }
   .foul-card.red { background:#ef4444; }
   :global(.paused-flash) { color: var(--draw) !important; animation: pausedPulse .9s ease-in-out infinite alternate; }

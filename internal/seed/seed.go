@@ -290,6 +290,44 @@ func Ensure(store *db.DB) error {
 	}
 	add(`INSERT OR IGNORE INTO schedule_state (event_id, offset_minutes) VALUES ('ev-demo', 0)`)
 
+	for i, kata := range []struct {
+		name, style, level, discipline string
+		weapon                         int
+	}{
+		{"Hekigan-ken", "JJJ", "standard", "kata", 0},
+		{"Nage-no-kata", "Judo", "standard", "kata", 0},
+		{"Katame-no-kata", "Judo", "standard", "kata", 0},
+		{"Seiyunchin", "Karate", "advanced", "kata", 0},
+		{"Kanku-dai", "Karate", "advanced", "kata", 0},
+		{"Gekusai-dai", "JJJ", "standard", "kata", 0},
+		{"Gekusai-sho", "JJJ", "standard", "kata", 0},
+		{"Pinan sono ichi", "Karate", "beginner", "kata", 0},
+		{"Taikyoku sono ichi", "Karate", "beginner", "kata", 0},
+		{"Koryu-no-kata", "JJJ", "weapon", "weapon kata", 1},
+		{"Tanto-no-kata", "JJJ", "weapon", "weapon kata", 1},
+		{"Bo-no-kata", "JJJ", "weapon", "weapon kata", 1},
+		{"Aikidoiken", "JJJ", "standard", "kata", 0},
+		{"Shinjitsu-ryu", "JJJ", "advanced", "kata", 0},
+		{"Broken ladder form", "Custom", "custom", "kata", 0},
+	} {
+		add(`INSERT OR IGNORE INTO kata_catalogue (id, name, style, level, discipline, is_weapon)
+			VALUES (?, ?, ?, ?, ?, ?)`,
+			fmt.Sprintf("kata-%02d", i+1), kata.name, kata.style, kata.level, kata.discipline, kata.weapon)
+	}
+	for i, session := range []struct {
+		title, kind, leader string
+	}{
+		{"Guest Sensei · Randori drills", "drill", "Shihan H. Yamamoto"},
+		{"Free sparring rotation · Mat 3", "sparring", "Kenji Sato"},
+		{"Kata clinic with visiting Shihan", "seminar", "Aiko Tanaka"},
+	} {
+		add(`INSERT OR IGNORE INTO training_sessions
+			(id, event_id, title, kind, leader, starts_at, duration_seconds)
+			VALUES (?, 'ev-demo', ?, ?, ?, ?, ?)`,
+			fmt.Sprintf("session-%02d", i+1), session.title, session.kind, session.leader,
+			fmt.Sprintf("2026-11-19T%02d:00:00Z", 13+i), 1800)
+	}
+
 	add(`INSERT OR IGNORE INTO invitations
 		(id, tenant_id, event_id, club_id, role, email, token_hash, expires_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,

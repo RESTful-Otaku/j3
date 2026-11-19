@@ -1,8 +1,10 @@
 package api_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/restful-otaku/j3/internal/api"
@@ -76,6 +78,31 @@ func TestAuthoritativeFightState(t *testing.T) {
 	}
 	if state.State != "complete" || state.Outcome != "win_red" {
 		t.Fatalf("unexpected final state: %+v", state)
+	}
+}
+
+func TestHoldTimerAndRoleEnforcement(t *testing.T) {
+	srv := seededServer(t)
+	hold := postJSON(t, srv, "/api/v1/fights/fight-05/hold", map[string]any{"corner": "blue", "seconds": 15})
+	if hold.Code != http.StatusOK {
+		t.Fatalf("hold = %d: %s", hold.Code, hold.Body.String())
+	}
+	var state api.FightStateView
+	if err := json.Unmarshal(hold.Body.Bytes(), &state); err != nil {
+		t.Fatal(err)
+	}
+	if state.HoldCorner != "blue" || state.HoldSeconds != 15 {
+		t.Fatalf("unexpected hold state: %+v", state)
+	}
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/fights/fight-05/submit",
+		bytes.NewReader([]byte(`{"outcome":"win_red"}`)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-J3-Role", "fighter")
+	srv.Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("fighter submit = %d, want 403", rec.Code)
 	}
 }
 

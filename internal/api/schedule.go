@@ -16,6 +16,7 @@ type scheduleItemView struct {
 	Duration       int    `json:"duration"`
 	Status         string `json:"status"`
 	OffsetMinutes  int    `json:"offsetMinutes"`
+	RestWarning    bool   `json:"restWarning"`
 }
 
 func (s *Server) schedule(r *http.Request, eventID string) ([]scheduleItemView, error) {
@@ -30,6 +31,7 @@ func (s *Server) schedule(r *http.Request, eventID string) ([]scheduleItemView, 
 	}
 	defer rows.Close()
 	items := []scheduleItemView{}
+	var previousEnd time.Time
 	for rows.Next() {
 		var item scheduleItemView
 		var planned string
@@ -45,6 +47,10 @@ func (s *Server) schedule(r *http.Request, eventID string) ([]scheduleItemView, 
 		item.ProjectedStart = projected.Format(time.RFC3339)
 		item.ProjectedEnd = projected.Add(time.Duration(item.Duration) * time.Second).Format(time.RFC3339)
 		item.OffsetMinutes = offset
+		if !previousEnd.IsZero() && projected.Before(previousEnd.Add(5*time.Minute)) {
+			item.RestWarning = true
+		}
+		previousEnd = projected.Add(time.Duration(item.Duration) * time.Second)
 		items = append(items, item)
 	}
 	return items, rows.Err()

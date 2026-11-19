@@ -4,11 +4,17 @@
 
   let event: EventDisplayInfo | null = null;
   let details: Record<string, any> = {};
+  let kataList: { id: string; name: string; style: string; level: string; discipline: string; isWeapon: boolean }[] = [];
+  let sessions: { id: string; title: string; kind: string; leader: string; startsAt: string }[] = [];
 
-  onMount(() => livePoll(api.event, 10000, (data) => {
-    event = data;
-    try { details = JSON.parse(data.detailsJson || '{}'); } catch { details = {}; }
-  }));
+  onMount(() => {
+    void api.kataCatalogue().then((result) => (kataList = result.kata)).catch(() => {});
+    void api.training().then((result) => (sessions = result.sessions)).catch(() => {});
+    return livePoll(api.event, 10000, (data) => {
+      event = data;
+      try { details = JSON.parse(data.detailsJson || '{}'); } catch { details = {}; }
+    });
+  });
 </script>
 
 <svelte:head><title>J3 · Event details & requirements</title></svelte:head>
@@ -62,6 +68,24 @@
       <div class="stat small" style="margin-top:8px;">Ippon <strong>{details.ippon ?? 3}</strong> · Waza-ari <strong>{details.wazaAri ?? 1}</strong></div>
       <div class="stat small" style="margin-top:8px;">Submission <strong>{details.submissionInstantWin ? 'instant win' : 'points only'}</strong></div>
       <div class="stat small" style="margin-top:8px;">Shido limit <strong>{details.shidoLimit ?? 3}</strong></div>
+    </div>
+
+    <div class="card slide-in">
+      <div class="eyebrow">Approved kata</div><h2>Kata catalogue</h2>
+      <div class="capabilities" style="margin-top:12px;">
+        {#each kataList as kata (kata.id)}
+          <span class="cap on">{kata.name} <span class="muted">· {kata.discipline}{kata.isWeapon ? ' ⚔' : ''}</span></span>
+        {:else}<span class="muted small">Catalogue unavailable.</span>{/each}
+      </div>
+    </div>
+
+    <div class="card slide-in">
+      <div class="eyebrow">Beyond competition</div><h2>Training & sparring</h2>
+      <div style="display:grid; gap:8px; margin-top:12px;">
+        {#each sessions as session (session.id)}
+          <div class="stat small"><strong>{session.title}</strong><br /><span class="muted">{session.kind} · {session.leader}</span></div>
+        {:else}<span class="muted small">No sessions scheduled.</span>{/each}
+      </div>
     </div>
   </div>
 </div>

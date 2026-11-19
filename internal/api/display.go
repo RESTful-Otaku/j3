@@ -2,6 +2,9 @@ package api
 
 import (
 	"net/http"
+	"sort"
+
+	"github.com/restful-otaku/j3/internal/rules"
 )
 
 type displayOfficial struct {
@@ -130,5 +133,17 @@ func (s *Server) standings(w http.ResponseWriter, r *http.Request) {
 		row.Points = row.Wins*3 + row.Draws
 		rowsData = append(rowsData, row)
 	}
+	chain := []string{"wins", "draws", "points_scored", "points_conceded"}
+	sort.SliceStable(rowsData, func(i, j int) bool {
+		a := rules.TieBreakStats{
+			Wins: rowsData[i].Wins, Draws: rowsData[i].Draws,
+			PointsScored: rowsData[i].Points, PointsConceded: rowsData[i].Losses,
+		}
+		b := rules.TieBreakStats{
+			Wins: rowsData[j].Wins, Draws: rowsData[j].Draws,
+			PointsScored: rowsData[j].Points, PointsConceded: rowsData[j].Losses,
+		}
+		return rules.TieBreak(a, b, chain) < 0
+	})
 	writeJSON(w, http.StatusOK, map[string]any{"standings": rowsData})
 }

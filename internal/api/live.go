@@ -7,7 +7,23 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/restful-otaku/j3/internal/auth"
 )
+
+// requireRole enforces RBAC on live scoring mutations. The demo defaults to
+// official; clients may pass X-J3-Role to exercise other roles.
+func (s *Server) requireRole(w http.ResponseWriter, r *http.Request, action auth.Action) bool {
+	role := auth.Role(r.Header.Get("X-J3-Role"))
+	if role == "" {
+		role = auth.RoleOfficial
+	}
+	if !auth.Can(role, action) {
+		writeJSON(w, http.StatusForbidden, map[string]string{"error": "your role cannot perform this action"})
+		return false
+	}
+	return true
+}
 
 type liveEvent struct {
 	Type    string `json:"type"`
@@ -71,6 +87,8 @@ type FightStateView struct {
 	BlueScore   int              `json:"blueScore"`
 	RedPenalty  int              `json:"redPenalty"`
 	BluePenalty int              `json:"bluePenalty"`
+	HoldSeconds int              `json:"holdSeconds"`
+	HoldCorner  string           `json:"holdCorner"`
 	Events      []scoreEventView `json:"events"`
 }
 
@@ -79,10 +97,11 @@ func (s *Server) fightState(ctx context.Context, fightID string) (FightStateView
 	var running int
 	err := s.Store.QueryRowContext(ctx, `
 		SELECT f.state, f.outcome, COALESCE(fs.running,0), COALESCE(fs.seconds_remaining,180),
-		       COALESCE(fs.round,1)
+		       COALESCE(fs.round,1), COALESCE(fs.hold_seconds,0), COALESCE(fs.hold_corner,'')
 		FROM fights f LEFT JOIN fight_state fs ON fs.fight_id = f.id
 		WHERE f.id = ?`, fightID).
-		Scan(&view.State, &view.Outcome, &running, &view.Seconds, &view.Round)
+		Scan(&view.State, &view.Outcome, &running, &view.Seconds, &view.Round,
+			&view.HoldSeconds, &view.HoldCorner)
 	if err != nil {
 		return view, err
 	}
@@ -166,6 +185,9 @@ type timerRequest struct {
 }
 
 func (s *Server) startFight(w http.ResponseWriter, r *http.Request) {
+	if !s.requireRole(w, r, auth.ActionScoreFight) {
+		return
+	}
 	id := r.PathValue("id")
 	var body timerRequest
 	_ = decodeJSON(r, &body)
@@ -200,6 +222,9 @@ func (s *Server) resumeFight(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) setRunning(w http.ResponseWriter, r *http.Request, value int, action string) {
+	if !s.requireRole(w, r, auth.ActionScoreFight) {
+		return
+	}
 	id := r.PathValue("id")
 	_, err := s.Store.ExecContext(r.Context(), `
 		INSERT INTO fight_state (fight_id, running) VALUES (?, ?)
@@ -222,6 +247,9 @@ type scoreRequest struct {
 }
 
 func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
+	if !s.requireRole(w, r, auth.ActionScoreFight) {
+		return
+	}
 	id := r.PathValue("id")
 	var body scoreRequest
 	if err := decodeJSON(r, &body); err != nil {
@@ -260,7 +288,47 @@ func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
 	s.getFightState(w, r)
 }
 
+func (s *Server) startHold(w http.ResponseWriter, r *http.Request) {
+	if !s.requireRole(w, r, auth.ActionScoreFight) {
+		return
+	}
+	id := r.PathValue("id")
+	var body struct {
+		Corner  string `json:"corner"`
+		Seconds int    `json:"seconds"`
+	}
+	if err := decodeJSON(r, &body); err != nil {
+		writeBadRequest(w, err.Error())
+		return
+	}
+	if body.Corner != "red" && body.Corner != "blue" {
+		writeBadRequest(w, "corner must be red or blue")
+		return
+	}
+	if body.Seconds < 1 || body.Seconds > 120 {
+		body.Seconds = 20
+	}
+	if _, err := s.Store.ExecContext(r.Context(), `
+		INSERT INTO fight_state (fight_id, hold_seconds, hold_corner) VALUES (?, ?, ?)
+		ON CONFLICT(fight_id) DO UPDATE SET hold_seconds = excluded.hold_seconds,
+		  hold_corner = excluded.hold_corner`, id, body.Seconds, body.Corner); err != nil {
+		writeError(w, err)
+		return
+	}
+	payload, _ := json.Marshal(body)
+	_, _ = s.Store.ExecContext(r.Context(), `
+		INSERT INTO score_events (fight_id, seq, kind, corner, payload_json)
+		VALUES (?, COALESCE((SELECT MAX(seq)+1 FROM score_events WHERE fight_id=?),1), 'hold', ?, ?)`,
+		id, id, body.Corner, string(payload))
+	s.audit(r, "fight.hold", "fight", id, string(payload))
+	s.broadcastFight(r, id, "fight.hold")
+	s.getFightState(w, r)
+}
+
 func (s *Server) undoFightEvent(w http.ResponseWriter, r *http.Request) {
+	if !s.requireRole(w, r, auth.ActionScoreFight) {
+		return
+	}
 	id := r.PathValue("id")
 	var seq int
 	if err := s.Store.QueryRowContext(r.Context(),
@@ -283,6 +351,9 @@ type submitRequest struct {
 }
 
 func (s *Server) submitFight(w http.ResponseWriter, r *http.Request) {
+	if !s.requireRole(w, r, auth.ActionScoreFight) {
+		return
+	}
 	id := r.PathValue("id")
 	var body submitRequest
 	if err := decodeJSON(r, &body); err != nil {
@@ -333,7 +404,7 @@ func (s *Server) StartClock(ctx context.Context) {
 
 func (s *Server) tickClock(ctx context.Context) {
 	rows, err := s.Store.QueryContext(ctx,
-		`SELECT fight_id FROM fight_state WHERE running = 1 AND seconds_remaining > 0`)
+		`SELECT fight_id FROM fight_state WHERE (running = 1 AND seconds_remaining > 0) OR hold_seconds > 0`)
 	if err != nil {
 		return
 	}
@@ -347,8 +418,12 @@ func (s *Server) tickClock(ctx context.Context) {
 	rows.Close()
 	for _, id := range ids {
 		_, _ = s.Store.ExecContext(ctx, `
-			UPDATE fight_state SET seconds_remaining = MAX(0, seconds_remaining - 1),
-			  running = CASE WHEN seconds_remaining <= 1 THEN 0 ELSE running END
+			UPDATE fight_state
+			SET seconds_remaining = CASE WHEN running = 1 AND seconds_remaining > 0
+			  THEN MAX(0, seconds_remaining - 1) ELSE seconds_remaining END,
+			  running = CASE WHEN running = 1 AND seconds_remaining <= 1 THEN 0 ELSE running END,
+			  hold_seconds = MAX(0, hold_seconds - 1),
+			  hold_corner = CASE WHEN hold_seconds <= 1 THEN '' ELSE hold_corner END
 			WHERE fight_id = ?`, id)
 		state, err := s.fightState(ctx, id)
 		if err == nil {
