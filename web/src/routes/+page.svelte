@@ -8,6 +8,11 @@
     type DemoCounts,
     type DemoFight,
     type Role,
+    type Eligibility,
+    type SignupResult,
+    type RoleRequest,
+    type PoolView,
+    type SignupRequest,
   } from '../lib/api';
 
   let ready = false;
@@ -24,11 +29,66 @@
   let selectedFightId = '';
   let theme: 'dark' | 'light' = 'dark';
 
+  let signupForm: SignupRequest = {
+    name: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '1998-01-01',
+    unitSystem: 'metric',
+    heightCm: 175,
+    weightKg: 74,
+    heightFt: 5,
+    heightIn: 9,
+    weightLb: 165,
+    beltRankId: 'br-blue',
+    gender: 'male',
+    accountType: 'fighter',
+    clubId: 'club-riverside',
+    categoryIds: [],
+    consentMoveUp: false,
+  };
+  let eligible: Eligibility[] = [];
+  let signupResult: SignupResult | null = null;
+  let roleRequests: RoleRequest[] = [];
+  let pools: PoolView[] = [];
+  let poolParams = {
+    categoryId: '',
+    targetPoolSize: 4,
+    maxPools: 8,
+    sameClubSeparation: true,
+    seed: 42,
+  };
+  let generating = false;
+
+  const beltRanks = [
+    { id: 'br-white', label: 'White' },
+    { id: 'br-grey', label: 'Grey (youth)' },
+    { id: 'br-yellow', label: 'Yellow' },
+    { id: 'br-orange', label: 'Orange' },
+    { id: 'br-green', label: 'Green' },
+    { id: 'br-blue', label: 'Blue' },
+    { id: 'br-purple', label: 'Purple' },
+    { id: 'br-brown', label: 'Brown' },
+    { id: 'br-black', label: 'Black' },
+    { id: 'br-redwhite', label: 'Red & White (mon)' },
+    { id: 'br-red', label: 'Red' },
+    { id: 'br-custom', label: 'Custom (Junior Samurai)' },
+  ];
+  const clubs = [
+    { id: 'club-riverside', label: 'Riverside Jiu Jitsu' },
+    { id: 'club-hilltop', label: 'Hilltop Dojo' },
+    { id: 'club-city', label: 'City Warriors' },
+    { id: 'club-sakura', label: 'Sakura Jiu Jitsu Academy' },
+    { id: '', label: 'Independent / no club' },
+  ];
+
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'accounts', label: 'Accounts & roles' },
     { id: 'scoreboard', label: 'Live scoreboard' },
     { id: 'fights', label: 'Fights' },
+    { id: 'signup', label: 'Sign up' },
+    { id: 'pools', label: 'Pools' },
     { id: 'setup', label: 'Setup preview' },
   ];
   const roles: (Role | 'all')[] = [
@@ -63,6 +123,9 @@
       capabilities = view.actions;
       const live = fights.find((f) => f.state === 'live') ?? fights[0];
       selectedFightId = live?.id ?? '';
+      const [poolResponse, requestResponse] = await Promise.all([api.pools(), api.roleRequests()]);
+      pools = poolResponse.pools;
+      roleRequests = requestResponse.requests;
       ready = true;
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
@@ -78,6 +141,58 @@
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     }
+  }
+
+  async function previewSignup() {
+    try {
+      const preview = await api.signupPreview(signupForm);
+      eligible = preview.eligible;
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  async function submitSignup() {
+    try {
+      signupResult = await api.signup(signupForm);
+      const [accts, reqs] = await Promise.all([api.accounts(), api.roleRequests()]);
+      accounts = accts.accounts;
+      roleRequests = reqs.requests;
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  async function generatePools() {
+    generating = true;
+    try {
+      const result = await api.generatePools({ eventId: 'ev-demo', ...poolParams });
+      pools = result.pools;
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    } finally {
+      generating = false;
+    }
+  }
+
+  async function approve(id: string) {
+    try {
+      await api.approveRoleRequest(id);
+      const [reqs, accts] = await Promise.all([api.roleRequests(), api.accounts()]);
+      roleRequests = reqs.requests;
+      accounts = accts.accounts;
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  function maxClubLoad(pool: PoolView) {
+    const counts: Record<string, number> = {};
+    for (const member of pool.members) {
+      const key = member.club || 'Independent';
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    return Math.max(0, ...Object.values(counts));
   }
 
   function initials(name: string) {
@@ -374,6 +489,155 @@
             </tbody>
           </table>
         </div>
+      </div>
+    {:else if activeTab === 'signup'}
+      <div class="grid" style="grid-template-columns: 1.2fr 1fr;">
+        <div class="card">
+          <div class="eyebrow">Self-service sign-up</div>
+          <h2>Create your account</h2>
+          <p class="muted small" style="margin:6px 0 16px;">
+            Metric or imperial — the backend stores canonical metric values. Compatible categories
+            are computed from your stats; heavier divisions appear only with your consent.
+          </p>
+          <div class="grid" style="grid-template-columns: 1fr 1fr;">
+            <label class="small">Full name<input class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink); cursor:text;" bind:value={signupForm.name} /></label>
+            <label class="small">Email<input class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink); cursor:text;" bind:value={signupForm.email} /></label>
+            <label class="small">Phone<input class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink); cursor:text;" bind:value={signupForm.phone} /></label>
+            <label class="small">Date of birth<input class="tab" type="date" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.dateOfBirth} /></label>
+          </div>
+          <div class="tabs" style="margin:16px 0 8px;">
+            <button class="tab" class:active={signupForm.unitSystem === 'metric'} on:click={() => (signupForm.unitSystem = 'metric')}>Metric</button>
+            <button class="tab" class:active={signupForm.unitSystem === 'imperial'} on:click={() => (signupForm.unitSystem = 'imperial')}>Imperial</button>
+          </div>
+          <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+            {#if signupForm.unitSystem === 'metric'}
+              <label class="small">Height (cm)<input class="tab" type="number" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.heightCm} /></label>
+              <label class="small">Weight (kg)<input class="tab" type="number" step="0.1" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.weightKg} /></label>
+            {:else}
+              <label class="small">Height (ft)<input class="tab" type="number" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.heightFt} /></label>
+              <label class="small">Height (in)<input class="tab" type="number" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.heightIn} /></label>
+              <label class="small">Weight (lb)<input class="tab" type="number" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.weightLb} /></label>
+            {/if}
+          </div>
+          <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top:14px;">
+            <label class="small">Rank / grade
+              <select class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.beltRankId}>
+                {#each beltRanks as rank}<option value={rank.id}>{rank.label}</option>{/each}
+              </select>
+            </label>
+            <label class="small">Gender
+              <select class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.gender}>
+                <option value="male">Male</option><option value="female">Female</option><option value="open">Open / prefer not to say</option>
+              </select>
+            </label>
+            <label class="small">Account type
+              <select class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.accountType}>
+                <option value="fighter">Fighter</option>
+                <option value="official">Official / moderator</option>
+                <option value="tournament_runner">Runner / organiser</option>
+                <option value="club_leader">Club leader</option>
+                <option value="spectator">Spectator</option>
+              </select>
+            </label>
+            <label class="small">Club
+              <select class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.clubId}>
+                {#each clubs as club}<option value={club.id}>{club.label}</option>{/each}
+              </select>
+            </label>
+          </div>
+          <label class="small" style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+            <input type="checkbox" bind:checked={signupForm.consentMoveUp} /> Allow a nearby heavier/older division if my exact one has no entrants
+          </label>
+          <div class="action-row">
+            <button class="btn" on:click={previewSignup}>Check compatible categories</button>
+            <button class="btn primary" on:click={submitSignup}>Create account</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Computed from your stats</div>
+          <h2>Compatible categories</h2>
+          {#if eligible.length > 0}
+            <div class="capabilities" style="flex-direction:column; align-items:stretch; margin-top:14px;">
+              {#each eligible as item (item.categoryId)}
+                <label class="cap" class:on={item.strict} style="display:flex; gap:9px; align-items:flex-start; cursor:pointer;">
+                  <input type="checkbox" value={item.categoryId} bind:group={signupForm.categoryIds} />
+                  <span><strong>{item.name}</strong><br /><span class="muted">{item.reason}{item.moveUp ? ' · needs consent' : ''}</span></span>
+                </label>
+              {/each}
+            </div>
+          {:else}
+            <div class="placeholder" style="margin-top:14px;">Press “Check compatible categories” to see your eligible divisions.</div>
+          {/if}
+          {#if signupResult}
+            <div style="margin-top:20px; border-top:1px solid var(--brand-border); padding-top:16px;">
+              <h3>Account created</h3>
+              <p class="small muted" style="margin-top:6px;">
+                Status: <strong>{signupResult.status}</strong> · role: {signupResult.role}<br />
+                Stored metric: {signupResult.heightCm.toFixed(1)} cm · {signupResult.weightKg.toFixed(1)} kg
+              </p>
+              {#if signupResult.roleRequestId}<p class="small" style="color:var(--draw); margin-top:8px;">Privileged role pending approval.</p>{/if}
+            </div>
+          {/if}
+          <div style="margin-top:20px; border-top:1px solid var(--brand-border); padding-top:16px;">
+            <h3>Role requests</h3>
+            {#each roleRequests as request (request.ID)}
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--brand-border);">
+                <span class="small">{request.Name} → <strong>{request.Role}</strong> <span class="badge spectator">{request.Status}</span></span>
+                {#if request.Status === 'pending'}<button class="btn" on:click={() => approve(request.ID)}>Approve</button>{/if}
+              </div>
+            {:else}
+              <p class="muted small">No role requests pending.</p>
+            {/each}
+          </div>
+        </div>
+      </div>
+    {:else if activeTab === 'pools'}
+      <div class="card">
+        <div class="section-title" style="margin-top:0;">
+          <div>
+            <h2>Automated pools</h2>
+            <p class="muted small">Balanced by seed, mixed by club, generated from organiser constraints.</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <select class="tab" style="color:var(--brand-ink);" bind:value={poolParams.categoryId}>
+              <option value="">All categories</option>
+              <option value="cat-adult-76">Adult -76 kg</option>
+              <option value="cat-adult-82">Adult -82 kg</option>
+              <option value="cat-adult-90">Adult +82 kg</option>
+              <option value="cat-women-58">Women -58 kg</option>
+              <option value="cat-youth-60">Youth -60 kg</option>
+              <option value="cat-kata">Kata Open</option>
+            </select>
+            <label class="small">Target size<input class="tab" type="number" min="2" max="10" style="width:70px; color:var(--brand-ink);" bind:value={poolParams.targetPoolSize} /></label>
+            <label class="small">Max pools<input class="tab" type="number" min="1" max="32" style="width:70px; color:var(--brand-ink);" bind:value={poolParams.maxPools} /></label>
+            <label class="small">Seed<input class="tab" type="number" style="width:80px; color:var(--brand-ink);" bind:value={poolParams.seed} /></label>
+            <label class="small" style="display:flex; align-items:center; gap:6px;"><input type="checkbox" bind:checked={poolParams.sameClubSeparation} /> Separate clubs</label>
+            <button class="btn primary" disabled={generating} on:click={generatePools}>{generating ? 'Generating…' : 'Generate pools'}</button>
+          </div>
+        </div>
+        {#if pools.length === 0}
+          <div class="placeholder">No pools yet — choose constraints and press “Generate pools”.</div>
+        {:else}
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            {#each pools as pool}
+              <div class="stat" style="padding:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <h3>{pool.name}</h3>
+                  <span class="pill">{pool.members.length} fighters · max club {maxClubLoad(pool)}</span>
+                </div>
+                <div style="margin-top:12px; display:grid; gap:8px;">
+                  {#each pool.members as member}
+                    <div style="display:flex; align-items:center; gap:9px;">
+                      <span class="avatar" style="width:30px; height:30px; border-radius:9px; background:{member.clubColour};">{initials(member.name)}</span>
+                      <span style="flex:1; min-width:0;"><strong class="small">{member.name}</strong><br /><span class="muted small" style="font-size:.72rem;">{member.club || 'Independent'} · {member.belt}</span></span>
+                      <span class="small muted">#{member.seed}</span>
+                    </div>
+                  {/each}
+                </div>
+              </div>
+            {/each}
+          </div>
+        {/if}
       </div>
     {:else if activeTab === 'setup'}
       <div class="card">
