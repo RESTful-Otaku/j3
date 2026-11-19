@@ -17,8 +17,9 @@ Setup is deliberately guided and plain-language: **no technical knowledge requir
 |---|---|
 | Venue server | Go + SQLite (`modernc.org/sqlite`), REST + WebSocket |
 | Web / mobile UI | SvelteKit + TypeScript, Capacitor for iOS/Android/tablets |
+| Frontend tooling | **Bun** (`bun install`, `bun run`, `bun test`) — no npm |
 | Shared types | OpenAPI 3.1 spec → generated TypeScript types |
-| Tests | Go `testing`, Vitest + Playwright |
+| Tests | Go `testing`, Bun/Vitest + Playwright |
 
 ## Repository layout
 
@@ -38,14 +39,14 @@ web/                 SvelteKit frontend + Capacitor
 go run ./cmd/j3d --addr :8787 --db ./data/j3.db
 curl http://localhost:8787/healthz
 
-# Frontend
-cd web && npm install && npm run dev
+# Frontend (Bun only)
+cd web && bun install && bun run dev
 ```
 
 Regenerate shared types after editing `api/openapi.yaml`:
 
 ```sh
-cd web && npm run generate:types
+cd web && bun run generate:types
 ```
 
 ## Status

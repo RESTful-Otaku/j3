@@ -367,6 +367,7 @@ Confirm which to include in v1 vs later:
 - **Backend:** Go (single binary; pure-Go SQLite `modernc.org/sqlite` for portability, optional
   PostgreSQL for cloud/scale), REST + WebSocket, OpenAPI spec.
 - **Frontend:** SvelteKit + TypeScript (one app, multiple "modes" via routes), Tailwind/CSS vars.
+  **Package manager / runner / test runner: Bun (not npm).** Use `bun install`, `bun run`, `bunx`.
 - **Mobile/Desktop:** Capacitor wrapping the Svelte app for iOS/Android/tablets; PWA for web.
 - **Device DB:** local SQLite (`@capacitor-community/sqlite` / `op-sqlite`) with outbox.
 - **Shared types:** generate TS from OpenAPI/Go types — no hand-maintained duplicates.
@@ -514,6 +515,8 @@ _Format: `D-### | date | decision | rationale | status`._
   — user stated the app must be usable by non-technical people; drives guided wizards,
   plain language, defaults, validation and progressive disclosure (§2 principle 9, §6.1).
   Status: accepted.
+- **D-011 | 2026-11-19 | Use Bun for all frontend package management, scripts and tests**
+  — explicit user instruction; no npm/pnpm. Status: accepted.
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)
