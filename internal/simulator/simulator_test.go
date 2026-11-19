@@ -21,6 +21,13 @@ func TestSimulationDeterministicAcrossSeedsAndSizes(t *testing.T) {
 			if len(first.Medals) < 2 {
 				t.Fatalf("seed %d size %d produced too few medals", seed, size)
 			}
+			kinds := map[string]bool{}
+			for _, medal := range first.Medals {
+				kinds[medal.Kind] = true
+			}
+			if !kinds["gold"] || !kinds["silver"] || !kinds["bronze"] {
+				t.Fatalf("seed %d size %d missing medal kinds: %+v", seed, size, first.Medals)
+			}
 			seen := map[string]bool{}
 			for _, bout := range first.Bouts {
 				if bout.RedID == bout.BlueID {

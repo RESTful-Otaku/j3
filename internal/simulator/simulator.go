@@ -162,29 +162,42 @@ func Run(seed int64, count int) Result {
 	}
 
 	semiLosers := []string{}
-	roundName := "Quarter-final"
+	var finalLoser string
 	for len(advance) > 1 {
+		roundName := "Knockout"
+		switch len(advance) {
+		case 8:
+			roundName = "Quarter-final"
+		case 4:
+			roundName = "Semi-final"
+		case 2:
+			roundName = "Final"
+		}
 		next := []string{}
 		for i := 0; i+1 < len(advance); i += 2 {
 			addBout("knockout", roundName, advance[i], advance[i+1])
 			last := result.Bouts[len(result.Bouts)-1]
+			loser := advance[i+1]
 			if contains(last.Outcome, "red") {
 				next = append(next, advance[i])
-				if roundName == "Semi-final" {
-					semiLosers = append(semiLosers, advance[i+1])
-				}
 			} else {
 				next = append(next, advance[i+1])
-				if roundName == "Semi-final" {
-					semiLosers = append(semiLosers, advance[i])
-				}
+				loser = advance[i]
+			}
+			if roundName == "Semi-final" {
+				semiLosers = append(semiLosers, loser)
+			}
+			if roundName == "Final" {
+				finalLoser = loser
 			}
 		}
 		advance = next
-		roundName = "Semi-final"
 	}
 	if len(advance) > 0 {
 		result.Medals = append(result.Medals, Medal{advance[0], "gold"}, Medal{advance[0], "champion"})
+	}
+	if finalLoser != "" {
+		result.Medals = append(result.Medals, Medal{finalLoser, "silver"})
 	}
 	if len(semiLosers) == 2 {
 		// No-rematch rule: if they already met, award two bronzes instead.
