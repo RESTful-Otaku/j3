@@ -111,6 +111,52 @@ paths:
                   fights:
                     type: array
                     items: { $ref: '#/components/schemas/DemoFight' }
+  /api/v1/demo/event:
+    get:
+      operationId: eventDisplay
+      summary: Event title, banner, logo, theme tokens and mats
+      responses:
+        '200':
+          description: Event display info
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventDisplayInfo' }
+  /api/v1/demo/officials:
+    get:
+      operationId: displayOfficials
+      summary: Referees, judges and scorekeepers shown on scoreboards
+      parameters:
+        - name: fightId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Officials
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [officials]
+                properties:
+                  officials:
+                    type: array
+                    items: { $ref: '#/components/schemas/DisplayOfficial' }
+  /api/v1/demo/standings:
+    get:
+      operationId: standings
+      summary: Overall and category standings with points
+      responses:
+        '200':
+          description: Standings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [standings]
+                properties:
+                  standings:
+                    type: array
+                    items: { $ref: '#/components/schemas/StandingRow' }
   /api/v1/signup/preview:
     post:
       operationId: signupPreview
@@ -285,6 +331,38 @@ components:
           type: array
           items: { $ref: '#/components/schemas/Action' }
         counts: { $ref: '#/components/schemas/DemoCounts' }
+    DisplayOfficial:
+      type: object
+      required: [id, name, role]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        role: { type: string }
+    EventDisplayInfo:
+      type: object
+      required: [name, bannerPath, logoPath, themeTokens, mats]
+      properties:
+        name: { type: string }
+        bannerPath: { type: string }
+        logoPath: { type: string }
+        themeTokens: { type: string }
+        mats:
+          type: array
+          items: { type: string }
+    StandingRow:
+      type: object
+      required: [fighterId, name, category, belt, club, clubColour, wins, losses, draws, points]
+      properties:
+        fighterId: { type: string }
+        name: { type: string }
+        category: { type: string }
+        belt: { type: string }
+        club: { type: string }
+        clubColour: { type: string }
+        wins: { type: integer }
+        losses: { type: integer }
+        draws: { type: integer }
+        points: { type: integer }
     SignupRequest:
       type: object
       required: [name, email, dateOfBirth]

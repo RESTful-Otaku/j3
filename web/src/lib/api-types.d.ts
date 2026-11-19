@@ -139,6 +139,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/event": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Event title, banner, logo, theme tokens and mats */
+        get: operations["eventDisplay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/officials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Referees, judges and scorekeepers shown on scoreboards */
+        get: operations["displayOfficials"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/standings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Overall and category standings with points */
+        get: operations["standings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/signup/preview": {
         parameters: {
             query?: never;
@@ -297,6 +348,30 @@ export interface components {
             actor: components["schemas"]["DemoAccount"];
             actions: components["schemas"]["Action"][];
             counts: components["schemas"]["DemoCounts"];
+        };
+        DisplayOfficial: {
+            id: string;
+            name: string;
+            role: string;
+        };
+        EventDisplayInfo: {
+            name: string;
+            bannerPath: string;
+            logoPath: string;
+            themeTokens: string;
+            mats: string[];
+        };
+        StandingRow: {
+            fighterId: string;
+            name: string;
+            category: string;
+            belt: string;
+            club: string;
+            clubColour: string;
+            wins: number;
+            losses: number;
+            draws: number;
+            points: number;
         };
         SignupRequest: {
             name: string;
@@ -675,6 +750,72 @@ export interface operations {
                 content: {
                     "application/json": {
                         fights: components["schemas"]["DemoFight"][];
+                    };
+                };
+            };
+        };
+    };
+    eventDisplay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Event display info */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventDisplayInfo"];
+                };
+            };
+        };
+    };
+    displayOfficials: {
+        parameters: {
+            query?: {
+                fightId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Officials */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        officials: components["schemas"]["DisplayOfficial"][];
+                    };
+                };
+            };
+        };
+    };
+    standings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Standings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        standings: components["schemas"]["StandingRow"][];
                     };
                 };
             };

@@ -217,6 +217,7 @@ func Ensure(store *db.DB) error {
 
 	// Fights: pair entrants in each category; a few are complete, one live.
 	fightNo := 0
+	fightIDs := []string{}
 	catKeys := make([]string, 0, len(byCategory))
 	for cat := range byCategory {
 		catKeys = append(catKeys, cat)
@@ -227,6 +228,7 @@ func Ensure(store *db.DB) error {
 		for i := 0; i+1 < len(ids) && fightNo < 16; i += 2 {
 			fightNo++
 			id := fmt.Sprintf("fight-%02d", fightNo)
+			fightIDs = append(fightIDs, id)
 			state, outcome := "pending", ""
 			switch {
 			case fightNo <= 3:
@@ -255,6 +257,17 @@ func Ensure(store *db.DB) error {
 					id, 3, "penalty", "u-official", `{"corner":"red","card":"yellow","reason":"Passivity"}`)
 			}
 		}
+	}
+
+	// Officials assigned per contest: shown on the big-screen scoreboard.
+	officialIDs := []string{"u-official", "u-official-2", "u-official-3", "u-official-4"}
+	for i, fightID := range fightIDs {
+		add(`INSERT OR IGNORE INTO fight_officials (fight_id, user_id, role) VALUES (?, ?, ?)`,
+			fightID, officialIDs[i%len(officialIDs)], "referee")
+		add(`INSERT OR IGNORE INTO fight_officials (fight_id, user_id, role) VALUES (?, ?, ?)`,
+			fightID, officialIDs[(i+1)%len(officialIDs)], "judge")
+		add(`INSERT OR IGNORE INTO fight_officials (fight_id, user_id, role) VALUES (?, ?, ?)`,
+			fightID, officialIDs[(i+2)%len(officialIDs)], "scorekeeper")
 	}
 
 	add(`INSERT OR IGNORE INTO invitations

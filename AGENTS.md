@@ -77,6 +77,9 @@ Core promise: *"One configurable engine, every Jiu Jitsu event, fully branded, f
     does the work: category eligibility, seeding, pool generation, scheduling and promotion.
     Algorithms optimise for fairness and enjoyable events, with controlled randomisation so
     groups are well mixed and same-club fighters are spread across pools wherever possible.
+12. **Multi-screen by design.** Every view must be openable in its own tab/window so organisers
+    can put the control room, public dashboard, several full-screen scoreboards and rotating
+    stat pages on different TVs/projectors/LED walls. All views are live-synced with the backend.
 
 ---
 
@@ -352,6 +355,50 @@ The v1 authorisation model is **RBAC with an invite-only chain of authority**:
 - Every write is attributable and auditable (§6.2); results are locked after confirmation,
   with explicit, recorded undo/correction paths.
 
+### 6.16 Multi-screen views, displays and spectator experience
+From direct user QA feedback (2026-11-19) — all of this is required, not optional polish:
+
+- **Responsive to the extremes.** Ultrawide monitors must use the full available width;
+  phones, tablets portrait/landscape, projectors and LED walls all get appropriate layouts.
+  Fighter photo/avatar areas must be **large enough to read from across a hall**.
+- **Every view opens in a new tab/window** (own URL) so the control room, public dashboard,
+  several full-screen scoreboards and rotating stats pages can be placed on separate screens.
+- **Public dashboard:** key info at a glance — upcoming events, next group of participants who
+  must report to a mat/podium, current results and general event status.
+- **Scoreboard must show:** accurate event title; mat number; tournament banner + logo; each
+  fighter's name, avatar, **belt designation**, height/weight, **affiliated club logo** (or a
+  default independent mark); **active referee and judges/officials with names, faces and roles**;
+  tracked moves **and penalties on each fighter's respective side**; timer that **pauses when the
+  referee stops the fight** and resumes on the scorekeeper's/moderator's command (tablet/laptop).
+- **Dedicated table/ranking views:** overall tables, category tables, medal/score rankings,
+  queryable/filterable by group, age bracket, weight bracket, height bracket and discipline.
+  **Kata needs its own view** with panel judges and gymnastics-style score display.
+- **Dedicated bracket view:** classic elimination and round-robin bracket charts showing
+  progression through rounds (quarter → semi → final → third-place/bronze rematch), who won/lost,
+  who is paired next. Moderators can move fighters into generated slots as they win, **keeping a
+  copy of each fighter at every round so the full history is visible**.
+- **Result icons/configurable outcomes:** WP/LP/DP (win/loss/draw on points), WS/LS (submission),
+  WT/LT (technical/forfeit/injury/DQ/red card), plus yellow/red card badges on fighter cards.
+  All enabled/disabled by organiser rules and constraints.
+- **Dedicated fight-pools view:** all matchups, ongoing fights highlighted, finished fights
+  marked with result, upcoming fights listed.
+- **Configurable dashboard templates:** savable templates defining which widgets each screen
+  shows; runners assign templates to screens. All views live-synced with the backend.
+- **Confirmation dialogues** for major actions: submitting a score/point, result, winner/loser/
+  draw and promotions.
+- **Celebrations & animation:** winner round/overall zoom-in of the player card, medal wins,
+  slick transitions; optional **Street Fighter style** theme with lineups, matchups and announcer
+  energy.
+- **PA/announcer interaction system:** timed toasts/popups and shoutouts; flashing fighter cards
+  to call competitors to their mat/area. Helps organisers, competitors and spectators stay
+  informed and keeps the event running smoothly.
+
+### 6.17 Developer & operator CLI
+- A **nice TUI-style, navigation-friendly `dev.sh`** with emoji, spinners and menus for:
+  dry running the app, QA testing, resetting demo data, building a production/live executable,
+  deploying it, and building **Capacitor mobile variants for Android and iOS/iPhone**.
+- Must remain easy for non-technical users: numbered menu, plain-language choices, clear status.
+
 ---
 
 ## 7. Gaps & things not in the original brief (research-backed)
@@ -571,6 +618,20 @@ _Format: `D-### | date | decision | rationale | status`._
 - **D-019 | 2026-11-19 | Category compatibility = strict ranges + consent to move up**
   — offer exactly eligible divisions; heavier/older divisions only with explicit user consent.
   Status: accepted.
+- **D-020 | 2026-11-19 | Dedicated, URL-addressable display views**
+  — public dashboard, full-screen scoreboard, brackets, tables/rankings, kata, pools and control
+  room each get their own route so they can be opened on separate screens/tabs. Live-synced.
+  Status: accepted (§6.16).
+- **D-021 | 2026-11-19 | Savable dashboard templates for screen assignment**
+  — runners configure which widgets each screen shows; templates saved and reused. Status:
+  accepted (design).
+- **D-022 | 2026-11-19 | Confirmation dialogues + celebration animations + PA toasts**
+  — major actions require confirmation; results trigger animated celebrations; announcer can
+  trigger timed toasts/cards. Street Fighter theme is an optional white-label theme. Status:
+  accepted.
+- **D-023 | 2026-11-19 | TUI menu for dev.sh incl. Capacitor Android/iOS builds**
+  — user requested an emoji/spinner, navigation-friendly CLI for dry runs, QA, live executable
+  build/deploy and mobile variants. Status: accepted (§6.17).
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)
