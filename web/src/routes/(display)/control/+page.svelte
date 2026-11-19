@@ -11,6 +11,7 @@
     { path: '/audit', name: 'Audit trail', icon: '📜', note: 'Who did what, when and how' },
     { path: '/mat', name: 'Mat scorekeeper console', icon: '🎛️', note: 'Authoritative control per mat' },
     { path: '/display', name: 'Full-screen scoreboard', icon: '🥊', note: 'Current fight, officials, moves' },
+    { path: '/ceremony', name: 'Medal ceremony', icon: '🏆', note: 'Animated podium + PA call' },
     { path: '/public', name: 'Public dashboard', icon: '📺', note: 'Live, next up, leaderboard' },
     { path: '/details', name: 'Event details', icon: '📋', note: 'Rules, protection, schedule, corners' },
     { path: '/brackets', name: 'Brackets', icon: '🏆', note: 'Elimination + round robin' },

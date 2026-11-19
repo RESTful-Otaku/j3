@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/restful-otaku/j3/internal/rules"
 )
@@ -134,6 +135,20 @@ func (s *Server) standings(w http.ResponseWriter, r *http.Request) {
 		rowsData = append(rowsData, row)
 	}
 	chain := []string{"wins", "draws", "points_scored", "points_conceded"}
+	if configured := r.URL.Query().Get("chain"); configured != "" {
+		parts := strings.Split(configured, ",")
+		allowed := map[string]bool{"wins": true, "losses": true, "draws": true,
+			"submissions": true, "points_scored": true, "points_conceded": true}
+		filtered := []string{}
+		for _, part := range parts {
+			if allowed[strings.TrimSpace(part)] {
+				filtered = append(filtered, strings.TrimSpace(part))
+			}
+		}
+		if len(filtered) > 0 {
+			chain = filtered
+		}
+	}
 	sort.SliceStable(rowsData, func(i, j int) bool {
 		a := rules.TieBreakStats{
 			Wins: rowsData[i].Wins, Draws: rowsData[i].Draws,

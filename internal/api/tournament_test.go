@@ -59,6 +59,28 @@ func TestCreateTournamentAndAudit(t *testing.T) {
 	}
 }
 
+func TestImportTemplateRecreatesEvent(t *testing.T) {
+	srv := seededServer(t)
+	created := postJSON(t, srv, "/api/v1/tournaments", map[string]any{
+		"name": "Template Event", "saveTemplate": true, "templateName": "Reusable",
+		"disciplines": []map[string]any{{"name": "Ne-Waza"}},
+		"categories":  []map[string]any{{"name": "Adult -70", "kind": "weight"}},
+	})
+	if created.Code != http.StatusCreated {
+		t.Fatalf("create = %d", created.Code)
+	}
+	var result struct {
+		TemplateID string `json:"templateId"`
+	}
+	if err := json.Unmarshal(created.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	imported := postJSON(t, srv, "/api/v1/templates/"+result.TemplateID+"/import", map[string]any{})
+	if imported.Code != http.StatusCreated {
+		t.Fatalf("import = %d: %s", imported.Code, imported.Body.String())
+	}
+}
+
 func TestCreateTournamentValidation(t *testing.T) {
 	srv := seededServer(t)
 	rec := postJSON(t, srv, "/api/v1/tournaments", map[string]any{"name": "No disciplines"})

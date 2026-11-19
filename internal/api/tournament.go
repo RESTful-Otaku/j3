@@ -76,13 +76,34 @@ func writeBadRequest(w http.ResponseWriter, message string) {
 	writeJSON(w, http.StatusBadRequest, map[string]string{"error": message})
 }
 
-// createTournament turns a validated wizard payload into a real event skeleton.
 func (s *Server) createTournament(w http.ResponseWriter, r *http.Request) {
 	var req createTournamentRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeBadRequest(w, err.Error())
 		return
 	}
+	s.createFromRequest(w, r, req)
+}
+
+// importTemplate recreates an event from a saved template configuration.
+func (s *Server) importTemplate(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	var config string
+	if err := s.Store.QueryRowContext(r.Context(),
+		`SELECT config_json FROM tournament_templates WHERE id = ?`, id).Scan(&config); err != nil {
+		writeError(w, err)
+		return
+	}
+	var req createTournamentRequest
+	if err := json.Unmarshal([]byte(config), &req); err != nil {
+		writeError(w, err)
+		return
+	}
+	s.createFromRequest(w, r, req)
+}
+
+// createFromRequest turns a validated wizard payload into a real event skeleton.
+func (s *Server) createFromRequest(w http.ResponseWriter, r *http.Request, req createTournamentRequest) {
 	if strings.TrimSpace(req.Name) == "" {
 		writeBadRequest(w, "event name is required")
 		return

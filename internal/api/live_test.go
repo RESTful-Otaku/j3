@@ -106,6 +106,36 @@ func TestHoldTimerAndRoleEnforcement(t *testing.T) {
 	}
 }
 
+func TestOfficialAssignmentEnforced(t *testing.T) {
+	srv := seededServer(t)
+	assigned := postJSON(t, srv, "/api/v1/demo/fights/fight-06/officials", map[string]any{
+		"userId": "u-official", "role": "referee",
+	})
+	if assigned.Code != http.StatusOK {
+		t.Fatalf("assign = %d", assigned.Code)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/fights/fight-06/event",
+		bytes.NewReader([]byte(`{"corner":"red","points":2,"kind":"score"}`)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-J3-User", "u-runner")
+	denied := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(denied, req)
+	if denied.Code != http.StatusForbidden {
+		t.Fatalf("unassigned scorer = %d, want 403", denied.Code)
+	}
+
+	req2 := httptest.NewRequest(http.MethodPost, "/api/v1/fights/fight-06/event",
+		bytes.NewReader([]byte(`{"corner":"red","points":2,"kind":"score"}`)))
+	req2.Header.Set("Content-Type", "application/json")
+	req2.Header.Set("X-J3-User", "u-official")
+	allowed := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(allowed, req2)
+	if allowed.Code != http.StatusOK {
+		t.Fatalf("assigned scorer = %d", allowed.Code)
+	}
+}
+
 func TestFightStateRejectsInvalidInput(t *testing.T) {
 	srv := seededServer(t)
 	if rec := postJSON(t, srv, "/api/v1/fights/fight-02/event", map[string]any{"corner": "green", "points": 1}); rec.Code != http.StatusBadRequest {

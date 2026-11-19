@@ -65,6 +65,7 @@ export const api = {
   pools: () => getJson<PoolsResponse>('/api/v1/demo/pools?eventId=ev-demo'),
   generatePools: (body: GeneratePoolsRequest) =>
     postJson<PoolsResponse>('/api/v1/demo/pools/generate', body),
+  medals: () => getJson<{ medals: { id: string; fighterId: string; name: string; club: string; clubColour: string; kind: string }[] }>('/api/v1/demo/medals'),
   kataCatalogue: () => getJson<{ kata: { id: string; name: string; style: string; level: string; discipline: string; isWeapon: boolean }[] }>('/api/v1/demo/kata/catalogue'),
   training: () => getJson<{ sessions: { id: string; title: string; kind: string; leader: string; startsAt: string; duration: number }[] }>('/api/v1/demo/training'),
   kata: () => getJson<{ performances: KataPerformance[] }>('/api/v1/demo/kata'),

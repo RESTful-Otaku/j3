@@ -251,6 +251,10 @@ func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
+	if actor := r.Header.Get("X-J3-User"); actor != "" && !s.isAssigned(r, id, actor) {
+		writeJSON(w, http.StatusForbidden, map[string]string{"error": "user is not assigned to this contest"})
+		return
+	}
 	var body scoreRequest
 	if err := decodeJSON(r, &body); err != nil {
 		writeBadRequest(w, err.Error())
@@ -355,6 +359,10 @@ func (s *Server) submitFight(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
+	if actor := r.Header.Get("X-J3-User"); actor != "" && !s.isAssigned(r, id, actor) {
+		writeJSON(w, http.StatusForbidden, map[string]string{"error": "user is not assigned to this contest"})
+		return
+	}
 	var body submitRequest
 	if err := decodeJSON(r, &body); err != nil {
 		writeBadRequest(w, err.Error())
