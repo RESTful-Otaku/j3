@@ -111,6 +111,96 @@ paths:
                   fights:
                     type: array
                     items: { $ref: '#/components/schemas/DemoFight' }
+  /api/v1/signup/preview:
+    post:
+      operationId: signupPreview
+      summary: Convert stats to metric and list compatible categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignupRequest' }
+      responses:
+        '200':
+          description: Eligibility preview
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignupPreview' }
+  /api/v1/signup:
+    post:
+      operationId: signup
+      summary: Self-service sign-up (privileged roles become pending approval)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignupRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignupResult' }
+  /api/v1/demo/role-requests:
+    get:
+      operationId: roleRequests
+      summary: Pending privileged-role requests (QA only)
+      responses:
+        '200':
+          description: Requests
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [requests]
+                properties:
+                  requests:
+                    type: array
+                    items: { $ref: '#/components/schemas/RoleRequest' }
+  /api/v1/demo/role-requests/{id}/approve:
+    post:
+      operationId: approveRoleRequest
+      summary: Approve a role request (QA only; runner-gated in production)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Approved
+          content:
+            application/json:
+              schema: { type: object }
+  /api/v1/demo/pools:
+    get:
+      operationId: pools
+      summary: List generated pools with member details
+      parameters:
+        - name: eventId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Pools
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoolsResponse' }
+  /api/v1/demo/pools/generate:
+    post:
+      operationId: generatePools
+      summary: Generate balanced pools from organiser constraints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GeneratePoolsRequest' }
+      responses:
+        '200':
+          description: Generated pools
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoolsResponse' }
 components:
   schemas:
     HealthResponse:
@@ -195,6 +285,107 @@ components:
           type: array
           items: { $ref: '#/components/schemas/Action' }
         counts: { $ref: '#/components/schemas/DemoCounts' }
+    SignupRequest:
+      type: object
+      required: [name, email, dateOfBirth]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        dateOfBirth: { type: string, format: date }
+        unitSystem: { type: string, enum: [metric, imperial] }
+        heightCm: { type: number }
+        weightKg: { type: number }
+        heightFt: { type: number }
+        heightIn: { type: number }
+        weightLb: { type: number }
+        beltRankId: { type: string }
+        gender: { type: string, enum: [male, female, open, coed] }
+        accountType: { $ref: '#/components/schemas/Role' }
+        clubId: { type: string }
+        categoryIds:
+          type: array
+          items: { type: string }
+        consentMoveUp: { type: boolean }
+    Eligibility:
+      type: object
+      required: [categoryId, name, strict, moveUp, reason]
+      properties:
+        categoryId: { type: string }
+        name: { type: string }
+        strict: { type: boolean }
+        moveUp: { type: boolean }
+        reason: { type: string }
+    SignupPreview:
+      type: object
+      required: [heightCm, weightKg, eligible]
+      properties:
+        heightCm: { type: number }
+        weightKg: { type: number }
+        eligible:
+          type: array
+          items: { $ref: '#/components/schemas/Eligibility' }
+    SignupResult:
+      type: object
+      required: [userId, status, role, heightCm, weightKg, eligible, selected]
+      properties:
+        userId: { type: string }
+        status: { type: string }
+        role: { type: string }
+        roleRequestId: { type: string }
+        heightCm: { type: number }
+        weightKg: { type: number }
+        eligible:
+          type: array
+          items: { $ref: '#/components/schemas/Eligibility' }
+        selected:
+          type: array
+          items: { type: string }
+    RoleRequest:
+      type: object
+      required: [ID, Role, Status, Name, Email]
+      properties:
+        ID: { type: string }
+        Role: { type: string }
+        Status: { type: string }
+        Name: { type: string }
+        Email: { type: string }
+    GeneratePoolsRequest:
+      type: object
+      properties:
+        eventId: { type: string }
+        categoryId: { type: string }
+        targetPoolSize: { type: integer }
+        maxPools: { type: integer }
+        sameClubSeparation: { type: boolean }
+        seed: { type: integer, format: int64 }
+    PoolMember:
+      type: object
+      required: [id, name, club, clubColour, belt, seed]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        club: { type: string }
+        clubColour: { type: string }
+        belt: { type: string }
+        seed: { type: integer }
+    PoolView:
+      type: object
+      required: [id, name, members]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        members:
+          type: array
+          items: { $ref: '#/components/schemas/PoolMember' }
+    PoolsResponse:
+      type: object
+      required: [pools]
+      properties:
+        pools:
+          type: array
+          items: { $ref: '#/components/schemas/PoolView' }
+        entrantCount: { type: integer }
     DemoFighter:
       type: object
       required: [id, name, club, clubColour, belt]

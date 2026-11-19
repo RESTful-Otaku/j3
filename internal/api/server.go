@@ -28,6 +28,12 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/demo/accounts", s.demoAccounts)
 	mux.HandleFunc("GET /api/v1/demo/view", s.demoView)
 	mux.HandleFunc("GET /api/v1/demo/fights", s.demoFights)
+	mux.HandleFunc("GET /api/v1/demo/role-requests", s.roleRequests)
+	mux.HandleFunc("POST /api/v1/demo/role-requests/{id}/approve", s.approveRoleRequest)
+	mux.HandleFunc("GET /api/v1/demo/pools", s.listPoolsHandler)
+	mux.HandleFunc("POST /api/v1/demo/pools/generate", s.generatePools)
+	mux.HandleFunc("POST /api/v1/signup/preview", s.signupPreview)
+	mux.HandleFunc("POST /api/v1/signup", s.signup)
 	mux.HandleFunc("GET /", s.root)
 	s.handler = middleware(mux)
 	return s

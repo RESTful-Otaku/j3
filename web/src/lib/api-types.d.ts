@@ -139,6 +139,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/signup/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Convert stats to metric and list compatible categories */
+        post: operations["signupPreview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/signup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Self-service sign-up (privileged roles become pending approval) */
+        post: operations["signup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/role-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pending privileged-role requests (QA only) */
+        get: operations["roleRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/role-requests/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve a role request (QA only; runner-gated in production) */
+        post: operations["approveRoleRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/pools": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List generated pools with member details */
+        get: operations["pools"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/pools/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate balanced pools from organiser constraints */
+        post: operations["generatePools"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -195,6 +297,83 @@ export interface components {
             actor: components["schemas"]["DemoAccount"];
             actions: components["schemas"]["Action"][];
             counts: components["schemas"]["DemoCounts"];
+        };
+        SignupRequest: {
+            name: string;
+            /** Format: email */
+            email: string;
+            phone?: string;
+            /** Format: date */
+            dateOfBirth: string;
+            /** @enum {string} */
+            unitSystem?: "metric" | "imperial";
+            heightCm?: number;
+            weightKg?: number;
+            heightFt?: number;
+            heightIn?: number;
+            weightLb?: number;
+            beltRankId?: string;
+            /** @enum {string} */
+            gender?: "male" | "female" | "open" | "coed";
+            accountType?: components["schemas"]["Role"];
+            clubId?: string;
+            categoryIds?: string[];
+            consentMoveUp?: boolean;
+        };
+        Eligibility: {
+            categoryId: string;
+            name: string;
+            strict: boolean;
+            moveUp: boolean;
+            reason: string;
+        };
+        SignupPreview: {
+            heightCm: number;
+            weightKg: number;
+            eligible: components["schemas"]["Eligibility"][];
+        };
+        SignupResult: {
+            userId: string;
+            status: string;
+            role: string;
+            roleRequestId?: string;
+            heightCm: number;
+            weightKg: number;
+            eligible: components["schemas"]["Eligibility"][];
+            selected: string[];
+        };
+        RoleRequest: {
+            ID: string;
+            Role: string;
+            Status: string;
+            Name: string;
+            Email: string;
+        };
+        GeneratePoolsRequest: {
+            eventId?: string;
+            categoryId?: string;
+            targetPoolSize?: number;
+            maxPools?: number;
+            sameClubSeparation?: boolean;
+            /** Format: int64 */
+            seed?: number;
+        };
+        PoolMember: {
+            id: string;
+            name: string;
+            club: string;
+            clubColour: string;
+            belt: string;
+            seed: number;
+        };
+        PoolView: {
+            id: string;
+            name: string;
+            members: components["schemas"]["PoolMember"][];
+        };
+        PoolsResponse: {
+            pools: components["schemas"]["PoolView"][];
+            entrantCount?: number;
         };
         DemoFighter: {
             id: string;
@@ -497,6 +676,144 @@ export interface operations {
                     "application/json": {
                         fights: components["schemas"]["DemoFight"][];
                     };
+                };
+            };
+        };
+    };
+    signupPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignupRequest"];
+            };
+        };
+        responses: {
+            /** @description Eligibility preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignupPreview"];
+                };
+            };
+        };
+    };
+    signup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignupRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignupResult"];
+                };
+            };
+        };
+    };
+    roleRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        requests: components["schemas"]["RoleRequest"][];
+                    };
+                };
+            };
+        };
+    };
+    approveRoleRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    pools: {
+        parameters: {
+            query?: {
+                eventId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pools */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PoolsResponse"];
+                };
+            };
+        };
+    };
+    generatePools: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GeneratePoolsRequest"];
+            };
+        };
+        responses: {
+            /** @description Generated pools */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PoolsResponse"];
                 };
             };
         };
