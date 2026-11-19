@@ -784,6 +784,9 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-19** — Release hardening: hold/pin timers, RBAC enforcement on live scoring, dedicated
+  `/mat` scorekeeper console, tie-break-ordered standings, rest warnings, browser TTS announcements,
+  seeded kata catalogue and training sessions; smoke suite expanded to 46/46 passing checks.
 - **2026-11-19** — Completion push: club-spread seeding, BYE padding and ordered tie-break chains
   in `rules`; direct-elimination bracket option; dual-bronze medal awards; `bun run smoke` automated
   end-to-end verification (41/41 passing across API and every UI route).
@@ -865,22 +868,21 @@ _Format: `D-### | date | decision | rationale | status`._
 
 ### Outstanding — must finish before a real tournament
 1. **Authoritative live scoring — delivered**: server-owned timers, score/penalty/submission
-   events, confirm, undo and SSE fan-out are implemented (`/api/v1/fights/*`, `/api/v1/events/stream`)
-   and wired into the display. Still to finish: judge-role permissions, hold timers and full
-   multi-mat operator console.
+   events, hold/pin timers, RBAC enforcement on every scoring mutation, confirm, undo, SSE fan-out
+   and a dedicated `/mat` scorekeeper console. Still to finish: per-judge assignment granularity.
 2. **Production format engine — delivered**: server-side bracket stages/slots with format
    suggestion, club-spread seeding, BYE padding for odd fields, persisted results, winner
    promotion and per-round history; ordered tie-break chains and dual-bronze medal awards exist
    as tested rules/API helpers. Still to finish: wiring every tie-break criterion into live results.
 3. **Scheduling authority — delivered**: persisted timeline with drift offsets, projected
-   start/end times, mark-complete and a large live dashboard clock with "next up" on `/public`.
-   Still to add: automatic rest-rule enforcement and TTS/PA announcements.
-4. **Kata panel judging — delivered**: performances, 3–9 judge panels, high/low drop, authoritative
-   totals and audit entries, wired into the kata table view. Still to add: full kata catalogue,
-   compulsory/choice rounds, bunkai and drills/sparring rotation.
+   start/end times, mark-complete, mandated-rest warnings and a large live dashboard clock with
+   "next up" on `/public`; PA announcements now also speak via browser TTS.
+4. **Kata & training — delivered**: panel judging with 3–9 judges, high/low drop and authoritative
+   totals; a seeded kata catalogue (including weapon kata) and training/sparring sessions are
+   published on `/details`. Still to add: compulsory/choice rounds, bunkai and rotation scheduling.
 5. **Setup completeness**: import clubs/fighters from templates, per-discipline rule snapshots,
    manual result entry and medal ceremony flow in one continuous path (Phase 1).
-6. **Verification**: `bun run smoke` now boots the real server and checks 41 API/UI assertions
+6. **Verification**: `bun run smoke` now boots the real server and checks 46 API/UI assertions
    automatically. Still to add: browser-driven click-through E2E, load/race runs and accessibility
    audit before final QA sign-off (Phase 7).
 
