@@ -73,6 +73,10 @@ Core promise: *"One configurable engine, every Jiu Jitsu event, fully branded, f
     single command to run the **whole app locally with realistic seeded data** so the user can
     play with it and give meaningful feedback early and often. QA feedback loops outrank
     breadth of features.
+11. **Automate the heavy lifting.** Organisers set requirements and constraints; the system
+    does the work: category eligibility, seeding, pool generation, scheduling and promotion.
+    Algorithms optimise for fairness and enjoyable events, with controlled randomisation so
+    groups are well mixed and same-club fighters are spread across pools wherever possible.
 
 ---
 
@@ -167,6 +171,9 @@ These are **inputs to the config model**, not rules to hard-code.
   ranking (§5.7). Both are first-class data points, not display-only decoration.
 - **Gender is optional**: support male/female/open/co-ed, and "no gender split" mode. Some
   kids divisions forbid cross-gender transfer — configurable.
+- **Height is a first-class stat** alongside weight (ranges and category eligibility can use
+  either). Users may enter **metric or imperial**; the **backend converts and stores metric**
+  (kg, cm) as canonical, keeping the original input for display fidelity.
 - **Match length policy** by age/belt/Gi-NoGi: 1.5 min (U8/U10) up to 5 min (adult), 6 min
   adult black belt in some rules, 5 min all adult No-Gi.
 - **Weigh-in** with tolerance, re-weigh, out-of-class flagging (see §7).
@@ -265,8 +272,15 @@ The v1 authorisation model is **RBAC with an invite-only chain of authority**:
   drafts, notes and personal data stay scoped to their role.
 
 ### 6.3 Registration, check-in, weigh-in
-- Invitations (link/QR), public registration, club bulk entry, payments, waitlists, refunds.
+- **Self-service sign-up** collects email, phone number, name, age/DOB, **height and weight**
+  (metric or imperial; backend converts to metric), **rank/grade** (belt colour / Dan / kyu /
+  youth / custom), plus account type.
+- Account type drives the next step: choose a **position/role** (official/moderator/runner/
+  organiser), **or** choose event participation from the tournament's available selections —
+  only the categories the user is **compatible with based on their stats** are offered.
+- Invitations (link/QR), club bulk entry, club-affiliation choice, payments, waitlists, refunds.
 - Check-in, QR badges, weigh-in with tolerance/re-weigh/out-of-class flags (see §7).
+- Light and dark appearance with system-following default and per-user override (§9).
 
 ### 6.4 Divisions & categories
 - Age ranges (minors/adults) with calendar-year vs event-day policy; weight ranges (Gi/No-Gi);
@@ -277,6 +291,9 @@ The v1 authorisation model is **RBAC with an invite-only chain of authority**:
   seeding, club/country separation, 3rd-place playoff, **dual bronze winners** option.
 - Automatic, consistent promotion of winners/losers/draws per configured rules; **rematches
   for 3rd place if the two fighters have not already met**; avoid repeat pairings where configured.
+- **Automated pool generation:** given organiser constraints and eligible entrants, create as
+  many balanced pools as each event needs; seed by rank/stats; use controlled randomisation to
+  mix groups well and **avoid same-club clustering**; expose a human override with re-balance.
 - Drag & drop fighter cards and match-order lists between brackets / into next rounds / to
   promote, with full animation.
 
@@ -445,8 +462,8 @@ crash recovery · migrations · load headroom well beyond a real event.
 
 ## 11. Roadmap (vertical slices; tick as completed)
 
-- [ ] **Phase 0 — Foundation**: repo, Go API + SQLite, SvelteKit shell, shared types/OpenAPI,
-      AGENTS doc, basic tenant/theme, theming tokens, testing harness.
+- [x] **Phase 0 — Foundation**: repo, Go API + SQLite, SvelteKit shell, shared types/OpenAPI,
+      AGENTS doc, basic tenant/theme, theming tokens, testing harness, seeded demo + QA dashboard.
 - [ ] **Phase 1 — Setup slice**: create event → clubs → fighters → categories → rule-set
       snapshot → simple single-elim bracket → manual result → medal table. End-to-end offline.
 - [ ] **Phase 2 — Formats & rules engine**: RR, pools, double elim, repechage, BYEs/seeding,
@@ -534,6 +551,17 @@ _Format: `D-### | date | decision | rationale | status`._
   — user asked for **2 tournament runners, 8 officials, 4 club leaders, 48 fighters across a
   few clubs** (plus a spectator). Seed must be generated programmatically and feel realistic
   enough to QA tables, brackets, lists and role switching at realistic volume. Status: accepted.
+- **D-015 | 2026-11-19 | Self-service sign-up with stats and role/participation choice**
+  — collect email, phone, name, DOB, height & weight (imperial converted to metric on the
+  backend), rank/grade. Account type then selects an official/runner/organiser position **or**
+  participation in compatible event categories. Privileged roles must still be approved/invited
+  (see §15) to preserve the RBAC integrity principle. Status: accepted, approval flow pending.
+- **D-016 | 2026-11-19 | Automated, constrained pool generation**
+  — organisers set requirements/constraints; algorithms compute eligibility, balanced pools,
+  seeding and promotion, with controlled randomisation and same-club separation, plus manual
+  override. Status: accepted (design in §8.6).
+- **D-017 | 2026-11-19 | Light and dark appearance**
+  — system-following default + per-user override + white-label tokens. Status: accepted.
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)
@@ -542,6 +570,11 @@ _Format: `D-### | date | decision | rationale | status`._
 4. Minimum LED/projector resolutions and aspect ratios to design for?
 5. Any existing brand assets/domain before theming is built?
 6. Which tables/stats should be in the very first schema migration (users + core entities agreed)?
+7. Can a self-signup **request** an official/runner role (pending approval by an existing
+   runner), or must privileged roles always arrive by invite? (Recommendation: request +
+   approval; never self-elevate.)
+8. What is the exact compatibility rule set for offered categories (strict ranges vs nearest
+   eligible division / moving up a weight with consent)?
 
 ## 16. Change log
 - **2026-11-19** — Created document: mission, principles, config model, domain model,
@@ -551,13 +584,20 @@ _Format: `D-### | date | decision | rationale | status`._
   data (D-005), RBAC invite-only hierarchy with auditability (D-006), venue-only v1 (D-007),
   git + atomic commits (D-008), start Phase 0 (D-009). Added §5.2 belt-colour detail,
   §6.2 RBAC hierarchy, §6.15 real-time data flow. Trimmed answered questions.
+- **2026-11-19** — Added zero-tech setup (D-010), Bun tooling (D-011), local full demo (D-012),
+  ~60 seeded accounts with role switcher (D-013/D-014), self-service sign-up + automated
+  pool generation + light/dark mode (D-015/D-016/D-017). Completed Phase 0: Go venue server,
+  SQLite migrations, RBAC roles, OpenAPI-generated types, SvelteKit QA dashboard, `bun run dev`,
+  tests and CI.
 
 ## 17. Immediate next actions
-1. Scaffold Phase 0: git init, Go module + SQLite, SvelteKit/NPM app, OpenAPI + generated TS
-   types, theming tokens, test harness, CI. Commit atomically at each logical step.
-2. Define the first schema migration (`users` + core tenant/event/config tables) with the
-   RBAC roles encoded as typed constants.
-3. Define `RuleSet` / `FormatPolicy` / belt-rank schemas in OpenAPI as the shared source of truth.
+1. Phase 1 slice: self-service sign-up (email/phone/name/DOB/height/weight imperial→metric,
+   rank/grade), compatibility-filtered category choices, and automated balanced pool generation
+   with same-club separation — all driven by organiser constraints.
+2. Extend schema with phone, height_cm, weight_kg canonical fields + original units, role
+   requests/approvals and pool assignments; add algorithms as pure Go packages with golden tests.
+3. Resolve §15 questions 7 (role approval flow) and 8 (category compatibility rules) before
+   implementing sign-up.
 
 ---
 

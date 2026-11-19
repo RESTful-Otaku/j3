@@ -1,0 +1,15 @@
+{
+  "name": "j3",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "bash scripts/dev.sh",
+    "api": "go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed",
+    "seed": "go run ./cmd/j3d seed -db ./data/j3-demo.db",
+    "reset": "go run ./cmd/j3d reset -db ./data/j3-demo.db",
+    "generate:types": "bun run --cwd web generate:types",
+    "test": "go test ./... && bun run --cwd web test",
+    "check": "bun run --cwd web check",
+    "build": "go build ./... && bun run --cwd web build"
+  }
+}

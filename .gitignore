@@ -12,18 +12,18 @@ coverage.*
 *.db-wal
 /data/
 
-# Node / SvelteKit
+# Node / SvelteKit (Bun)
 node_modules/
-/.svelte-kit/
-/build/
-/dist/
-/.netlify/
-/.vercel/
+.svelte-kit/
+build/
+dist/
+.netlify/
+.vercel/
 *.local
 .env
 .env.*
 
-# Generated artifacts (regenerate via npm run generate:types)
+# Generated artifacts (regenerate via bun run generate:types)
 # web/src/lib/api-types.d.ts is committed intentionally.
 
 # Editors / OS

@@ -32,21 +32,26 @@ web/                 SvelteKit frontend + Capacitor
 .github/workflows    CI
 ```
 
-## Quick start
+## Quick start — full local demo
+
+One command starts the venue server with ~60 seeded accounts and the web UI:
 
 ```sh
-# Venue server
-go run ./cmd/j3d --addr :8787 --db ./data/j3.db
-curl http://localhost:8787/healthz
-
-# Frontend (Bun only)
-cd web && bun install && bun run dev
+bun run dev
 ```
+
+- UI: <http://localhost:5173>
+- API: <http://127.0.0.1:8787/api/v1/demo>
+- Reset the demo data: `bun run reset`
+- Run all checks: `bun run check && bun run test && bun run build`
+
+In the UI, open **Accounts & roles** to act as any runner, official, club leader, fighter or
+spectator and verify what each can see and do.
 
 Regenerate shared types after editing `api/openapi.yaml`:
 
 ```sh
-cd web && bun run generate:types
+bun run generate:types
 ```
 
 ## Status
