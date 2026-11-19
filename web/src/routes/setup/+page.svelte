@@ -3,11 +3,13 @@
   import { api, type CreateTournamentRequest } from '../../lib/api';
   import { notify, notifySuccess, notifyError, notifyWarning } from '../../lib/toast';
 
+  type ScoreValue = { id: string; label: string; value: number };
   type Discipline = {
     id: string; name: string; title: string; style: string; scoring: string;
-    matchSeconds: number; rounds: number; requirements: string;
+    matchSeconds: number; rounds: number; requirements: string; points: ScoreValue[];
   };
-  type Category = { id: string; name: string; kind: string; gender: string; min: number; max: number };
+  type CategoryRange = { id: string; kind: string; min: number; max: number };
+  type Category = { id: string; name: string; kind: string; gender: string; min: number; max: number; ranges: CategoryRange[] };
   type Invite = { id: string; email: string; phone: string; role: string; clubName: string };
   type Wizard = {
     step: number; name: string; title: string; venue: string; startDate: string; endDate: string;
@@ -22,16 +24,21 @@
   const themePresets = ['classic', 'ocean', 'street'];
   const stylePresets = ['Round robin', 'Single elimination', 'Double elimination', 'Fight pools', 'Kata panel'];
   const scoringPresets = ['Ippon / Waza-ari', 'BJJ points', 'Kata panel 5–10', 'Custom'];
+  const pointPresets: Record<string, { label: string; value: number }[]> = {
+    'Ippon / Waza-ari': [{ label: 'Ippon', value: 3 }, { label: 'Waza-ari', value: 1 }],
+    'BJJ points': [{ label: 'Takedown', value: 2 }, { label: 'Sweep', value: 2 }, { label: 'Guard pass', value: 3 }, { label: 'Mount / back', value: 4 }],
+    'Kata panel 5–10': [{ label: 'Excellent', value: 10 }, { label: 'Very good', value: 8 }, { label: 'Acceptable', value: 6 }],
+  };
   const uid = () => Math.random().toString(36).slice(2, 9);
 
   function defaults(): Wizard {
     return {
       step: 0, name: '', title: '', venue: '', startDate: '', endDate: '', theme: 'classic',
       logoPath: '', bannerPath: '', saveTemplate: true, templateName: '',
-      disciplines: [{ id: uid(), name: 'Fighting System', title: 'Main fighting division', style: 'Fight pools', scoring: 'Ippon / Waza-ari', matchSeconds: 180, rounds: 3, requirements: 'Gi inspection; 3 second control' }],
+      disciplines: [{ id: uid(), name: 'Fighting System', title: 'Main fighting division', style: 'Fight pools', scoring: 'Ippon / Waza-ari', matchSeconds: 180, rounds: 3, requirements: 'Gi inspection; 3 second control', points: [{ id: uid(), label: 'Ippon', value: 3 }, { id: uid(), label: 'Waza-ari', value: 1 }] }],
       categories: [
-        { id: uid(), name: 'Adult -76 kg', kind: 'weight', gender: 'male', min: 0, max: 76 },
-        { id: uid(), name: 'Youth U16', kind: 'age', gender: 'open', min: 14, max: 16 },
+        { id: uid(), name: 'Adult -76 kg', kind: 'weight', gender: 'male', min: 0, max: 76, ranges: [{ id: uid(), kind: 'weight', min: 0, max: 76 }] },
+        { id: uid(), name: 'Youth U16', kind: 'age', gender: 'open', min: 14, max: 16, ranges: [{ id: uid(), kind: 'age', min: 14, max: 16 }] },
       ],
       constraints: { cap: 200, maxPools: 12, autoPlace: true, separateClubs: true, genderPolicy: 'optional' },
       invites: [],
@@ -43,12 +50,19 @@
   let errors: { step: number; message: string }[] = [];
   let bulkInvites = '';
   let dragIndex = -1;
+  let invitePage = 0;
+  let selectedInvites: string[] = [];
+  const invitePageSize = 8;
+  type ConfigTemplate = { name: string; config: string; at: string };
+  let configTemplates: ConfigTemplate[] = [];
+  let newTemplateName = '';
 
   onMount(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) wizard = { ...defaults(), ...JSON.parse(saved) };
     } catch { /* ignore corrupt drafts */ }
+    try { configTemplates = JSON.parse(localStorage.getItem('j3-config-templates') || '[]'); } catch { configTemplates = []; }
     ready = true;
     validate();
   });
@@ -82,6 +96,7 @@
     wizard.disciplines = [...wizard.disciplines, {
       id: uid(), name: '', title: '', style: stylePresets[0], scoring: scoringPresets[0],
       matchSeconds: 180, rounds: 3, requirements: '',
+      points: [{ id: uid(), label: 'Ippon', value: 3 }],
     }];
     touch();
   }
@@ -112,7 +127,7 @@
     notifySuccess('Discipline order updated');
   }
   function addCategory() {
-    wizard.categories = [...wizard.categories, { id: uid(), name: '', kind: 'weight', gender: 'open', min: 0, max: 100 }];
+    wizard.categories = [...wizard.categories, { id: uid(), name: '', kind: 'weight', gender: 'open', min: 0, max: 100, ranges: [{ id: uid(), kind: 'weight', min: 0, max: 100 }] }];
     touch();
   }
   function removeCategory(index: number) {
@@ -132,6 +147,50 @@
     touch();
     notifySuccess(`${added.length} invitation${added.length === 1 ? '' : 's'} added`);
   }
+  function toggleInvite(id: string) {
+    selectedInvites = selectedInvites.includes(id)
+      ? selectedInvites.filter((item) => item !== id)
+      : [...selectedInvites, id];
+  }
+  function deleteSelected() {
+    if (selectedInvites.length === 0) { notifyWarning('Select invitations to delete'); return; }
+    const removed = wizard.invites.filter((invite) => selectedInvites.includes(invite.id));
+    wizard.invites = wizard.invites.filter((invite) => !selectedInvites.includes(invite.id));
+    selectedInvites = [];
+    touch();
+    notifySuccess(`${removed.length} invitation${removed.length === 1 ? '' : 's'} deleted`, () => {
+      wizard.invites = [...wizard.invites, ...removed];
+      touch();
+    });
+  }
+  function saveConfigTemplate() {
+    if (!newTemplateName.trim()) { notifyWarning('Give the template a name first'); return; }
+    const copy = { ...wizard, step: 0 };
+    configTemplates = [
+      { name: newTemplateName, config: JSON.stringify(copy), at: new Date().toLocaleString() },
+      ...configTemplates.filter((template) => template.name !== newTemplateName),
+    ];
+    localStorage.setItem('j3-config-templates', JSON.stringify(configTemplates));
+    newTemplateName = '';
+    notifySuccess('Configuration saved as a reusable template');
+  }
+  function loadConfigTemplate(name: string) {
+    const template = configTemplates.find((item) => item.name === name);
+    if (!template) return;
+    try { wizard = { ...defaults(), ...JSON.parse(template.config), step: 0 }; touch(); notifySuccess(`Loaded template “${name}”`); }
+    catch { notifyError('That template could not be loaded'); }
+  }
+
+  function cloneSetup() {
+    const copy = { ...wizard, name: `${wizard.name || 'Tournament'} (copy)`, templateName: `${wizard.templateName || wizard.name || 'Tournament'} copy`, step: 0 };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(copy));
+    wizard = copy;
+    notifySuccess('Setup cloned — you are editing the copy');
+  }
+
+  $: invitePages = Math.max(1, Math.ceil(wizard.invites.length / invitePageSize));
+  $: pagedInvites = wizard.invites.slice(invitePage * invitePageSize, (invitePage + 1) * invitePageSize);
+
   async function upload(event: Event, kind: 'logo' | 'banner') {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -162,9 +221,11 @@
         name: d.name, title: d.title, style: d.style, scoring: d.scoring,
         matchSeconds: Number(d.matchSeconds), rounds: Number(d.rounds),
         requirements: d.requirements.split(',').map((r) => r.trim()).filter(Boolean),
+        points: d.points.map((p) => ({ label: p.label, value: Number(p.value) })),
       })),
       categories: wizard.categories.map((c) => ({
         name: c.name, kind: c.kind, gender: c.gender, min: c.min, max: c.max,
+        ranges: c.ranges.map((r) => ({ kind: r.kind, min: r.min, max: r.max })),
       })),
       constraints: wizard.constraints,
       invites: wizard.invites,
@@ -227,9 +288,9 @@
       <p class="muted small">Each discipline has its own scoring, timers, rounds and requirements. Drag cards to reorder.</p>
       <div style="display:grid; gap:12px; margin-top:18px;">
         {#each wizard.disciplines as discipline, i (discipline.id)}
-          <div class="rule-card" role="listitem" aria-label="Discipline {i + 1}, draggable" draggable="true" on:dragstart={(e) => dragStart(i, e)} on:dragover={(e) => e.preventDefault()} on:drop={(e) => drop(i, e)}>
+          <div class="rule-card" role="listitem" aria-label="Discipline {i + 1}" on:dragover={(e) => e.preventDefault()} on:drop={(e) => drop(i, e)}>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="badge fighter">#{i + 1} · drag to reorder</span>
+              <span class="drag-handle" role="button" tabindex="0" aria-label="Drag discipline {i + 1} to reorder" draggable="true" on:dragstart={(e) => dragStart(i, e)} on:keydown={() => {}}>⠿ #{i + 1}</span>
               <button class="tab" on:click={() => removeDiscipline(i)}>Remove</button>
             </div>
             <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin-top:12px;">
@@ -241,14 +302,35 @@
               <label class="field">Point system
                 <select bind:value={discipline.scoring}>{#each scoringPresets as scoring}<option value={scoring}>{scoring}</option>{/each}</select>
               </label>
-              <label class="field">Match length
-                <select bind:value={discipline.matchSeconds}><option value={90}>90 seconds</option><option value={180}>3 minutes</option><option value={300}>5 minutes</option><option value={480}>8 minutes</option></select>
+              <label class="field">Match length (seconds)
+                <input type="number" min="30" max="1800" step="5" bind:value={discipline.matchSeconds} />
               </label>
               <label class="field">Rounds <strong>{discipline.rounds}</strong>
                 <input type="range" min="1" max="7" bind:value={discipline.rounds} />
               </label>
             </div>
+            <div class="tabs" style="margin-top:10px;">
+              {#each [90, 180, 300, 480] as preset}
+                <button class="tab" class:active={Number(discipline.matchSeconds) === preset} on:click={() => { discipline.matchSeconds = preset; touch(); }}>
+                  {preset >= 60 ? `${preset / 60} min` : `${preset} s`}
+                </button>
+              {/each}
+            </div>
             <label class="field" style="margin-top:12px;">Requirements / constraints<input bind:value={discipline.requirements} placeholder="Gi inspection, 3s control, no jumping guard…" /></label>
+            <div class="muted small" style="margin:14px 0 6px;">Points awarded — choose a preset, then tweak or add your own:</div>
+            <div class="tabs" style="margin-bottom:10px;">
+              {#each Object.keys(pointPresets) as preset}
+                <button class="tab" on:click={() => { discipline.points = pointPresets[preset].map((p) => ({ id: uid(), ...p })); discipline.scoring = preset; touch(); }}>{preset}</button>
+              {/each}
+            </div>
+            {#each discipline.points as point (point.id)}
+              <div style="display:flex; gap:8px; align-items:end; margin-bottom:8px;">
+                <label class="field" style="flex:2;">Technique / action<input bind:value={point.label} /></label>
+                <label class="field">Points<input type="number" min="0" max="100" bind:value={point.value} /></label>
+                <button class="tab" on:click={() => { discipline.points = discipline.points.filter((p) => p.id !== point.id); touch(); }}>✕</button>
+              </div>
+            {/each}
+            <button class="tab" on:click={() => { discipline.points = [...discipline.points, { id: uid(), label: 'Custom move', value: 1 }]; touch(); }}>+ Add custom scoring action</button>
           </div>
         {/each}
       </div>
@@ -258,13 +340,22 @@
       <p class="muted small">Fighters are placed automatically into compatible categories using their stats.</p>
       <div style="display:grid; gap:10px; margin-top:18px;">
         {#each wizard.categories as category, i (category.id)}
-          <div class="rule-card" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
-            <label class="field" style="flex:2;">Category name<input bind:value={category.name} /></label>
-            <label class="field">Type<select bind:value={category.kind}><option value="weight">Weight</option><option value="height">Height</option><option value="age">Age</option><option value="belt">Rank / belt</option><option value="combined">Combined</option></select></label>
-            <label class="field">Gender<select bind:value={category.gender}><option value="open">Open</option><option value="male">Male</option><option value="female">Female</option></select></label>
-            <label class="field">From<input type="number" bind:value={category.min} /></label>
-            <label class="field">To<input type="number" bind:value={category.max} /></label>
-            <button class="tab" on:click={() => removeCategory(i)}>Remove</button>
+          <div class="rule-card">
+            <div style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
+              <label class="field" style="flex:2;">Category name<input bind:value={category.name} /></label>
+              <label class="field">Gender<select bind:value={category.gender}><option value="open">Open</option><option value="male">Male</option><option value="female">Female</option></select></label>
+              <button class="tab" style="margin-left:auto;" on:click={() => removeCategory(i)}>Remove</button>
+            </div>
+            <div class="muted small" style="margin:12px 0 6px;">Combine age, height, weight and rank ranges — all must be met:</div>
+            {#each category.ranges as range (range.id)}
+              <div style="display:flex; gap:8px; align-items:end; flex-wrap:wrap; margin-bottom:8px;">
+                <label class="field">Range type<select bind:value={range.kind}><option value="weight">Weight (kg)</option><option value="height">Height (cm)</option><option value="age">Age (years)</option><option value="belt">Rank / belt</option></select></label>
+                <label class="field">From<input type="number" bind:value={range.min} /></label>
+                <label class="field">To<input type="number" bind:value={range.max} /></label>
+                <button class="tab" on:click={() => { category.ranges = category.ranges.filter((r) => r.id !== range.id); touch(); }}>✕</button>
+              </div>
+            {/each}
+            <button class="tab" on:click={() => { category.ranges = [...category.ranges, { id: uid(), kind: 'height', min: 140, max: 210 }]; touch(); }}>+ Add range</button>
           </div>
         {/each}
       </div>
@@ -286,17 +377,32 @@
         <textarea rows="6" bind:value={bulkInvites} placeholder="judge@club.com, +447700900001, official, Riverside&#10;fighter@club.com, , fighter, Hilltop"></textarea>
       </label>
       <button class="btn primary" style="margin-top:12px;" on:click={parseBulkInvites}>Add invitations</button>
-      <h3 style="margin-top:22px;">Invited ({wizard.invites.length})</h3>
+      <div class="section-title" style="margin-top:22px;">
+        <h3>Invited ({wizard.invites.length})</h3>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button class="tab" on:click={() => (selectedInvites = selectedInvites.length === wizard.invites.length ? [] : wizard.invites.map((i) => i.id))}>
+            {selectedInvites.length === wizard.invites.length && wizard.invites.length > 0 ? 'Clear selection' : 'Select all'}
+          </button>
+          <button class="tab" on:click={deleteSelected}>🗑 Delete selected ({selectedInvites.length})</button>
+        </div>
+      </div>
       <div style="display:grid; gap:8px; margin-top:10px;">
-        {#each wizard.invites as invite, i (invite.id)}
+        {#each pagedInvites as invite (invite.id)}
           <div class="rule-card" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <input type="checkbox" checked={selectedInvites.includes(invite.id)} on:change={() => toggleInvite(invite.id)} aria-label="Select {invite.email}" />
             <strong>{invite.email}</strong><span class="muted small">{invite.phone || 'no phone'}</span>
             <span class="badge {invite.role === 'official' ? 'official' : invite.role === 'club_leader' ? 'fighter' : 'spectator'}">{invite.role}</span>
             <span class="muted small">{invite.clubName || 'independent'}</span>
-            <button class="tab" style="margin-left:auto;" on:click={() => { wizard.invites = wizard.invites.filter((_, idx) => idx !== i); touch(); notifySuccess('Invite removed', () => { const list = [...wizard.invites]; list.splice(i, 0, invite); wizard.invites = list; touch(); }); }}>Remove</button>
           </div>
         {:else}<span class="muted small">No invitations yet.</span>{/each}
       </div>
+      {#if invitePages > 1}
+        <div class="tabs" style="margin-top:12px;">
+          <button class="tab" disabled={invitePage === 0} on:click={() => (invitePage -= 1)}>← Previous</button>
+          <span class="pill">Page {invitePage + 1} of {invitePages}</span>
+          <button class="tab" disabled={invitePage >= invitePages - 1} on:click={() => (invitePage += 1)}>Next →</button>
+        </div>
+      {/if}
     {:else}
       <div class="eyebrow">Step 5 of 5</div><h2>Review & launch</h2>
       {#if errors.length > 0}
@@ -319,6 +425,26 @@
         <label class="cap" class:on={wizard.saveTemplate}><input type="checkbox" bind:checked={wizard.saveTemplate} /> Save this setup as a reusable template</label>
       </div>
       {#if wizard.saveTemplate}<label class="field" style="margin-top:12px;">Template name<input bind:value={wizard.templateName} placeholder="{wizard.name || 'My tournament'} template" /></label>{/if}
+      <div style="margin-top:22px; border-top:1px solid var(--brand-border); padding-top:18px;">
+        <h3>Template library</h3>
+        <p class="muted small">Save any setup — event, categories, disciplines, rules, scoring or a whole tournament — and load it again later.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+          <input class="tab" style="color:var(--brand-ink); cursor:text; flex:1;" placeholder="Template name…" bind:value={newTemplateName} />
+          <button class="btn" on:click={saveConfigTemplate}>💾 Save template</button>
+          <button class="btn" on:click={cloneSetup}>⧉ Clone current setup</button>
+        </div>
+        <div style="display:grid; gap:8px; margin-top:12px;">
+          {#each configTemplates as template (template.name)}
+            <div class="stat small" style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+              <span><strong>{template.name}</strong> · <span class="muted">{template.at}</span></span>
+              <span style="display:flex; gap:6px;">
+                <button class="tab" on:click={() => loadConfigTemplate(template.name)}>Load</button>
+                <button class="tab" on:click={() => { configTemplates = configTemplates.filter((t) => t.name !== template.name); localStorage.setItem('j3-config-templates', JSON.stringify(configTemplates)); }}>Delete</button>
+              </span>
+            </div>
+          {:else}<span class="muted small">No saved templates yet.</span>{/each}
+        </div>
+      </div>
     {/if}
 
     <div class="wizard-actions">
@@ -344,6 +470,8 @@
   :global(.field) { display:grid; gap:5px; font-size:.8rem; color:var(--brand-muted); }
   :global(.field input), :global(.field select), :global(.field textarea) { padding:9px 11px; border-radius:9px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-ink); font-size:.9rem; width:100%; }
   .rule-card { padding:14px; border-radius:12px; border:1px solid var(--brand-border); background:var(--brand-surface-3); }
+  .drag-handle { cursor:grab; padding:5px 9px; border-radius:8px; background:var(--brand-surface-2); border:1px solid var(--brand-border); font-size:.78rem; font-weight:700; color:var(--brand-accent); user-select:none; }
+  .drag-handle:active { cursor:grabbing; }
   .wizard-actions { display:flex; align-items:center; gap:14px; margin-top:26px; padding-top:18px; border-top:1px solid var(--brand-border); }
   .wizard-actions .btn.primary { margin-left:auto; }
   .warning-panel { border:1px solid rgba(245,158,11,.5); background:rgba(245,158,11,.08); border-radius:12px; padding:16px; display:grid; gap:8px; }

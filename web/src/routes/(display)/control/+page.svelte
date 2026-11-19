@@ -6,10 +6,12 @@
   const views = [
     { path: '/setup', name: 'Create tournament', icon: '✨', note: 'Five-step setup wizard' },
     { path: '/', name: 'Operator QA', icon: '🎛️', note: 'Accounts, sign-up, pools, fights' },
+    { path: '/simulate', name: 'Tournament simulator', icon: '🎬', note: 'Replay a full event + charts' },
     { path: '/data', name: 'Data explorer', icon: '🔎', note: 'Search, filter, sort any dataset' },
     { path: '/audit', name: 'Audit trail', icon: '📜', note: 'Who did what, when and how' },
     { path: '/display', name: 'Full-screen scoreboard', icon: '🥊', note: 'Current fight, officials, moves' },
     { path: '/public', name: 'Public dashboard', icon: '📺', note: 'Live, next up, leaderboard' },
+    { path: '/details', name: 'Event details', icon: '📋', note: 'Rules, protection, schedule, corners' },
     { path: '/brackets', name: 'Brackets', icon: '🏆', note: 'Elimination + round robin' },
     { path: '/tables', name: 'Tables & rankings', icon: '📊', note: 'Overall, medals, kata panel' },
     { path: '/pools', name: 'Fight pools', icon: '🧩', note: 'Matchups and progression' },

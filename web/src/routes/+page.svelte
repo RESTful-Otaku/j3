@@ -59,6 +59,7 @@
     seed: 42,
   };
   let generating = false;
+  let eventDetails: Record<string, any> = {};
 
   const beltRanks = [
     { id: 'br-white', label: 'White' },
@@ -110,12 +111,14 @@
 
   onMount(async () => {
     try {
-      const [demo, accts, fs, view] = await Promise.all([
+      const [demo, accts, fs, view, eventInfo] = await Promise.all([
         api.demo(),
         api.accounts(),
         api.fights(),
         api.view(actorId),
+        api.event(),
       ]);
+      try { eventDetails = JSON.parse(eventInfo.detailsJson || '{}'); } catch { eventDetails = {}; }
       counts = demo.counts;
       accounts = accts.accounts;
       fights = fs.fights;
@@ -241,7 +244,7 @@
 <div class="shell" data-theme={theme}>
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark">J3</div>
+      <a class="brand-mark" href="/" aria-label="J3 dashboard">J3</a>
       <div>
         <div class="brand-name">J Cubed</div>
         <div class="brand-sub">Tournament creator · local QA demo</div>
@@ -368,6 +371,7 @@
             <a class="btn" href="/brackets" target="_blank" rel="noreferrer">Brackets ↗</a>
             <a class="btn" href="/tables" target="_blank" rel="noreferrer">Tables ↗</a>
             <a class="btn" href="/pools" target="_blank" rel="noreferrer">Pools ↗</a>
+            <a class="btn" href="/simulate" target="_blank" rel="noreferrer">Simulate ↗</a>
           </div>
         </div>
       </div>
@@ -607,6 +611,13 @@
             {:else}
               <p class="muted small">No role requests pending.</p>
             {/each}
+          </div>
+          <div style="margin-top:20px; border-top:1px solid var(--brand-border); padding-top:16px;">
+            <h3>Event requirements</h3>
+            <p class="muted small">These apply to every competitor at this event.</p>
+            <div class="capabilities" style="margin-top:10px;">
+              {#each eventDetails.protection ?? [] as requirement}<span class="cap on">✓ {requirement}</span>{/each}
+            </div>
           </div>
         </div>
       </div>

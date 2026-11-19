@@ -165,7 +165,7 @@ func Ensure(store *db.DB) error {
 
 	add(`INSERT OR IGNORE INTO rule_sets (id, tenant_id, name, version, config_json) VALUES (?, ?, ?, ?, ?)`,
 		"rs-demo", tenantID, "Generic J3 Rules", 1,
-		`{"matchSeconds":300,"ippon":3,"wazaAri":1,"shidoLimit":3,"holdWazaAriSec":10,"holdIpponSec":20,"submissionInstantWin":true,"goldenScore":false,"bestOf":1}`)
+		`{"matchSeconds":300,"ippon":3,"wazaAri":1,"shidoLimit":3,"holdWazaAriSec":10,"holdIpponSec":20,"submissionInstantWin":true,"goldenScore":false,"bestOf":1,"venue":"Riverside Sports Centre","protection":["Clean pressed Gi","Belt","Mouth guard","Head guard for youth divisions","Instep / shin guards for Randori"],"cornerColours":{"red":"#ef4444","blue":"#3b82f6"},"schedule":[{"time":"08:30","label":"Doors open & weigh-in","kind":"general"},{"time":"09:00","label":"Opening ceremony","kind":"ceremony"},{"time":"12:30","label":"Lunch break","kind":"break"},{"time":"16:30","label":"Medal ceremony","kind":"ceremony"}],"amenities":["Changing rooms","First aid","Café","Spectator seating"]}`)
 	add(`INSERT OR IGNORE INTO format_policies (id, tenant_id, name, version, config_json) VALUES (?, ?, ?, ?, ?)`,
 		"fp-demo", tenantID, "Generic Format", 1,
 		`{"one":"no_contest","two":"best_of_three","three":"round_robin","four":"single_elim_third_place","five":"round_robin","six":"two_pools","sevenPlus":"double_elim","thirdPlace":"if_not_met","dualBronze":true}`)

@@ -461,6 +461,12 @@ non-technical runner completes in **under 10 minutes**, with most work automated
   Punjabi, Arabic, Japanese, Korean and Mandarin. Account settings hold language, UI units
   (metric/imperial), name, email, mobile number, height, weight, rank/grade belt, DOB/age, club
   affiliation, light/dark/system appearance and other useful preferences.
+- **Every configurable value needs presets plus custom input:** point values per technique/action,
+  timers, rounds, categories, requirements and equipment are dropdown/list/toggle/slider choices
+  with "add your own" always available. **Templates must exist at every level** — individual
+  events, categories, disciplines, rule sets, scoring schemes and whole tournaments — so a runner
+  can reuse and tweak a known-good setup reliably at any time.
+
 - **Uploads are capability-scoped:** fighters upload a photo; officials a photo; clubs a logo and
   banner; runners/organisers a logo and banner. Formats PNG/JPG/WEBP/SVG with a size limit. The
   backend extracts a **main colour and highlight colour from the image** so club/brand colours
@@ -778,6 +784,12 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-19** — Refinement batch: added `internal/simulator` with deterministic 50-fighter
+  end-to-end tournament simulation plus `/simulate` animated replay and `/details` public
+  requirements/rules view; setup QoL (scoring point values with presets/custom, combined range
+  rows, second-level timers, invite pagination + bulk delete, clone, config template library, drag
+  handles); scoreboard player cards with last-three moves and foul cards, explicit event/category/
+  round, paused-timer flash; J3 logo links to dashboard. All checks green.
 - **2026-11-19** — Full document refresh: added §18 current state/outstanding register, updated
   header status and roadmap (Phase 1c done, Phase 7 in progress), and recorded D-035. Completed
   capability-scoped uploads with dominant/highlight colour extraction, belt picker with custom
@@ -829,19 +841,28 @@ _Format: `D-### | date | decision | rationale | status`._
   colour extraction, query API, data explorer, audit view, settings (11 locales, units,
   colour-block belt picker + custom grade), stacked toasts with undo.
 - Multi-screen routes: `/display`, `/public`, `/brackets`, `/tables`, `/pools`, `/control`,
-  `/setup`, `/data`, `/audit`, `/settings`; live polling, PA toasts, celebration animations,
-  Street Fighter theme, ultrawide CSS, TUI `dev.sh`, Capacitor config.
+  `/setup`, `/data`, `/audit`, `/settings`, `/details`, `/simulate`; live polling, PA toasts,
+  celebration animations, Street Fighter theme, ultrawide CSS, TUI `dev.sh`, Capacitor config.
+- Refinement batch delivered: editable point values per technique with presets + custom actions,
+  combined age/height/weight/rank category ranges, second-level round durations, invite
+  pagination + bulk delete, clone setup, per-config template library, drag handles separated from
+  widgets, scoreboard player cards (last three moves, foul cards, belt, height/weight, club logo),
+  explicit event title/category/round, distinct paused-timer flash, public details/requirements
+  view, deterministic animated full-tournament simulator and spectator charts (top moves, club
+  points, medals, standings).
 - Test suite: `go test ./...`, `go test -race ./...`, `bun run check`, `bun run test`, `bun run build`
   all green at the time of this update.
 
 ### Outstanding — must finish before a real tournament
 1. **Authoritative live scoring**: server-owned timers, technique/hold/submission/penalty events,
    confirmation + undo, WebSocket sync and multi-mat control (Phase 3). The scoreboard is currently
-   a demo view with client-side timer.
+   a demo view with client-side timer; the simulator is deterministic but separate.
 2. **Production format engine**: wire `SuggestFormat`, `ThirdPlacePlan`, tie-break chains, BYEs and
-   seeding into real bracket generation; persist per-round history and promotion (Phase 2).
+   seeding into real bracket generation; persist per-round history and promotion (Phase 2). The
+   bracket diagram currently derives pools/fights client-side.
 3. **Scheduling authority**: event timeline, drift projection, on-deck callouts, mandated rest
-   intervals, TTS/PA announcements and the large dashboard clock (Phase 4).
+   intervals, TTS/PA announcements and the large dashboard clock (Phase 4). The details view is
+   published but static; projections are not yet adaptive.
 4. **Public details & dashboard clock**: publish rules, protection requirements, event times,
    ceremonies, amenities and corner colours; add the large live clock with drift-adaptive
    projected start/end times and on-deck callouts (Phase 4).
@@ -851,6 +872,25 @@ _Format: `D-### | date | decision | rationale | status`._
    manual result entry and medal ceremony flow in one continuous path (Phase 1).
 7. **Verification**: browser E2E walkthrough of the wizard and multi-screen routes, API fuzz
    corpus, load/race runs, no-bad-state audit and final QA sign-off (Phase 7).
+
+### Latest refinement batch (user QA, 2026-11-19)
+- **Setup QoL:** pagination, bulk create/delete, clone events, template presets, more optional
+  fields, combined age/height/weight/rank ranges per category, round duration in seconds, drag
+  handles separated from sliders/widgets inside movable cards.
+- **Display clarity:** more colour/pop/spacing for distance viewing; scoreboard shows event title,
+  category and round; player cards always show name, avatar, club logo/colours, belt, height,
+  weight, last three moves and foul cards; paused timer flashes a distinct colour; fight ledger
+  and pools show winners/losers, medals as coloured circles and penalty cards.
+- **Officials:** multiple judges per contest (kata panels and mat assistants); one scorekeeper/
+  timekeeper per mat who controls the board and advances events.
+- **Brackets/graphs:** a proper football-style bracket diagram with connectors and drag/shuffle;
+  real score tables, rankings and medal counts; charts for top moves, highest-scoring clubs,
+  most medals by club/fighter.
+- **Automation:** a deterministic full-tournament simulation run in real time end-to-end, plus a
+  compact realistic 50-participant seed for rapid QA.
+- **Navigation:** clicking the J3 logo returns to the signed-in account's main dashboard.
+- **Animation:** significantly more wow-factor, transitions and dynamic visuals without losing
+  clarity or role-appropriate access.
 
 ### Outstanding — polish & scale
 - Full translation rollout for the 11 locales (settings currently stores the preference only).

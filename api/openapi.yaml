@@ -540,6 +540,13 @@ components:
         requirements:
           type: array
           items: { type: string }
+        points:
+          type: array
+          items:
+            type: object
+            properties:
+              label: { type: string }
+              value: { type: number }
     CreateCategory:
       type: object
       required: [name, kind]
@@ -550,6 +557,14 @@ components:
         min: { type: number }
         max: { type: number }
         beltRankId: { type: string }
+        ranges:
+          type: array
+          items:
+            type: object
+            properties:
+              kind: { type: string }
+              min: { type: number }
+              max: { type: number }
     CreateConstraints:
       type: object
       properties:

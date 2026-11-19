@@ -526,6 +526,10 @@ export interface components {
             matchSeconds?: number;
             rounds?: number;
             requirements?: string[];
+            points?: {
+                label?: string;
+                value?: number;
+            }[];
         };
         CreateCategory: {
             name: string;
@@ -534,6 +538,11 @@ export interface components {
             min?: number;
             max?: number;
             beltRankId?: string;
+            ranges?: {
+                kind?: string;
+                min?: number;
+                max?: number;
+            }[];
         };
         CreateConstraints: {
             cap?: number;

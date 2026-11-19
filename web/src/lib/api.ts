@@ -65,6 +65,10 @@ export const api = {
   pools: () => getJson<PoolsResponse>('/api/v1/demo/pools?eventId=ev-demo'),
   generatePools: (body: GeneratePoolsRequest) =>
     postJson<PoolsResponse>('/api/v1/demo/pools/generate', body),
+  simulate: (seed = 42, fighters = 50) =>
+    getJson<SimulationResult>(`/api/v1/demo/simulate?seed=${seed}&fighters=${fighters}`),
+  stats: (seed = 42, fighters = 50) =>
+    getJson<StatsResult>(`/api/v1/demo/stats?seed=${seed}&fighters=${fighters}`),
   belts: () => getJson<{ belts: BeltOption[] }>('/api/v1/demo/belts'),
   event: () => getJson<EventDisplayInfo>('/api/v1/demo/event'),
   officials: (fightId?: string) =>
@@ -98,6 +102,31 @@ export const api = {
     if (!response.ok) throw new Error(`Upload failed (${response.status})`);
     return response.json() as Promise<{ url: string; colour: string; highlight: string }>;
   },
+};
+
+export type SimulationBout = {
+  id: string; stage: string; round: string; redId: string; blueId: string;
+  outcome: string; method: string; pointsRed: number; pointsBlue: number; sequence: number;
+};
+export type SimulationResult = {
+  bouts: SimulationBout[];
+  medals: { fighterId: string; kind: string }[];
+  standings: { fighterId: string; name: string; club: string; wins: number; losses: number; draws: number; points: number }[];
+  topMoves: Record<string, number>;
+  clubPoints: Record<string, number>;
+  clubMedals: Record<string, number>;
+  fighterMedals: Record<string, number>;
+  seed: number;
+};
+
+export type StatsResult = {
+  topMoves: Record<string, number>;
+  clubPoints: Record<string, number>;
+  clubMedals: Record<string, number>;
+  fighterMedals: Record<string, number>;
+  standings: SimulationResult['standings'];
+  medals: SimulationResult['medals'];
+  boutCount: number;
 };
 
 // Polls a data source and keeps all open display tabs live-synced.

@@ -62,7 +62,10 @@
       .reduce((sum, e) => sum + Number(payload(e).points ?? 0), 0);
   }
   function moves(fight: DemoFight | undefined, corner: 'red' | 'blue') {
-    return (fight?.events ?? []).filter((e) => payload(e).corner === corner);
+    return (fight?.events ?? []).filter((e) => e.kind === 'score' && payload(e).corner === corner);
+  }
+  function fouls(fight: DemoFight | undefined, corner: 'red' | 'blue') {
+    return (fight?.events ?? []).filter((e) => e.kind === 'penalty' && payload(e).corner === corner);
   }
   function initials(name: string) {
     return name.replace(/\s*\(.*\)$/, '').split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase();
@@ -97,7 +100,7 @@
   <header class="display-header">
     <div>
       <div class="event-mark"><span class="crest">J3</span><span>{event?.name ?? 'Tournament'}</span></div>
-      <div class="meta">{matName} · {selected?.category ?? 'Contest'} · {selected?.round ?? 'Live'}</div>
+      <div class="meta">Event: {event?.name ?? 'Tournament'} · Category: {selected?.category ?? 'Contest'} · Round: {selected?.round ?? 'Live'} · {matName}</div>
     </div>
     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
       <span class="pill" class:off={!selected || selected.state !== 'live'}>
@@ -125,12 +128,14 @@
           <div class="stat">{selected.red.heightCm ? `${Math.round(selected.red.heightCm)} cm` : '—'} · {selected.red.weightKg ? `${selected.red.weightKg.toFixed(1)} kg` : '—'}</div>
           <div class="stat">{selected.red.club || 'Independent'}</div>
           <div class="moves-side">
-            {#each moves(selected, 'red') as event (event.seq)}
-              <div class="move-chip" class:penalty={event.kind === 'penalty'}>
-                <span>#{event.seq} {event.kind === 'score' ? String(payload(event).technique ?? 'Score') : `⚠ ${String(payload(event).card ?? 'penalty')}`}</span>
-                <span class="pts">{event.kind === 'score' ? `+${payload(event).points ?? 0}` : '—'}</span>
-              </div>
+            {#each moves(selected, 'red').slice(-3) as move (move.seq)}
+              <div class="move-chip"><span>Last {move.seq} · {String(payload(move).technique ?? 'Score')}</span><span class="pts">+{payload(move).points ?? 0}</span></div>
             {:else}<span class="stat">No moves recorded</span>{/each}
+            <div class="capabilities">
+              {#each fouls(selected, 'red') as foul (foul.seq)}
+                <span class="foul-card {String(payload(foul).card ?? 'yellow')}">{String(payload(foul).card ?? 'yellow').toUpperCase()}</span>
+              {/each}
+            </div>
           </div>
         </div>
         <div class="big-score">{score(selected, 'red')}</div>
@@ -139,7 +144,7 @@
 
       <section class="clock-panel">
         <div class="round">{matName} · {selected.round}</div>
-        <div class="clock" class:flash={paused}>{clockText(seconds)}</div>
+        <div class="clock" class:paused-flash={paused}>{clockText(seconds)}</div>
         <div class="meta">{paused ? 'Referee stoppage · timer paused' : 'Fight in progress'}</div>
       </section>
 
@@ -155,12 +160,14 @@
           <div class="stat">{selected.blue.heightCm ? `${Math.round(selected.blue.heightCm)} cm` : '—'} · {selected.blue.weightKg ? `${selected.blue.weightKg.toFixed(1)} kg` : '—'}</div>
           <div class="stat">{selected.blue.club || 'Independent'}</div>
           <div class="moves-side">
-            {#each moves(selected, 'blue') as event (event.seq)}
-              <div class="move-chip" class:penalty={event.kind === 'penalty'}>
-                <span>#{event.seq} {event.kind === 'score' ? String(payload(event).technique ?? 'Score') : `⚠ ${String(payload(event).card ?? 'penalty')}`}</span>
-                <span class="pts">{event.kind === 'score' ? `+${payload(event).points ?? 0}` : '—'}</span>
-              </div>
+            {#each moves(selected, 'blue').slice(-3) as move (move.seq)}
+              <div class="move-chip"><span>Last {move.seq} · {String(payload(move).technique ?? 'Score')}</span><span class="pts">+{payload(move).points ?? 0}</span></div>
             {:else}<span class="stat">No moves recorded</span>{/each}
+            <div class="capabilities">
+              {#each fouls(selected, 'blue') as foul (foul.seq)}
+                <span class="foul-card {String(payload(foul).card ?? 'yellow')}">{String(payload(foul).card ?? 'yellow').toUpperCase()}</span>
+              {/each}
+            </div>
           </div>
         </div>
         <div class="big-score">{score(selected, 'blue')}</div>
@@ -214,5 +221,10 @@
   .celebration .eyebrow { color: var(--brand-accent); letter-spacing: .2em; text-transform: uppercase; font-weight: 800; }
   .celebration .portrait { width: clamp(160px, 24vw, 420px); height: clamp(160px, 24vw, 420px); margin: 22px auto; border-radius: 24%; display: grid; place-items: center; font-family: var(--font-display); font-size: clamp(4rem, 10vw, 10rem); font-weight: 800; color: #fff; background: linear-gradient(145deg, var(--brand-primary), var(--brand-accent)); }
   .celebration p { color: var(--brand-muted); font-size: 1.2rem; }
+  .foul-card { display:inline-grid; place-items:center; width:34px; height:26px; border-radius:6px; font-size:.72rem; font-weight:900; color:#fff; box-shadow:0 4px 14px rgba(0,0,0,.35); }
+  .foul-card.yellow { background:#facc15; color:#422006; }
+  .foul-card.red { background:#ef4444; }
+  :global(.paused-flash) { color: var(--draw) !important; animation: pausedPulse .9s ease-in-out infinite alternate; }
+  @keyframes pausedPulse { from { opacity: 1; text-shadow: 0 0 0 rgba(245,158,11,0); } to { opacity: .45; text-shadow: 0 0 32px rgba(245,158,11,.9); } }
   @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>
