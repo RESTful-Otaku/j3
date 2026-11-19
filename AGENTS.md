@@ -69,6 +69,10 @@ Core promise: *"One configurable engine, every Jiu Jitsu event, fully branded, f
    editors, validation with clear error messages, progressive disclosure (advanced options
    hidden until needed), and *never* raw config/YAML/script editing in normal flows. Power-user
    config remains available as an opt-in escape hatch, not the front door.
+10. **A runnable local full demo is a first-class deliverable.** At every phase there must be a
+    single command to run the **whole app locally with realistic seeded data** so the user can
+    play with it and give meaningful feedback early and often. QA feedback loops outrank
+    breadth of features.
 
 ---
 
@@ -517,6 +521,19 @@ _Format: `D-### | date | decision | rationale | status`._
   Status: accepted.
 - **D-011 | 2026-11-19 | Use Bun for all frontend package management, scripts and tests**
   — explicit user instruction; no npm/pnpm. Status: accepted.
+- **D-012 | 2026-11-19 | Local full-stack demo + seed data is a priority deliverable**
+  — user wants to play with the running app and QA early/often (§2 principle 10). Provide a
+  single command (`bun run dev`) that boots the venue server + web UI with seeded demo data,
+  plus a reset/seed command. Status: accepted.
+- **D-013 | 2026-11-19 | Seed dummy accounts at every RBAC level with instant switching**
+  — QA must be able to see that each user type works and looks right. Seed a runner, officials,
+  club leaders (per club), independent and club-invited fighters, and a spectator; expose a
+  demo account list + "act as" mechanism and a one-click account switcher in the UI.
+  Dev/demo only. Status: accepted (scale increased by D-014).
+- **D-014 | 2026-11-19 | Demo seed scale: ~60 accounts**
+  — user asked for **2 tournament runners, 8 officials, 4 club leaders, 48 fighters across a
+  few clubs** (plus a spectator). Seed must be generated programmatically and feel realistic
+  enough to QA tables, brackets, lists and role switching at realistic volume. Status: accepted.
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)
