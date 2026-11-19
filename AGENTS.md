@@ -784,6 +784,10 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-19** — Production push: added authoritative fight state/timers, score and penalty
+  events, confirm/undo, SSE live hub and display wiring; generated and synced Capacitor Android
+  and iOS projects (`bun run mobile:sync|android|ios`). APK build still needs an Android SDK and
+  iOS build needs macOS/Xcode.
 - **2026-11-19** — Refinement batch: added `internal/simulator` with deterministic 50-fighter
   end-to-end tournament simulation plus `/simulate` animated replay and `/details` public
   requirements/rules view; setup QoL (scoring point values with presets/custom, combined range
@@ -854,9 +858,10 @@ _Format: `D-### | date | decision | rationale | status`._
   all green at the time of this update.
 
 ### Outstanding — must finish before a real tournament
-1. **Authoritative live scoring**: server-owned timers, technique/hold/submission/penalty events,
-   confirmation + undo, WebSocket sync and multi-mat control (Phase 3). The scoreboard is currently
-   a demo view with client-side timer; the simulator is deterministic but separate.
+1. **Authoritative live scoring — delivered**: server-owned timers, score/penalty/submission
+   events, confirm, undo and SSE fan-out are implemented (`/api/v1/fights/*`, `/api/v1/events/stream`)
+   and wired into the display. Still to finish: judge-role permissions, hold timers and full
+   multi-mat operator console.
 2. **Production format engine**: wire `SuggestFormat`, `ThirdPlacePlan`, tie-break chains, BYEs and
    seeding into real bracket generation; persist per-round history and promotion (Phase 2). The
    bracket diagram currently derives pools/fights client-side.

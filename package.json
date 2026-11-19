@@ -11,6 +11,9 @@
     "generate:types": "bun run --cwd web generate:types",
     "test": "go test ./... && bun run --cwd web test",
     "check": "bun run --cwd web check",
-    "build": "go build ./... && bun run --cwd web build"
+    "build": "go build ./... && bun run --cwd web build",
+    "mobile:sync": "bun run --cwd web build && bunx --cwd web cap sync",
+    "mobile:android": "bun run mobile:sync && bunx --cwd web cap build android",
+    "mobile:ios": "bun run mobile:sync && bunx --cwd web cap build ios"
   }
 }

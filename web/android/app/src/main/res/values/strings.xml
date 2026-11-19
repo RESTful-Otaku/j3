@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">J3</string>
+    <string name="title_activity_main">J3</string>
+    <string name="package_name">com.j3.tournaments</string>
+    <string name="custom_url_scheme">com.j3.tournaments</string>
+</resources>

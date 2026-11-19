@@ -23,6 +23,12 @@ dist/
 .env
 .env.*
 
+# Capacitor generated web assets (regenerate with bun run mobile:sync)
+web/android/app/src/main/assets/public/
+web/android/app/src/main/assets/capacitor.config.json
+web/ios/App/App/public/
+web/ios/App/App/capacitor.config.json
+
 # Generated artifacts (regenerate via bun run generate:types)
 # web/src/lib/api-types.d.ts is committed intentionally.
 
