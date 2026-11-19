@@ -111,6 +111,49 @@ func TestDemoAccountsCoverEveryRole(t *testing.T) {
 	}
 }
 
+func TestDemoFights(t *testing.T) {
+	rec := httptest.NewRecorder()
+	seededServer(t).Handler().ServeHTTP(rec,
+		httptest.NewRequest(http.MethodGet, "/api/v1/demo/fights", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200: %s", rec.Code, rec.Body.String())
+	}
+	var body struct {
+		Fights []struct {
+			ID    string `json:"id"`
+			State string `json:"state"`
+			Red   struct {
+				Name string `json:"name"`
+			} `json:"red"`
+			Blue struct {
+				Name string `json:"name"`
+			} `json:"blue"`
+			Events []json.RawMessage `json:"events"`
+		} `json:"fights"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if len(body.Fights) == 0 {
+		t.Fatal("expected demo fights")
+	}
+	foundLive := false
+	for _, f := range body.Fights {
+		if f.Red.Name == "" || f.Blue.Name == "" {
+			t.Fatalf("fight %s missing fighter names", f.ID)
+		}
+		if f.State == "live" {
+			foundLive = true
+			if len(f.Events) == 0 {
+				t.Fatalf("live fight %s has no scoring events", f.ID)
+			}
+		}
+	}
+	if !foundLive {
+		t.Fatal("expected a live fight in demo data")
+	}
+}
+
 func TestDemoViewResolvesActorCapabilities(t *testing.T) {
 	rec := httptest.NewRecorder()
 	seededServer(t).Handler().ServeHTTP(rec,

@@ -27,6 +27,7 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/demo", s.demo)
 	mux.HandleFunc("GET /api/v1/demo/accounts", s.demoAccounts)
 	mux.HandleFunc("GET /api/v1/demo/view", s.demoView)
+	mux.HandleFunc("GET /api/v1/demo/fights", s.demoFights)
 	mux.HandleFunc("GET /", s.root)
 	s.handler = middleware(mux)
 	return s

@@ -1,0 +1,349 @@
+openapi: 3.1.0
+info:
+  title: J3 Venue Server API
+  version: 0.1.0
+  description: |
+    Shared schema source of truth for the J3 venue server and UI.
+    Types are generated into web/src/lib/api-types.d.ts with `bun run generate:types`.
+servers:
+  - url: http://127.0.0.1:8787
+    description: Local venue server
+paths:
+  /healthz:
+    get:
+      operationId: healthz
+      summary: Liveness probe
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+  /readyz:
+    get:
+      operationId: readyz
+      summary: Readiness probe including database
+      responses:
+        '200':
+          description: Ready
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+  /api/v1/version:
+    get:
+      operationId: version
+      responses:
+        '200':
+          description: Version info
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VersionInfo' }
+  /api/v1/roles:
+    get:
+      operationId: roles
+      summary: RBAC roles and their capabilities
+      responses:
+        '200':
+          description: Roles
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [roles]
+                properties:
+                  roles:
+                    type: array
+                    items: { $ref: '#/components/schemas/RoleInfo' }
+  /api/v1/demo:
+    get:
+      operationId: demo
+      summary: Seeded data counts for local QA
+      responses:
+        '200':
+          description: Counts
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DemoResponse' }
+  /api/v1/demo/accounts:
+    get:
+      operationId: demoAccounts
+      summary: Dummy accounts for every RBAC level (QA only)
+      responses:
+        '200':
+          description: Accounts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accounts]
+                properties:
+                  accounts:
+                    type: array
+                    items: { $ref: '#/components/schemas/DemoAccount' }
+  /api/v1/demo/view:
+    get:
+      operationId: demoView
+      summary: Resolve the acting account and its capabilities (QA only)
+      parameters:
+        - name: actor
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Actor view
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DemoViewResponse' }
+  /api/v1/demo/fights:
+    get:
+      operationId: demoFights
+      summary: Fights with fighters, clubs and scoring events (QA only)
+      responses:
+        '200':
+          description: Fights
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [fights]
+                properties:
+                  fights:
+                    type: array
+                    items: { $ref: '#/components/schemas/DemoFight' }
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+        database: { type: string }
+    VersionInfo:
+      type: object
+      required: [name, version]
+      properties:
+        name: { type: string }
+        version: { type: string }
+    Role:
+      type: string
+      enum: [tournament_runner, official, club_leader, fighter, spectator]
+    Action:
+      type: string
+      enum:
+        - manage_tenant
+        - manage_event
+        - manage_users
+        - manage_club
+        - invite_fighters
+        - score_fight
+        - register_self
+        - view_private
+        - view_public
+    RoleInfo:
+      type: object
+      required: [id, label, description, rank, actions]
+      properties:
+        id: { $ref: '#/components/schemas/Role' }
+        label: { type: string }
+        description: { type: string }
+        rank: { type: integer }
+        actions:
+          type: array
+          items: { $ref: '#/components/schemas/Action' }
+    DemoCounts:
+      type: object
+      required: [tenants, clubs, users, fighters, beltRanks, events, categories, entrants, mats, fights, fightEvents]
+      properties:
+        tenants: { type: integer }
+        clubs: { type: integer }
+        users: { type: integer }
+        fighters: { type: integer }
+        beltRanks: { type: integer }
+        events: { type: integer }
+        categories: { type: integer }
+        entrants: { type: integer }
+        mats: { type: integer }
+        fights: { type: integer }
+        fightEvents: { type: integer }
+    DemoResponse:
+      type: object
+      required: [counts]
+      properties:
+        counts: { $ref: '#/components/schemas/DemoCounts' }
+    DemoAccount:
+      type: object
+      required: [id, name, email, role, roleLabel, clubName, source, status, actions]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/Role' }
+        roleLabel: { type: string }
+        clubName: { type: string }
+        source: { type: string, enum: [independent, club_invite] }
+        status: { type: string }
+        actions:
+          type: array
+          items: { $ref: '#/components/schemas/Action' }
+    DemoViewResponse:
+      type: object
+      required: [actor, actions, counts]
+      properties:
+        actor: { $ref: '#/components/schemas/DemoAccount' }
+        actions:
+          type: array
+          items: { $ref: '#/components/schemas/Action' }
+        counts: { $ref: '#/components/schemas/DemoCounts' }
+    DemoFighter:
+      type: object
+      required: [id, name, club, clubColour, belt]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        club: { type: string }
+        clubColour: { type: string }
+        belt: { type: string }
+    DemoFightEvent:
+      type: object
+      required: [seq, kind, payload]
+      properties:
+        seq: { type: integer }
+        kind: { type: string }
+        payload: { type: object }
+    DemoFight:
+      type: object
+      required: [id, category, mat, round, state, outcome, red, blue, events]
+      properties:
+        id: { type: string }
+        category: { type: string }
+        mat: { type: string }
+        round: { type: string }
+        state: { type: string, enum: [pending, live, paused, complete, forfeit] }
+        outcome: { type: string }
+        red: { $ref: '#/components/schemas/DemoFighter' }
+        blue: { $ref: '#/components/schemas/DemoFighter' }
+        events:
+          type: array
+          items: { $ref: '#/components/schemas/DemoFightEvent' }
+    Tenant:
+      type: object
+      required: [id, name, slug, locale]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        locale: { type: string }
+    Theme:
+      type: object
+      required: [id, tenantId, name, tokensJson]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        name: { type: string }
+        tokensJson: { type: string }
+    Club:
+      type: object
+      required: [id, tenantId, name, primaryColour]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        name: { type: string }
+        logoPath: { type: string }
+        primaryColour: { type: string }
+    BeltRank:
+      type: object
+      required: [id, tenantId, label, colour, sortOrder, gradeKind, isCustom]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        label: { type: string }
+        colour: { type: string }
+        sortOrder: { type: integer }
+        gradeKind: { type: string, enum: [kyu, dan, youth, custom] }
+        stripeCount: { type: integer }
+        minAge: { type: integer, nullable: true }
+        maxAge: { type: integer, nullable: true }
+        isCustom: { type: boolean }
+    Fighter:
+      type: object
+      required: [id, tenantId, displayName]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        userId: { type: string, nullable: true }
+        clubId: { type: string, nullable: true }
+        beltRankId: { type: string, nullable: true }
+        displayName: { type: string }
+        dateOfBirth: { type: string }
+        weightKg: { type: number, nullable: true }
+        gender: { type: string, enum: [male, female, open, coed] }
+        avatarPath: { type: string }
+    RuleSet:
+      type: object
+      required: [id, tenantId, name, version, configJson]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        name: { type: string }
+        version: { type: integer }
+        configJson: { type: string }
+    FormatPolicy:
+      type: object
+      required: [id, tenantId, name, version, configJson]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        name: { type: string }
+        version: { type: integer }
+        configJson: { type: string }
+    Event:
+      type: object
+      required: [id, tenantId, name, status]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        themeId: { type: string, nullable: true }
+        ruleSetId: { type: string, nullable: true }
+        formatPolicyId: { type: string, nullable: true }
+        name: { type: string }
+        startsAt: { type: string }
+        endsAt: { type: string }
+        status: { type: string, enum: [draft, published, live, complete] }
+    Category:
+      type: object
+      required: [id, eventId, name, kind]
+      properties:
+        id: { type: string }
+        eventId: { type: string }
+        name: { type: string }
+        kind: { type: string, enum: [age, weight, belt, gender, combined] }
+        minValue: { type: number, nullable: true }
+        maxValue: { type: number, nullable: true }
+        beltRankId: { type: string, nullable: true }
+        gender: { type: string }
+        sortOrder: { type: integer }
+    Fight:
+      type: object
+      required: [id, eventId, state, outcome]
+      properties:
+        id: { type: string }
+        eventId: { type: string }
+        matId: { type: string, nullable: true }
+        categoryId: { type: string, nullable: true }
+        roundLabel: { type: string }
+        redFighterId: { type: string, nullable: true }
+        blueFighterId: { type: string, nullable: true }
+        state: { type: string, enum: [pending, live, paused, complete, forfeit] }
+        outcome: { type: string }
+        bestOf: { type: integer }
+        version: { type: integer }
+    FightEvent:
+      type: object
+      required: [fightId, seq, kind]
+      properties:
+        fightId: { type: string }
+        seq: { type: integer }
+        kind: { type: string }
+        actorUserId: { type: string, nullable: true }
+        payloadJson: { type: string }
