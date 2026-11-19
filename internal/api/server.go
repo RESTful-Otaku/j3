@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"net/http"
+	"os"
 
 	"github.com/restful-otaku/j3/internal/db"
 )
@@ -37,6 +38,12 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/demo/event", s.eventDisplay)
 	mux.HandleFunc("GET /api/v1/demo/officials", s.displayOfficials)
 	mux.HandleFunc("GET /api/v1/demo/standings", s.standings)
+	mux.HandleFunc("POST /api/v1/tournaments", s.createTournament)
+	mux.HandleFunc("GET /api/v1/templates", s.templates)
+	mux.HandleFunc("GET /api/v1/demo/audit", s.auditLog)
+	mux.HandleFunc("POST /api/v1/uploads", s.upload)
+	_ = os.MkdirAll("data/uploads", 0o755)
+	mux.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("data/uploads"))))
 	mux.HandleFunc("GET /", s.root)
 	s.handler = middleware(mux)
 	return s

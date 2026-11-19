@@ -111,6 +111,26 @@ paths:
                   fights:
                     type: array
                     items: { $ref: '#/components/schemas/DemoFight' }
+  /api/v1/demo/audit:
+    get:
+      operationId: auditLog
+      summary: Accountability trail for runners and officials
+      parameters:
+        - { name: actor, in: query, schema: { type: string } }
+        - { name: action, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses:
+        '200':
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [entries]
+                properties:
+                  entries:
+                    type: array
+                    items: { $ref: '#/components/schemas/AuditEntry' }
   /api/v1/demo/event:
     get:
       operationId: eventDisplay
@@ -157,6 +177,56 @@ paths:
                   standings:
                     type: array
                     items: { $ref: '#/components/schemas/StandingRow' }
+  /api/v1/tournaments:
+    post:
+      operationId: createTournament
+      summary: Create a full tournament from the setup wizard payload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateTournamentRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreateTournamentResponse' }
+  /api/v1/templates:
+    get:
+      operationId: templates
+      summary: Saved tournament setup templates
+      responses:
+        '200':
+          description: Templates
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [templates]
+                properties:
+                  templates:
+                    type: array
+                    items: { $ref: '#/components/schemas/Template' }
+  /api/v1/uploads:
+    post:
+      operationId: upload
+      summary: Upload an avatar, logo, banner or club symbol
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                kind: { type: string }
+                file: { type: string, format: binary }
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadResponse' }
   /api/v1/signup/preview:
     post:
       operationId: signupPreview
@@ -363,6 +433,105 @@ components:
         losses: { type: integer }
         draws: { type: integer }
         points: { type: integer }
+    CreateDiscipline:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        title: { type: string }
+        style: { type: string }
+        scoring: { type: string }
+        matchSeconds: { type: integer }
+        rounds: { type: integer }
+        requirements:
+          type: array
+          items: { type: string }
+    CreateCategory:
+      type: object
+      required: [name, kind]
+      properties:
+        name: { type: string }
+        kind: { type: string }
+        gender: { type: string }
+        min: { type: number }
+        max: { type: number }
+        beltRankId: { type: string }
+    CreateConstraints:
+      type: object
+      properties:
+        cap: { type: integer }
+        maxPools: { type: integer }
+        autoPlace: { type: boolean }
+        separateClubs: { type: boolean }
+        genderPolicy: { type: string }
+    CreateInvite:
+      type: object
+      properties:
+        email: { type: string }
+        phone: { type: string }
+        role: { type: string }
+        clubName: { type: string }
+    CreateTournamentRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        title: { type: string }
+        venue: { type: string }
+        startDate: { type: string }
+        endDate: { type: string }
+        theme: { type: string }
+        templateName: { type: string }
+        saveTemplate: { type: boolean }
+        logoPath: { type: string }
+        bannerPath: { type: string }
+        disciplines:
+          type: array
+          items: { $ref: '#/components/schemas/CreateDiscipline' }
+        categories:
+          type: array
+          items: { $ref: '#/components/schemas/CreateCategory' }
+        constraints: { $ref: '#/components/schemas/CreateConstraints' }
+        invites:
+          type: array
+          items: { $ref: '#/components/schemas/CreateInvite' }
+    CreateTournamentResponse:
+      type: object
+      required: [eventId, templateId, disciplineCount, categoryCount, inviteCount]
+      properties:
+        eventId: { type: string }
+        templateId: { type: string }
+        disciplineCount: { type: integer }
+        categoryCount: { type: integer }
+        inviteCount: { type: integer }
+    Template:
+      type: object
+      required: [ID, Name, ConfigJSON, CreatedAt]
+      properties:
+        ID: { type: string }
+        Name: { type: string }
+        ConfigJSON: { type: string }
+        CreatedAt: { type: string }
+    UploadResponse:
+      type: object
+      required: [url, path, kind]
+      properties:
+        url: { type: string }
+        path: { type: string }
+        kind: { type: string }
+    AuditEntry:
+      type: object
+      required: [id, actorUserId, actorRole, action, targetType, targetId, beforeJson, afterJson, createdAt]
+      properties:
+        id: { type: integer }
+        actorUserId: { type: string }
+        actorRole: { type: string }
+        action: { type: string }
+        targetType: { type: string }
+        targetId: { type: string }
+        beforeJson: { type: string }
+        afterJson: { type: string }
+        createdAt: { type: string }
     SignupRequest:
       type: object
       required: [name, email, dateOfBirth]

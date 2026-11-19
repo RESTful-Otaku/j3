@@ -399,6 +399,41 @@ From direct user QA feedback (2026-11-19) — all of this is required, not optio
   deploying it, and building **Capacitor mobile variants for Android and iOS/iPhone**.
 - Must remain easy for non-technical users: numbered menu, plain-language choices, clear status.
 
+### 6.18 Tournament creation pipeline (full setup from scratch)
+The core "create a tournament" experience must be a **simple, coherent ~5-step pipeline** that a
+non-technical runner completes in **under 10 minutes**, with most work automated:
+
+1. **Event & identity** — name, title, dates, venue, branding/theme, banner/logo, presets.
+2. **Disciplines & rules** — per-discipline rules, requirements, point systems and attribution,
+   timers, round counts, event titles, tournament style per event/discipline/category.
+3. **Categories & constraints** — weight/height/rank ranges, gender policy, participant cap,
+   max fight pools, category fulfilment rules and automatic placement settings.
+4. **People & invitations** — bulk email/phone invites (email + optional SMS) to runners,
+   moderators/officials, club leaders and participants; delegate roles; individual self-signup.
+5. **Review & launch** — sanity check + validation; on error, inform the user with a popup and
+   jump to the offending section; on success create everything, auto-generate kata and fight
+   pools, assign officials, create the dashboard/views and **save the whole setup as a template**.
+
+- Steps are **URL/persisted views** that can be stepped forward/back without losing data.
+- Widgets: text/number fields with **sensible defaults + "choose one of these" presets** and
+  "enter my own"; checkboxes, radio/boolean selectors, sliders, and **draggable reordering** of
+  event/matchup cards and bracket slots.
+- **Notifications/toasts:** errors, validation, warnings and success ("created/updated/deleted/
+  saved/changed") stack in arrival order, slide/fade in and out, are dismissable, show a progress
+  bar counting down to auto-dismiss, and offer **undo within 10 seconds** for material actions.
+- **Auto-generated bracket diagram:** built from fight pools, with fighter cards in each slot,
+  progression/knockout/promotion highlighting, result icons, cards/fouls/penalties, and drag/
+  shuffle by moderators with the right access. Keep a copy of each fighter at every round.
+- Everything saved as reusable **templates** (tournament setup + custom dashboard views) for
+  future events. Users fill in their details/stats and chosen events; the app does the rest.
+- **Media uploads are mandatory for a professional, official look:** fighter/official photos,
+  club symbols/logos, runner/organiser logo and event banner, club colours and belt/rank colours.
+  Uploads are stored locally with the venue data and referenced by theme/club/fighter records so
+  they appear on scoreboards, brackets, tables and cards.
+- **Event auditing is essential and visible to runners and officials:** every action records who
+  did it, when, what it affected, and how (before → after). A dedicated audit view lets runners
+  and officials review the full trail to prevent cheating, bias or abuse.
+
 ---
 
 ## 7. Gaps & things not in the original brief (research-backed)
@@ -637,6 +672,21 @@ _Format: `D-### | date | decision | rationale | status`._
 - **D-023 | 2026-11-19 | TUI menu for dev.sh incl. Capacitor Android/iOS builds**
   — user requested an emoji/spinner, navigation-friendly CLI for dry runs, QA, live executable
   build/deploy and mobile variants. Status: accepted (§6.17).
+- **D-024 | 2026-11-19 | Five-step persisted setup pipeline with validation**
+  — create/theme/configure a whole tournament in <10 minutes; presets + custom values; final
+  sanity check jumps to the offending step. Status: accepted (§6.18).
+- **D-025 | 2026-11-19 | Stacked toasts with progress bar and 10s undo**
+  — one notification system for validation, warnings, success and errors, with undo for material
+  actions. Status: accepted.
+- **D-026 | 2026-11-19 | Bracket diagram auto-generated from pools**
+  — interactive slots, drag/shuffle by moderators, per-round history and result highlighting.
+  Status: accepted.
+- **D-027 | 2026-11-19 | Local media uploads for avatars, logos, banners, club/rank colours**
+  — multipart upload endpoint + local file serving; references stored on theme/club/fighter/
+  official records and used by every display. Status: accepted.
+- **D-028 | 2026-11-19 | Runner/official audit view**
+  — queryable audit log showing actor, role, timestamp, action, target and before/after values,
+  to deter and detect cheating, bias or abuse. Status: accepted.
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)

@@ -139,6 +139,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Accountability trail for runners and officials */
+        get: operations["auditLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/demo/event": {
         parameters: {
             query?: never;
@@ -184,6 +201,57 @@ export interface paths {
         get: operations["standings"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tournaments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a full tournament from the setup wizard payload */
+        post: operations["createTournament"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Saved tournament setup templates */
+        get: operations["templates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload an avatar, logo, banner or club symbol */
+        post: operations["upload"];
         delete?: never;
         options?: never;
         head?: never;
@@ -372,6 +440,81 @@ export interface components {
             losses: number;
             draws: number;
             points: number;
+        };
+        CreateDiscipline: {
+            name: string;
+            title?: string;
+            style?: string;
+            scoring?: string;
+            matchSeconds?: number;
+            rounds?: number;
+            requirements?: string[];
+        };
+        CreateCategory: {
+            name: string;
+            kind: string;
+            gender?: string;
+            min?: number;
+            max?: number;
+            beltRankId?: string;
+        };
+        CreateConstraints: {
+            cap?: number;
+            maxPools?: number;
+            autoPlace?: boolean;
+            separateClubs?: boolean;
+            genderPolicy?: string;
+        };
+        CreateInvite: {
+            email?: string;
+            phone?: string;
+            role?: string;
+            clubName?: string;
+        };
+        CreateTournamentRequest: {
+            name: string;
+            title?: string;
+            venue?: string;
+            startDate?: string;
+            endDate?: string;
+            theme?: string;
+            templateName?: string;
+            saveTemplate?: boolean;
+            logoPath?: string;
+            bannerPath?: string;
+            disciplines?: components["schemas"]["CreateDiscipline"][];
+            categories?: components["schemas"]["CreateCategory"][];
+            constraints?: components["schemas"]["CreateConstraints"];
+            invites?: components["schemas"]["CreateInvite"][];
+        };
+        CreateTournamentResponse: {
+            eventId: string;
+            templateId: string;
+            disciplineCount: number;
+            categoryCount: number;
+            inviteCount: number;
+        };
+        Template: {
+            ID: string;
+            Name: string;
+            ConfigJSON: string;
+            CreatedAt: string;
+        };
+        UploadResponse: {
+            url: string;
+            path: string;
+            kind: string;
+        };
+        AuditEntry: {
+            id: number;
+            actorUserId: string;
+            actorRole: string;
+            action: string;
+            targetType: string;
+            targetId: string;
+            beforeJson: string;
+            afterJson: string;
+            createdAt: string;
         };
         SignupRequest: {
             name: string;
@@ -759,6 +902,32 @@ export interface operations {
             };
         };
     };
+    auditLog: {
+        parameters: {
+            query?: {
+                actor?: string;
+                action?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Audit entries */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        entries: components["schemas"]["AuditEntry"][];
+                    };
+                };
+            };
+        };
+    };
     eventDisplay: {
         parameters: {
             query?: never;
@@ -821,6 +990,80 @@ export interface operations {
                     "application/json": {
                         standings: components["schemas"]["StandingRow"][];
                     };
+                };
+            };
+        };
+    };
+    createTournament: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTournamentRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateTournamentResponse"];
+                };
+            };
+        };
+    };
+    templates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Templates */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        templates: components["schemas"]["Template"][];
+                    };
+                };
+            };
+        };
+    };
+    upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    kind?: string;
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Uploaded */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadResponse"];
                 };
             };
         };
