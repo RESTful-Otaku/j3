@@ -270,6 +270,26 @@ func Ensure(store *db.DB) error {
 			fightID, officialIDs[(i+2)%len(officialIDs)], "scorekeeper")
 	}
 
+	for i, item := range []struct {
+		name, area, start string
+		duration          int
+	}{
+		{"Doors open & weigh-in", "Reception", "2026-11-19T08:30:00Z", 1800},
+		{"Opening ceremony", "Main hall", "2026-11-19T09:00:00Z", 900},
+		{"Adult -76 kg · Pool stage", "Mat 1", "2026-11-19T09:30:00Z", 1800},
+		{"Youth -60 kg · Pool stage", "Mat 2", "2026-11-19T10:30:00Z", 1800},
+		{"Kata Open · Round 1", "Kata Area", "2026-11-19T11:30:00Z", 1200},
+		{"Lunch break", "Café", "2026-11-19T12:30:00Z", 3600},
+		{"Semi-finals", "Mat 1", "2026-11-19T14:00:00Z", 1800},
+		{"Medal ceremony", "Podium", "2026-11-19T16:30:00Z", 900},
+	} {
+		add(`INSERT OR IGNORE INTO schedule_items
+			(id, event_id, name, area, starts_at, duration_seconds, sort_order)
+			VALUES (?, 'ev-demo', ?, ?, ?, ?, ?)`,
+			fmt.Sprintf("sched-%02d", i+1), item.name, item.area, item.start, item.duration, i)
+	}
+	add(`INSERT OR IGNORE INTO schedule_state (event_id, offset_minutes) VALUES ('ev-demo', 0)`)
+
 	add(`INSERT OR IGNORE INTO invitations
 		(id, tenant_id, event_id, club_id, role, email, token_hash, expires_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,

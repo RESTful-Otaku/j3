@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, livePoll, type StandingRow, type DemoFight } from '../../../lib/api';
+  import { api, livePoll, type StandingRow, type DemoFight, type KataPerformance } from '../../../lib/api';
 
   let standings: StandingRow[] = [];
   let fights: DemoFight[] = [];
+  let kataPerformances: KataPerformance[] = [];
   let tab: 'overall' | 'category' | 'medals' | 'kata' = 'overall';
   let category = '';
   let query = '';
@@ -12,9 +13,13 @@
   onMount(() => {
     const stopStandings = livePoll(api.standings, 3000, (data) => (standings = data.standings));
     const stopFights = livePoll(api.fights, 3000, (data) => (fights = data.fights));
-    return () => { stopStandings(); stopFights(); };
+    const stopKata = livePoll(api.kata, 5000, (data) => (kataPerformances = data.performances));
+    return () => { stopStandings(); stopFights(); stopKata(); };
   });
 
+  async function submitScore(id: string, judge: number, value: number) {
+    kataPerformances = (await api.kataScore(id, { judge, score: value })).performances;
+  }
   function initials(name: string) { return name.split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase(); }
   function kataScores(index: number) {
     const base = 7.2 + ((index * 7) % 27) / 10;
@@ -61,6 +66,30 @@
   </div>
 
   {#if tab === 'kata'}
+    <div class="card" style="margin-bottom:18px;">
+      <h2>Panel judging</h2>
+      <p class="muted small">Scores are dropped high/low and averaged; totals are authoritative.</p>
+      <div style="display:grid; gap:12px; margin-top:14px;">
+        {#each kataPerformances as performance (performance.id)}
+          <div class="rule-card" style="padding:12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3);">
+            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <strong>{performance.name}</strong>
+              <span class="badge {performance.status === 'complete' ? 'fighter' : 'spectator'}">{performance.kataName || 'Open kata'} · {performance.status} · {performance.total.toFixed(2)}</span>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+              {#each Array(performance.panelSize) as _, i}
+                {@const judge = i + 1}
+                {@const score = performance.scores.find((s) => s.judge === judge)?.score ?? ''}
+                <label class="small">J{i + 1}
+                  <input type="number" min="0" max="10" step="0.1" value={score}
+                    on:change={(e) => submitScore(performance.id, judge, Number((e.target as HTMLInputElement).value))} />
+                </label>
+              {/each}
+            </div>
+          </div>
+        {:else}<span class="muted small">No kata performances recorded yet.</span>{/each}
+      </div>
+    </div>
     <div class="card" style="overflow-x:auto;">
       <h2>Kata judged competition</h2>
       <p class="muted small">Panel of seven judges · highest and lowest discarded · mean of middle five.</p>

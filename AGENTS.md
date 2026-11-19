@@ -784,6 +784,9 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-19** — Release push: persisted bracket stages/slots with promotion and result history,
+  schedule with drift projections + live clock, kata panel judging with high/low drop, plus their
+  API tests. Live scoring, simulator fix and Capacitor projects were already committed.
 - **2026-11-19** — Production push: added authoritative fight state/timers, score and penalty
   events, confirm/undo, SSE live hub and display wiring; generated and synced Capacitor Android
   and iOS projects (`bun run mobile:sync|android|ios`). APK build still needs an Android SDK and
@@ -862,20 +865,18 @@ _Format: `D-### | date | decision | rationale | status`._
    events, confirm, undo and SSE fan-out are implemented (`/api/v1/fights/*`, `/api/v1/events/stream`)
    and wired into the display. Still to finish: judge-role permissions, hold timers and full
    multi-mat operator console.
-2. **Production format engine**: wire `SuggestFormat`, `ThirdPlacePlan`, tie-break chains, BYEs and
-   seeding into real bracket generation; persist per-round history and promotion (Phase 2). The
-   bracket diagram currently derives pools/fights client-side.
-3. **Scheduling authority**: event timeline, drift projection, on-deck callouts, mandated rest
-   intervals, TTS/PA announcements and the large dashboard clock (Phase 4). The details view is
-   published but static; projections are not yet adaptive.
-4. **Public details & dashboard clock**: publish rules, protection requirements, event times,
-   ceremonies, amenities and corner colours; add the large live clock with drift-adaptive
-   projected start/end times and on-deck callouts (Phase 4).
-5. **Kata completeness**: catalogue, compulsory/choice kata, panel judge scoring, deductions,
-   weapon kata, bunkai, drills and sparring rotation (Phase 5).
-6. **Setup completeness**: import clubs/fighters from templates, per-discipline rule snapshots,
+2. **Production format engine — delivered**: server-side bracket stages/slots with format
+   suggestion, persisted results, winner promotion and per-round history; `/brackets` now has an
+   "Official bracket" tab. Still to add: BYEs, seeding and full tie-break chains.
+3. **Scheduling authority — delivered**: persisted timeline with drift offsets, projected
+   start/end times, mark-complete and a large live dashboard clock with "next up" on `/public`.
+   Still to add: automatic rest-rule enforcement and TTS/PA announcements.
+4. **Kata panel judging — delivered**: performances, 3–9 judge panels, high/low drop, authoritative
+   totals and audit entries, wired into the kata table view. Still to add: full kata catalogue,
+   compulsory/choice rounds, bunkai and drills/sparring rotation.
+5. **Setup completeness**: import clubs/fighters from templates, per-discipline rule snapshots,
    manual result entry and medal ceremony flow in one continuous path (Phase 1).
-7. **Verification**: browser E2E walkthrough of the wizard and multi-screen routes, API fuzz
+6. **Verification**: browser E2E walkthrough of the wizard and multi-screen routes, API fuzz
    corpus, load/race runs, no-bad-state audit and final QA sign-off (Phase 7).
 
 ### Latest refinement batch (user QA, 2026-11-19)

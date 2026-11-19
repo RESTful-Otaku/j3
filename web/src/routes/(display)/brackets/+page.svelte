@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, livePoll, type DemoFight, type PoolView, broadcastPA } from '../../../lib/api';
-  import { notifySuccess } from '../../../lib/toast';
+  import { api, livePoll, type DemoFight, type PoolView, type BracketStage, broadcastPA } from '../../../lib/api';
+  import { notifySuccess, notifyError } from '../../../lib/toast';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
 
   type Slot = { id: string; name: string; colour: string };
@@ -10,12 +10,14 @@
   let fights: DemoFight[] = [];
   let pools: PoolView[] = [];
   let bracket: BracketNode[][] = [];
-  let mode: 'bracket' | 'elimination' | 'roundRobin' = 'bracket';
+  let mode: 'official' | 'bracket' | 'elimination' | 'roundRobin' = 'official';
+  let serverStages: BracketStage[] = [];
   let pendingPromotion: DemoFight | null = null;
   let confirmOpen = false;
   let dragging: { round: number; node: number; corner: 'a' | 'b' } | null = null;
 
   onMount(() => {
+    void api.bracketStages().then((result) => (serverStages = result.stages)).catch(() => {});
     const stopFights = livePoll(api.fights, 2000, (data) => {
       fights = data.fights;
       if (bracket.length > 0) buildBracket();
@@ -27,6 +29,27 @@
     return () => { stopFights(); stopPools(); };
   });
 
+  async function buildOfficial() {
+    try {
+      const result = await api.buildBracket({
+        eventId: 'ev-demo', format: 'Double elimination', targetPoolSize: 4,
+        maxPools: 12, seed: 42, thirdPlace: true,
+      });
+      serverStages = result.stages;
+      notifySuccess(`Official bracket built · ${result.format} · ${serverStages.length} stages`);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : 'Could not build bracket');
+    }
+  }
+  async function promoteOfficial(id: string, icon: string) {
+    try {
+      const result = await api.promoteSlot(id, { winner: icon.startsWith('W'), resultIcon: icon });
+      serverStages = result.stages;
+      notifySuccess(`Result ${icon} recorded with history retained`);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : 'Could not record result');
+    }
+  }
   function toSlot(member: { id: string; name: string; clubColour: string }): Slot {
     return { id: member.id, name: member.name, colour: member.clubColour };
   }
@@ -121,12 +144,45 @@
   <header class="display-header">
     <div><div class="event-mark"><span class="crest">J3</span>Brackets</div><div class="meta">Progression, results and history · live</div></div>
     <div class="tabs">
+      <button class="tab" class:active={mode === 'official'} on:click={() => (mode = 'official')}>Official bracket</button>
       <button class="tab" class:active={mode === 'elimination'} on:click={() => (mode = 'elimination')}>Elimination bracket</button>
       <button class="tab" class:active={mode === 'roundRobin'} on:click={() => (mode = 'roundRobin')}>Round robin table</button>
     </div>
   </header>
 
-  {#if mode === 'elimination'}
+  {#if mode === 'official'}
+    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+      <p class="muted small">Server-generated stages · results and promotion retained in every round</p>
+      <button class="btn primary" on:click={buildOfficial}>⚙ Build official bracket</button>
+    </div>
+    <div style="display:flex; gap:clamp(14px,2vw,40px); overflow-x:auto; align-items:flex-start; padding-bottom:20px;">
+      {#each serverStages as stage (stage.id)}
+        <section style="min-width:clamp(250px,22vw,380px); flex:1;">
+          <div class="eyebrow">{stage.name} · {stage.kind}</div>
+          <div style="display:grid; gap:10px; margin-top:12px;">
+            {#each stage.slots as slot (slot.id)}
+              <div class="card slide-in" style="padding:8px 12px;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <span class="portrait tiny" style="background:{slot.clubColour || '#64748b'};">{initials(slot.fighterName || 'TBD')}</span>
+                  <span style="flex:1;"><strong>{slot.fighterName || 'TBD'}</strong><br /><span class="muted small">{slot.club || 'Independent'} · {slot.belt}</span></span>
+                  {#if slot.resultIcon}<span class="badge {slot.state === 'advanced' ? 'fighter' : 'spectator'}">{slot.resultIcon}</span>{/if}
+                </div>
+                {#if slot.fighterId}
+                  <div style="display:flex; gap:6px; margin-top:8px;">
+                    <button class="tab" on:click={() => promoteOfficial(slot.id, 'WP')}>Win points</button>
+                    <button class="tab" on:click={() => promoteOfficial(slot.id, 'WS')}>Win sub</button>
+                    <button class="tab" on:click={() => promoteOfficial(slot.id, 'LP')}>Loss</button>
+                  </div>
+                {/if}
+              </div>
+            {/each}
+          </div>
+        </section>
+      {:else}
+        <div class="placeholder">No official bracket yet — press “Build official bracket”.</div>
+      {/each}
+    </div>
+  {:else if mode === 'elimination'}
     <div style="display:flex; gap:clamp(14px,2vw,40px); overflow-x:auto; padding-bottom:20px; align-items:flex-start;">
       {#each groups as [round, roundFights] (round)}
         <section style="min-width:clamp(280px,24vw,420px); flex:1;">
@@ -187,5 +243,5 @@
 />
 
 <style>
-  .small-portrait { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: .85rem; flex: none; }
+  .small-portrait, .portrait.tiny { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: .85rem; flex: none; }
 </style>

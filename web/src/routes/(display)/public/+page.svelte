@@ -1,22 +1,39 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow } from '../../../lib/api';
+  import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
 
   let event: EventDisplayInfo | null = null;
   let fights: DemoFight[] = [];
   let standings: StandingRow[] = [];
+  let schedule: ScheduleItem[] = [];
+  let now = new Date();
 
   onMount(() => {
     const stopEvent = livePoll(api.event, 10000, (data) => (event = data));
     const stopFights = livePoll(api.fights, 2000, (data) => (fights = data.fights));
     const stopStandings = livePoll(api.standings, 5000, (data) => (standings = data.standings));
-    return () => { stopEvent(); stopFights(); stopStandings(); };
+    const stopSchedule = livePoll(api.schedule, 5000, (data) => (schedule = data.items));
+    const clock = setInterval(() => (now = new Date()), 1000);
+    return () => { stopEvent(); stopFights(); stopStandings(); stopSchedule(); clearInterval(clock); };
   });
 
+  $: nextUp = schedule.find((item) => item.status === 'upcoming');
+  $: offset = schedule[0]?.offsetMinutes ?? 0;
   $: live = fights.filter((f) => f.state === 'live');
   $: upcoming = fights.filter((f) => f.state === 'pending').slice(0, 12);
   $: finished = fights.filter((f) => f.state === 'complete');
   $: leaders = standings.slice(0, 10);
+  async function drift(minutes: number) {
+    const result = await api.setDrift(minutes);
+    schedule = result.items;
+  }
+  async function complete(id: string) {
+    const result = await api.completeScheduleItem(id);
+    schedule = result.items;
+  }
+  function formatTime(value: string) {
+    return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
   function initials(name: string) { return name.split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase(); }
 </script>
 
@@ -27,6 +44,45 @@
     <div class="event-mark"><span class="crest">J3</span><span>{event?.name ?? 'Tournament'}</span></div>
     <div class="meta">Live now · {live.length} contest{live.length === 1 ? '' : 's'} · {fights.length} total · updates automatically</div>
   </header>
+
+  <div class="clock-hero slide-in">
+    <div>
+      <div class="eyebrow">Venue time</div>
+      <div class="big-clock">{now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
+    </div>
+    <div style="flex:1; min-width:240px;">
+      <div class="eyebrow">Next up</div>
+      <div style="font-family:var(--font-display); font-size:clamp(1.2rem,2.4vw,2.4rem); font-weight:800;">
+        {nextUp?.name ?? 'Schedule complete'}
+      </div>
+      <div class="muted">{nextUp ? `${nextUp.area} · projected ${formatTime(nextUp.projectedStart)}–${formatTime(nextUp.projectedEnd)}` : 'Well done everyone'}</div>
+    </div>
+    <div style="display:grid; gap:8px;">
+      <span class="pill">{offset === 0 ? 'On schedule' : `${offset > 0 ? '+' : ''}${offset} min drift`}</span>
+      <div style="display:flex; gap:6px;">
+        <button class="btn" on:click={() => drift(Math.max(-480, offset - 5))}>−5 min</button>
+        <button class="btn" on:click={() => drift(0)}>Reset</button>
+        <button class="btn" on:click={() => drift(Math.min(480, offset + 5))}>+5 min</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><h2>Today's timeline</h2></div>
+  <div class="card" style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:clamp(.9rem,1.2vw,1.3rem);">
+      <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">Projected</th><th>Event</th><th>Area</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {#each schedule as item (item.id)}
+          <tr style="border-top:1px solid var(--brand-border);" class:flash={item.id === nextUp?.id}>
+            <td style="padding:8px; font-weight:700;">{formatTime(item.projectedStart)}–{formatTime(item.projectedEnd)}</td>
+            <td>{item.name}</td><td>{item.area}</td>
+            <td><span class="badge {item.status === 'complete' ? 'spectator' : 'fighter'}">{item.status}</span></td>
+            <td>{#if item.status !== 'complete'}<button class="tab" on:click={() => complete(item.id)}>Mark done</button>{/if}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
 
   <div class="section-title"><h2>On the mats now</h2><span class="pill"><span class="dot"></span>Live</span></div>
   <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));">
@@ -97,4 +153,6 @@
 
 <style>
   .small-portrait { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 800; }
+  .clock-hero { display:flex; gap:clamp(14px,3vw,50px); align-items:center; flex-wrap:wrap; padding:clamp(16px,2vw,30px); border-radius:20px; border:1px solid var(--brand-primary); background:linear-gradient(135deg, rgba(59,130,246,.18), transparent), var(--brand-surface-2); box-shadow:var(--brand-shadow); }
+  .big-clock { font-family:var(--font-display); font-size:clamp(3rem,8vw,8rem); font-weight:800; line-height:1; letter-spacing:.02em; color:var(--brand-accent); }
 </style>

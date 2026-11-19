@@ -65,6 +65,22 @@ export const api = {
   pools: () => getJson<PoolsResponse>('/api/v1/demo/pools?eventId=ev-demo'),
   generatePools: (body: GeneratePoolsRequest) =>
     postJson<PoolsResponse>('/api/v1/demo/pools/generate', body),
+  kata: () => getJson<{ performances: KataPerformance[] }>('/api/v1/demo/kata'),
+  createKata: (body: Record<string, unknown>) =>
+    postJson<{ performances: KataPerformance[] }>('/api/v1/demo/kata/performances', body),
+  kataScore: (id: string, body: Record<string, unknown>) =>
+    postJson<{ performances: KataPerformance[] }>(`/api/v1/demo/kata/${encodeURIComponent(id)}/scores`, body),
+  schedule: () => getJson<{ items: ScheduleItem[] }>('/api/v1/demo/schedule?eventId=ev-demo'),
+  setDrift: (minutes: number) =>
+    postJson<{ items: ScheduleItem[] }>('/api/v1/demo/schedule/drift', { minutes }),
+  completeScheduleItem: (id: string) =>
+    postJson<{ items: ScheduleItem[] }>(`/api/v1/demo/schedule/${encodeURIComponent(id)}/complete`, {}),
+  bracketStages: (eventId = 'ev-demo') =>
+    getJson<{ stages: BracketStage[] }>(`/api/v1/demo/brackets?eventId=${encodeURIComponent(eventId)}`),
+  buildBracket: (body: Record<string, unknown>) =>
+    postJson<{ format: string; stages: BracketStage[] }>('/api/v1/demo/brackets/build', body),
+  promoteSlot: (id: string, body: Record<string, unknown>) =>
+    postJson<{ stages: BracketStage[] }>(`/api/v1/demo/brackets/slots/${encodeURIComponent(id)}/promote`, body),
   fightState: (id: string) => getJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/state`),
   startFight: (id: string, seconds = 180, round = 1) =>
     postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/start`, { seconds, round }),
@@ -120,6 +136,25 @@ export const api = {
     return response.json() as Promise<{ url: string; colour: string; highlight: string }>;
   },
 };
+
+export type KataPerformance = {
+  id: string; fighterId: string; name: string; club: string; belt: string;
+  kataName: string; panelSize: number; status: string; total: number;
+  scores: { judge: number; score: number }[];
+};
+
+export type ScheduleItem = {
+  id: string; name: string; area: string; plannedStart: string;
+  projectedStart: string; projectedEnd: string; duration: number;
+  status: string; offsetMinutes: number;
+};
+
+export type BracketSlot = {
+  id: string; position: number; fighterId: string; fighterName: string;
+  club: string; clubColour: string; belt: string; state: string;
+  resultIcon: string; source: string;
+};
+export type BracketStage = { id: string; name: string; kind: string; slots: BracketSlot[] };
 
 export type FightState = {
   fightId: string; state: string; outcome: string; running: boolean;
