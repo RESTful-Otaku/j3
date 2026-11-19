@@ -67,6 +67,10 @@ func (s *Server) generatePools(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	seedByID := map[string]int{}
+	for _, entrant := range entrants {
+		seedByID[entrant.ID] = entrant.Seed
+	}
 	generated := rules.GeneratePools(entrants, rules.PoolConstraints{
 		TargetPoolSize: req.TargetPoolSize, MaxPools: req.MaxPools,
 		SameClubSeparation: req.SameClubSeparation, Seed: req.Seed,
@@ -99,8 +103,8 @@ func (s *Server) generatePools(w http.ResponseWriter, r *http.Request) {
 		}
 		for _, member := range pool.Members {
 			if _, err := tx.ExecContext(r.Context(), `
-				INSERT OR IGNORE INTO pool_members (pool_id, fighter_id) VALUES (?, ?)`,
-				poolID, member); err != nil {
+				INSERT OR IGNORE INTO pool_members (pool_id, fighter_id, seed) VALUES (?, ?, ?)`,
+				poolID, member, seedByID[member]); err != nil {
 				writeError(w, err)
 				return
 			}

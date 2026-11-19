@@ -464,6 +464,9 @@ crash recovery · migrations · load headroom well beyond a real event.
 
 - [x] **Phase 0 — Foundation**: repo, Go API + SQLite, SvelteKit shell, shared types/OpenAPI,
       AGENTS doc, basic tenant/theme, theming tokens, testing harness, seeded demo + QA dashboard.
+- [x] **Phase 1a — Sign-up & automated pools**: imperial→metric conversion, stats capture,
+      compatibility (strict + consent move-up), role request/approval, constrained balanced pool
+      generation with same-club separation, QA views. Golden/unit tests.
 - [ ] **Phase 1 — Setup slice**: create event → clubs → fighters → categories → rule-set
       snapshot → simple single-elim bracket → manual result → medal table. End-to-end offline.
 - [ ] **Phase 2 — Formats & rules engine**: RR, pools, double elim, repechage, BYEs/seeding,
@@ -562,6 +565,12 @@ _Format: `D-### | date | decision | rationale | status`._
   override. Status: accepted (design in §8.6).
 - **D-017 | 2026-11-19 | Light and dark appearance**
   — system-following default + per-user override + white-label tokens. Status: accepted.
+- **D-018 | 2026-11-19 | Privileged roles require request + approval**
+  — sign-up may request official/runner/organiser, but an existing runner must approve;
+  fighters and spectators register instantly. Prevents self-elevation. Status: accepted.
+- **D-019 | 2026-11-19 | Category compatibility = strict ranges + consent to move up**
+  — offer exactly eligible divisions; heavier/older divisions only with explicit user consent.
+  Status: accepted.
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)
@@ -584,6 +593,10 @@ _Format: `D-### | date | decision | rationale | status`._
   data (D-005), RBAC invite-only hierarchy with auditability (D-006), venue-only v1 (D-007),
   git + atomic commits (D-008), start Phase 0 (D-009). Added §5.2 belt-colour detail,
   §6.2 RBAC hierarchy, §6.15 real-time data flow. Trimmed answered questions.
+- **2026-11-19** — Completed Phase 1a: `units` (imperial→metric) and `rules` (eligibility +
+  deterministic balanced pools) Go packages with tests; `users` stats columns, `role_requests`,
+  `pools`/`pool_members` migration; sign-up, preview, approval and pool API endpoints; OpenAPI
+  types regenerated; Sign-up and Pools QA tabs. Added D-018/D-019.
 - **2026-11-19** — Added zero-tech setup (D-010), Bun tooling (D-011), local full demo (D-012),
   ~60 seeded accounts with role switcher (D-013/D-014), self-service sign-up + automated
   pool generation + light/dark mode (D-015/D-016/D-017). Completed Phase 0: Go venue server,
@@ -591,13 +604,12 @@ _Format: `D-### | date | decision | rationale | status`._
   tests and CI.
 
 ## 17. Immediate next actions
-1. Phase 1 slice: self-service sign-up (email/phone/name/DOB/height/weight imperial→metric,
-   rank/grade), compatibility-filtered category choices, and automated balanced pool generation
-   with same-club separation — all driven by organiser constraints.
-2. Extend schema with phone, height_cm, weight_kg canonical fields + original units, role
-   requests/approvals and pool assignments; add algorithms as pure Go packages with golden tests.
-3. Resolve §15 questions 7 (role approval flow) and 8 (category compatibility rules) before
-   implementing sign-up.
+1. Phase 1 setup slice: guided event wizard (organiser sets constraints) → clubs → categories →
+   rule-set snapshot → bracket/pool generation → manual result → medal table, end-to-end offline.
+2. Live scoring engine: timer, techniques, holds, submission instant-win, penalties, W/L/D and
+   multi-mat sync (Phase 3).
+3. Keep using `bun run dev` + `bun run reset` for QA after each slice; add a browser walkthrough
+   script once browser tooling is available.
 
 ---
 
