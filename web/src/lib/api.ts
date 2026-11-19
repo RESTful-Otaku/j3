@@ -144,7 +144,8 @@ export const api = {
 
 export type KataPerformance = {
   id: string; fighterId: string; name: string; club: string; belt: string;
-  kataName: string; panelSize: number; status: string; total: number;
+  kataName: string; roundNumber: number; kataType: string; bunkaiScore: number;
+  panelSize: number; status: string; total: number;
   scores: { judge: number; score: number }[];
 };
 

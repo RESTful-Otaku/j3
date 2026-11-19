@@ -12,23 +12,29 @@ type kataScoreView struct {
 }
 
 type kataPerformanceView struct {
-	ID        string          `json:"id"`
-	FighterID string          `json:"fighterId"`
-	Name      string          `json:"name"`
-	Club      string          `json:"club"`
-	Belt      string          `json:"belt"`
-	KataName  string          `json:"kataName"`
-	PanelSize int             `json:"panelSize"`
-	Status    string          `json:"status"`
-	Total     float64         `json:"total"`
-	Scores    []kataScoreView `json:"scores"`
+	ID          string          `json:"id"`
+	FighterID   string          `json:"fighterId"`
+	Name        string          `json:"name"`
+	Club        string          `json:"club"`
+	Belt        string          `json:"belt"`
+	KataName    string          `json:"kataName"`
+	RoundNumber int             `json:"roundNumber"`
+	KataType    string          `json:"kataType"`
+	BunkaiScore float64         `json:"bunkaiScore"`
+	PanelSize   int             `json:"panelSize"`
+	Status      string          `json:"status"`
+	Total       float64         `json:"total"`
+	Scores      []kataScoreView `json:"scores"`
 }
 
 func (s *Server) createKataPerformance(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		FighterID string `json:"fighterId"`
-		KataName  string `json:"kataName"`
-		PanelSize int    `json:"panelSize"`
+		FighterID   string  `json:"fighterId"`
+		KataName    string  `json:"kataName"`
+		PanelSize   int     `json:"panelSize"`
+		RoundNumber int     `json:"roundNumber"`
+		KataType    string  `json:"kataType"`
+		BunkaiScore float64 `json:"bunkaiScore"`
 	}
 	if err := decodeJSON(r, &body); err != nil {
 		writeBadRequest(w, err.Error())
@@ -41,10 +47,18 @@ func (s *Server) createKataPerformance(w http.ResponseWriter, r *http.Request) {
 	if body.PanelSize < 3 || body.PanelSize > 9 {
 		body.PanelSize = 5
 	}
+	if body.RoundNumber < 1 {
+		body.RoundNumber = 1
+	}
+	if body.KataType == "" {
+		body.KataType = "tokuyi"
+	}
 	id := newID("kata")
 	_, err := s.Store.ExecContext(r.Context(), `
-		INSERT INTO kata_performances (id, event_id, fighter_id, kata_name, panel_size)
-		VALUES (?, 'ev-demo', ?, ?, ?)`, id, body.FighterID, body.KataName, body.PanelSize)
+		INSERT INTO kata_performances
+		 (id, event_id, fighter_id, kata_name, panel_size, round_number, kata_type, bunkai_score)
+		VALUES (?, 'ev-demo', ?, ?, ?, ?, ?, ?)`,
+		id, body.FighterID, body.KataName, body.PanelSize, body.RoundNumber, body.KataType, body.BunkaiScore)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -118,7 +132,10 @@ func (s *Server) submitKataScore(w http.ResponseWriter, r *http.Request) {
 		for _, score := range ordered {
 			sum += score
 		}
-		total = sum / float64(len(ordered))
+		var bunkai float64
+		_ = s.Store.QueryRowContext(r.Context(),
+			`SELECT bunkai_score FROM kata_performances WHERE id = ?`, id).Scan(&bunkai)
+		total = sum/float64(len(ordered)) + bunkai
 	}
 	_, _ = s.Store.ExecContext(r.Context(),
 		`UPDATE kata_performances SET total = ?, status = ? WHERE id = ?`, total, status, id)
@@ -145,7 +162,7 @@ func (s *Server) listKata(r *http.Request) ([]kataPerformanceView, error) {
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT kp.id, kp.fighter_id, COALESCE(f.display_name, kp.fighter_id),
 		       COALESCE(c.name,''), COALESCE(b.label,''), kp.kata_name,
-		       kp.panel_size, kp.status, kp.total
+		       kp.panel_size, kp.status, kp.total, kp.round_number, kp.kata_type, kp.bunkai_score
 		FROM kata_performances kp
 		LEFT JOIN fighters f ON f.id = kp.fighter_id
 		LEFT JOIN clubs c ON c.id = f.club_id
@@ -159,7 +176,8 @@ func (s *Server) listKata(r *http.Request) ([]kataPerformanceView, error) {
 	for rows.Next() {
 		var item kataPerformanceView
 		if err := rows.Scan(&item.ID, &item.FighterID, &item.Name, &item.Club, &item.Belt,
-			&item.KataName, &item.PanelSize, &item.Status, &item.Total); err != nil {
+			&item.KataName, &item.PanelSize, &item.Status, &item.Total,
+			&item.RoundNumber, &item.KataType, &item.BunkaiScore); err != nil {
 			return nil, err
 		}
 		item.Scores = []kataScoreView{}

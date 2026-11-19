@@ -784,6 +784,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-19** — Repository pushed to `git@github.com:RESTful-Otaku/j3.git` (`main`). Added
+  GitHub Actions CI (branch naming, Go vet/test/race/build, Bun check/test/build, 50-check smoke),
+  mobile artifact builds (Android APK, iOS simulator .app), release workflow, PR template,
+  dependabot, CODEOWNERS and local pre-push hooks. Kata rounds/bunkai and template people-import
+  added; toast unit tests added.
 - **2026-11-19** — Final gaps: configurable tie-break chains, per-contest official assignment with
   scorer enforcement, template import to recreate events, animated medal ceremony view, and a smoke
   suite expanded to 49/49 passing checks.
@@ -880,15 +885,16 @@ _Format: `D-### | date | decision | rationale | status`._
 3. **Scheduling authority — delivered**: persisted timeline with drift offsets, projected
    start/end times, mark-complete, mandated-rest warnings and a large live dashboard clock with
    "next up" on `/public`; PA announcements now also speak via browser TTS.
-4. **Kata & training — delivered**: panel judging with 3–9 judges, high/low drop and authoritative
-   totals; a seeded kata catalogue (including weapon kata) and training/sparring sessions are
-   published on `/details`. Still to add: compulsory/choice rounds, bunkai and rotation scheduling.
-5. **Setup & ceremony — delivered**: saved tournament templates can be imported to recreate an
-   event; an animated `/ceremony` podium with PA call exists. Still to add: per-club/fighter bulk
-   import from a template and a guided medal-ceremony sequence.
-6. **Verification**: `bun run smoke` now boots the real server and checks 49 API/UI assertions
-   automatically. Still to add: browser-driven click-through E2E, load/race runs and accessibility
-   audit before final QA sign-off (Phase 7).
+4. **Kata & training — delivered**: panel judging with 3–9 judges, high/low drop, authoritative
+   totals, numbered rounds (shitei/tokuyi) and bunkai scores; a seeded kata catalogue (including
+   weapon kata) and training/sparring sessions are published on `/details`. Still to add: guided
+   rotation scheduling and full kata round advancement rules.
+5. **Setup & ceremony — delivered**: saved tournament templates can recreate an event **or import
+   its clubs/fighters**; an animated `/ceremony` podium with PA call exists. Still to add: a guided
+   medal-ceremony sequence.
+6. **Verification**: `bun run smoke` now boots the real server and checks 50 API/UI assertions
+   automatically; web toast/undo unit tests added. Still to add: browser click-through E2E, load/race
+   runs and accessibility audit before final QA sign-off (Phase 7).
 
 ### Latest refinement batch (user QA, 2026-11-19)
 - **Setup QoL:** pagination, bulk create/delete, clone events, template presets, more optional

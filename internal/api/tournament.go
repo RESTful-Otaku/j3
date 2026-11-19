@@ -59,6 +59,18 @@ type createTournamentRequest struct {
 	Protection    []string            `json:"protection"`
 	CornerColours map[string]string   `json:"cornerColours"`
 	Schedule      []map[string]string `json:"schedule"`
+	Clubs         []struct {
+		Name   string `json:"name"`
+		Colour string `json:"colour"`
+	} `json:"clubs"`
+	Fighters []struct {
+		Name       string  `json:"name"`
+		Club       string  `json:"club"`
+		BeltRankID string  `json:"beltRankId"`
+		WeightKg   float64 `json:"weightKg"`
+		DOB        string  `json:"dob"`
+		Gender     string  `json:"gender"`
+	} `json:"fighters"`
 }
 
 func themeTokens(preset string) string {
@@ -190,6 +202,10 @@ func (s *Server) createFromRequest(w http.ResponseWriter, r *http.Request, req c
 			writeError(w, err)
 			return
 		}
+	}
+	if err := insertPeopleTx(r.Context(), tx, req); err != nil {
+		writeError(w, err)
+		return
 	}
 	for _, invite := range req.Invites {
 		var clubID any

@@ -604,6 +604,24 @@ components:
         invites:
           type: array
           items: { $ref: '#/components/schemas/CreateInvite' }
+        clubs:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              colour: { type: string }
+        fighters:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              club: { type: string }
+              beltRankId: { type: string }
+              weightKg: { type: number }
+              dob: { type: string }
+              gender: { type: string }
     CreateTournamentResponse:
       type: object
       required: [eventId, templateId, disciplineCount, categoryCount, inviteCount]

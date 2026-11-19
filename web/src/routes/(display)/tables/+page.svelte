@@ -74,7 +74,7 @@
           <div class="rule-card" style="padding:12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3);">
             <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
               <strong>{performance.name}</strong>
-              <span class="badge {performance.status === 'complete' ? 'fighter' : 'spectator'}">{performance.kataName || 'Open kata'} · {performance.status} · {performance.total.toFixed(2)}</span>
+              <span class="badge {performance.status === 'complete' ? 'fighter' : 'spectator'}">R{performance.roundNumber} · {performance.kataType} · {performance.kataName || 'Open kata'} · {performance.status} · {performance.total.toFixed(2)}</span>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
               {#each Array(performance.panelSize) as _, i}

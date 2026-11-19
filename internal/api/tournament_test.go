@@ -81,6 +81,32 @@ func TestImportTemplateRecreatesEvent(t *testing.T) {
 	}
 }
 
+func TestImportPeopleFromTemplate(t *testing.T) {
+	srv := seededServer(t)
+	created := postJSON(t, srv, "/api/v1/tournaments", map[string]any{
+		"name": "People Event", "saveTemplate": true, "templateName": "People Template",
+		"disciplines": []map[string]any{{"name": "Randori"}},
+		"categories":  []map[string]any{{"name": "Open", "kind": "combined"}},
+		"clubs":       []map[string]any{{"name": "New Club", "colour": "#ff0000"}},
+		"fighters": []map[string]any{{
+			"name": "New Fighter", "club": "New Club", "weightKg": 70, "dob": "1999-01-01", "gender": "male",
+		}},
+	})
+	if created.Code != http.StatusCreated {
+		t.Fatalf("create = %d: %s", created.Code, created.Body.String())
+	}
+	var result struct {
+		TemplateID string `json:"templateId"`
+	}
+	if err := json.Unmarshal(created.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	imported := postJSON(t, srv, "/api/v1/templates/"+result.TemplateID+"/import-people", map[string]any{})
+	if imported.Code != http.StatusOK {
+		t.Fatalf("import-people = %d: %s", imported.Code, imported.Body.String())
+	}
+}
+
 func TestCreateTournamentValidation(t *testing.T) {
 	srv := seededServer(t)
 	rec := postJSON(t, srv, "/api/v1/tournaments", map[string]any{"name": "No disciplines"})

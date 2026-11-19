@@ -572,6 +572,18 @@ export interface components {
             categories?: components["schemas"]["CreateCategory"][];
             constraints?: components["schemas"]["CreateConstraints"];
             invites?: components["schemas"]["CreateInvite"][];
+            clubs?: {
+                name?: string;
+                colour?: string;
+            }[];
+            fighters?: {
+                name?: string;
+                club?: string;
+                beltRankId?: string;
+                weightKg?: number;
+                dob?: string;
+                gender?: string;
+            }[];
         };
         CreateTournamentResponse: {
             eventId: string;
