@@ -21,6 +21,10 @@
   --font-display: 'Space Grotesk', var(--font);
 }
 
+[data-theme='street'] {
+  --brand-primary: #ef4444; --brand-primary-soft: #7f1d1d; --brand-accent: #fbbf24;
+  --brand-surface: #09090b; --brand-surface-2: #18181b; --brand-surface-3: #27272a;
+}
 [data-theme='light'] {
   --brand-surface: #f8fafc;
   --brand-surface-2: #ffffff;
@@ -52,7 +56,12 @@ h3 { font-size: 1.02rem; font-weight: 600; }
 p { margin: 0; }
 button, input, select { font: inherit; }
 
-.shell { max-width: 1280px; margin: 0 auto; padding: 28px clamp(16px, 4vw, 44px) 80px; }
+.shell { max-width: min(96vw, 2300px); margin: 0 auto; padding: 28px clamp(16px, 3vw, 56px) 80px; }
+@media (min-width: 1800px) {
+  .shell { max-width: none; padding-left: 4vw; padding-right: 4vw; }
+  .accounts { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .grid.stats { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+}
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
   gap: 20px; flex-wrap: wrap; margin-bottom: 28px;

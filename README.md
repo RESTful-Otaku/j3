@@ -34,10 +34,9 @@ web/                 SvelteKit frontend + Capacitor
 
 ## Quick start — full local demo
 
-One command starts the venue server with ~60 seeded accounts and the web UI:
-
 ```sh
-bun run dev
+bun run dev      # friendly TUI menu (emoji + spinner): run, QA, reset, build, deploy, mobile
+bun run demo     # skip the menu and start the full seeded demo immediately
 ```
 
 - UI: <http://localhost:5173>
@@ -45,8 +44,16 @@ bun run dev
 - Reset the demo data: `bun run reset`
 - Run all checks: `bun run check && bun run test && bun run build`
 
-In the UI, open **Accounts & roles** to act as any runner, official, club leader, fighter or
-spectator and verify what each can see and do.
+### Dedicated screens (each opens in its own tab)
+- `/display` — full-screen live scoreboard with officials, big fighter cards, timer and celebrations
+- `/public` — public dashboard with live fights, next-up callouts, leaderboard and results
+- `/brackets` — elimination and round-robin progression with result icons and promotion
+- `/tables` — overall/category tables, medals and kata panel scores
+- `/pools` — pools and all matchups
+- `/control` — open views on other screens, save dashboard templates, theme and PA announcements
+
+The TUI menu also builds a **live executable** (`bin/j3d` + `dist/web`) and Capacitor targets
+for Android and iOS.
 
 Regenerate shared types after editing `api/openapi.yaml`:
 

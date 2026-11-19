@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "bash scripts/dev.sh",
+    "demo": "bash scripts/demo.sh",
     "api": "go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed",
     "seed": "go run ./cmd/j3d seed -db ./data/j3-demo.db",
     "reset": "go run ./cmd/j3d reset -db ./data/j3-demo.db",

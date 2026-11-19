@@ -514,6 +514,11 @@ crash recovery · migrations · load headroom well beyond a real event.
 - [x] **Phase 1a — Sign-up & automated pools**: imperial→metric conversion, stats capture,
       compatibility (strict + consent move-up), role request/approval, constrained balanced pool
       generation with same-club separation, QA views. Golden/unit tests.
+- [x] **Phase 1b — Multi-screen displays & operator CLI**: responsive ultrawide layouts, URL-
+      addressable public dashboard / full-screen scoreboard / brackets / tables+kata / pools /
+      display control, big fighter cards, officials, per-side moves & penalties, PA toasts,
+      confirmation dialogues, celebration animations, Street Fighter theme, dashboard templates,
+      TUI dev.sh with live build and Capacitor Android/iOS targets.
 - [ ] **Phase 1 — Setup slice**: create event → clubs → fighters → categories → rule-set
       snapshot → simple single-elim bracket → manual result → medal table. End-to-end offline.
 - [ ] **Phase 2 — Formats & rules engine**: RR, pools, double elim, repechage, BYEs/seeding,
@@ -647,6 +652,12 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-19** — Completed Phase 1b from user QA feedback: dedicated live routes
+  (`/display`, `/public`, `/brackets`, `/tables`, `/pools`, `/control`), live polling, ultrawide
+  CSS, large fighter portraits, officials/standings/event API, method icons, confirmation
+  dialogues, celebration animation, PA toast broadcasts across tabs, Street Fighter theme,
+  savable dashboard templates and an emoji TUI `dev.sh` with Capacitor build options. Added
+  §6.16/§6.17 and D-020–D-023.
 - **2026-11-19** — Created document: mission, principles, config model, domain model,
   research findings (§5), gaps (§7), architecture (§8), roadmap (§11), decision log,
   open questions.
@@ -665,12 +676,12 @@ _Format: `D-### | date | decision | rationale | status`._
   tests and CI.
 
 ## 17. Immediate next actions
-1. Phase 1 setup slice: guided event wizard (organiser sets constraints) → clubs → categories →
+1. Guided non-technical setup wizard (organiser sets constraints) → clubs → categories →
    rule-set snapshot → bracket/pool generation → manual result → medal table, end-to-end offline.
-2. Live scoring engine: timer, techniques, holds, submission instant-win, penalties, W/L/D and
-   multi-mat sync (Phase 3).
-3. Keep using `bun run dev` + `bun run reset` for QA after each slice; add a browser walkthrough
-   script once browser tooling is available.
+2. Live scoring engine: authoritative timers, techniques, holds, submission instant-win,
+   penalties, W/L/D and multi-mat sync (Phase 3). Confirmation + promotion must be audited.
+3. QA each slice with `bun run dev` (TUI menu) or `bun run demo`, plus `bun run reset`. Verify
+   that every display route still opens standalone on a second screen.
 
 ---
 

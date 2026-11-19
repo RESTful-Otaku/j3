@@ -455,7 +455,11 @@ export interface components {
             name: string;
             club: string;
             clubColour: string;
+            logoPath: string;
             belt: string;
+            beltColour: string;
+            heightCm: number;
+            weightKg: number;
         };
         DemoFightEvent: {
             seq: number;

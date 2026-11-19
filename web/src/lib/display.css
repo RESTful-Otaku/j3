@@ -1,0 +1,156 @@
+/* Big-screen display styles. Import per display route, never in the operator UI. */
+
+.display-shell {
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: clamp(14px, 2vw, 40px);
+  overflow-x: hidden;
+}
+
+.display-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(12px, 2vw, 40px);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--brand-border);
+  padding-bottom: clamp(10px, 1.4vw, 22px);
+  margin-bottom: clamp(14px, 2vw, 34px);
+}
+.display-header .title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1;
+}
+.display-header .meta { font-size: clamp(.8rem, 1.2vw, 1.4rem); color: var(--brand-muted); }
+.event-mark {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(1.2rem, 2.4vw, 2.6rem);
+}
+.event-mark .crest {
+  width: clamp(42px, 5vw, 86px); height: clamp(42px, 5vw, 86px);
+  border-radius: 22%; display: grid; place-items: center;
+  background: linear-gradient(145deg, var(--brand-primary), var(--brand-accent));
+  color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+.hero-scoreboard {
+  display: grid;
+  grid-template-columns: 1fr minmax(190px, .38fr) 1fr;
+  align-items: center;
+  gap: clamp(12px, 2.2vw, 48px);
+  width: 100%;
+}
+.fighter-hero {
+  display: flex; align-items: center; gap: clamp(14px, 2vw, 42px);
+  min-width: 0; padding: clamp(12px, 1.6vw, 28px);
+  border-radius: 26px; background: var(--brand-surface-2);
+  border: 1px solid var(--brand-border);
+  box-shadow: var(--brand-shadow);
+  position: relative; overflow: hidden;
+}
+.fighter-hero.blue { flex-direction: row-reverse; text-align: right; }
+.fighter-hero .portrait {
+  width: clamp(110px, 14vw, 320px);
+  height: clamp(110px, 14vw, 320px);
+  border-radius: 22%;
+  display: grid; place-items: center; flex: none;
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(2.4rem, 6vw, 7rem); color: #fff;
+  background: linear-gradient(145deg, #ef4444, #7f1d1d);
+  box-shadow: inset 0 0 0 6px rgba(255,255,255,.12), 0 18px 50px rgba(0,0,0,.4);
+  position: relative;
+}
+.fighter-hero.blue .portrait { background: linear-gradient(145deg, #3b82f6, #1e3a8a); }
+.fighter-hero .portrait img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.fighter-hero .club-crest {
+  position: absolute; right: 10px; bottom: 10px; width: clamp(34px, 4vw, 74px);
+  height: clamp(34px, 4vw, 74px); border-radius: 16px; display: grid; place-items: center;
+  background: #fff; color: #0f172a; font-weight: 800; font-size: clamp(.7rem,1.4vw,1.5rem);
+  box-shadow: 0 6px 18px rgba(0,0,0,.4);
+}
+.fighter-hero.blue .club-crest { right: auto; left: 10px; }
+.fighter-hero .who { min-width: 0; flex: 1; }
+.fighter-hero .who .name {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(1.6rem, 3.4vw, 4.6rem); line-height: 1.02;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.fighter-hero .who .belt {
+  display: inline-flex; margin-top: clamp(6px,1vw,14px); padding: 4px 12px;
+  border-radius: 999px; font-weight: 700; font-size: clamp(.8rem,1.4vw,1.5rem);
+  color: #0f172a; background: var(--brand-accent);
+}
+.fighter-hero .who .stat { color: var(--brand-muted); font-size: clamp(.8rem,1.3vw,1.4rem); }
+.fighter-hero .big-score {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(4rem, 10vw, 13rem); line-height: .9;
+}
+.clock-panel { text-align: center; }
+.clock-panel .clock {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(3.5rem, 8vw, 11rem); line-height: 1;
+  letter-spacing: .02em;
+}
+.clock-panel .round { color: var(--brand-muted); font-size: clamp(.9rem,1.5vw,1.6rem); }
+.officials-strip {
+  display: flex; gap: clamp(8px,1.2vw,22px); flex-wrap: wrap; justify-content: center;
+  margin-top: clamp(14px, 2vw, 34px);
+}
+.official {
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+  border-radius: 999px; background: var(--brand-surface-2); border: 1px solid var(--brand-border);
+}
+.official .face {
+  width: clamp(34px, 3vw, 60px); height: clamp(34px, 3vw, 60px); border-radius: 50%;
+  display: grid; place-items: center; background: linear-gradient(145deg, #7c3aed, #2563eb);
+  color: #fff; font-weight: 800; font-size: clamp(.8rem,1.3vw,1.3rem);
+}
+.official .role { color: var(--brand-accent); font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; }
+.official .name { font-weight: 600; font-size: clamp(.85rem,1.2vw,1.2rem); }
+
+.moves-side { display: grid; gap: 8px; margin-top: 16px; }
+.move-chip {
+  display: flex; justify-content: space-between; gap: 16px; align-items: center;
+  padding: 8px 12px; border-radius: 10px; background: var(--brand-surface-3);
+  border-left: 4px solid var(--brand-primary); font-size: clamp(.85rem,1.2vw,1.2rem);
+}
+.move-chip.penalty { border-left-color: var(--loss); }
+.move-chip .pts { color: var(--win); font-weight: 800; }
+
+.celebrate { animation: celebratePop 1.4s cubic-bezier(.16,1,.3,1) both; }
+@keyframes celebratePop {
+  0% { transform: scale(.7) rotate(-6deg); opacity: 0; filter: brightness(2); }
+  55% { transform: scale(1.12) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.slide-in { animation: slideIn .5s cubic-bezier(.16,1,.3,1) both; }
+@keyframes slideIn { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.flash { animation: flashPulse 1.1s ease-in-out infinite; }
+@keyframes flashPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.6); } 50% { box-shadow: 0 0 0 16px rgba(245,158,11,0); } }
+
+[data-theme='street'] {
+  --brand-primary: #ef4444; --brand-primary-soft: #7f1d1d; --brand-accent: #fbbf24;
+  --brand-surface: #09090b; --brand-surface-2: #18181b; --brand-surface-3: #27272a;
+}
+[data-theme='street'] .display-shell {
+  background:
+    repeating-linear-gradient(135deg, rgba(239,68,68,.09) 0 12px, transparent 12px 28px),
+    radial-gradient(900px 500px at 50% -10%, rgba(251,191,36,.2), transparent 60%),
+    var(--brand-surface);
+}
+[data-theme='street'] .fighter-hero { border-radius: 8px; transform: skewX(-2deg); }
+
+@media (min-width: 1800px) {
+  .display-shell { max-width: none; }
+  .hero-scoreboard { grid-template-columns: 1fr minmax(300px, .3fr) 1fr; }
+  .moves-side { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .hero-scoreboard { grid-template-columns: 1fr; }
+  .fighter-hero.blue { flex-direction: row; text-align: left; }
+  .clock-panel { order: -1; }
+}

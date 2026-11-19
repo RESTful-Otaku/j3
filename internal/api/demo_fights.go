@@ -6,11 +6,15 @@ import (
 )
 
 type demoFighter struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Club       string `json:"club"`
-	ClubColour string `json:"clubColour"`
-	Belt       string `json:"belt"`
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Club       string  `json:"club"`
+	ClubColour string  `json:"clubColour"`
+	LogoPath   string  `json:"logoPath"`
+	Belt       string  `json:"belt"`
+	BeltColour string  `json:"beltColour"`
+	HeightCm   float64 `json:"heightCm"`
+	WeightKg   float64 `json:"weightKg"`
 }
 
 type demoFightEvent struct {
@@ -39,10 +43,12 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 		       f.state, f.outcome,
 		       COALESCE(fr.id, ''), COALESCE(fr.display_name, ''),
 		       COALESCE(cr.name, ''), COALESCE(cr.primary_colour, '#64748b'),
-		       COALESCE(br.label, ''),
+		       COALESCE(cr.logo_path, ''), COALESCE(br.label, ''), COALESCE(br.colour, '#94a3b8'),
+		       COALESCE(ur.height_cm, 0), COALESCE(fr.weight_kg, 0),
 		       COALESCE(fb.id, ''), COALESCE(fb.display_name, ''),
 		       COALESCE(cb.name, ''), COALESCE(cb.primary_colour, '#64748b'),
-		       COALESCE(bb.label, '')
+		       COALESCE(cb.logo_path, ''), COALESCE(bb.label, ''), COALESCE(bb.colour, '#94a3b8'),
+		       COALESCE(ub.height_cm, 0), COALESCE(fb.weight_kg, 0)
 		FROM fights f
 		LEFT JOIN categories c  ON c.id = f.category_id
 		LEFT JOIN mats m        ON m.id = f.mat_id
@@ -52,6 +58,8 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 		LEFT JOIN clubs cb      ON cb.id = fb.club_id
 		LEFT JOIN belt_ranks br ON br.id = fr.belt_rank_id
 		LEFT JOIN belt_ranks bb ON bb.id = fb.belt_rank_id
+		LEFT JOIN users ur      ON ur.id = fr.user_id
+		LEFT JOIN users ub      ON ub.id = fb.user_id
 		ORDER BY f.id`)
 	if err != nil {
 		writeError(w, err)
@@ -64,8 +72,10 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 		var f demoFight
 		if err := rows.Scan(
 			&f.ID, &f.Category, &f.Mat, &f.Round, &f.State, &f.Outcome,
-			&f.Red.ID, &f.Red.Name, &f.Red.Club, &f.Red.ClubColour, &f.Red.Belt,
-			&f.Blue.ID, &f.Blue.Name, &f.Blue.Club, &f.Blue.ClubColour, &f.Blue.Belt,
+			&f.Red.ID, &f.Red.Name, &f.Red.Club, &f.Red.ClubColour, &f.Red.LogoPath,
+			&f.Red.Belt, &f.Red.BeltColour, &f.Red.HeightCm, &f.Red.WeightKg,
+			&f.Blue.ID, &f.Blue.Name, &f.Blue.Club, &f.Blue.ClubColour, &f.Blue.LogoPath,
+			&f.Blue.Belt, &f.Blue.BeltColour, &f.Blue.HeightCm, &f.Blue.WeightKg,
 		); err != nil {
 			writeError(w, err)
 			return

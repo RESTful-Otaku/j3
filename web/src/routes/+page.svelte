@@ -27,7 +27,7 @@
   let roleFilter: Role | 'all' = 'all';
   let search = '';
   let selectedFightId = '';
-  let theme: 'dark' | 'light' = 'dark';
+  let theme: 'dark' | 'light' | 'street' = 'dark';
 
   let signupForm: SignupRequest = {
     name: '',
@@ -249,8 +249,8 @@
     </div>
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <span class="pill"><span class="dot" class:off={!!error}></span>{error ? 'Server offline' : 'Venue server running'}</span>
-      <button class="tab" on:click={() => (theme = theme === 'dark' ? 'light' : 'dark')}>
-        {theme === 'dark' ? '☀ Light' : '☾ Dark'}
+      <button class="tab" on:click={() => (theme = theme === 'dark' ? 'light' : theme === 'light' ? 'street' : 'dark')}>
+        {theme === 'dark' ? '☀ Light' : theme === 'light' ? '⚡ Street' : '☾ Dark'}
       </button>
     </div>
   </header>
@@ -282,6 +282,8 @@
         <div class="action-row">
           <button class="btn primary" on:click={() => (activeTab = 'accounts')}>Switch account</button>
           <button class="btn" on:click={() => (activeTab = 'scoreboard')}>Open live scoreboard</button>
+          <a class="btn" href="/control" target="_blank" rel="noreferrer">🖥️ Display control ↗</a>
+          <a class="btn" href="/display" target="_blank" rel="noreferrer">🥊 Full-screen board ↗</a>
           <a class="btn" href="/api/v1/demo" target="_blank" rel="noreferrer">Inspect API ↗</a>
         </div>
       </div>
@@ -350,6 +352,20 @@
             Runners, officials, club leaders, fighters and spectators each see and can change
             only what their authority allows. Every material action is audited.
           </p>
+        </div>
+        <div class="card">
+          <div class="eyebrow">04 · Every screen</div>
+          <h3>Dedicated live views</h3>
+          <p class="muted small" style="margin-top:8px;">
+            Open each in its own tab and place it on any TV: public dashboard, full-screen
+            scoreboard, brackets, tables/medals/kata, fight pools and display control.
+          </p>
+          <div class="action-row">
+            <a class="btn" href="/public" target="_blank" rel="noreferrer">Public ↗</a>
+            <a class="btn" href="/brackets" target="_blank" rel="noreferrer">Brackets ↗</a>
+            <a class="btn" href="/tables" target="_blank" rel="noreferrer">Tables ↗</a>
+            <a class="btn" href="/pools" target="_blank" rel="noreferrer">Pools ↗</a>
+          </div>
         </div>
       </div>
     {:else if activeTab === 'accounts'}

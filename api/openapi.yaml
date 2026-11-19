@@ -466,13 +466,17 @@ components:
         entrantCount: { type: integer }
     DemoFighter:
       type: object
-      required: [id, name, club, clubColour, belt]
+      required: [id, name, club, clubColour, logoPath, belt, beltColour, heightCm, weightKg]
       properties:
         id: { type: string }
         name: { type: string }
         club: { type: string }
         clubColour: { type: string }
+        logoPath: { type: string }
         belt: { type: string }
+        beltColour: { type: string }
+        heightCm: { type: number }
+        weightKg: { type: number }
     DemoFightEvent:
       type: object
       required: [seq, kind, payload]
