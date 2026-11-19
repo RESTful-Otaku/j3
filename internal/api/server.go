@@ -14,12 +14,13 @@ import (
 type Server struct {
 	Store   *db.DB
 	Version string
+	Hub     *LiveHub
 	handler http.Handler
 }
 
 // New builds a server with its middleware chain.
 func New(store *db.DB, version string) *Server {
-	s := &Server{Store: store, Version: version}
+	s := &Server{Store: store, Version: version, Hub: newLiveHub()}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.healthz)
 	mux.HandleFunc("GET /readyz", s.readyz)
@@ -38,6 +39,14 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/demo/event", s.eventDisplay)
 	mux.HandleFunc("GET /api/v1/demo/officials", s.displayOfficials)
 	mux.HandleFunc("GET /api/v1/demo/standings", s.standings)
+	mux.HandleFunc("GET /api/v1/events/stream", s.streamEvents)
+	mux.HandleFunc("GET /api/v1/fights/{id}/state", s.getFightState)
+	mux.HandleFunc("POST /api/v1/fights/{id}/start", s.startFight)
+	mux.HandleFunc("POST /api/v1/fights/{id}/pause", s.pauseFight)
+	mux.HandleFunc("POST /api/v1/fights/{id}/resume", s.resumeFight)
+	mux.HandleFunc("POST /api/v1/fights/{id}/event", s.addFightEvent)
+	mux.HandleFunc("POST /api/v1/fights/{id}/undo", s.undoFightEvent)
+	mux.HandleFunc("POST /api/v1/fights/{id}/submit", s.submitFight)
 	mux.HandleFunc("GET /api/v1/demo/belts", s.belts)
 	mux.HandleFunc("GET /api/v1/demo/simulate", s.simulate)
 	mux.HandleFunc("GET /api/v1/demo/stats", s.stats)

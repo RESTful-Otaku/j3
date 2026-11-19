@@ -49,9 +49,11 @@ func serve() {
 		log.Printf("demo data ready")
 	}
 
+	venue := api.New(store, *version)
+	venue.StartClock(context.Background())
 	server := &http.Server{
 		Addr:              *addr,
-		Handler:           api.New(store, *version).Handler(),
+		Handler:           venue.Handler(),
 		ReadHeaderTimeout: cfg.Timeout,
 	}
 	go func() {

@@ -7,6 +7,7 @@
     type EventDisplayInfo,
     type DisplayOfficial,
     type DemoFightEvent,
+    type FightState,
   } from '../../../lib/api';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
 
@@ -19,6 +20,7 @@
   let celebrate = false;
   let confirmOpen = false;
   let loading = true;
+  let liveState: FightState | null = null;
 
   onMount(() => {
     const fromUrl = new URLSearchParams(location.search).get('fight') ?? '';
@@ -44,9 +46,15 @@
     const clock = setInterval(() => {
       if (!paused && seconds > 0) seconds -= 1;
     }, 1000);
+    const stopStream = api.eventStream((message) => {
+      if (message.payload && (message.payload.fightId === selectedId || message.fightId === selectedId)) {
+        liveState = message.payload;
+      }
+    });
     return () => {
       stopFights();
       stopEvent();
+      stopStream();
       clearInterval(officialTimer);
       clearInterval(clock);
     };
@@ -57,6 +65,7 @@
   }
   function score(fight: DemoFight | undefined, corner: 'red' | 'blue') {
     if (!fight) return 0;
+    if (liveState?.fightId === fight.id) return corner === 'red' ? liveState.redScore : liveState.blueScore;
     return fight.events
       .filter((e) => e.kind === 'score' && payload(e).corner === corner)
       .reduce((sum, e) => sum + Number(payload(e).points ?? 0), 0);
@@ -81,6 +90,20 @@
     const submission = fight.events.some((e) => e.kind === 'submission');
     const technical = fight.outcome.startsWith('dq') || fight.state === 'forfeit';
     return `${isWinner ? 'W' : 'L'}${submission ? 'S' : technical ? 'T' : 'P'}`;
+  }
+  async function startFight() {
+    if (selected) liveState = await api.startFight(selected.id, 180, 1);
+  }
+  async function pauseFight() {
+    if (selected) liveState = await api.pauseFight(selected.id);
+  }
+  async function resumeFight() {
+    if (selected) liveState = await api.resumeFight(selected.id);
+  }
+  async function submitResult(outcome: string) {
+    if (selected) liveState = await api.submitFight(selected.id, outcome);
+    confirmOpen = false;
+    celebrateResult();
   }
   function celebrateResult() {
     celebrate = true;
@@ -107,7 +130,9 @@
         <span class="dot" class:off={!selected || selected.state !== 'live'}></span>{selected?.state ?? 'connecting…'}
       </span>
       <button class="btn" on:click={fullscreen}>⛶ Fullscreen</button>
-      <button class="btn" on:click={() => (paused = !paused)}>{paused ? '▶ Resume' : '⏸ Pause (ref stoppage)'}</button>
+      <button class="btn" on:click={startFight}>▶ Start</button>
+      <button class="btn" on:click={pauseFight}>⏸ Pause (ref stoppage)</button>
+      <button class="btn" on:click={resumeFight}>▶ Resume</button>
       <button class="btn primary" on:click={() => (confirmOpen = true)}>Confirm result</button>
     </div>
   </header>
@@ -144,8 +169,8 @@
 
       <section class="clock-panel">
         <div class="round">{matName} · {selected.round}</div>
-        <div class="clock" class:paused-flash={paused}>{clockText(seconds)}</div>
-        <div class="meta">{paused ? 'Referee stoppage · timer paused' : 'Fight in progress'}</div>
+        <div class="clock" class:paused-flash={liveState ? !liveState.running : paused}>{clockText(liveState?.seconds ?? seconds)}</div>
+        <div class="meta">{(liveState ? !liveState.running : paused) ? 'Referee stoppage · timer paused' : 'Fight in progress'} · authoritative server clock</div>
       </section>
 
       <section class="fighter-hero blue" class:celebrate={celebrate && method(selected, 'blue').startsWith('W')}>
@@ -212,7 +237,7 @@
   title="Confirm this result?"
   message="The winner, points and promotion will be committed to the tournament record and shown on all displays."
   confirmLabel="Confirm result"
-  onConfirm={celebrateResult}
+  onConfirm={() => void submitResult('win_red')}
 />
 
 <style>

@@ -65,6 +65,23 @@ export const api = {
   pools: () => getJson<PoolsResponse>('/api/v1/demo/pools?eventId=ev-demo'),
   generatePools: (body: GeneratePoolsRequest) =>
     postJson<PoolsResponse>('/api/v1/demo/pools/generate', body),
+  fightState: (id: string) => getJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/state`),
+  startFight: (id: string, seconds = 180, round = 1) =>
+    postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/start`, { seconds, round }),
+  pauseFight: (id: string) => postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/pause`, {}),
+  resumeFight: (id: string) => postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/resume`, {}),
+  fightEvent: (id: string, body: Record<string, unknown>) =>
+    postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/event`, body),
+  undoFightEvent: (id: string) => postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/undo`, {}),
+  submitFight: (id: string, outcome: string) =>
+    postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/submit`, { outcome }),
+  eventStream: (onEvent: (event: { type: string; fightId?: string; payload?: FightState }) => void) => {
+    const source = new EventSource('/api/v1/events/stream');
+    source.onmessage = (message) => {
+      try { onEvent(JSON.parse(message.data)); } catch { /* ignore malformed frames */ }
+    };
+    return () => source.close();
+  },
   simulate: (seed = 42, fighters = 50) =>
     getJson<SimulationResult>(`/api/v1/demo/simulate?seed=${seed}&fighters=${fighters}`),
   stats: (seed = 42, fighters = 50) =>
@@ -102,6 +119,13 @@ export const api = {
     if (!response.ok) throw new Error(`Upload failed (${response.status})`);
     return response.json() as Promise<{ url: string; colour: string; highlight: string }>;
   },
+};
+
+export type FightState = {
+  fightId: string; state: string; outcome: string; running: boolean;
+  seconds: number; round: number; redScore: number; blueScore: number;
+  redPenalty: number; bluePenalty: number;
+  events: { seq: number; kind: string; corner: string; points: number; technique: string; card: string; actor: string; createdAt: string }[];
 };
 
 export type SimulationBout = {
