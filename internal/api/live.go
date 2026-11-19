@@ -185,7 +185,7 @@ func (s *Server) startFight(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
-	_, _ = s.Store.ExecContext(r.Context(), `UPDATE fights SET state='live' WHERE id=?`, id)
+	_, _ = s.Store.ExecContext(r.Context(), `UPDATE fights SET state='live', outcome='' WHERE id=?`, id)
 	s.audit(r, "fight.start", "fight", id, fmt.Sprintf(`{"seconds":%d}`, seconds))
 	s.broadcastFight(r, id, "fight.started")
 	s.getFightState(w, r)
