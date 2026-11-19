@@ -42,20 +42,23 @@ type createInvite struct {
 }
 
 type createTournamentRequest struct {
-	Name         string             `json:"name"`
-	Title        string             `json:"title"`
-	Venue        string             `json:"venue"`
-	StartDate    string             `json:"startDate"`
-	EndDate      string             `json:"endDate"`
-	Theme        string             `json:"theme"`
-	LogoPath     string             `json:"logoPath"`
-	BannerPath   string             `json:"bannerPath"`
-	TemplateName string             `json:"templateName"`
-	SaveTemplate bool               `json:"saveTemplate"`
-	Disciplines  []createDiscipline `json:"disciplines"`
-	Categories   []createCategory   `json:"categories"`
-	Constraints  createConstraints  `json:"constraints"`
-	Invites      []createInvite     `json:"invites"`
+	Name          string              `json:"name"`
+	Title         string              `json:"title"`
+	Venue         string              `json:"venue"`
+	StartDate     string              `json:"startDate"`
+	EndDate       string              `json:"endDate"`
+	Theme         string              `json:"theme"`
+	LogoPath      string              `json:"logoPath"`
+	BannerPath    string              `json:"bannerPath"`
+	TemplateName  string              `json:"templateName"`
+	SaveTemplate  bool                `json:"saveTemplate"`
+	Disciplines   []createDiscipline  `json:"disciplines"`
+	Categories    []createCategory    `json:"categories"`
+	Constraints   createConstraints   `json:"constraints"`
+	Invites       []createInvite      `json:"invites"`
+	Protection    []string            `json:"protection"`
+	CornerColours map[string]string   `json:"cornerColours"`
+	Schedule      []map[string]string `json:"schedule"`
 }
 
 func themeTokens(preset string) string {
@@ -99,7 +102,10 @@ func (s *Server) createTournament(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	disciplineJSON, _ := json.Marshal(req.Disciplines)
+	detailsJSON, _ := json.Marshal(map[string]any{
+		"disciplines": req.Disciplines, "protection": req.Protection,
+		"cornerColours": req.CornerColours, "schedule": req.Schedule, "venue": req.Venue,
+	})
 	categoryJSON, _ := json.Marshal(req.Categories)
 	constraintJSON, _ := json.Marshal(req.Constraints)
 	inviteJSON, _ := json.Marshal(req.Invites)
@@ -132,7 +138,7 @@ func (s *Server) createTournament(w http.ResponseWriter, r *http.Request) {
 		VALUES (?, 'demo-tenant', ?, ?, ?, ?)`,
 		themeID, req.Name+" theme", themeTokens(req.Theme), req.LogoPath, req.BannerPath)
 	exec(`INSERT INTO rule_sets (id, tenant_id, name, config_json) VALUES (?, 'demo-tenant', ?, ?)`,
-		ruleSetID, req.Name+" rules", string(disciplineJSON))
+		ruleSetID, req.Name+" rules", string(detailsJSON))
 	exec(`INSERT INTO format_policies (id, tenant_id, name, config_json) VALUES (?, 'demo-tenant', ?, ?)`,
 		formatID, req.Name+" format", string(constraintJSON))
 	exec(`INSERT INTO events
@@ -145,8 +151,9 @@ func (s *Server) createTournament(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i, discipline := range req.Disciplines {
+		rulesJSON, _ := json.Marshal(discipline)
 		exec(`INSERT INTO disciplines (id, event_id, name, rules_json, sort_order) VALUES (?, ?, ?, ?, ?)`,
-			newID("disc"), eventID, discipline.Name, string(disciplineJSON), i)
+			newID("disc"), eventID, discipline.Name, string(rulesJSON), i)
 		if err != nil {
 			writeError(w, err)
 			return

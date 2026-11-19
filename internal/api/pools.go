@@ -40,7 +40,7 @@ func (s *Server) generatePools(w http.ResponseWriter, r *http.Request) {
 		req.EventID = "ev-demo"
 	}
 	query := `SELECT e.fighter_id, COALESCE(e.club_id, ''), COALESCE(e.seed, 0)
-		FROM entrants e WHERE e.event_id = ?`
+		FROM entrants e WHERE e.event_id = ? AND (e.status = 'active' OR e.status IS NULL)`
 	args := []any{req.EventID}
 	if req.CategoryID != "" {
 		query += ` AND e.category_id = ?`

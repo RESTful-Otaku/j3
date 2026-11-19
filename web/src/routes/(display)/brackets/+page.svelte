@@ -1,15 +1,85 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, livePoll, type DemoFight, broadcastPA } from '../../../lib/api';
+  import { api, livePoll, type DemoFight, type PoolView, broadcastPA } from '../../../lib/api';
+  import { notifySuccess } from '../../../lib/toast';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
 
+  type Slot = { id: string; name: string; colour: string };
+  type BracketNode = { id: string; label: string; a: Slot | null; b: Slot | null; winner: string };
+
   let fights: DemoFight[] = [];
-  let mode: 'elimination' | 'roundRobin' = 'elimination';
+  let pools: PoolView[] = [];
+  let bracket: BracketNode[][] = [];
+  let mode: 'bracket' | 'elimination' | 'roundRobin' = 'bracket';
   let pendingPromotion: DemoFight | null = null;
   let confirmOpen = false;
+  let dragging: { round: number; node: number; corner: 'a' | 'b' } | null = null;
 
-  onMount(() => livePoll(api.fights, 2000, (data) => (fights = data.fights)));
+  onMount(() => {
+    const stopFights = livePoll(api.fights, 2000, (data) => {
+      fights = data.fights;
+      if (bracket.length > 0) buildBracket();
+    });
+    const stopPools = livePoll(api.pools, 4000, (data) => {
+      pools = data.pools;
+      if (bracket.length === 0) buildBracket();
+    });
+    return () => { stopFights(); stopPools(); };
+  });
 
+  function toSlot(member: { id: string; name: string; clubColour: string }): Slot {
+    return { id: member.id, name: member.name, colour: member.clubColour };
+  }
+  function winnerFor(a: Slot | null, b: Slot | null) {
+    const fight = fights.find((f) =>
+      (f.red.id === a?.id && f.blue.id === b?.id) || (f.red.id === b?.id && f.blue.id === a?.id));
+    if (fight?.outcome === 'win_red') return a?.id ?? '';
+    if (fight?.outcome === 'win_blue') return b?.id ?? '';
+    if (fight?.outcome === 'draw') return 'draw';
+    return a?.id ?? b?.id ?? '';
+  }
+  function node(id: string, label: string, a: Slot | null, b: Slot | null): BracketNode {
+    return { id, label, a, b, winner: winnerFor(a, b) };
+  }
+  function buildBracket() {
+    const first: BracketNode[] = [];
+    pools.forEach((pool, poolIndex) => {
+      for (let i = 0; i + 1 < pool.members.length; i += 2) {
+        first.push(node(`r0-${poolIndex}-${i}`, `${pool.name} · ${i / 2 + 1}`,
+          toSlot(pool.members[i]), toSlot(pool.members[i + 1])));
+      }
+    });
+    const advance = (sources: BracketNode[]) => sources.map((source) =>
+      source.winner === source.a?.id ? source.a : source.b);
+    const semiWinners = advance(first);
+    const semis: BracketNode[] = [];
+    for (let i = 0; i + 1 < semiWinners.length && semis.length < 2; i += 2) {
+      semis.push(node(`r1-${i}`, `Semi ${i / 2 + 1}`, semiWinners[i], semiWinners[i + 1]));
+    }
+    const finalists = advance(semis);
+    const losers = semis.map((s) => s.winner === s.a?.id ? s.b : s.a);
+    const last: BracketNode[] = [
+      node('final', 'Final', finalists[0] ?? null, finalists[1] ?? null),
+      node('third', 'Bronze decider', losers[0] ?? null, losers[1] ?? null),
+    ];
+    bracket = [first, semis, last];
+  }
+  function dropSlot(round: number, nodeIndex: number, corner: 'a' | 'b') {
+    if (!dragging) return;
+    const source = bracket[dragging.round]?.[dragging.node];
+    const target = bracket[round]?.[nodeIndex];
+    if (!source || !target) return;
+    const from = dragging.corner === 'a' ? source.a : source.b;
+    const to = corner === 'a' ? target.a : target.b;
+    if (dragging.round === round && dragging.node === nodeIndex && dragging.corner === corner) return;
+    if (dragging.corner === 'a') source.a = to; else source.b = to;
+    if (corner === 'a') target.a = from; else target.b = from;
+    source.winner = winnerFor(source.a, source.b);
+    target.winner = winnerFor(target.a, target.b);
+    bracket = [...bracket];
+    dragging = null;
+    notifySuccess('Bracket slot updated', () => buildBracket());
+  }
   function initials(name: string) { return name.split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase(); }
   function outcome(fight: DemoFight, corner: 'red' | 'blue') {
     if (!fight.outcome) return { code: '', win: false };

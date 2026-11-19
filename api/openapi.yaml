@@ -111,6 +111,32 @@ paths:
                   fights:
                     type: array
                     items: { $ref: '#/components/schemas/DemoFight' }
+  /api/v1/query:
+    get:
+      operationId: query
+      summary: Allow-listed search/sort/filter/pagination over public data
+      parameters:
+        - { name: table, in: query, required: true, schema: { type: string } }
+        - { name: search, in: query, schema: { type: string } }
+        - { name: sort, in: query, schema: { type: string } }
+        - { name: order, in: query, schema: { type: string, enum: [asc, desc] } }
+        - { name: limit, in: query, schema: { type: integer } }
+        - { name: offset, in: query, schema: { type: integer } }
+      responses:
+        '200':
+          description: Query result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [table, columns, rows, count]
+                properties:
+                  table: { type: string }
+                  columns: { type: array, items: { type: string } }
+                  rows:
+                    type: array
+                    items: { type: object, additionalProperties: true }
+                  count: { type: integer }
   /api/v1/demo/audit:
     get:
       operationId: auditLog
@@ -131,6 +157,22 @@ paths:
                   entries:
                     type: array
                     items: { $ref: '#/components/schemas/AuditEntry' }
+  /api/v1/demo/belts:
+    get:
+      operationId: belts
+      summary: Full JJJ grade spectrum with colours for the belt picker
+      responses:
+        '200':
+          description: Belt ranks
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [belts]
+                properties:
+                  belts:
+                    type: array
+                    items: { $ref: '#/components/schemas/BeltOption' }
   /api/v1/demo/event:
     get:
       operationId: eventDisplay
@@ -177,6 +219,47 @@ paths:
                   standings:
                     type: array
                     items: { $ref: '#/components/schemas/StandingRow' }
+  /api/v1/demo/fights/{id}/forfeit:
+    post:
+      operationId: forfeitFight
+      summary: Record an injury, forfeit or disqualification
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+                winner: { type: string, enum: [red, blue] }
+      responses:
+        '200':
+          description: Result recorded
+          content:
+            application/json:
+              schema: { type: object }
+  /api/v1/demo/entrants/{id}/status:
+    post:
+      operationId: entrantStatus
+      summary: Mark a dropout, no-show or injury; pools rebalance on regeneration
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [active, withdrawn, no_show, injured] }
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema: { type: object }
   /api/v1/tournaments:
     post:
       operationId: createTournament
@@ -401,6 +484,16 @@ components:
           type: array
           items: { $ref: '#/components/schemas/Action' }
         counts: { $ref: '#/components/schemas/DemoCounts' }
+    BeltOption:
+      type: object
+      required: [id, label, colour, sortOrder, gradeKind, isCustom]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        colour: { type: string }
+        sortOrder: { type: integer }
+        gradeKind: { type: string }
+        isCustom: { type: boolean }
     DisplayOfficial:
       type: object
       required: [id, name, role]
@@ -410,12 +503,13 @@ components:
         role: { type: string }
     EventDisplayInfo:
       type: object
-      required: [name, bannerPath, logoPath, themeTokens, mats]
+      required: [name, bannerPath, logoPath, themeTokens, detailsJson, mats]
       properties:
         name: { type: string }
         bannerPath: { type: string }
         logoPath: { type: string }
         themeTokens: { type: string }
+        detailsJson: { type: string }
         mats:
           type: array
           items: { type: string }
@@ -514,11 +608,13 @@ components:
         CreatedAt: { type: string }
     UploadResponse:
       type: object
-      required: [url, path, kind]
+      required: [url, path, kind, colour, highlight]
       properties:
         url: { type: string }
         path: { type: string }
         kind: { type: string }
+        colour: { type: string }
+        highlight: { type: string }
     AuditEntry:
       type: object
       required: [id, actorUserId, actorRole, action, targetType, targetId, beforeJson, afterJson, createdAt]
@@ -547,6 +643,8 @@ components:
         heightIn: { type: number }
         weightLb: { type: number }
         beltRankId: { type: string }
+        customBeltLabel: { type: string }
+        customBeltColour: { type: string }
         gender: { type: string, enum: [male, female, open, coed] }
         accountType: { $ref: '#/components/schemas/Role' }
         clubId: { type: string }
@@ -556,13 +654,16 @@ components:
         consentMoveUp: { type: boolean }
     Eligibility:
       type: object
-      required: [categoryId, name, strict, moveUp, reason]
+      required: [categoryId, name, strict, moveUp, reason, capacity, spaces, full]
       properties:
         categoryId: { type: string }
         name: { type: string }
         strict: { type: boolean }
         moveUp: { type: boolean }
         reason: { type: string }
+        capacity: { type: integer }
+        spaces: { type: integer }
+        full: { type: boolean }
     SignupPreview:
       type: object
       required: [heightCm, weightKg, eligible]

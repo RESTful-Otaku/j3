@@ -19,22 +19,24 @@ import (
 )
 
 type signupRequest struct {
-	Name          string   `json:"name"`
-	Email         string   `json:"email"`
-	Phone         string   `json:"phone"`
-	DOB           string   `json:"dateOfBirth"`
-	UnitSystem    string   `json:"unitSystem"`
-	HeightCm      float64  `json:"heightCm"`
-	WeightKg      float64  `json:"weightKg"`
-	HeightFt      float64  `json:"heightFt"`
-	HeightIn      float64  `json:"heightIn"`
-	WeightLb      float64  `json:"weightLb"`
-	BeltRankID    string   `json:"beltRankId"`
-	Gender        string   `json:"gender"`
-	AccountType   string   `json:"accountType"`
-	ClubID        string   `json:"clubId"`
-	CategoryIDs   []string `json:"categoryIds"`
-	ConsentMoveUp bool     `json:"consentMoveUp"`
+	Name             string   `json:"name"`
+	Email            string   `json:"email"`
+	Phone            string   `json:"phone"`
+	DOB              string   `json:"dateOfBirth"`
+	UnitSystem       string   `json:"unitSystem"`
+	HeightCm         float64  `json:"heightCm"`
+	WeightKg         float64  `json:"weightKg"`
+	HeightFt         float64  `json:"heightFt"`
+	HeightIn         float64  `json:"heightIn"`
+	WeightLb         float64  `json:"weightLb"`
+	BeltRankID       string   `json:"beltRankId"`
+	CustomBeltLabel  string   `json:"customBeltLabel"`
+	CustomBeltColour string   `json:"customBeltColour"`
+	Gender           string   `json:"gender"`
+	AccountType      string   `json:"accountType"`
+	ClubID           string   `json:"clubId"`
+	CategoryIDs      []string `json:"categoryIds"`
+	ConsentMoveUp    bool     `json:"consentMoveUp"`
 }
 
 type signupResult struct {
@@ -65,7 +67,11 @@ func decodeJSON(r *http.Request, target any) error {
 }
 
 func canonicalStats(req signupRequest) (heightCm, weightKg float64, err error) {
-	switch strings.ToLower(req.UnitSystem) {
+	unitSystem := strings.ToLower(strings.TrimSpace(req.UnitSystem))
+	if unitSystem != "" && unitSystem != "metric" && unitSystem != "imperial" {
+		return 0, 0, fmt.Errorf("unknown unit system %q", req.UnitSystem)
+	}
+	switch unitSystem {
 	case "imperial":
 		heightCm, err = units.FeetInchesToCm(req.HeightFt, req.HeightIn)
 		if err != nil {
@@ -127,15 +133,38 @@ func (s *Server) beltOrder(r *http.Request, beltRankID string) int {
 	return order
 }
 
+func (s *Server) enrichCapacity(r *http.Request, eligible []rules.Eligibility) []rules.Eligibility {
+	capacity := 0
+	var raw string
+	if err := s.Store.QueryRowContext(r.Context(),
+		`SELECT config_json FROM format_policies WHERE id = 'fp-demo'`).Scan(&raw); err == nil {
+		var config map[string]any
+		if json.Unmarshal([]byte(raw), &config) == nil {
+			if value, ok := config["cap"].(float64); ok {
+				capacity = int(value)
+			}
+		}
+	}
+	for i := range eligible {
+		current := 0
+		_ = s.Store.QueryRowContext(r.Context(),
+			`SELECT COUNT(*) FROM entrants WHERE category_id = ?`, eligible[i].CategoryID).Scan(&current)
+		eligible[i].Capacity = capacity
+		eligible[i].Spaces = rules.CapRemaining(capacity, current)
+		eligible[i].Full = !rules.CanAccept(capacity, current)
+	}
+	return eligible
+}
+
 func (s *Server) signupPreview(w http.ResponseWriter, r *http.Request) {
 	var req signupRequest
 	if err := decodeJSON(r, &req); err != nil {
-		writeError(w, err)
+		writeBadRequest(w, err.Error())
 		return
 	}
 	heightCm, weightKg, err := canonicalStats(req)
 	if err != nil {
-		writeError(w, err)
+		writeBadRequest(w, err.Error())
 		return
 	}
 	categories, err := s.categoriesForSignup(r, "ev-demo")
@@ -147,7 +176,7 @@ func (s *Server) signupPreview(w http.ResponseWriter, r *http.Request) {
 		DOB: req.DOB, WeightKg: weightKg, HeightCm: heightCm,
 		BeltOrder: s.beltOrder(r, req.BeltRankID), Gender: req.Gender,
 	}
-	eligible := rules.Compatible(categories, stats, time.Now(), req.ConsentMoveUp)
+	eligible := s.enrichCapacity(r, rules.Compatible(categories, stats, time.Now(), req.ConsentMoveUp))
 	writeJSON(w, http.StatusOK, map[string]any{
 		"heightCm": heightCm, "weightKg": weightKg, "eligible": eligible,
 	})
@@ -156,24 +185,24 @@ func (s *Server) signupPreview(w http.ResponseWriter, r *http.Request) {
 func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 	var req signupRequest
 	if err := decodeJSON(r, &req); err != nil {
-		writeError(w, err)
+		writeBadRequest(w, err.Error())
 		return
 	}
 	if strings.TrimSpace(req.Name) == "" {
-		writeError(w, errors.New("name is required"))
+		writeBadRequest(w, "name is required")
 		return
 	}
 	if _, err := mail.ParseAddress(req.Email); err != nil {
-		writeError(w, errors.New("a valid email is required"))
+		writeBadRequest(w, "a valid email is required")
 		return
 	}
 	if _, err := time.Parse("2006-01-02", req.DOB); err != nil {
-		writeError(w, errors.New("date of birth must be YYYY-MM-DD"))
+		writeBadRequest(w, "date of birth must be YYYY-MM-DD")
 		return
 	}
 	heightCm, weightKg, err := canonicalStats(req)
 	if err != nil {
-		writeError(w, err)
+		writeBadRequest(w, err.Error())
 		return
 	}
 
@@ -183,6 +212,25 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 	}
 	privileged := role == auth.RoleOfficial || role == auth.RoleTournamentRunner ||
 		role == auth.RoleClubLeader
+
+	categories, err := s.categoriesForSignup(r, "ev-demo")
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	stats := rules.Stats{
+		DOB: req.DOB, WeightKg: weightKg, HeightCm: heightCm,
+		BeltOrder: s.beltOrder(r, req.BeltRankID), Gender: req.Gender,
+	}
+	eligible := s.enrichCapacity(r, rules.Compatible(categories, stats, time.Now(), req.ConsentMoveUp))
+	for _, selected := range req.CategoryIDs {
+		for _, item := range eligible {
+			if item.CategoryID == selected && item.Full {
+				writeBadRequest(w, fmt.Sprintf("category %s is full", item.Name))
+				return
+			}
+		}
+	}
 
 	gender := req.Gender
 	if gender == "" {
@@ -204,6 +252,28 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer tx.Rollback()
+
+	beltRankID := req.BeltRankID
+	if strings.TrimSpace(req.CustomBeltLabel) != "" {
+		beltRankID = newID("br")
+		nextOrder := 0
+		_ = tx.QueryRowContext(r.Context(),
+			`SELECT COALESCE(MAX(sort_order), 0) + 1 FROM belt_ranks WHERE tenant_id = 'demo-tenant'`).
+			Scan(&nextOrder)
+		colour := req.CustomBeltColour
+		if colour == "" {
+			colour = "#14b8a6"
+		}
+		if _, err := tx.ExecContext(r.Context(), `
+			INSERT INTO belt_ranks
+			 (id, tenant_id, label, colour, sort_order, grade_kind, is_custom)
+			VALUES (?, 'demo-tenant', ?, ?, ?, 'custom', 1)`,
+			beltRankID, req.CustomBeltLabel, colour, nextOrder); err != nil {
+			writeError(w, err)
+			return
+		}
+	}
+
 	_, err = tx.ExecContext(r.Context(), `
 		INSERT INTO users
 		 (id, tenant_id, club_id, role, display_name, email, phone, date_of_birth,
@@ -211,7 +281,7 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		  source, status, role_request, role_request_status)
 		VALUES (?, 'demo-tenant', NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		userID, req.ClubID, string(role), req.Name, req.Email, req.Phone, req.DOB,
-		heightCm, weightKg, req.UnitSystem, req.UnitSystem, nullIfEmpty(req.BeltRankID),
+		heightCm, weightKg, req.UnitSystem, req.UnitSystem, nullIfEmpty(beltRankID),
 		gender, "independent", status,
 		nullIfEmpty(string(role)), roleRequestStatus)
 	if err != nil {
@@ -236,7 +306,7 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 			 (id, tenant_id, user_id, club_id, belt_rank_id, display_name, date_of_birth,
 			  weight_kg, gender)
 			VALUES (?, 'demo-tenant', ?, NULLIF(?, ''), ?, ?, ?, ?, ?)`,
-			fighterID, userID, req.ClubID, nullIfEmpty(req.BeltRankID), req.Name,
+			fighterID, userID, req.ClubID, nullIfEmpty(beltRankID), req.Name,
 			req.DOB, weightKg, gender); err != nil {
 			writeError(w, err)
 			return
@@ -256,9 +326,13 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	selected := req.CategoryIDs
+	if selected == nil {
+		selected = []string{}
+	}
 	result := signupResult{
 		UserID: userID, Status: status, Role: string(role), RoleRequestID: roleRequestID,
-		HeightCm: heightCm, WeightKg: weightKg, Selected: req.CategoryIDs, Eligible: []rules.Eligibility{},
+		HeightCm: heightCm, WeightKg: weightKg, Selected: selected, Eligible: eligible,
 	}
 	writeJSON(w, http.StatusCreated, result)
 }

@@ -33,6 +33,9 @@ type Eligibility struct {
 	Strict     bool   `json:"strict"`
 	MoveUp     bool   `json:"moveUp"`
 	Reason     string `json:"reason"`
+	Capacity   int    `json:"capacity"`
+	Spaces     int    `json:"spaces"`
+	Full       bool   `json:"full"`
 }
 
 func ageOn(dob string, on time.Time) (int, bool) {
@@ -57,6 +60,10 @@ func genderMatches(categoryGender, athleteGender string) bool {
 	return categoryGender == athleteGender
 }
 
+func offer(id, name, reason string, strict, moveUp bool) Eligibility {
+	return Eligibility{CategoryID: id, Name: name, Strict: strict, MoveUp: moveUp, Reason: reason}
+}
+
 // Compatible returns categories the athlete fits. Strict matches come first;
 // when consentMoveUp is true, nearby heavier/older divisions are appended.
 func Compatible(categories []Category, stats Stats, on time.Time, consentMoveUp bool) []Eligibility {
@@ -79,14 +86,14 @@ func Compatible(categories []Category, stats Stats, on time.Time, consentMoveUp 
 				continue
 			}
 			if stats.BeltOrder >= int(cat.Min) && (cat.Max == 0 || stats.BeltOrder <= int(cat.Max)) {
-				result = append(result, Eligibility{cat.ID, cat.Name, true, false, "belt grade in range"})
+				result = append(result, offer(cat.ID, cat.Name, "belt grade in range", true, false))
 			}
 		case cat.Kind == "age":
 			if !hasAge {
 				continue
 			}
 			if age >= int(cat.Min) && age <= int(cat.Max) {
-				result = append(result, Eligibility{cat.ID, cat.Name, true, false, "age in range"})
+				result = append(result, offer(cat.ID, cat.Name, "age in range", true, false))
 			} else if consentMoveUp && age < int(cat.Min) {
 				moveUps = append(moveUps, candidate{cat, cat.Min, "older division with consent"})
 			}
@@ -95,20 +102,20 @@ func Compatible(categories []Category, stats Stats, on time.Time, consentMoveUp 
 				continue
 			}
 			if stats.WeightKg >= cat.Min && stats.WeightKg <= cat.Max {
-				result = append(result, Eligibility{cat.ID, cat.Name, true, false, "weight in range"})
+				result = append(result, offer(cat.ID, cat.Name, "weight in range", true, false))
 			} else if consentMoveUp && stats.WeightKg < cat.Min {
 				moveUps = append(moveUps, candidate{cat, cat.Min, "heavier division with consent"})
 			}
 		default:
 			// Open divisions (e.g. Kata) accept everyone.
-			result = append(result, Eligibility{cat.ID, cat.Name, true, false, "open division"})
+			result = append(result, offer(cat.ID, cat.Name, "open division", true, false))
 		}
 	}
 
 	if consentMoveUp && len(moveUps) > 0 {
 		sort.Slice(moveUps, func(i, j int) bool { return moveUps[i].min < moveUps[j].min })
 		for _, c := range moveUps {
-			result = append(result, Eligibility{c.cat.ID, c.cat.Name, false, true, c.why})
+			result = append(result, offer(c.cat.ID, c.cat.Name, c.why, false, true))
 		}
 	}
 	return result

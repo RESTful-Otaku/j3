@@ -139,6 +139,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Allow-listed search/sort/filter/pagination over public data */
+        get: operations["query"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/demo/audit": {
         parameters: {
             query?: never;
@@ -148,6 +165,23 @@ export interface paths {
         };
         /** Accountability trail for runners and officials */
         get: operations["auditLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/belts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Full JJJ grade spectrum with colours for the belt picker */
+        get: operations["belts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -201,6 +235,40 @@ export interface paths {
         get: operations["standings"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/fights/{id}/forfeit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record an injury, forfeit or disqualification */
+        post: operations["forfeitFight"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/entrants/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a dropout, no-show or injury; pools rebalance on regeneration */
+        post: operations["entrantStatus"];
         delete?: never;
         options?: never;
         head?: never;
@@ -417,6 +485,14 @@ export interface components {
             actions: components["schemas"]["Action"][];
             counts: components["schemas"]["DemoCounts"];
         };
+        BeltOption: {
+            id: string;
+            label: string;
+            colour: string;
+            sortOrder: number;
+            gradeKind: string;
+            isCustom: boolean;
+        };
         DisplayOfficial: {
             id: string;
             name: string;
@@ -427,6 +503,7 @@ export interface components {
             bannerPath: string;
             logoPath: string;
             themeTokens: string;
+            detailsJson: string;
             mats: string[];
         };
         StandingRow: {
@@ -504,6 +581,8 @@ export interface components {
             url: string;
             path: string;
             kind: string;
+            colour: string;
+            highlight: string;
         };
         AuditEntry: {
             id: number;
@@ -531,6 +610,8 @@ export interface components {
             heightIn?: number;
             weightLb?: number;
             beltRankId?: string;
+            customBeltLabel?: string;
+            customBeltColour?: string;
             /** @enum {string} */
             gender?: "male" | "female" | "open" | "coed";
             accountType?: components["schemas"]["Role"];
@@ -544,6 +625,9 @@ export interface components {
             strict: boolean;
             moveUp: boolean;
             reason: string;
+            capacity: number;
+            spaces: number;
+            full: boolean;
         };
         SignupPreview: {
             heightCm: number;
@@ -902,6 +986,40 @@ export interface operations {
             };
         };
     };
+    query: {
+        parameters: {
+            query: {
+                table: string;
+                search?: string;
+                sort?: string;
+                order?: "asc" | "desc";
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Query result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        table: string;
+                        columns: string[];
+                        rows: {
+                            [key: string]: unknown;
+                        }[];
+                        count: number;
+                    };
+                };
+            };
+        };
+    };
     auditLog: {
         parameters: {
             query?: {
@@ -923,6 +1041,28 @@ export interface operations {
                 content: {
                     "application/json": {
                         entries: components["schemas"]["AuditEntry"][];
+                    };
+                };
+            };
+        };
+    };
+    belts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Belt ranks */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        belts: components["schemas"]["BeltOption"][];
                     };
                 };
             };
@@ -990,6 +1130,65 @@ export interface operations {
                     "application/json": {
                         standings: components["schemas"]["StandingRow"][];
                     };
+                };
+            };
+        };
+    };
+    forfeitFight: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reason?: string;
+                    /** @enum {string} */
+                    winner?: "red" | "blue";
+                };
+            };
+        };
+        responses: {
+            /** @description Result recorded */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    entrantStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    status?: "active" | "withdrawn" | "no_show" | "injured";
+                };
+            };
+        };
+        responses: {
+            /** @description Status updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

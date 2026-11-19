@@ -15,6 +15,7 @@ type eventDisplayInfo struct {
 	BannerPath  string   `json:"bannerPath"`
 	LogoPath    string   `json:"logoPath"`
 	ThemeTokens string   `json:"themeTokens"`
+	DetailsJSON string   `json:"detailsJson"`
 	Mats        []string `json:"mats"`
 }
 
@@ -35,10 +36,11 @@ func (s *Server) eventDisplay(w http.ResponseWriter, r *http.Request) {
 	var info eventDisplayInfo
 	err := s.Store.QueryRowContext(r.Context(), `
 		SELECT e.name, COALESCE(t.banner_path, ''), COALESCE(t.logo_path, ''),
-		       COALESCE(t.tokens_json, '{}')
+		       COALESCE(t.tokens_json, '{}'), COALESCE(rs.config_json, '{}')
 		FROM events e LEFT JOIN themes t ON t.id = e.theme_id
+		LEFT JOIN rule_sets rs ON rs.id = e.rule_set_id
 		WHERE e.id = 'ev-demo'`).
-		Scan(&info.Name, &info.BannerPath, &info.LogoPath, &info.ThemeTokens)
+		Scan(&info.Name, &info.BannerPath, &info.LogoPath, &info.ThemeTokens, &info.DetailsJSON)
 	if err != nil {
 		writeError(w, err)
 		return

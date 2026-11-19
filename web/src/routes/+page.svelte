@@ -248,6 +248,9 @@
       </div>
     </div>
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <a class="btn primary" href="/setup">✨ Create tournament</a>
+      <a class="btn" href="/data">🔎 Data</a>
+      <a class="btn" href="/audit">📜 Audit</a>
       <span class="pill"><span class="dot" class:off={!!error}></span>{error ? 'Server offline' : 'Venue server running'}</span>
       <button class="tab" on:click={() => (theme = theme === 'dark' ? 'light' : theme === 'light' ? 'street' : 'dark')}>
         {theme === 'dark' ? '☀ Light' : theme === 'light' ? '⚡ Street' : '☾ Dark'}

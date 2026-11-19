@@ -9,8 +9,13 @@ export type PoolView = components['schemas']['PoolView'];
 export type GeneratePoolsRequest = components['schemas']['GeneratePoolsRequest'];
 export type RoleRequest = components['schemas']['RoleRequest'];
 export type DisplayOfficial = components['schemas']['DisplayOfficial'];
+export type BeltOption = components['schemas']['BeltOption'];
 export type EventDisplayInfo = components['schemas']['EventDisplayInfo'];
 export type StandingRow = components['schemas']['StandingRow'];
+export type AuditEntry = components['schemas']['AuditEntry'];
+export type CreateTournamentRequest = components['schemas']['CreateTournamentRequest'];
+export type CreateTournamentResponse = components['schemas']['CreateTournamentResponse'];
+export type Template = components['schemas']['Template'];
 export type DemoAccount = components['schemas']['DemoAccount'];
 export type DemoCounts = components['schemas']['DemoCounts'];
 export type DemoFight = components['schemas']['DemoFight'];
@@ -60,12 +65,39 @@ export const api = {
   pools: () => getJson<PoolsResponse>('/api/v1/demo/pools?eventId=ev-demo'),
   generatePools: (body: GeneratePoolsRequest) =>
     postJson<PoolsResponse>('/api/v1/demo/pools/generate', body),
+  belts: () => getJson<{ belts: BeltOption[] }>('/api/v1/demo/belts'),
   event: () => getJson<EventDisplayInfo>('/api/v1/demo/event'),
   officials: (fightId?: string) =>
     getJson<{ officials: DisplayOfficial[] }>(
       `/api/v1/demo/officials${fightId ? `?fightId=${encodeURIComponent(fightId)}` : ''}`,
     ),
   standings: () => getJson<{ standings: StandingRow[] }>('/api/v1/demo/standings'),
+  audit: (params: { actor?: string; action?: string; limit?: number } = {}) => {
+    const query = new URLSearchParams();
+    if (params.actor) query.set('actor', params.actor);
+    if (params.action) query.set('action', params.action);
+    if (params.limit) query.set('limit', String(params.limit));
+    return getJson<{ entries: AuditEntry[] }>(`/api/v1/demo/audit?${query}`);
+  },
+  query: (params: Record<string, string | number>) => {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) query.set(key, String(value));
+    return getJson<{ table: string; columns: string[]; rows: Record<string, unknown>[]; count: number }>(
+      `/api/v1/query?${query}`,
+    );
+  },
+  templates: () => getJson<{ templates: Template[] }>('/api/v1/templates'),
+  createTournament: (body: CreateTournamentRequest) =>
+    postJson<CreateTournamentResponse>('/api/v1/tournaments', body),
+  upload: async (file: File, kind: string, role: string): Promise<{ url: string; colour: string; highlight: string }> => {
+    const body = new FormData();
+    body.append('kind', kind);
+    body.append('ownerRole', role);
+    body.append('file', file);
+    const response = await fetch('/api/v1/uploads', { method: 'POST', body });
+    if (!response.ok) throw new Error(`Upload failed (${response.status})`);
+    return response.json() as Promise<{ url: string; colour: string; highlight: string }>;
+  },
 };
 
 // Polls a data source and keeps all open display tabs live-synced.

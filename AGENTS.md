@@ -6,7 +6,7 @@
 >
 > | Field | Value |
 > |---|---|
-> | Status | Planning — not yet implemented |
+> | Status | Implementation — Phase 1c complete; verification/hardening in progress |
 > | Created | 2026-11-19 |
 > | Last updated | 2026-11-19 |
 > | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
@@ -80,6 +80,14 @@ Core promise: *"One configurable engine, every Jiu Jitsu event, fully branded, f
 12. **Multi-screen by design.** Every view must be openable in its own tab/window so organisers
     can put the control room, public dashboard, several full-screen scoreboards and rotating
     stat pages on different TVs/projectors/LED walls. All views are live-synced with the backend.
+13. **Final quality bar — thoroughness and polish.** Before wrap-up: rigorous inspection,
+    refinement, bug-fixing, testing and verification of absolute correctness. No bad states.
+    A solid, simple, informative, beautiful UI/UX that is a joy to use, with stunning animations,
+    snappy Street-Fighter-style "wow" factor, awesome transitions, movement and dynamism — while
+    remaining a dependable tournament application that minimises organiser effort.
+14. **Production-grade verification.** Extensive automated coverage: unit, property/fuzz, API
+    integration, deterministic full-tournament simulation from signup to medals, varied seeding,
+    edge cases and unusual progression paths. Fix every defect found before shipping.
 
 ---
 
@@ -433,6 +441,42 @@ non-technical runner completes in **under 10 minutes**, with most work automated
 - **Event auditing is essential and visible to runners and officials:** every action records who
   did it, when, what it affected, and how (before → after). A dedicated audit view lets runners
   and officials review the full trail to prevent cheating, bias or abuse.
+- **All data must be queryable** so views, charts, tables and rankings can sort, filter and search
+  it: officials need deep query access; spectators and fighters get a safe public subset. A generic
+  allow-listed query endpoint plus a data-explorer view supports this without exposing private data.
+- **Belt/rank and safety presentation:**
+  - belt selection is a dropdown showing a **colour block + name**, with a final "enter my own"
+    option exposing a **colour picker + text field** (full JJJ spectrum included by default);
+  - **rank/grade affects eligibility** — Kata vs Weapon Kata, Free Fighting vs Randori, age and
+    safety/insurance limits; protection requirements per event (**head guard, mouth guard,
+    gloves/MMA, instep/shin guards, clean pressed Gi, belt**, etc.) must be listed and public;
+  - **competition corner colours are configurable** (red/white, red/blue, whatever the runner
+    decides) to distinguish fighters on the mat.
+- **Public tournament details view:** rules, requirements, event times, opening/closing ceremonies,
+  non-competition schedule, location, venue, amenities, lunch and mandated rest between fights.
+- **Main dashboard clock:** large clock, upcoming events with projected start/end times, and the
+  ability to adapt projections when the event runs early or late — an authoritative timeline
+  everyone can follow.
+- **Locales & account settings:** support English, French, German, Spanish, Portuguese, Hindi,
+  Punjabi, Arabic, Japanese, Korean and Mandarin. Account settings hold language, UI units
+  (metric/imperial), name, email, mobile number, height, weight, rank/grade belt, DOB/age, club
+  affiliation, light/dark/system appearance and other useful preferences.
+- **Uploads are capability-scoped:** fighters upload a photo; officials a photo; clubs a logo and
+  banner; runners/organisers a logo and banner. Formats PNG/JPG/WEBP/SVG with a size limit. The
+  backend extracts a **main colour and highlight colour from the image** so club/brand colours
+  can be auto-generated, with manual override.
+
+- **Operational edge cases must be handled explicitly** (user QA):
+  - uneven fight pools and categories with too few or no entrants;
+  - **voluntary promotion** of a participant into a heavier/older category when they consent;
+  - **participant caps**: reject applications when full, and grey out full/incompatible categories
+    on sign-up so users do not waste time applying;
+  - dynamic suggestion to switch to **round robin** when elimination is incompatible with the
+    actual pool sizes/entrant count;
+  - automatic **third-place rematch only if the two fighters have not already met**, otherwise
+    award **two bronze medals**;
+  - **dropouts, no-shows and injuries on the day**: forfeit/withdraw handling, pool rebalance and
+    promotion adjustment so the event continues smoothly and fairly.
 
 ---
 
@@ -554,19 +598,27 @@ crash recovery · migrations · load headroom well beyond a real event.
       display control, big fighter cards, officials, per-side moves & penalties, PA toasts,
       confirmation dialogues, celebration animations, Street Fighter theme, dashboard templates,
       TUI dev.sh with live build and Capacitor Android/iOS targets.
-- [ ] **Phase 1 — Setup slice**: create event → clubs → fighters → categories → rule-set
-      snapshot → simple single-elim bracket → manual result → medal table. End-to-end offline.
-- [ ] **Phase 2 — Formats & rules engine**: RR, pools, double elim, repechage, BYEs/seeding,
-      tie-breaks, dual bronze, third-place rematch rule. Golden tests.
-- [ ] **Phase 3 — Live scoring**: WebSocket + outbox sync, judge phone UI, bout engine
-      (timer, techniques, holds, submission, penalties, forfeit, undo), multi-mat.
-- [ ] **Phase 4 — Displays & scheduling**: scoreboard display, bracket/leaderboard/chart
-      visualisations, schedule + drift + on-deck, callouts + PA/TTS.
-- [ ] **Phase 5 — Kata & drills**: panel judging, kata catalogue, deduction rules, drills/
-      sparring rotation, guest sensie/shihan sessions.
+- [x] **Phase 1c — Setup pipeline & data platform**: five-step persisted wizard with validation,
+      tournament/template creation API, stacked toasts with undo, generic allow-listed query API,
+      data explorer, audit view, capacity limits + voluntary promotion, forfeit/no-show handling,
+      auto-generated interactive bracket, settings page (11 locales, units, belt picker).
+- [ ] **Phase 1 — Setup completeness**: clubs/categories imported from templates, rule-set
+      snapshots per discipline, manual result entry and medal table in one end-to-end flow.
+- [ ] **Phase 2 — Formats & rules engine**: RR, true/consolation double elim, repechage,
+      BYEs/seeding, tie-break chain, dual bronze and no-rematch rule in production code (rules
+      helpers exist; simulation tests cover them).
+- [ ] **Phase 3 — Live scoring**: authoritative server timer + WebSocket/outbox sync, judge
+      phone UI, holds, submission instant-win, penalties, undo and multi-mat control.
+- [ ] **Phase 4 — Displays & scheduling (partial)**: scoreboard/brackets/tables/pools/public
+      views exist; still need authoritative schedule, drift projection, on-deck and TTS/PA.
+- [ ] **Phase 5 — Kata & drills (partial)**: kata panel table exists; need catalogue, deduction
+      rules, panel judge input, weapon kata, drills and sparring rotation.
 - [ ] **Phase 6 — White-label depth & scale**: portals, registration/payments/check-in/
-      weigh-in, rankings/team points, broadcast overlays/VAR, i18n JA, mobile polish,
-      import/export, hardening.
+      weigh-in, team points/season rankings, broadcast overlays/VAR, full i18n translation rollout,
+      mobile polish, import/export.
+- [~] **Phase 7 — Verification & hardening (in progress)**: fuzz/property/simulation/API tests
+      added and two defects fixed; still need broader API fuzzing, browser E2E tests, race/load
+      runs, edge-case sweep and final UI/UX polish + QA sign-off (§2 principles 13–14).
 
 > Order may change; keep this list honest. Each phase should be demoable.
 
@@ -687,6 +739,30 @@ _Format: `D-### | date | decision | rationale | status`._
 - **D-028 | 2026-11-19 | Runner/official audit view**
   — queryable audit log showing actor, role, timestamp, action, target and before/after values,
   to deter and detect cheating, bias or abuse. Status: accepted.
+- **D-029 | 2026-11-19 | Allow-listed generic query API + data explorer**
+  — tables/columns are explicitly allow-listed; search/sort/filter/pagination are parameterised;
+  private tables hidden from public views. Status: accepted.
+- **D-030 | 2026-11-19 | Final verification and polish pass is mandatory**
+  — user requires thorough inspection, bug fixing, correctness/no-bad-states verification, and
+  high-polish animation-rich UX before considering the app complete (§2 principle 13). Status:
+  accepted; track as a late roadmap phase.
+- **D-031 | 2026-11-19 | Production-grade automated verification suite**
+  — fuzz/property tests for conversions and algorithms, deterministic full-tournament simulation,
+  varied seed sets, edge cases, API integration and validation tests; defects fixed before ship.
+  Status: accepted (§12).
+- **D-032 | 2026-11-19 | Capacity, promotion and on-the-day disruption rules**
+  — full categories greyed out/rejected; voluntary upward promotion; format fallback to round
+  robin; rematch-or-dual-bronze; forfeit/no-show/injury handled dynamically. Status: accepted.
+- **D-033 | 2026-11-19 | Rank/safety presentation and authoritative event timeline**
+  — colour-block belt picker + custom belt, configurable corner colours, per-event protection
+  requirements, public details view and a live dashboard clock with drift-adaptive projections.
+  Status: accepted.
+- **D-034 | 2026-11-19 | Eleven locales and per-user account settings**
+  — EN/FR/DE/ES/PT/HI/PA/AR/JA/KO/ZH plus language, units, profile stats, belt, club affiliation
+  and appearance preferences on the user's account. Status: accepted.
+- **D-035 | 2026-11-19 | Capability-scoped uploads with auto-generated colours**
+  — photos for fighters/officials, logo+banner for clubs and runners; PNG/JPG/WEBP/SVG, size
+  limit; backend extracts main/highlight colours with manual override. Status: accepted.
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)
@@ -702,6 +778,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-19** — Full document refresh: added §18 current state/outstanding register, updated
+  header status and roadmap (Phase 1c done, Phase 7 in progress), and recorded D-035. Completed
+  capability-scoped uploads with dominant/highlight colour extraction, belt picker with custom
+  grades, 11-locale settings, capacity/disruption rules, format/third-place helpers and their
+  automated tests. Fixed validation status codes and unvalidated unit-system defects found by tests.
 - **2026-11-19** — Completed Phase 1b from user QA feedback: dedicated live routes
   (`/display`, `/public`, `/brackets`, `/tables`, `/pools`, `/control`), live polling, ultrawide
   CSS, large fighter portraits, officials/standings/event API, method icons, confirmation
@@ -735,4 +816,49 @@ _Format: `D-### | date | decision | rationale | status`._
 
 ---
 
-_End of living document. Agents: please update §§14–17 as you work._
+## 18. Current state & outstanding work (living summary)
+
+### Delivered and verified
+- Go venue server + pure-Go SQLite with migrations, RBAC role catalogue, seeded demo
+  (**2 runners, 8 officials, 5 club leaders, 48 fighters, 1 spectator, 4 clubs, 6 categories, 16 fights**).
+- Sign-up with imperial→metric conversion, compatibility (strict + consent move-up), capacity
+  checks, role request/approval, forfeit/no-show/injury handling and audit logging.
+- Deterministic, property-tested algorithms: balanced pool generation with same-club separation,
+  eligibility, format fallback and third-place planning; 120-seed full-tournament simulation.
+- Five-step setup wizard, tournament/template creation, capability-scoped uploads with image
+  colour extraction, query API, data explorer, audit view, settings (11 locales, units,
+  colour-block belt picker + custom grade), stacked toasts with undo.
+- Multi-screen routes: `/display`, `/public`, `/brackets`, `/tables`, `/pools`, `/control`,
+  `/setup`, `/data`, `/audit`, `/settings`; live polling, PA toasts, celebration animations,
+  Street Fighter theme, ultrawide CSS, TUI `dev.sh`, Capacitor config.
+- Test suite: `go test ./...`, `go test -race ./...`, `bun run check`, `bun run test`, `bun run build`
+  all green at the time of this update.
+
+### Outstanding — must finish before a real tournament
+1. **Authoritative live scoring**: server-owned timers, technique/hold/submission/penalty events,
+   confirmation + undo, WebSocket sync and multi-mat control (Phase 3). The scoreboard is currently
+   a demo view with client-side timer.
+2. **Production format engine**: wire `SuggestFormat`, `ThirdPlacePlan`, tie-break chains, BYEs and
+   seeding into real bracket generation; persist per-round history and promotion (Phase 2).
+3. **Scheduling authority**: event timeline, drift projection, on-deck callouts, mandated rest
+   intervals, TTS/PA announcements and the large dashboard clock (Phase 4).
+4. **Public details & dashboard clock**: publish rules, protection requirements, event times,
+   ceremonies, amenities and corner colours; add the large live clock with drift-adaptive
+   projected start/end times and on-deck callouts (Phase 4).
+5. **Kata completeness**: catalogue, compulsory/choice kata, panel judge scoring, deductions,
+   weapon kata, bunkai, drills and sparring rotation (Phase 5).
+6. **Setup completeness**: import clubs/fighters from templates, per-discipline rule snapshots,
+   manual result entry and medal ceremony flow in one continuous path (Phase 1).
+7. **Verification**: browser E2E walkthrough of the wizard and multi-screen routes, API fuzz
+   corpus, load/race runs, no-bad-state audit and final QA sign-off (Phase 7).
+
+### Outstanding — polish & scale
+- Full translation rollout for the 11 locales (settings currently stores the preference only).
+- Payments, waivers, check-in/weigh-in, season rankings/team points, public portal, i18n JA content,
+  broadcast overlays/VAR, CSV/PDF import/export.
+- Capacitor Android/iOS build verification on real devices; projector/LED aspect-ratio tuning.
+- Accessibility sweep, keyboard navigation and colour-blind verification across all displays.
+
+---
+
+_End of living document. Agents: please update §§14–18 as you work._
