@@ -2,9 +2,36 @@ name: CI
 
 on:
   push:
+    branches: [main, develop]
   pull_request:
+    branches: [main, develop]
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
+  branch-name:
+    name: Branch convention
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate feature/bug/fix/chore/perf/improv prefix
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          echo "Branch: $BRANCH"
+          if [[ "$BRANCH" =~ ^(feature|bug|fix|chore|perf|improv|release|hotfix)/[a-z0-9._-]+$ ]]; then
+            echo "✅ Branch name follows the convention"
+          else
+            echo "❌ Use feature/, bug/, fix/, chore/, perf/, improv/, release/ or hotfix/ prefix"
+            exit 1
+          fi
+
   go:
     name: Go venue server
     runs-on: ubuntu-latest
@@ -13,8 +40,19 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27'
-      - run: go test ./...
-      - run: go build ./...
+          cache: true
+      - name: Vet
+        run: go vet ./...
+      - name: Unit + property + simulation tests
+        run: go test ./... -count=1
+      - name: Race detector
+        run: go test -race ./...
+      - name: Build
+        run: go build -o bin/j3d ./cmd/j3d
+      - uses: actions/upload-artifact@v4
+        with:
+          name: j3d-${{ github.sha }}
+          path: bin/j3d
 
   web:
     name: Web (Bun)
@@ -22,7 +60,50 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
       - run: bun install --cwd web --frozen-lockfile
-      - run: bun run --cwd web check
-      - run: bun run --cwd web test
-      - run: bun run --cwd web build
+      - name: Type check
+        run: bun run --cwd web check
+      - name: Unit tests
+        run: bun run --cwd web test
+      - name: Production build
+        run: bun run --cwd web build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-build-${{ github.sha }}
+          path: web/build
+
+  smoke:
+    name: End-to-end smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --cwd web --frozen-lockfile
+      - name: Full-stack smoke suite
+        run: bun run smoke
+
+  required-checks:
+    name: All checks passed
+    if: always()
+    needs: [branch-name, go, web, smoke]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all jobs succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
+              echo "❌ A required check did not pass"
+              exit 1
+            fi
+          done
+          echo "✅ All required checks passed"

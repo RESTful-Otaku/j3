@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: Verify before release
+    uses: ./.github/workflows/ci.yml
+
+  mobile:
+    name: Mobile artifacts
+    needs: verify
+    uses: ./.github/workflows/mobile.yml
+
+  package:
+    name: Package executables
+    needs: [verify, mobile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --cwd web --frozen-lockfile
+      - name: Build venue server
+        run: |
+          mkdir -p dist/bin
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/bin/j3d-linux-amd64 ./cmd/j3d
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o dist/bin/j3d-darwin-arm64 ./cmd/j3d
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o dist/bin/j3d-windows-amd64.exe ./cmd/j3d
+      - name: Build web app
+        run: bun run --cwd web build && cp -R web/build dist/web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: j3-executables-${{ github.sha }}
+          path: dist
+
+  publish:
+    name: Publish GitHub release
+    needs: [verify, mobile, package]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**
+          generate_release_notes: true
+          draft: false

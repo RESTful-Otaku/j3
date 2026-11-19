@@ -1,0 +1,80 @@
+name: Mobile builds
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Android APK (QA artifact)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Restore Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('web/android/gradle/wrapper/gradle-wrapper.properties') }}
+      - run: bun install --cwd web --frozen-lockfile
+      - run: bun run --cwd web build
+      - run: bunx --cwd web cap sync android
+      - name: Build debug APK
+        working-directory: web/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: j3-android-apk-${{ github.sha }}
+          path: web/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+  ios:
+    name: iOS .app (simulator QA artifact)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --cwd web --frozen-lockfile
+      - run: bun run --cwd web build
+      - run: bunx --cwd web cap sync ios
+      - name: Build unsigned simulator app
+        working-directory: web/ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App \
+            -configuration Debug -sdk iphonesimulator \
+            -derivedDataPath ../../../build/ios CODE_SIGNING_ALLOWED=NO build
+      - name: Package .app
+        run: |
+          mkdir -p artifacts
+          cp -R build/ios/Build/Products/Debug-iphonesimulator/App.app artifacts/J3.app
+          cd artifacts && zip -r ../j3-ios-app.zip J3.app
+      - name: Upload iOS app
+        uses: actions/upload-artifact@v4
+        with:
+          name: j3-ios-app-${{ github.sha }}
+          path: j3-ios-app.zip
+          if-no-files-found: error

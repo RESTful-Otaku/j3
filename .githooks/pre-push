@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Local gate: branch convention + full checks before pushing.
+set -uo pipefail
+
+branch="$(git rev-parse --abbrev-ref HEAD)"
+if [[ "$branch" =~ ^(feature|bug|fix|chore|perf|improv|release|hotfix)/[a-z0-9._-]+$ ]] || [ "$branch" = "main" ]; then
+  echo "✅ Branch name: $branch"
+else
+  echo "❌ Branch '$branch' must use feature/, bug/, fix/, chore/, perf/, improv/, release/ or hotfix/"
+  exit 1
+fi
+
+export PATH="$HOME/.bun/bin:$PATH"
+echo "🧪 Running pre-push verification…"
+if ! go test ./... >/dev/null || ! bun run check >/dev/null || ! bun run --cwd web test >/dev/null; then
+  echo "❌ Pre-push checks failed"
+  exit 1
+fi
+echo "✅ Pre-push checks passed"
