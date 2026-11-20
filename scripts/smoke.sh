@@ -36,6 +36,9 @@ has() { curl -s "$1" | grep -q "$2" && echo 1 || echo 0; }
 echo "🚀 Starting venue server on $PORT"
 pkill -f "j3-smoke-bin -addr 127.0.0.1:$PORT" 2>/dev/null || true
 go build -o /tmp/j3-smoke-bin ./cmd/j3d
+if [ "${SMOKE_FULL:-0}" = "1" ]; then
+  /tmp/j3-smoke-bin reset -full -db "$DB" >/dev/null 2>&1
+fi
 /tmp/j3-smoke-bin -addr "127.0.0.1:$PORT" -db "$DB" -seed >/tmp/j3-smoke-server.log 2>&1 &
 SERVER_PID=$!
 for _ in $(seq 1 80); do
@@ -79,6 +82,8 @@ check "schedule drift" "200" "$(status -X POST "$BASE/api/v1/demo/schedule/drift
 check "medal award" "200" "$(status -X POST "$BASE/api/v1/demo/medals/award" -H 'Content-Type: application/json' -d '{"gold":"f01","silver":"f02","bronze":["f03","f04"]}')"
 check "tie-break standings" "200" "$(status "$BASE/api/v1/demo/standings?chain=wins,submissions,points_scored")"
 check "sparring rotation" "200" "$(status -X POST "$BASE/api/v1/demo/rotation" -H 'Content-Type: application/json' -d '{"fighters":["f01","f02","f03","f04"],"mats":["Mat 1","Mat 2"],"rounds":3}')"
+check "official bracket stages" "200" "$(status "$BASE/api/v1/demo/brackets?eventId=ev-demo")"
+check "medal table" "200" "$(status "$BASE/api/v1/demo/medals")"
 
 echo "🔎 Data assertions"
 check "simulator has medals" "1" "$(has "$BASE/api/v1/demo/simulate?fighters=50" '"medals"')"

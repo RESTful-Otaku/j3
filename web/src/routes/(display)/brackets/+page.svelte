@@ -15,6 +15,44 @@
   let pendingPromotion: DemoFight | null = null;
   let confirmOpen = false;
   let dragging: { round: number; node: number; corner: 'a' | 'b' } | null = null;
+  let bracketContainer: HTMLDivElement;
+  let connectorPaths: string[] = [];
+
+  function matchesOf(stage: BracketStage) {
+    const result: { id: string; slots: typeof stage.slots }[] = [];
+    for (let i = 0; i < stage.slots.length; i += 2) {
+      result.push({ id: stage.slots[i].id, slots: stage.slots.slice(i, i + 2) });
+    }
+    return result;
+  }
+
+  function drawConnectors() {
+    if (!bracketContainer) return;
+    const containerRect = bracketContainer.getBoundingClientRect();
+    const columns = Array.from(bracketContainer.querySelectorAll('.bracket-column'));
+    const paths: string[] = [];
+    for (let i = 0; i < columns.length - 1; i++) {
+      const from = Array.from(columns[i].querySelectorAll('.bracket-match'));
+      const to = Array.from(columns[i + 1].querySelectorAll('.bracket-match'));
+      from.forEach((element, index) => {
+        const target = to[Math.floor(index / 2)];
+        if (!target) return;
+        const a = element.getBoundingClientRect();
+        const b = target.getBoundingClientRect();
+        const x1 = a.right - containerRect.left;
+        const y1 = a.top - containerRect.top + a.height / 2;
+        const x2 = b.left - containerRect.left;
+        const y2 = b.top - containerRect.top + b.height / 2;
+        const mid = x1 + (x2 - x1) / 2;
+        paths.push(`M ${x1} ${y1} H ${mid} V ${y2} H ${x2}`);
+      });
+    }
+    connectorPaths = paths;
+  }
+
+  function scheduleConnectors() {
+    requestAnimationFrame(() => requestAnimationFrame(drawConnectors));
+  }
 
   onMount(() => {
     void api.bracketStages().then((result) => (serverStages = result.stages)).catch(() => {});
@@ -26,7 +64,8 @@
       pools = data.pools;
       if (bracket.length === 0) buildBracket();
     });
-    return () => { stopFights(); stopPools(); };
+    window.addEventListener('resize', drawConnectors);
+    return () => { stopFights(); stopPools(); window.removeEventListener('resize', drawConnectors); };
   });
 
   async function buildOfficial(direct = false) {
@@ -136,6 +175,7 @@
   }
 
   $: groups = roundGroups();
+  $: if (serverStages.length > 0) scheduleConnectors();
 </script>
 
 <svelte:head><title>J3 · Brackets</title></svelte:head>
@@ -156,25 +196,33 @@
       <button class="btn" on:click={() => buildOfficial(true)}>⚡ Direct elimination (BYEs)</button>
       <button class="btn primary" on:click={() => buildOfficial()}>⚙ Build official bracket</button>
     </div>
-    <div style="display:flex; gap:clamp(14px,2vw,40px); overflow-x:auto; align-items:flex-start; padding-bottom:20px;">
+    <div class="bracket-wrap" bind:this={bracketContainer}>
+      <svg class="bracket-lines" aria-hidden="true">
+        {#each connectorPaths as path (path)}<path d={path} />{/each}
+      </svg>
       {#each serverStages as stage (stage.id)}
-        <section style="min-width:clamp(250px,22vw,380px); flex:1;">
+        <section class="bracket-column">
           <div class="eyebrow">{stage.name} · {stage.kind}</div>
-          <div style="display:grid; gap:10px; margin-top:12px;">
-            {#each stage.slots as slot (slot.id)}
-              <div class="card slide-in" style="padding:8px 12px;">
-                <div style="display:flex; gap:10px; align-items:center;">
-                  <span class="portrait tiny" style="background:{slot.clubColour || '#64748b'};">{initials(slot.fighterName || 'TBD')}</span>
-                  <span style="flex:1;"><strong>{slot.fighterName || 'TBD'}</strong><br /><span class="muted small">{slot.club || 'Independent'} · {slot.belt}</span></span>
-                  {#if slot.resultIcon}<span class="badge {slot.state === 'advanced' ? 'fighter' : 'spectator'}">{slot.resultIcon}</span>{/if}
-                </div>
-                {#if slot.fighterId}
-                  <div style="display:flex; gap:6px; margin-top:8px;">
-                    <button class="tab" on:click={() => promoteOfficial(slot.id, 'WP')}>Win points</button>
-                    <button class="tab" on:click={() => promoteOfficial(slot.id, 'WS')}>Win sub</button>
-                    <button class="tab" on:click={() => promoteOfficial(slot.id, 'LP')}>Loss</button>
+          <div class="bracket-matches">
+            {#each matchesOf(stage) as match (match.id)}
+              <div class="bracket-match">
+                {#each match.slots as slot (slot.id)}
+                  <div class="bracket-slot" class:advanced={slot.state === 'advanced'} class:out={slot.state === 'eliminated'}>
+                    <span class="portrait tiny" style="background:{slot.clubColour || '#64748b'};">{initials(slot.fighterName || 'TBD')}</span>
+                    <span style="flex:1; min-width:0;">
+                      <strong>{slot.fighterName || 'TBD'}</strong>
+                      <span class="muted small" style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{slot.club || 'Independent'} · {slot.belt}</span>
+                    </span>
+                    {#if slot.resultIcon}<span class="badge {slot.state === 'advanced' ? 'fighter' : 'spectator'}">{slot.resultIcon}</span>{/if}
+                    {#if slot.fighterId}
+                      <span class="slot-actions">
+                        <button class="tab" title="Win on points" on:click={() => promoteOfficial(slot.id, 'WP')}>W</button>
+                        <button class="tab" title="Win by submission" on:click={() => promoteOfficial(slot.id, 'WS')}>S</button>
+                        <button class="tab" title="Loss" on:click={() => promoteOfficial(slot.id, 'LP')}>L</button>
+                      </span>
+                    {/if}
                   </div>
-                {/if}
+                {/each}
               </div>
             {/each}
           </div>
@@ -245,4 +293,16 @@
 
 <style>
   .small-portrait, .portrait.tiny { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: .85rem; flex: none; }
+  .bracket-wrap { position:relative; display:flex; gap:clamp(24px,3vw,70px); align-items:flex-start; overflow-x:auto; padding:12px 0 40px; min-height:420px; min-width:max-content; }
+  .bracket-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+  .bracket-lines path { fill:none; stroke:var(--brand-accent); stroke-width:2; opacity:.65; }
+  .bracket-column { min-width:clamp(260px,22vw,380px); flex:1; position:relative; z-index:1; }
+  .bracket-matches { display:flex; flex-direction:column; gap:clamp(14px,3vh,32px); margin-top:14px; }
+  .bracket-match { background:var(--brand-surface-2); border:1px solid var(--brand-border); border-radius:12px; padding:4px; box-shadow:var(--brand-shadow); }
+  .bracket-slot { display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; }
+  .bracket-slot + .bracket-slot { border-top:1px solid var(--brand-border); }
+  .bracket-slot.advanced { background:rgba(34,197,94,.12); }
+  .bracket-slot.out { opacity:.55; }
+  .slot-actions { display:flex; gap:3px; }
+  .slot-actions .tab { padding:4px 7px; font-size:.72rem; }
 </style>

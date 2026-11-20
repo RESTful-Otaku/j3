@@ -102,12 +102,12 @@ func (s *Server) standings(w http.ResponseWriter, r *http.Request) {
 		SELECT f.id, f.display_name, COALESCE(c.name, 'Open'),
 		       COALESCE(b.label, ''), COALESCE(cl.name, 'Independent'),
 		       COALESCE(cl.primary_colour, '#64748b'),
-		       SUM(CASE WHEN (ft.red_fighter_id = f.id AND ft.outcome = 'win_red')
-		                  OR (ft.blue_fighter_id = f.id AND ft.outcome = 'win_blue') THEN 1 ELSE 0 END),
-		       SUM(CASE WHEN (ft.red_fighter_id = f.id AND ft.outcome = 'win_blue')
-		                  OR (ft.blue_fighter_id = f.id AND ft.outcome = 'win_red') THEN 1 ELSE 0 END),
-		       SUM(CASE WHEN ft.outcome = 'draw' AND
-		                  (ft.red_fighter_id = f.id OR ft.blue_fighter_id = f.id) THEN 1 ELSE 0 END)
+		       COALESCE(SUM(CASE WHEN (ft.red_fighter_id = f.id AND ft.outcome = 'win_red')
+		                  OR (ft.blue_fighter_id = f.id AND ft.outcome = 'win_blue') THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN (ft.red_fighter_id = f.id AND ft.outcome = 'win_blue')
+		                  OR (ft.blue_fighter_id = f.id AND ft.outcome = 'win_red') THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN ft.outcome = 'draw' AND
+		                  (ft.red_fighter_id = f.id OR ft.blue_fighter_id = f.id) THEN 1 ELSE 0 END), 0)
 		FROM fighters f
 		LEFT JOIN fights ft ON ft.red_fighter_id = f.id OR ft.blue_fighter_id = f.id
 		LEFT JOIN clubs cl ON cl.id = f.club_id

@@ -405,7 +405,10 @@ From direct user QA feedback (2026-11-19) — all of this is required, not optio
 - A **nice TUI-style, navigation-friendly `dev.sh`** with emoji, spinners and menus for:
   dry running the app, QA testing, resetting demo data, building a production/live executable,
   deploying it, and building **Capacitor mobile variants for Android and iOS/iPhone**.
-- Must remain easy for non-technical users: numbered menu, plain-language choices, clear status.
+- Must remain easy for non-technical users: plain-language choices, clear status, **nested menus**
+  with up/down arrow navigation, Enter to select and q/Esc to step back to the parent menu.
+- One command must launch a **fully seeded, internally consistent tournament** for QA: pools,
+  six-round bracket with promotion history, scored fights, kata scores, medals, standings and audit.
 
 ### 6.18 Tournament creation pipeline (full setup from scratch)
 The core "create a tournament" experience must be a **simple, coherent ~5-step pipeline** that a
@@ -784,6 +787,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-20** — Added a complete deterministic tournament seeder (`seed -full`, `bun run
+  demo:full`, `bun run smoke:full`) with pools, six-round bracket, scored fights, kata, medals and
+  audit; rebuilt the official bracket as a football-style diagram with SVG connectors, promotion
+  history and a bronze decider; rebuilt the TUI with nested keyboard-navigable menus. Hardened
+  standings with COALESCE to prevent 500s on empty data.
 - **2026-11-20** — Added kata round advancement, environment-gated dev/staging/production deploy
   workflow, and an optional signed-IPA build step gated on Apple signing secrets. Smoke runner now
   builds a real binary to avoid stale servers; 52/52 checks passing.
@@ -898,7 +906,7 @@ _Format: `D-### | date | decision | rationale | status`._
    rotation generator are available.
 5. **Setup & ceremony — delivered**: saved tournament templates can recreate an event **or import
    its clubs/fighters**; `/ceremony` provides a guided animated podium sequence with PA callouts.
-6. **Verification — delivered**: `bun run smoke` (52 API/UI assertions), `bun run e2e` (26 browser
+6. **Verification — delivered**: `bun run smoke` (52 API/UI assertions), `bun run e2e` (27 browser
    journey + axe accessibility tests), `bun run load` (200 concurrent requests), Go race tests and
    web toast unit tests all pass. CI runs every gate on PRs before merge.
 

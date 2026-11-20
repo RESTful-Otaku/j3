@@ -48,6 +48,16 @@ test.describe('J3 end-to-end journeys', () => {
     expect(errors).toEqual([]);
   });
 
+  test('official bracket renders connector lines and rounds', async ({ page }) => {
+    const errors = await expectNoPageErrors(page);
+    await page.goto('/brackets');
+    await page.getByRole('button', { name: /Build official bracket/ }).click();
+    await expect(page.locator('.bracket-column').first()).toBeVisible();
+    await expect(page.locator('.bracket-lines path').first()).toBeAttached();
+    expect(await page.locator('.bracket-column').count()).toBeGreaterThanOrEqual(4);
+    expect(errors).toEqual([]);
+  });
+
   test('scorekeeper can start a fight from the mat console', async ({ page }) => {
     const errors = await expectNoPageErrors(page);
     await page.goto('/mat');

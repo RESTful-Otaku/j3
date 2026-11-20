@@ -77,6 +77,7 @@ func seedCommand(args []string, reset bool) error {
 	cfg := config.Load()
 	flags := flag.NewFlagSet("seed", flag.ContinueOnError)
 	dbPath := flags.String("db", cfg.DBPath, "SQLite database path")
+	full := flags.Bool("full", false, "seed a complete verifiable tournament")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -94,6 +95,12 @@ func seedCommand(args []string, reset bool) error {
 	defer store.Close()
 	if err := seed.Ensure(store); err != nil {
 		return err
+	}
+	if *full {
+		if err := seed.EnsureFull(store); err != nil {
+			return err
+		}
+		log.Printf("full tournament seeded")
 	}
 	log.Printf("demo data ready in %s", *dbPath)
 	return nil

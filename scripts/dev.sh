@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# J3 developer / operator console — friendly TUI for local QA, live builds and mobile.
+# J3 developer / operator console — nested TUI with keyboard navigation.
 set -uo pipefail
-
 export PATH="$HOME/.bun/bin:$PATH"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -15,9 +14,42 @@ header() {
   printf "%b\n" "${CYAN}${BOLD}"
   echo "  ╭──────────────────────────────────────────────╮"
   echo "  │        J3 · TOURNAMENT CREATOR               │"
-  echo "  │   dev / QA / live / mobile console           │"
+  echo "  │   keyboard-navigable developer console       │"
   echo "  ╰──────────────────────────────────────────────╯"
   printf "%b\n" "${NC}"
+  echo ""
+}
+
+select_menu() {
+  local title="$1"; shift
+  local -a items=("$@")
+  local selected=0 key rest
+  while true; do
+    header
+    printf "  %b%s%b\n" "$BOLD" "$title" "$NC"
+    echo ""
+    for i in "${!items[@]}"; do
+      if [ "$i" -eq "$selected" ]; then
+        printf "  %b➜  %s%b\n" "$GREEN" "${items[$i]}" "$NC"
+      else
+        printf "     %s\n" "${items[$i]}"
+      fi
+    done
+    echo ""
+    printf "  %b↑/↓ move  ·  Enter select  ·  q back%b\n" "$YELLOW" "$NC"
+    read -rsn1 key
+    case "$key" in
+      $'\033')
+        read -rsn2 -t 0.1 rest || rest=""
+        case "$rest" in
+          '[A') selected=$(( (selected - 1 + ${#items[@]}) % ${#items[@]} )) ;;
+          '[B') selected=$(( (selected + 1) % ${#items[@]} )) ;;
+        esac
+        ;;
+      '') return "$selected" ;;
+      [qQ]) return 255 ;;
+    esac
+  done
 }
 
 spinner() {
@@ -39,10 +71,14 @@ spinner() {
   return "$code"
 }
 
+pause() {
+  echo ""
+  read -r -p "  Press Enter to continue…" _
+}
+
 run_demo() {
   mkdir -p data
   spinner "Installing web dependencies" bun install --cwd web
-  printf "  %b🚀 Starting venue server + UI…%b\n" "$GREEN" "$NC"
   (
     trap 'kill %1 2>/dev/null || true' EXIT INT TERM
     go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
@@ -51,91 +87,121 @@ run_demo() {
       sleep 0.25
     done
     echo ""
-    echo "  ✅ J3 demo ready"
-    echo "     UI  → http://localhost:5173"
-    echo "     API → http://127.0.0.1:8787/api/v1/demo"
-    echo "     Press Ctrl-C to stop."
+    echo "  ✅ J3 demo ready → http://localhost:5173"
     echo ""
     bun run --cwd web dev
   )
 }
 
-qa_checks() {
-  spinner "Go unit tests" go test ./...
-  spinner "Svelte type check" bun run check
-  spinner "Web tests" bun run --cwd web test
+run_demo_full() {
+  mkdir -p data
+  spinner "Installing web dependencies" bun install --cwd web
+  spinner "Seeding complete tournament" go run ./cmd/j3d reset -full -db ./data/j3-demo.db
+  (
+    trap 'kill %1 2>/dev/null || true' EXIT INT TERM
+    go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
+    for _ in $(seq 1 80); do
+      curl -fsS http://127.0.0.1:8787/healthz >/dev/null 2>&1 && break
+      sleep 0.25
+    done
+    echo ""
+    echo "  ✅ Fully seeded tournament ready → http://localhost:5173"
+    echo "     Brackets, tables, kata, medals and audit are all populated."
+    echo ""
+    bun run --cwd web dev
+  )
+}
+
+qa_all() {
+  spinner "Go tests" go test ./...
+  spinner "Web type check" bun run check
+  spinner "Web unit tests" bun run --cwd web test
+  spinner "Full-stack smoke" bun run smoke
+  spinner "Browser E2E + accessibility" bun run e2e
+  spinner "Load test" bash scripts/load.sh
   spinner "Production build" bun run build
-  echo "  ${GREEN}✅ All QA checks passed${NC}"
 }
 
-reset_data() { spinner "Resetting demo data" go run ./cmd/j3d reset -db ./data/j3-demo.db; }
-seed_data()  { spinner "Seeding demo data"  go run ./cmd/j3d seed  -db ./data/j3-demo.db; }
-
-build_live() {
-  mkdir -p bin dist
-  spinner "Building venue server binary" go build -o bin/j3d ./cmd/j3d
-  spinner "Building static web app" bun run --cwd web build
-  cp -R web/build/. dist/web/ 2>/dev/null || { mkdir -p dist/web && cp -R web/build/. dist/web/; }
-  echo "  ${GREEN}✅ Live build ready:${NC} ./bin/j3d + ./dist/web"
+qa_menu() {
+  while true; do
+    select_menu "QA & verification" \
+      "Run all QA checks" "Full-stack smoke (52 checks)" "Full-data smoke (seeded tournament)" \
+      "Browser E2E + axe accessibility" "Load test (200 concurrent)" "← Back"
+    choice=$?
+    [ "$choice" -eq 255 ] && return
+    case "$choice" in
+      0) qa_all ;;
+      1) spinner "Full-stack smoke" bun run smoke ;;
+      2) spinner "Full-data smoke" bun run smoke:full ;;
+      3) spinner "Browser E2E" bun run e2e ;;
+      4) spinner "Load test" bash scripts/load.sh ;;
+    esac
+    pause
+  done
 }
 
-run_live() {
-  if [ ! -x bin/j3d ]; then echo "  ${RED}Build first (option 5)${NC}"; return; fi
-  echo "  ${GREEN}▶ Running live executable on :8787 (Ctrl-C to stop)${NC}"
-  J3_DB=./data/j3-live.db ./bin/j3d -addr 127.0.0.1:8787
+data_menu() {
+  while true; do
+    select_menu "Demo data & state" \
+      "Reset demo data" "Seed demo data" "Seed full tournament" "Run live executable" "← Back"
+    choice=$?
+    [ "$choice" -eq 255 ] && return
+    case "$choice" in
+      0) spinner "Resetting demo data" go run ./cmd/j3d reset -db ./data/j3-demo.db ;;
+      1) spinner "Seeding demo data" go run ./cmd/j3d seed -db ./data/j3-demo.db ;;
+      2) spinner "Seeding full tournament" go run ./cmd/j3d reset -full -db ./data/j3-demo.db ;;
+      3) J3_DB=./data/j3-live.db ./bin/j3d -addr 127.0.0.1:8787 ;;
+    esac
+    pause
+  done
 }
 
-mobile_sync() {
-  spinner "Preparing web build" bun run --cwd web build
-  spinner "Syncing Capacitor platforms" bunx --cwd web cap sync
+build_menu() {
+  while true; do
+    select_menu "Build & deploy" \
+      "Build live executable + static UI" "Deploy to development" "Deploy to staging" \
+      "Deploy to production" "← Back"
+    choice=$?
+    [ "$choice" -eq 255 ] && return
+    case "$choice" in
+      0) spinner "Building live executable" go build -o bin/j3d ./cmd/j3d; spinner "Building web app" bun run --cwd web build ;;
+      1) spinner "Deploying development" bash scripts/deploy.sh development artifacts ;;
+      2) spinner "Deploying staging" bash scripts/deploy.sh staging artifacts ;;
+      3) spinner "Deploying production" bash scripts/deploy.sh production artifacts ;;
+    esac
+    pause
+  done
 }
 
-android_build() {
-  spinner "Preparing web build" bun run --cwd web build
-  if ! ls web/android >/dev/null 2>&1; then spinner "Adding Android platform" bunx --cwd web cap add android; fi
-  spinner "Syncing Capacitor" bunx --cwd web cap sync android
-  spinner "Building Android APK (needs Android SDK)" bunx --cwd web cap build android
-}
-
-ios_build() {
-  spinner "Preparing web build" bun run --cwd web build
-  if ! ls web/ios >/dev/null 2>&1; then spinner "Adding iOS platform" bunx --cwd web cap add ios; fi
-  spinner "Syncing Capacitor" bunx --cwd web cap sync ios
-  if [ "$(uname)" != "Darwin" ]; then
-    echo "  ${YELLOW}⚠ iOS builds require macOS + Xcode. Open web/ios/App/App.xcworkspace on a Mac.${NC}"
-    return 1
-  fi
-  spinner "Building iOS app" bunx --cwd web cap build ios
+mobile_menu() {
+  while true; do
+    select_menu "Mobile (Android / iOS)" \
+      "Sync Capacitor projects" "Build Android APK" "Build iOS .app" \
+      "Install Playwright Chromium" "← Back"
+    choice=$?
+    [ "$choice" -eq 255 ] && return
+    case "$choice" in
+      0) spinner "Syncing Capacitor" bun run mobile:sync ;;
+      1) spinner "Building Android APK" bun run mobile:android ;;
+      2) spinner "Building iOS app" bun run mobile:ios ;;
+      3) spinner "Installing Chromium" bun run e2e:install ;;
+    esac
+    pause
+  done
 }
 
 while true; do
-  header
-  echo "  ${BOLD}Choose an option${NC}"
-  echo "    1) 🚀 Run full local demo (server + UI, seeded)"
-  echo "    2) 🧪 Run all QA checks"
-  echo "    3) 🔄 Reset demo data"
-  echo "    4) 🌱 Seed demo data"
-  echo "    5) 🏗️  Build live executable + static UI"
-  echo "    6) ▶️  Run live executable"
-  echo "    7) 📱 Sync Capacitor platforms"
-  echo "    8) 🤖 Build Android APK"
-  echo "    9) 🍎 Build iOS app"
-  echo "    0) 👋 Exit"
-  echo ""
-  read -r -p "  Choice: " choice
+  select_menu "J3 developer console" \
+    "▶ Run full local demo" "🚀 Run fully seeded tournament" "🧪 QA & verification  ▸" \
+    "💾 Demo data  ▸" "🏗 Build & deploy  ▸" "📱 Mobile  ▸" "❌ Exit"
+  choice=$?
   case "$choice" in
-    1) run_demo ;;
-    2) qa_checks ;;
-    3) reset_data ;;
-    4) seed_data ;;
-    5) build_live ;;
-    6) run_live ;;
-    7) mobile_sync ;;
-    8) android_build ;;
-    9) ios_build ;;
-    0) echo "  👋 Bye!"; exit 0 ;;
-    *) echo "  ${RED}Unknown option: $choice${NC}" ;;
+    0) run_demo ;;
+    1) run_demo_full ;;
+    2) qa_menu ;;
+    3) data_menu ;;
+    4) build_menu ;;
+    5) mobile_menu ;;
+    6) echo "  👋 Bye!"; exit 0 ;;
   esac
-  echo ""
-  read -r -p "  Press Enter to continue…" _
 done
