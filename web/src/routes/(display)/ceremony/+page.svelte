@@ -11,9 +11,11 @@
   $: activeKind = podium[step];
   function call() { broadcastPA('Medal ceremony at the podium — competitors please report', '', 8); }
   function next() {
-    step = (step + 1) % podium.length;
-    const winners = medals.filter((m) => m.kind === activeKind);
-    broadcastPA(`${activeKind.toUpperCase()} medalists to the podium: ${winners.map((m) => m.name).join(', ') || 'to be announced'}`, '', 10);
+    const nextStep = (step + 1) % podium.length;
+    const kind = podium[nextStep];
+    const winners = medals.filter((m) => m.kind === kind);
+    step = nextStep;
+    broadcastPA(`${kind.toUpperCase()} medalists to the podium: ${winners.map((m) => m.name).join(', ') || 'to be announced'}`, '', 10);
   }
   function previous() { step = (step - 1 + podium.length) % podium.length; }
 </script>

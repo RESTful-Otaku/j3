@@ -15,6 +15,10 @@ type createDiscipline struct {
 	MatchSeconds int      `json:"matchSeconds"`
 	Rounds       int      `json:"rounds"`
 	Requirements []string `json:"requirements"`
+	Points       []struct {
+		Label string  `json:"label"`
+		Value float64 `json:"value"`
+	} `json:"points"`
 }
 
 type createCategory struct {
@@ -24,6 +28,11 @@ type createCategory struct {
 	Min        float64 `json:"min"`
 	Max        float64 `json:"max"`
 	BeltRankID string  `json:"beltRankId"`
+	Ranges     []struct {
+		Kind string  `json:"kind"`
+		Min  float64 `json:"min"`
+		Max  float64 `json:"max"`
+	} `json:"ranges"`
 }
 
 type createConstraints struct {
@@ -235,20 +244,14 @@ func (s *Server) createFromRequest(w http.ResponseWriter, r *http.Request, req c
 			return
 		}
 	}
-	exec(`INSERT INTO audit_log
-		(tenant_id, actor_user_id, actor_role, action, target_type, target_id, after_json)
-		VALUES ('demo-tenant', 'u-runner', 'tournament_runner', 'tournament.create', 'event', ?, ?)`,
-		eventID, fmt.Sprintf(`{"disciplines":%d,"categories":%d,"invites":%d}`,
-			len(req.Disciplines), len(req.Categories), len(req.Invites)))
-	if err != nil {
-		writeError(w, err)
-		return
-	}
 	if err := tx.Commit(); err != nil {
 		writeError(w, err)
 		return
 	}
 
+	s.audit(r, "tournament.create", "event", eventID,
+		fmt.Sprintf(`{"disciplines":%d,"categories":%d,"invites":%d}`,
+			len(req.Disciplines), len(req.Categories), len(req.Invites)))
 	writeJSON(w, http.StatusCreated, map[string]any{
 		"eventId": eventID, "templateId": templateID,
 		"disciplineCount": len(req.Disciplines), "categoryCount": len(req.Categories),

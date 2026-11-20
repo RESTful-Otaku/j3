@@ -14,12 +14,22 @@ import (
 // requireRole enforces RBAC on live scoring mutations. The demo defaults to
 // official; clients may pass X-J3-Role to exercise other roles.
 func (s *Server) requireRole(w http.ResponseWriter, r *http.Request, action auth.Action) bool {
-	role := auth.Role(r.Header.Get("X-J3-Role"))
-	if role == "" {
-		role = auth.RoleOfficial
-	}
-	if !auth.Can(role, action) {
+	_, roleName := actorFromRequest(r)
+	if !auth.Can(auth.Role(roleName), action) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "your role cannot perform this action"})
+		return false
+	}
+	return true
+}
+
+// requireAssigned enforces role and per-contest assignment in one place.
+func (s *Server) requireAssigned(w http.ResponseWriter, r *http.Request, action auth.Action, fightID string) bool {
+	if !s.requireRole(w, r, action) {
+		return false
+	}
+	actor := r.Header.Get("X-J3-User")
+	if actor != "" && !s.isAssigned(r, fightID, actor) {
+		writeJSON(w, http.StatusForbidden, map[string]string{"error": "user is not assigned to this contest"})
 		return false
 	}
 	return true
@@ -185,10 +195,10 @@ type timerRequest struct {
 }
 
 func (s *Server) startFight(w http.ResponseWriter, r *http.Request) {
-	if !s.requireRole(w, r, auth.ActionScoreFight) {
+	id := r.PathValue("id")
+	if !s.requireAssigned(w, r, auth.ActionScoreFight, id) {
 		return
 	}
-	id := r.PathValue("id")
 	var body timerRequest
 	_ = decodeJSON(r, &body)
 	seconds := body.Seconds
@@ -222,10 +232,10 @@ func (s *Server) resumeFight(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) setRunning(w http.ResponseWriter, r *http.Request, value int, action string) {
-	if !s.requireRole(w, r, auth.ActionScoreFight) {
+	id := r.PathValue("id")
+	if !s.requireAssigned(w, r, auth.ActionScoreFight, id) {
 		return
 	}
-	id := r.PathValue("id")
 	_, err := s.Store.ExecContext(r.Context(), `
 		INSERT INTO fight_state (fight_id, running) VALUES (?, ?)
 		ON CONFLICT(fight_id) DO UPDATE SET running = excluded.running`, id, value)
@@ -247,12 +257,8 @@ type scoreRequest struct {
 }
 
 func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
-	if !s.requireRole(w, r, auth.ActionScoreFight) {
-		return
-	}
 	id := r.PathValue("id")
-	if actor := r.Header.Get("X-J3-User"); actor != "" && !s.isAssigned(r, id, actor) {
-		writeJSON(w, http.StatusForbidden, map[string]string{"error": "user is not assigned to this contest"})
+	if !s.requireAssigned(w, r, auth.ActionScoreFight, id) {
 		return
 	}
 	var body scoreRequest
@@ -293,10 +299,10 @@ func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) startHold(w http.ResponseWriter, r *http.Request) {
-	if !s.requireRole(w, r, auth.ActionScoreFight) {
+	id := r.PathValue("id")
+	if !s.requireAssigned(w, r, auth.ActionScoreFight, id) {
 		return
 	}
-	id := r.PathValue("id")
 	var body struct {
 		Corner  string `json:"corner"`
 		Seconds int    `json:"seconds"`
@@ -330,10 +336,10 @@ func (s *Server) startHold(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) undoFightEvent(w http.ResponseWriter, r *http.Request) {
-	if !s.requireRole(w, r, auth.ActionScoreFight) {
+	id := r.PathValue("id")
+	if !s.requireAssigned(w, r, auth.ActionScoreFight, id) {
 		return
 	}
-	id := r.PathValue("id")
 	var seq int
 	if err := s.Store.QueryRowContext(r.Context(),
 		`SELECT MAX(seq) FROM score_events WHERE fight_id = ?`, id).Scan(&seq); err != nil {
@@ -355,12 +361,8 @@ type submitRequest struct {
 }
 
 func (s *Server) submitFight(w http.ResponseWriter, r *http.Request) {
-	if !s.requireRole(w, r, auth.ActionScoreFight) {
-		return
-	}
 	id := r.PathValue("id")
-	if actor := r.Header.Get("X-J3-User"); actor != "" && !s.isAssigned(r, id, actor) {
-		writeJSON(w, http.StatusForbidden, map[string]string{"error": "user is not assigned to this contest"})
+	if !s.requireAssigned(w, r, auth.ActionScoreFight, id) {
 		return
 	}
 	var body submitRequest
@@ -387,11 +389,12 @@ func (s *Server) submitFight(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) audit(r *http.Request, action, targetType, targetID, after string) {
+	userID, role := actorFromRequest(r)
 	_, _ = s.Store.ExecContext(r.Context(), `
 		INSERT INTO audit_log
 		 (tenant_id, actor_user_id, actor_role, action, target_type, target_id, after_json)
-		 VALUES ('demo-tenant', 'u-official', 'official', ?, ?, ?, ?)`,
-		action, targetType, targetID, after)
+		 VALUES ('demo-tenant', ?, ?, ?, ?, ?, ?)`,
+		userID, role, action, targetType, targetID, after)
 }
 
 // StartClock decrements running fights once per second and broadcasts ticks.

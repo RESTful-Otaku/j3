@@ -276,11 +276,13 @@ func (s *Server) promoteSlot(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, err.Error())
 		return
 	}
-	var stageID, fighterID, source string
+	var stageID, fighterID, source, eventID string
 	var position int
 	if err := s.Store.QueryRowContext(r.Context(),
-		`SELECT stage_id, position, COALESCE(fighter_id,''), source_slot FROM bracket_slots WHERE id = ?`, slotID).
-		Scan(&stageID, &position, &fighterID, &source); err != nil {
+		`SELECT bs.stage_id, bs.position, COALESCE(bs.fighter_id,''), bs.source_slot, st.event_id
+		 FROM bracket_slots bs JOIN bracket_stages st ON st.id = bs.stage_id
+		 WHERE bs.id = ?`, slotID).
+		Scan(&stageID, &position, &fighterID, &source, &eventID); err != nil {
 		writeError(w, err)
 		return
 	}
@@ -311,7 +313,7 @@ func (s *Server) promoteSlot(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.audit(r, "bracket.promote", "slot", slotID, fmt.Sprintf(`{"result":%q}`, icon))
-	stages, err := s.listBrackets(r, "ev-demo", "")
+	stages, err := s.listBrackets(r, eventID, "")
 	if err != nil {
 		writeError(w, err)
 		return

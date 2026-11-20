@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 )
 
 type demoFighter struct {
@@ -113,6 +114,35 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 			writeError(w, err)
 			return
 		}
+
+		// Scorekeeper events are authoritative; include them in the display feed.
+		scoreRows, err := s.Store.QueryContext(r.Context(), `
+			SELECT seq, kind, corner, points, technique, card
+			FROM score_events WHERE fight_id = ? ORDER BY seq`, fights[i].ID)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		for scoreRows.Next() {
+			var event demoFightEvent
+			var seq, points int
+			var kind, corner, technique, card string
+			if err := scoreRows.Scan(&seq, &kind, &corner, &points, &technique, &card); err != nil {
+				scoreRows.Close()
+				writeError(w, err)
+				return
+			}
+			event.Seq = seq
+			event.Kind = kind
+			event.Payload = map[string]any{
+				"corner": corner, "points": points, "technique": technique, "card": card,
+			}
+			fights[i].Events = append(fights[i].Events, event)
+		}
+		scoreRows.Close()
+		sort.SliceStable(fights[i].Events, func(a, b int) bool {
+			return fights[i].Events[a].Seq < fights[i].Events[b].Seq
+		})
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"fights": fights})
 }

@@ -62,7 +62,7 @@
       <div class="meta">Scorekeeper & timekeeper · authoritative board</div></div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       {#each event?.mats ?? [] as mat}
-        <button class="tab" class:active={selectedMat === mat} on:click={() => (selectedMat = mat)}>{mat}</button>
+        <button class="tab" class:active={selectedMat === mat} on:click={() => { selectedMat = mat; selected = ''; state = null; }}>{mat}</button>
       {/each}
     </div>
   </header>

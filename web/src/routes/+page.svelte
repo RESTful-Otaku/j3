@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { initials } from '../lib/format';
   import {
     api,
     allActions,
@@ -61,27 +62,8 @@
   let generating = false;
   let eventDetails: Record<string, any> = {};
 
-  const beltRanks = [
-    { id: 'br-white', label: 'White' },
-    { id: 'br-grey', label: 'Grey (youth)' },
-    { id: 'br-yellow', label: 'Yellow' },
-    { id: 'br-orange', label: 'Orange' },
-    { id: 'br-green', label: 'Green' },
-    { id: 'br-blue', label: 'Blue' },
-    { id: 'br-purple', label: 'Purple' },
-    { id: 'br-brown', label: 'Brown' },
-    { id: 'br-black', label: 'Black' },
-    { id: 'br-redwhite', label: 'Red & White (mon)' },
-    { id: 'br-red', label: 'Red' },
-    { id: 'br-custom', label: 'Custom (Junior Samurai)' },
-  ];
-  const clubs = [
-    { id: 'club-riverside', label: 'Riverside Jiu Jitsu' },
-    { id: 'club-hilltop', label: 'Hilltop Dojo' },
-    { id: 'club-city', label: 'City Warriors' },
-    { id: 'club-sakura', label: 'Sakura Jiu Jitsu Academy' },
-    { id: '', label: 'Independent / no club' },
-  ];
+  let beltRanks: { id: string; label: string; colour?: string }[] = [];
+  let clubs: { id: string; label: string }[] = [{ id: '', label: 'Independent / no club' }];
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -90,7 +72,6 @@
     { id: 'fights', label: 'Fights' },
     { id: 'signup', label: 'Sign up' },
     { id: 'pools', label: 'Pools' },
-    { id: 'setup', label: 'Setup preview' },
   ];
   const roles: (Role | 'all')[] = [
     'all',
@@ -111,14 +92,18 @@
 
   onMount(async () => {
     try {
-      const [demo, accts, fs, view, eventInfo] = await Promise.all([
+      const [demo, accts, fs, view, eventInfo, beltInfo, clubInfo] = await Promise.all([
         api.demo(),
         api.accounts(),
         api.fights(),
         api.view(actorId),
         api.event(),
+        api.belts(),
+        api.query({ table: 'clubs', limit: 100 }),
       ]);
       try { eventDetails = JSON.parse(eventInfo.detailsJson || '{}'); } catch { eventDetails = {}; }
+      beltRanks = beltInfo.belts;
+      clubs = [...clubs, ...clubInfo.rows.map((row) => ({ id: String(row.id), label: String(row.name) }))];
       counts = demo.counts;
       accounts = accts.accounts;
       fights = fs.fights;
@@ -198,16 +183,6 @@
     return Math.max(0, ...Object.values(counts));
   }
 
-  function initials(name: string) {
-    return name
-      .replace(/\s*\(.*\)$/, '')
-      .split(' ')
-      .slice(0, 2)
-      .map((part) => part[0] ?? '')
-      .join('')
-      .toUpperCase();
-  }
-
   function roleCount(role: Role | 'all') {
     return role === 'all'
       ? accounts.length
@@ -260,6 +235,15 @@
       </button>
     </div>
   </header>
+
+  <div class="journey">
+    <span class="muted small">Tournament journey</span>
+    <a href="/">🏠 Home</a><span>›</span>
+    <a href="/public" target="_blank" rel="noreferrer">📺 Dashboard</a><span>›</span>
+    <a href="/display" target="_blank" rel="noreferrer">🥊 Arena</a><span>›</span>
+    <a href="/brackets" target="_blank" rel="noreferrer">🏆 Brackets</a><span>›</span>
+    <a href="/control" target="_blank" rel="noreferrer">🎛️ Control</a>
+  </div>
 
   <div class="notice">
     <strong>Demo mode.</strong> The venue server is seeded with realistic data. Use
@@ -453,7 +437,7 @@
             </div>
             <div style="text-align:center;">
               <div class="small muted">{selectedFight.mat} · {selectedFight.round}</div>
-              <div class="clock">03:00</div>
+              <div class="clock">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
               <span class="badge {selectedFight.state === 'live' ? 'fighter' : 'spectator'}">{selectedFight.state}</span>
             </div>
             <div class="corner blue">
@@ -668,21 +652,6 @@
             {/each}
           </div>
         {/if}
-      </div>
-    {:else if activeTab === 'setup'}
-      <div class="card">
-        <div class="eyebrow">Coming in Phase 1</div>
-        <h2>Guided event setup</h2>
-        <p class="muted small" style="margin-top:8px;">
-          The next slice makes this real: create an event, invite clubs, add fighters, choose
-          categories and rules, generate a bracket and award medals — entirely through a
-          plain-language wizard with a live preview.
-        </p>
-        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); margin-top:18px;">
-          {#each ['Brand your event', 'Invite clubs', 'Add fighters', 'Set categories', 'Pick rules', 'Build bracket'] as step, i}
-            <div class="stat"><div class="value" style="font-size:1rem;">{i + 1}. {step}</div></div>
-          {/each}
-        </div>
       </div>
     {/if}
   {/if}

@@ -392,6 +392,10 @@ From direct user QA feedback (2026-11-19) — all of this is required, not optio
   marked with result, upcoming fights listed.
 - **Configurable dashboard templates:** savable templates defining which widgets each screen
   shows; runners assign templates to screens. All views live-synced with the backend.
+- **User-built custom views:** a builder mode where any authorised user assembles a screen from
+  live widgets by **drag and drop**, rearranges and **resizes** them, then **saves, clones, loads
+  and deletes** named views. Views open in their own tab and stay live. The goal is minimal manual
+  work: the app supplies components and data, the organiser composes the screens they want.
 - **Confirmation dialogues** for major actions: submitting a score/point, result, winner/loser/
   draw and promotions.
 - **Celebrations & animation:** winner round/overall zoom-in of the player card, medal wins,
@@ -769,6 +773,9 @@ _Format: `D-### | date | decision | rationale | status`._
 - **D-034 | 2026-11-19 | Eleven locales and per-user account settings**
   — EN/FR/DE/ES/PT/HI/PA/AR/JA/KO/ZH plus language, units, profile stats, belt, club affiliation
   and appearance preferences on the user's account. Status: accepted.
+- **D-036 | 2026-11-20 | Drag-and-drop custom view builder**
+  — widgets are composable live components; users arrange/resize them, save/clone/delete named
+  layouts and open them as standalone live screens. Status: accepted.
 - **D-035 | 2026-11-19 | Capability-scoped uploads with auto-generated colours**
   — photos for fighters/officials, logo+banner for clubs and runners; PNG/JPG/WEBP/SVG, size
   limit; backend extracts main/highlight colours with manual override. Status: accepted.
@@ -787,6 +794,17 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-20** — Cleanup pass: live scoring events now feed the scoreboard; one RBAC/assignment
+  guard covers all fight mutations; audit attribution derives from the request; bracket promotion
+  returns the correct event; launch auto-runs the created event; kata table uses committed panel
+  results; fixed stale mat selection and podium call; removed stale wizard stub, dead modes and
+  duplicate helpers; unified request helpers and shared formatting; gated widget pollers per type;
+  persisting wizard scoring points and category ranges; consolidated audit writes and simplified
+  collection helpers. Verified with 56 smoke + 46 E2E checks.
+- **2026-11-20** — General review pass: fixed football-bracket vertical spacing and de-cluttered
+  promotion controls; added readiness checklist + one-tap auto-run, a Storybook-style `/ui`
+  component gallery, a drag-and-drop `/builder` for custom live views with save/clone/delete/open,
+  a tournament journey bar, and E2E coverage for all of it (46 tests).
 - **2026-11-20** — Added a complete deterministic tournament seeder (`seed -full`, `bun run
   demo:full`, `bun run smoke:full`) with pools, six-round bracket, scored fights, kata, medals and
   audit; rebuilt the official bracket as a football-style diagram with SVG connectors, promotion
@@ -905,8 +923,11 @@ _Format: `D-### | date | decision | rationale | status`._
    kata catalogue (including weapon kata), training sessions and a fair round-robin sparring
    rotation generator are available.
 5. **Setup & ceremony — delivered**: saved tournament templates can recreate an event **or import
-   its clubs/fighters**; `/ceremony` provides a guided animated podium sequence with PA callouts.
-6. **Verification — delivered**: `bun run smoke` (52 API/UI assertions), `bun run e2e` (27 browser
+   its clubs/fighters**; a readiness checklist and one-tap auto-run generate pools, brackets and
+   official assignments; `/ceremony` provides a guided animated podium sequence with PA callouts.
+   A drag-and-drop `/builder` lets users compose, resize, save, clone, load and delete live widget
+   dashboards, with `/ui` as a Storybook-style component gallery.
+6. **Verification — delivered**: `bun run smoke` (56 API/UI assertions), `bun run e2e` (46 browser
    journey + axe accessibility tests), `bun run load` (200 concurrent requests), Go race tests and
    web toast unit tests all pass. CI runs every gate on PRs before merge.
 

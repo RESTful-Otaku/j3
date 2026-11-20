@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { initials } from '../../../lib/format';
   import { api, livePoll, type DemoFight, type PoolView, type BracketStage, broadcastPA } from '../../../lib/api';
   import { notifySuccess, notifyError } from '../../../lib/toast';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
@@ -10,7 +11,7 @@
   let fights: DemoFight[] = [];
   let pools: PoolView[] = [];
   let bracket: BracketNode[][] = [];
-  let mode: 'official' | 'bracket' | 'elimination' | 'roundRobin' = 'official';
+  let mode: 'official' | 'elimination' | 'roundRobin' = 'official';
   let serverStages: BracketStage[] = [];
   let pendingPromotion: DemoFight | null = null;
   let confirmOpen = false;
@@ -142,7 +143,6 @@
     dragging = null;
     notifySuccess('Bracket slot updated', () => buildBracket());
   }
-  function initials(name: string) { return name.split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase(); }
   function outcome(fight: DemoFight, corner: 'red' | 'blue') {
     if (!fight.outcome) return { code: '', win: false };
     if (fight.outcome === 'draw') return { code: 'DP', win: false };
@@ -251,7 +251,7 @@
                   </div>
                 {/each}
                 {#if fight.state !== 'complete'}
-                  <button class="btn" style="width:100%; margin-top:8px;" on:click={() => promote(fight)}>Promote winner →</button>
+                  <button class="btn" style="width:100%; margin-top:8px;" on:click={() => promote(fight)}>Announce winner →</button>
                 {:else}
                   <div class="small muted" style="margin-top:8px;">Result committed · history retained at this round</div>
                 {/if}
@@ -285,24 +285,26 @@
 
 <ConfirmDialog
   open={confirmOpen}
-  title="Promote winner?"
-  message="This records the winner into the next round and keeps a copy in this round's history."
-  confirmLabel="Promote & announce"
+  title="Announce winner?"
+  message="This calls the winner to the next area. Use the Official bracket tab to record a result and promote a fighter."
+  confirmLabel="Announce"
   onConfirm={confirmPromotion}
 />
 
 <style>
   .small-portrait, .portrait.tiny { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: .85rem; flex: none; }
-  .bracket-wrap { position:relative; display:flex; gap:clamp(24px,3vw,70px); align-items:flex-start; overflow-x:auto; padding:12px 0 40px; min-height:420px; min-width:max-content; }
+  .bracket-wrap { position:relative; display:flex; gap:clamp(18px,2vw,44px); align-items:stretch; overflow-x:auto; padding:12px 0 32px; min-height:min(68vh, 720px); min-width:max-content; }
   .bracket-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }
-  .bracket-lines path { fill:none; stroke:var(--brand-accent); stroke-width:2; opacity:.65; }
-  .bracket-column { min-width:clamp(260px,22vw,380px); flex:1; position:relative; z-index:1; }
-  .bracket-matches { display:flex; flex-direction:column; gap:clamp(14px,3vh,32px); margin-top:14px; }
+  .bracket-lines path { fill:none; stroke:var(--brand-accent); stroke-width:2; opacity:.7; }
+  .bracket-column { min-width:clamp(230px,19vw,330px); flex:1; position:relative; z-index:1; display:flex; flex-direction:column; }
+  .bracket-matches { display:flex; flex-direction:column; justify-content:space-around; flex:1; gap:12px; margin-top:12px; }
   .bracket-match { background:var(--brand-surface-2); border:1px solid var(--brand-border); border-radius:12px; padding:4px; box-shadow:var(--brand-shadow); }
   .bracket-slot { display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; }
   .bracket-slot + .bracket-slot { border-top:1px solid var(--brand-border); }
   .bracket-slot.advanced { background:rgba(34,197,94,.12); }
   .bracket-slot.out { opacity:.55; }
-  .slot-actions { display:flex; gap:3px; }
+  .slot-actions { display:flex; gap:3px; opacity:0; transition:opacity .15s ease; }
+  .bracket-slot:hover .slot-actions, .bracket-slot:focus-within .slot-actions { opacity:1; }
+  @media (hover: none) { .slot-actions { opacity:1; } }
   .slot-actions .tab { padding:4px 7px; font-size:.72rem; }
 </style>

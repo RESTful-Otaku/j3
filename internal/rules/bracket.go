@@ -1,6 +1,9 @@
 package rules
 
-import "sort"
+import (
+	"math"
+	"sort"
+)
 
 // SeedEntrants orders fighters by seed (higher first) while spreading clubs
 // so same-club fighters do not cluster at the top of a draw.
@@ -19,7 +22,7 @@ func SeedEntrants(entrants []Entrant, separateClubs bool) []Entrant {
 	used := map[string]int{}
 	for len(ordered) > 0 {
 		picked := 0
-		best := int(^uint(0) >> 1)
+		best := math.MaxInt
 		for i, candidate := range ordered {
 			load := used[candidate.ClubID]
 			if load < best {

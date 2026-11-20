@@ -46,6 +46,10 @@ func GeneratePools(entrants []Entrant, c PoolConstraints) []Pool {
 		count = 1
 	}
 	rng := rand.New(rand.NewSource(c.Seed))
+	clubsByID := make(map[string]string, len(entrants))
+	for _, entrant := range entrants {
+		clubsByID[entrant.ID] = entrant.ClubID
+	}
 
 	ordered := append([]Entrant(nil), entrants...)
 	sort.SliceStable(ordered, func(i, j int) bool {
@@ -66,13 +70,13 @@ func GeneratePools(entrants []Entrant, c PoolConstraints) []Pool {
 		bestMembers := len(pools[0].Members)
 		bestClubs := 0
 		if c.SameClubSeparation {
-			bestClubs = clubLoad(pools[0], entrant.ClubID, entrants)
+			bestClubs = clubLoad(pools[0], entrant.ClubID, clubsByID)
 		}
 		for i := range pools {
 			members := len(pools[i].Members)
 			clubs := 0
 			if c.SameClubSeparation {
-				clubs = clubLoad(pools[i], entrant.ClubID, entrants)
+				clubs = clubLoad(pools[i], entrant.ClubID, clubsByID)
 			}
 			better := members < bestMembers ||
 				(members == bestMembers && clubs < bestClubs) ||
@@ -86,17 +90,13 @@ func GeneratePools(entrants []Entrant, c PoolConstraints) []Pool {
 	return pools
 }
 
-func clubLoad(pool Pool, clubID string, entrants []Entrant) int {
+func clubLoad(pool Pool, clubID string, clubsByID map[string]string) int {
 	if clubID == "" {
 		return 0
 	}
-	clubs := map[string]string{}
-	for _, e := range entrants {
-		clubs[e.ID] = e.ClubID
-	}
 	load := 0
 	for _, member := range pool.Members {
-		if clubs[member] == clubID {
+		if clubsByID[member] == clubID {
 			load++
 		}
 	}

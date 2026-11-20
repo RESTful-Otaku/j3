@@ -14,7 +14,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      command: 'cd .. && go run ./cmd/j3d -addr 127.0.0.1:8791 -db /tmp/j3-e2e.db -seed',
+      command: 'cd .. && rm -f /tmp/j3-e2e.db* && go run ./cmd/j3d -addr 127.0.0.1:8791 -db /tmp/j3-e2e.db -seed',
       url: 'http://127.0.0.1:8791/healthz',
       reuseExistingServer: true,
       timeout: 120_000,

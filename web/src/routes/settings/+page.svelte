@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api, type BeltOption } from '../../lib/api';
-  import { notifySuccess, notifyError } from '../../lib/toast';
+  import { notify, notifySuccess, notifyError } from '../../lib/toast';
 
   const KEY = 'j3-settings-v1';
   const locales = [
@@ -70,7 +70,7 @@
         settings.clubHighlight = result.highlight;
       }
       save();
-      notifySuccess(`${kind} uploaded · colours ${result.colour} / ${result.highlight}`);
+      notify(`${kind} uploaded · colours ${result.colour} / ${result.highlight}`);
     } catch (error) {
       notifyError(error instanceof Error ? error.message : 'Upload failed');
     }

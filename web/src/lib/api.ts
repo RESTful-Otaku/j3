@@ -24,25 +24,20 @@ export type Role = components['schemas']['Role'];
 export type Action = components['schemas']['Action'];
 export type RoleInfo = components['schemas']['RoleInfo'];
 
-async function getJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
+async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, init);
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText} from ${url}`);
   }
   return (await response.json()) as T;
 }
 
-async function postJson<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText} from ${url}`);
-  }
-  return (await response.json()) as T;
-}
+const getJson = <T>(url: string) => requestJson<T>(url);
+const postJson = <T>(url: string, body: unknown) => requestJson<T>(url, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  body: JSON.stringify(body),
+});
 
 export const api = {
   health: () => getJson<{ status: string }>('/healthz'),
@@ -107,6 +102,8 @@ export const api = {
     };
     return () => source.close();
   },
+  readiness: () => getJson<{ categories: { id: string; name: string; entrants: number; ready: boolean; poolCount: number }[] }>('/api/v1/demo/readiness'),
+  autoRun: () => postJson<{ pools: number; stages: number; officials: number }>('/api/v1/demo/auto-run', {}),
   simulate: (seed = 42, fighters = 50) =>
     getJson<SimulationResult>(`/api/v1/demo/simulate?seed=${seed}&fighters=${fighters}`),
   stats: (seed = 42, fighters = 50) =>

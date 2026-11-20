@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { initials } from '../../../lib/format';
   import { api, livePoll, type PoolView, type DemoFight } from '../../../lib/api';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
 
@@ -24,7 +25,6 @@
       pools = result.pools;
     } finally { generating = false; }
   }
-  function initials(name: string) { return name.split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase(); }
   function resultCode(fight: DemoFight) {
     if (fight.outcome === 'draw') return 'DP';
     return fight.outcome === 'win_red' ? `W ${fight.red.name}` : `W ${fight.blue.name}`;

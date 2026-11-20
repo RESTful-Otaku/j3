@@ -56,6 +56,8 @@
   type ConfigTemplate = { name: string; config: string; at: string };
   let configTemplates: ConfigTemplate[] = [];
   let newTemplateName = '';
+  type Readiness = { id: string; name: string; entrants: number; ready: boolean; poolCount: number };
+  let readiness: Readiness[] = [];
 
   onMount(() => {
     try {
@@ -63,6 +65,7 @@
       if (saved) wizard = { ...defaults(), ...JSON.parse(saved) };
     } catch { /* ignore corrupt drafts */ }
     try { configTemplates = JSON.parse(localStorage.getItem('j3-config-templates') || '[]'); } catch { configTemplates = []; }
+    void api.readiness().then((result) => (readiness = result.categories)).catch(() => {});
     ready = true;
     validate();
   });
@@ -205,6 +208,15 @@
       notifyError(error instanceof Error ? error.message : 'Upload failed');
     }
   }
+  async function autoRun() {
+    try {
+      const result = await api.autoRun();
+      notifySuccess(`Auto-generated ${result.pools} pools, ${result.stages} rounds and ${result.officials} official assignments`);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : 'Auto-generation failed');
+    }
+  }
+
   async function launch() {
     validate();
     if (errors.length > 0) {
@@ -232,6 +244,7 @@
     };
     try {
       const result = await api.createTournament(payload);
+      await autoRun();
       notifySuccess(`Tournament created · ${result.disciplineCount} disciplines · ${result.categoryCount} categories · ${result.inviteCount} invites`);
       localStorage.removeItem(STORAGE_KEY);
       wizard = defaults();
@@ -425,6 +438,21 @@
         <label class="cap" class:on={wizard.saveTemplate}><input type="checkbox" bind:checked={wizard.saveTemplate} /> Save this setup as a reusable template</label>
       </div>
       {#if wizard.saveTemplate}<label class="field" style="margin-top:12px;">Template name<input bind:value={wizard.templateName} placeholder="{wizard.name || 'My tournament'} template" /></label>{/if}
+      <div style="margin-top:22px; border-top:1px solid var(--brand-border); padding-top:18px;">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+          <div><h3>Readiness check</h3><p class="muted small">Divisions need at least two entrants before a bracket is valid.</p></div>
+          <button class="btn primary" on:click={autoRun}>⚡ Auto-generate pools, brackets & officials</button>
+        </div>
+        <div style="display:grid; gap:8px; margin-top:12px;">
+          {#each readiness as item (item.id)}
+            <div class="stat small" style="display:flex; justify-content:space-between; gap:12px;">
+              <span><strong>{item.name}</strong> · {item.entrants} entrants · {item.poolCount} pool{item.poolCount === 1 ? '' : 's'}</span>
+              <span class="badge {item.ready ? 'fighter' : 'spectator'}">{item.ready ? 'ready' : 'needs entrants'}</span>
+            </div>
+          {:else}<span class="muted small">No divisions recorded yet.</span>{/each}
+        </div>
+      </div>
+
       <div style="margin-top:22px; border-top:1px solid var(--brand-border); padding-top:18px;">
         <h3>Template library</h3>
         <p class="muted small">Save any setup — event, categories, disciplines, rules, scoring or a whole tournament — and load it again later.</p>

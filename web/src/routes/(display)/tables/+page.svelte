@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, livePoll, type StandingRow, type DemoFight, type KataPerformance } from '../../../lib/api';
+  import { initials } from '../../../lib/format';
+  import { api, livePoll, type StandingRow, type KataPerformance } from '../../../lib/api';
 
   let standings: StandingRow[] = [];
-  let fights: DemoFight[] = [];
   let kataPerformances: KataPerformance[] = [];
   let tab: 'overall' | 'category' | 'medals' | 'kata' = 'overall';
   let category = '';
@@ -12,9 +12,8 @@
 
   onMount(() => {
     const stopStandings = livePoll(api.standings, 3000, (data) => (standings = data.standings));
-    const stopFights = livePoll(api.fights, 3000, (data) => (fights = data.fights));
     const stopKata = livePoll(api.kata, 5000, (data) => (kataPerformances = data.performances));
-    return () => { stopStandings(); stopFights(); stopKata(); };
+    return () => { stopStandings(); stopKata(); };
   });
 
   async function submitScore(id: string, judge: number, value: number) {
@@ -22,15 +21,6 @@
   }
   async function advanceKata() {
     kataPerformances = (await api.advanceKata(8)).performances;
-  }
-  function initials(name: string) { return name.split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase(); }
-  function kataScores(index: number) {
-    const base = 7.2 + ((index * 7) % 27) / 10;
-    return Array.from({ length: 7 }, (_, i) => Number((base + ((i * 3 + index) % 9) / 10).toFixed(1)));
-  }
-  function kataTotal(index: number) {
-    const scores = kataScores(index).sort((a, b) => a - b).slice(1, -1);
-    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
   }
 
   $: categories = Array.from(new Set(standings.map((row) => row.category))).sort();
@@ -40,7 +30,6 @@
     (!group || row.belt === group) &&
     `${row.name} ${row.club}`.toLowerCase().includes(query.toLowerCase()));
   $: medalRows = filtered.slice().sort((a, b) => b.points - a.points).slice(0, 12);
-  $: kataFights = fights.filter((f) => f.category.toLowerCase().includes('kata'));
 </script>
 
 <svelte:head><title>J3 · Tables & rankings</title></svelte:head>
@@ -105,13 +94,15 @@
           {#each Array(7) as _, i}<th>J{i + 1}</th>{/each}<th>Drop</th><th>Total</th><th>Rank</th>
         </tr></thead>
         <tbody>
-          {#each kataFights as fight, i (fight.id)}
-            {@const name = i % 2 === 0 ? fight.red.name : fight.blue.name}
+          {#each [...kataPerformances].sort((a, b) => b.total - a.total) as performance, i (performance.id)}
             <tr style="border-top:1px solid var(--brand-border);">
-              <td style="padding:8px;"><strong>{name}</strong></td>
-              <td>{['Seiyunchin', 'Kanku-dai', 'Gekusai-dai', 'Pinan sono ichi'][i % 4]}</td>
-              {#each kataScores(i) as score}<td>{score.toFixed(1)}</td>{/each}
-              <td class="muted">hi + lo</td><td><strong>{kataTotal(i)}</strong></td>
+              <td style="padding:8px;"><strong>{performance.name}</strong></td>
+              <td>{performance.kataName || 'Open kata'}</td>
+              {#each Array(performance.panelSize) as _, j}
+                <td>{performance.scores.find((score) => score.judge === j + 1)?.score.toFixed(1) ?? '—'}</td>
+              {/each}
+              <td class="muted">{performance.panelSize >= 5 ? 'hi + lo' : 'all'}</td>
+              <td><strong>{performance.total.toFixed(2)}</strong></td>
               <td>{i + 1}</td>
             </tr>
           {:else}

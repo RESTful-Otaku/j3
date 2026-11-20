@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"strings"
 
 	"github.com/restful-otaku/j3/internal/rules"
 )
@@ -110,7 +111,7 @@ func Run(seed int64, count int) Result {
 		case "forfeit":
 			outcome = "forfeit_red"
 		}
-		if rng.Intn(2) == 0 && outcome != "draw" && !contains(outcome, "red") {
+		if rng.Intn(2) == 0 && outcome != "draw" && !strings.Contains(outcome, "red") {
 			outcome = replaceCorner(outcome)
 			redPoints, bluePoints = bluePoints, redPoints
 		}
@@ -126,7 +127,7 @@ func Run(seed int64, count int) Result {
 			rb.draws++
 			ra.points++
 			rb.points++
-		} else if contains(outcome, "red") {
+		} else if strings.Contains(outcome, "red") {
 			ra.wins++
 			rb.losses++
 			ra.points += 3
@@ -178,7 +179,7 @@ func Run(seed int64, count int) Result {
 			addBout("knockout", roundName, advance[i], advance[i+1])
 			last := result.Bouts[len(result.Bouts)-1]
 			loser := advance[i+1]
-			if contains(last.Outcome, "red") {
+			if strings.Contains(last.Outcome, "red") {
 				next = append(next, advance[i])
 			} else {
 				next = append(next, advance[i+1])
@@ -207,7 +208,7 @@ func Run(seed int64, count int) Result {
 			last := result.Bouts[len(result.Bouts)-1]
 			if last.Outcome == "draw" {
 				result.Medals = append(result.Medals, Medal{semiLosers[0], "bronze"}, Medal{semiLosers[1], "bronze"})
-			} else if contains(last.Outcome, "red") {
+			} else if strings.Contains(last.Outcome, "red") {
 				result.Medals = append(result.Medals, Medal{semiLosers[0], "bronze"})
 			} else {
 				result.Medals = append(result.Medals, Medal{semiLosers[1], "bronze"})
@@ -236,17 +237,8 @@ func Run(seed int64, count int) Result {
 	return result
 }
 
-func contains(value, needle string) bool {
-	for i := 0; i+len(needle) <= len(value); i++ {
-		if value[i:i+len(needle)] == needle {
-			return true
-		}
-	}
-	return false
-}
-
 func replaceCorner(value string) string {
-	if contains(value, "red") {
+	if strings.Contains(value, "red") {
 		return "win_blue"
 	}
 	return "win_red"

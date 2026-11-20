@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { initials, clockText } from '../../../lib/format';
   import {
     api,
     livePoll,
@@ -75,12 +76,6 @@
   }
   function fouls(fight: DemoFight | undefined, corner: 'red' | 'blue') {
     return (fight?.events ?? []).filter((e) => e.kind === 'penalty' && payload(e).corner === corner);
-  }
-  function initials(name: string) {
-    return name.replace(/\s*\(.*\)$/, '').split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase();
-  }
-  function clockText(value: number) {
-    return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
   }
   function method(fight: DemoFight | undefined, corner: 'red' | 'blue') {
     if (!fight?.outcome) return '';

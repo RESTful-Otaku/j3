@@ -17,7 +17,7 @@ import (
 
 var allowedUploadKinds = map[string]bool{
 	"avatar": true, "photo": true, "club": true, "logo": true,
-	"banner": true, "belt": true,
+	"banner": true,
 }
 
 // Upload rights follow the RBAC hierarchy: fighters and officials may upload a

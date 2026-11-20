@@ -76,6 +76,9 @@ button, input, select { font: inherit; }
 a.brand-mark:hover { text-decoration: none; transform: translateY(-2px); }
 .brand-name { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
 .brand-sub { font-size: 0.78rem; color: var(--brand-muted); }
+.journey { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 14px; margin-bottom:18px; border-radius:12px; background:var(--brand-surface-2); border:1px solid var(--brand-border); font-size:.85rem; }
+.journey a { font-weight:600; text-decoration:none; }
+.journey span { color:var(--brand-muted); }
 .pill {
   display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px;
   border-radius: 999px; border: 1px solid var(--brand-border);

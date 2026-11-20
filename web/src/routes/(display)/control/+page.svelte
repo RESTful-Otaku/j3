@@ -7,6 +7,8 @@
     { path: '/setup', name: 'Create tournament', icon: '✨', note: 'Five-step setup wizard' },
     { path: '/', name: 'Operator QA', icon: '🎛️', note: 'Accounts, sign-up, pools, fights' },
     { path: '/simulate', name: 'Tournament simulator', icon: '🎬', note: 'Replay a full event + charts' },
+    { path: '/builder', name: 'View builder', icon: '🧱', note: 'Drag, resize and save custom screens' },
+    { path: '/ui', name: 'Component gallery', icon: '🧩', note: 'Storybook-style UI QA' },
     { path: '/data', name: 'Data explorer', icon: '🔎', note: 'Search, filter, sort any dataset' },
     { path: '/audit', name: 'Audit trail', icon: '📜', note: 'Who did what, when and how' },
     { path: '/mat', name: 'Mat scorekeeper console', icon: '🎛️', note: 'Authoritative control per mat' },

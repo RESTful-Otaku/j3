@@ -396,16 +396,10 @@ func (s *Server) approveRoleRequest(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
-	if _, err := tx.ExecContext(r.Context(), `
-		INSERT INTO audit_log (tenant_id, actor_user_id, actor_role, action, target_type, target_id, after_json)
-		VALUES ('demo-tenant', 'u-runner', 'tournament_runner', 'role.approve', 'role_request', ?, ?)`,
-		id, fmt.Sprintf(`{"role":%q}`, role)); err != nil {
-		writeError(w, err)
-		return
-	}
 	if err := tx.Commit(); err != nil {
 		writeError(w, err)
 		return
 	}
+	s.audit(r, "role.approve", "role_request", id, fmt.Sprintf(`{"role":%q}`, role))
 	writeJSON(w, http.StatusOK, map[string]any{"id": id, "status": "approved", "role": role})
 }

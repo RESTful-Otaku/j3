@@ -55,18 +55,11 @@ func (s *Server) forfeitFight(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
-	if _, err := tx.ExecContext(r.Context(), `
-		INSERT INTO audit_log
-		 (tenant_id, actor_user_id, actor_role, action, target_type, target_id, after_json)
-		 VALUES ('demo-tenant', 'u-official', 'official', 'fight.forfeit', 'fight', ?, ?)`,
-		fightID, string(payload)); err != nil {
-		writeError(w, err)
-		return
-	}
 	if err := tx.Commit(); err != nil {
 		writeError(w, err)
 		return
 	}
+	s.audit(r, "fight.forfeit", "fight", fightID, string(payload))
 	writeJSON(w, http.StatusOK, map[string]any{"fightId": fightID, "state": "forfeit", "outcome": outcome})
 }
 
@@ -95,10 +88,6 @@ func (s *Server) entrantStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	payload, _ := json.Marshal(map[string]string{"status": body.Status})
-	_, _ = s.Store.ExecContext(r.Context(), `
-		INSERT INTO audit_log
-		 (tenant_id, actor_user_id, actor_role, action, target_type, target_id, after_json)
-		 VALUES ('demo-tenant', 'u-official', 'official', 'entrant.status', 'entrant', ?, ?)`,
-		entrantID, string(payload))
+	s.audit(r, "entrant.status", "entrant", entrantID, string(payload))
 	writeJSON(w, http.StatusOK, map[string]any{"entrantId": entrantID, "status": body.Status})
 }

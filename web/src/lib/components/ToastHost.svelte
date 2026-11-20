@@ -3,7 +3,7 @@
   import { fly } from 'svelte/transition';
   import { runUndo, type ToastDetail } from '../toast';
 
-  type ActiveToast = ToastDetail & { expires: number };
+  type ActiveToast = ToastDetail;
   let toasts: ActiveToast[] = [];
 
   const icons: Record<string, string> = {
@@ -13,7 +13,7 @@
   onMount(() => {
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<ToastDetail>).detail;
-      toasts = [...toasts, { ...detail, expires: Date.now() + detail.duration }];
+      toasts = [...toasts, detail];
       setTimeout(() => dismiss(detail.id), detail.duration);
     };
     window.addEventListener('j3-toast', handler);

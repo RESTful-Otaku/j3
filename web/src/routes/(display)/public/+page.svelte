@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { initials } from '../../../lib/format';
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
 
   let event: EventDisplayInfo | null = null;
@@ -34,7 +35,6 @@
   function formatTime(value: string) {
     return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
-  function initials(name: string) { return name.split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase(); }
 </script>
 
 <svelte:head><title>J3 · Public dashboard</title></svelte:head>

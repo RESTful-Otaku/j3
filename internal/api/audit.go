@@ -3,7 +3,22 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"strings"
 )
+
+// actorFromRequest resolves the demo actor from request headers. Defaults keep
+// the local QA experience usable without a real identity provider.
+func actorFromRequest(r *http.Request) (string, string) {
+	userID := r.Header.Get("X-J3-User")
+	if userID == "" {
+		userID = "u-official"
+	}
+	role := r.Header.Get("X-J3-Role")
+	if role == "" {
+		role = "official"
+	}
+	return userID, role
+}
 
 type auditEntry struct {
 	ID          int    `json:"id"`
@@ -32,8 +47,9 @@ func (s *Server) auditLog(w http.ResponseWriter, r *http.Request) {
 		args = append(args, actor)
 	}
 	if action := r.URL.Query().Get("action"); action != "" {
-		query += ` AND action LIKE ?`
-		args = append(args, "%"+action+"%")
+		query += ` AND action LIKE ? ESCAPE '\'`
+		escaped := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(action)
+		args = append(args, "%"+escaped+"%")
 	}
 	query += ` ORDER BY id DESC LIMIT ?`
 	args = append(args, limit)

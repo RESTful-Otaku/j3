@@ -42,7 +42,6 @@
   }
   onMount(() => { void load(); });
 
-  $: if (table) { /* table changes are handled by the select on:change */ }
 </script>
 
 <svelte:head><title>J3 · Data explorer</title></svelte:head>

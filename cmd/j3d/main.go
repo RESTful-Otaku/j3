@@ -49,8 +49,10 @@ func serve() {
 		log.Printf("demo data ready")
 	}
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 	venue := api.New(store, *version)
-	venue.StartClock(context.Background())
+	venue.StartClock(ctx)
 	server := &http.Server{
 		Addr:              *addr,
 		Handler:           venue.Handler(),
@@ -63,12 +65,10 @@ func serve() {
 		}
 	}()
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
-	<-stop
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout)
+	<-ctx.Done()
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Timeout)
 	defer cancel()
-	if err := server.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Printf("shutdown: %v", err)
 	}
 }

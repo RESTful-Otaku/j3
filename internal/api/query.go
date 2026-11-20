@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -47,7 +48,7 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request) {
 		if reservedQueryParams[key] || len(values) == 0 {
 			continue
 		}
-		if contains(spec.columns, key) {
+		if slices.Contains(spec.columns, key) {
 			where = append(where, key+" = ?")
 			args = append(args, values[0])
 		}
@@ -64,7 +65,7 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sortCol := params.Get("sort")
-	if !contains(spec.columns, sortCol) {
+	if !slices.Contains(spec.columns, sortCol) {
 		sortCol = spec.columns[0]
 	}
 	order := "ASC"
@@ -123,13 +124,4 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"table": table, "columns": columns, "rows": result, "count": len(result),
 	})
-}
-
-func contains(values []string, target string) bool {
-	for _, value := range values {
-		if value == target {
-			return true
-		}
-	}
-	return false
 }
