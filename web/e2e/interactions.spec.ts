@@ -166,6 +166,19 @@ test.describe('Interactive controls', () => {
     await expect(page.getByRole('link', { name: /Arena/ })).toBeVisible();
   });
 
+  test('operations: check-in and add a fighter', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto('/operations');
+    await expect(page.getByText('Check-in & weigh-in')).toBeVisible();
+    await page.locator('input[aria-label^="Weight for"]').first().fill('74');
+    await page.locator('input[aria-label^="Weight for"]').first().dispatchEvent('change');
+    await expect(page.getByText(/checked in|out of class/).first()).toBeVisible();
+    await page.getByLabel('Name').fill('E2E Added Fighter');
+    await page.getByRole('button', { name: 'Add fighter' }).click();
+    await expect(page.getByText(/E2E Added Fighter added/).first()).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
   test('view builder: add, resize, save, clone and delete a view', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('/builder');

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api, type BeltOption } from '../../lib/api';
+  import { LOCALES, translate } from '../../lib/i18n';
   import { notify, notifySuccess, notifyError } from '../../lib/toast';
 
   const KEY = 'j3-settings-v1';
@@ -45,6 +46,9 @@
       ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
       : choice;
     document.documentElement.dataset.theme = resolved;
+    document.documentElement.lang = settings.locale;
+    const localeInfo = LOCALES.find((item) => item.id === settings.locale);
+    document.documentElement.dir = localeInfo?.dir ?? 'ltr';
   }
   function save() {
     localStorage.setItem(KEY, JSON.stringify(settings));
@@ -145,6 +149,11 @@
         <option value="system">Follow system</option><option value="light">Light</option>
         <option value="dark">Dark</option><option value="street">Street Fighter</option>
       </select></label>
+    </div>
+    <div class="capabilities" style="margin-top:12px;">
+      {#each ['dashboard','setup','scoreboard','brackets','tables','medals','upcoming','live'] as key}
+        <span class="cap on">{translate(settings.locale, key as any)}</span>
+      {/each}
     </div>
     <h2 style="margin-top:26px;">Media & branding</h2>
     <p class="muted small">Uploads are limited by account type. Main and highlight colours are detected from your image.</p>

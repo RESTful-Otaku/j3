@@ -11,6 +11,8 @@
     { path: '/ui', name: 'Component gallery', icon: '🧩', note: 'Storybook-style UI QA' },
     { path: '/data', name: 'Data explorer', icon: '🔎', note: 'Search, filter, sort any dataset' },
     { path: '/audit', name: 'Audit trail', icon: '📜', note: 'Who did what, when and how' },
+    { path: '/operations', name: 'Event operations', icon: '📥', note: 'Check-in, weigh-in, rankings, CSV' },
+    { path: '/overlay', name: 'Broadcast overlay', icon: '📡', note: 'Transparent scorebug for OBS' },
     { path: '/mat', name: 'Mat scorekeeper console', icon: '🎛️', note: 'Authoritative control per mat' },
     { path: '/display', name: 'Full-screen scoreboard', icon: '🥊', note: 'Current fight, officials, moves' },
     { path: '/ceremony', name: 'Medal ceremony', icon: '🏆', note: 'Animated podium + PA call' },

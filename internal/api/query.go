@@ -16,6 +16,7 @@ type querySpec struct {
 // parameters, so user input can never become SQL.
 var querySpecs = map[string]querySpec{
 	"fighters":   {[]string{"id", "display_name", "date_of_birth", "weight_kg", "gender", "club_id", "belt_rank_id"}, []string{"display_name"}},
+	"entrants":   {[]string{"id", "fighter_id", "category_id", "club_id", "seed", "status"}, []string{"fighter_id"}},
 	"clubs":      {[]string{"id", "name", "primary_colour", "logo_path"}, []string{"name"}},
 	"events":     {[]string{"id", "name", "starts_at", "ends_at", "status"}, []string{"name"}},
 	"categories": {[]string{"id", "event_id", "name", "kind", "gender", "min_value", "max_value", "sort_order"}, []string{"name"}},

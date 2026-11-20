@@ -102,6 +102,12 @@ export const api = {
     };
     return () => source.close();
   },
+  checkIn: (id: string, weightKg: number) =>
+    postJson<{ entrantId: string; weightKg: number; outOfClass: boolean }>(`/api/v1/demo/entrants/${encodeURIComponent(id)}/checkin`, { weightKg }),
+  teamRankings: () => getJson<{ teams: { club: string; gold: number; silver: number; bronze: number; points: number }[] }>('/api/v1/demo/team-rankings'),
+  importEntries: (rows: Record<string, unknown>[]) =>
+    postJson<{ imported: number }>('/api/v1/demo/import', { rows }),
+  exportUrl: (type: string) => `/api/v1/demo/export?type=${encodeURIComponent(type)}`,
   readiness: () => getJson<{ categories: { id: string; name: string; entrants: number; ready: boolean; poolCount: number }[] }>('/api/v1/demo/readiness'),
   autoRun: () => postJson<{ pools: number; stages: number; officials: number }>('/api/v1/demo/auto-run', {}),
   simulate: (seed = 42, fighters = 50) =>

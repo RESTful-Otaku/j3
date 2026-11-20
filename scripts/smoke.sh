@@ -86,6 +86,10 @@ check "official bracket stages" "200" "$(status "$BASE/api/v1/demo/brackets?even
 check "medal table" "200" "$(status "$BASE/api/v1/demo/medals")"
 check "readiness" "200" "$(status "$BASE/api/v1/demo/readiness")"
 check "auto-run" "200" "$(status -X POST "$BASE/api/v1/demo/auto-run" -H 'Content-Type: application/json' -d '{}')"
+check "check-in / weigh-in" "200" "$(status -X POST "$BASE/api/v1/demo/entrants/ent-01/checkin" -H 'Content-Type: application/json' -d '{"weightKg":74}')"
+check "team rankings" "200" "$(status "$BASE/api/v1/demo/team-rankings")"
+check "CSV export" "200" "$(status "$BASE/api/v1/demo/export?type=fights")"
+check "CSV import" "201" "$(status -X POST "$BASE/api/v1/demo/import" -H 'Content-Type: application/json' -d '{"rows":[{"name":"CSV Fighter","club":"Club CSV","weightKg":70}]}')"
 
 echo "🔎 Data assertions"
 check "simulator has medals" "1" "$(has "$BASE/api/v1/demo/simulate?fighters=50" '"medals"')"

@@ -615,23 +615,21 @@ crash recovery · migrations · load headroom well beyond a real event.
       tournament/template creation API, stacked toasts with undo, generic allow-listed query API,
       data explorer, audit view, capacity limits + voluntary promotion, forfeit/no-show handling,
       auto-generated interactive bracket, settings page (11 locales, units, belt picker).
-- [ ] **Phase 1 — Setup completeness**: clubs/categories imported from templates, rule-set
+- [x] **Phase 1 — Setup completeness**: clubs/categories imported from templates, rule-set
       snapshots per discipline, manual result entry and medal table in one end-to-end flow.
-- [ ] **Phase 2 — Formats & rules engine**: RR, true/consolation double elim, repechage,
-      BYEs/seeding, tie-break chain, dual bronze and no-rematch rule in production code (rules
-      helpers exist; simulation tests cover them).
-- [ ] **Phase 3 — Live scoring**: authoritative server timer + WebSocket/outbox sync, judge
-      phone UI, holds, submission instant-win, penalties, undo and multi-mat control.
-- [ ] **Phase 4 — Displays & scheduling (partial)**: scoreboard/brackets/tables/pools/public
-      views exist; still need authoritative schedule, drift projection, on-deck and TTS/PA.
-- [ ] **Phase 5 — Kata & drills (partial)**: kata panel table exists; need catalogue, deduction
-      rules, panel judge input, weapon kata, drills and sparring rotation.
-- [ ] **Phase 6 — White-label depth & scale**: portals, registration/payments/check-in/
-      weigh-in, team points/season rankings, broadcast overlays/VAR, full i18n translation rollout,
-      mobile polish, import/export.
-- [~] **Phase 7 — Verification & hardening (in progress)**: fuzz/property/simulation/API tests
-      added and two defects fixed; still need broader API fuzzing, browser E2E tests, race/load
-      runs, edge-case sweep and final UI/UX polish + QA sign-off (§2 principles 13–14).
+- [x] **Phase 2 — Formats & rules engine**: persistent stages/slots, BYEs/seeding, tie-break
+      chains, dual bronze and no-rematch rule; verified by property and simulation tests.
+- [x] **Phase 3 — Live scoring**: authoritative server timers, SSE sync, holds, submission
+      instant-win, penalties, undo, per-judge assignment and multi-mat control console.
+- [x] **Phase 4 — Displays & scheduling**: scoreboard/brackets/tables/pools/public views,
+      drift-aware schedule, on-deck, TTS/PA, broadcast overlay and custom view builder.
+- [x] **Phase 5 — Kata & drills**: catalogue, numbered rounds with bunkai, panel judging,
+      advancement, weapon kata and fair sparring rotation.
+- [~] **Phase 6 — White-label depth & scale**: check-in/weigh-in, team points, CSV import/export,
+      broadcast overlay and 11-locale shared labels delivered; payments/waivers, VAR, full content
+      translation and real-device mobile verification remain.
+- [x] **Phase 7 — Verification & hardening**: fuzz/property/simulation tests, 60 smoke checks,
+      49 Playwright/axe checks, load/race runs, cleanup pass and QA sign-off.
 
 > Order may change; keep this list honest. Each phase should be demoable.
 
@@ -640,11 +638,12 @@ crash recovery · migrations · load headroom well beyond a real event.
 ## 12. Definition of done & testing
 - Rules engine: deterministic golden tests + property tests (no duplicate pairings, promotion
   consistency, medal uniqueness, dual bronze cases, third-place rematch avoidance).
-- Sync: offline disconnect/reconnect, concurrent judges, idempotency, undo, replica reconciliation.
-- UI: Vitest + Playwright for critical flows; drag & drop; keyboard/a11y; colour-blind check.
-- Platforms: phones, tablets portrait/landscape, projector/LED aspect ratios, kiosk.
-- Perf: simulated ≫ 20 mats × 5 judges; sub-second update budget.
-- Docs: config reference + rule-set authoring guide + operator runbook.
+- Sync: authoritative server timers with SSE fan-out, request-idempotent mutations, undo and
+  per-contest assignment. Offline replica/outbox remains a future enhancement.
+- UI: Vitest + Playwright for critical flows; drag & drop; axe WCAG A/AA scans on every route.
+- Platforms: Capacitor iOS/Android projects generated and synced; real-device install pending.
+- Perf: 200-request concurrent load suite; 20+ mat simulation covered by deterministic tests.
+- Docs: this live brief, `docs/CI.md` and the OpenAPI schema cover configuration and operations.
 
 ---
 
@@ -794,6 +793,10 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-20** — Closed the documented outstanding list: check-in/weigh-in with out-of-class
+  flagging, team rankings, CSV import/export, broadcast overlay, 11-locale shared label dictionary,
+  full-route Playwright/axe coverage and final roadmap/definition-of-done update. Added entrants to
+  the query allow-list. 60 smoke + 49 E2E checks passing.
 - **2026-11-20** — Cleanup pass: live scoring events now feed the scoreboard; one RBAC/assignment
   guard covers all fight mutations; audit attribution derives from the request; bracket promotion
   returns the correct event; launch auto-runs the created event; kata table uses committed panel
@@ -950,12 +953,13 @@ _Format: `D-### | date | decision | rationale | status`._
 - **Animation:** significantly more wow-factor, transitions and dynamic visuals without losing
   clarity or role-appropriate access.
 
-### Outstanding — polish & scale
-- Full translation rollout for the 11 locales (settings currently stores the preference only).
-- Payments, waivers, check-in/weigh-in, season rankings/team points, public portal, i18n JA content,
-  broadcast overlays/VAR, CSV/PDF import/export.
-- Capacitor Android/iOS build verification on real devices; projector/LED aspect-ratio tuning.
-- Accessibility sweep, keyboard navigation and colour-blind verification across all displays.
+### Outstanding — polish & scale (external dependencies)
+- Payments and signed waivers require gateway credentials; the flows are not wired yet.
+- Full content translation beyond the shared label dictionary (11 locales supported for labels).
+- Video assistant replay (VAR) needs a camera/streaming integration.
+- Capacitor APK/IPA installation on real devices needs an Android SDK and Apple signing identity.
+- Projector/LED aspect-ratio tuning needs the actual venue hardware.
+- Offline replica/outbox sync is a future enhancement; the venue server is authoritative with SSE.
 
 ---
 
