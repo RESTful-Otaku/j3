@@ -29,6 +29,7 @@
   let selected = '';
   $: matFights = fights.filter((fight) => fight.mat === selectedMat);
   $: selectedFight = fights.find((fight) => fight.id === selected);
+  $: if (selected && !state) { void loadState(selected); }
 
   async function act(fn: () => Promise<FightState>, label: string) {
     try { state = await fn(); notifySuccess(label); }

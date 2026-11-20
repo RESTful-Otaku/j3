@@ -11,9 +11,9 @@ export default defineConfig({
       ignored: ['**/android/**', '**/ios/**', '**/build/**', '**/.svelte-kit/**'],
     },
     proxy: {
-      '/api': 'http://127.0.0.1:8787',
-      '/healthz': 'http://127.0.0.1:8787',
-      '/readyz': 'http://127.0.0.1:8787',
+      '/api': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
+      '/healthz': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
+      '/readyz': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
     },
   },
   test: {

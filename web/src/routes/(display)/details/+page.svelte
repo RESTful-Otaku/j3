@@ -6,6 +6,17 @@
   let details: Record<string, any> = {};
   let kataList: { id: string; name: string; style: string; level: string; discipline: string; isWeapon: boolean }[] = [];
   let sessions: { id: string; title: string; kind: string; leader: string; startsAt: string }[] = [];
+  let rotationFighters = 'f01, f02, f03, f04, f05, f06';
+  let rotationPairs: { round: number; mat: string; red: string; blue: string }[] = [];
+  async function generateRotation() {
+    try {
+      const result = await api.rotation({
+        fighters: rotationFighters.split(',').map((s) => s.trim()).filter(Boolean),
+        mats: event?.mats ?? ['Mat 1'], rounds: 0,
+      });
+      rotationPairs = result.pairs;
+    } catch { /* keep last frame */ }
+  }
 
   onMount(() => {
     void api.kataCatalogue().then((result) => (kataList = result.kata)).catch(() => {});
@@ -85,6 +96,14 @@
         {#each sessions as session (session.id)}
           <div class="stat small"><strong>{session.title}</strong><br /><span class="muted">{session.kind} · {session.leader}</span></div>
         {:else}<span class="muted small">No sessions scheduled.</span>{/each}
+      </div>
+      <h3 style="margin-top:18px;">Free sparring rotation</h3>
+      <input class="tab" style="color:var(--brand-ink); cursor:text; width:100%; margin-top:8px;" bind:value={rotationFighters} aria-label="Fighter IDs for rotation" />
+      <button class="btn" style="margin-top:8px;" on:click={generateRotation}>⚙ Generate fair rotation</button>
+      <div style="display:grid; gap:6px; margin-top:10px;">
+        {#each rotationPairs as pair (pair.round + pair.red + pair.blue)}
+          <div class="stat small">R{pair.round} · {pair.mat} · {pair.red} vs {pair.blue}</div>
+        {/each}
       </div>
     </div>
   </div>

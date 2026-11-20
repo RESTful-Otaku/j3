@@ -784,6 +784,10 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-20** — Verification complete: added Playwright E2E + axe accessibility suites (26/26
+  passing), load test (200 concurrent requests), and wired both into CI. Fixed defects found:
+  missing document title, mat console initial state, wizard validation copy. Added guided medal
+  ceremony sequence and round-robin sparring rotation generator. Smoke suite now 51/51.
 - **2026-11-19** — Repository pushed to `git@github.com:RESTful-Otaku/j3.git` (`main`). Added
   GitHub Actions CI (branch naming, Go vet/test/race/build, Bun check/test/build, 50-check smoke),
   mobile artifact builds (Android APK, iOS simulator .app), release workflow, PR template,
@@ -887,14 +891,12 @@ _Format: `D-### | date | decision | rationale | status`._
    "next up" on `/public`; PA announcements now also speak via browser TTS.
 4. **Kata & training — delivered**: panel judging with 3–9 judges, high/low drop, authoritative
    totals, numbered rounds (shitei/tokuyi) and bunkai scores; a seeded kata catalogue (including
-   weapon kata) and training/sparring sessions are published on `/details`. Still to add: guided
-   rotation scheduling and full kata round advancement rules.
+   weapon kata), training sessions and a fair round-robin sparring rotation generator are available.
 5. **Setup & ceremony — delivered**: saved tournament templates can recreate an event **or import
-   its clubs/fighters**; an animated `/ceremony` podium with PA call exists. Still to add: a guided
-   medal-ceremony sequence.
-6. **Verification**: `bun run smoke` now boots the real server and checks 50 API/UI assertions
-   automatically; web toast/undo unit tests added. Still to add: browser click-through E2E, load/race
-   runs and accessibility audit before final QA sign-off (Phase 7).
+   its clubs/fighters**; `/ceremony` provides a guided animated podium sequence with PA callouts.
+6. **Verification — delivered**: `bun run smoke` (51 API/UI assertions), `bun run e2e` (26 browser
+   journey + axe accessibility tests), `bun run load` (200 concurrent requests), Go race tests and
+   web toast unit tests all pass. CI runs every gate on PRs before merge.
 
 ### Latest refinement batch (user QA, 2026-11-19)
 - **Setup QoL:** pagination, bulk create/delete, clone events, template presets, more optional

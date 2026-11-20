@@ -89,10 +89,50 @@ jobs:
       - name: Full-stack smoke suite
         run: bun run smoke
 
+  load:
+    name: Load & stability
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27'
+      - name: Start venue server
+        run: |
+          go run ./cmd/j3d -addr 127.0.0.1:8787 -db /tmp/j3-load.db -seed > /tmp/j3-load-server.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:8787/healthz >/dev/null && break
+            sleep 0.25
+          done
+      - name: 200 concurrent requests
+        run: bun run load
+
+  e2e:
+    name: Browser E2E + accessibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --cwd web --frozen-lockfile
+      - name: Install Chromium
+        run: bunx --cwd web playwright install --with-deps chromium
+      - name: Run E2E and axe scans
+        run: bun run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ github.sha }}
+          path: web/test-results
+
   required-checks:
     name: All checks passed
     if: always()
-    needs: [branch-name, go, web, smoke]
+    needs: [branch-name, go, web, smoke, load, e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all jobs succeeded

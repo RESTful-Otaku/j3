@@ -68,6 +68,8 @@ export const api = {
   medals: () => getJson<{ medals: { id: string; fighterId: string; name: string; club: string; clubColour: string; kind: string }[] }>('/api/v1/demo/medals'),
   kataCatalogue: () => getJson<{ kata: { id: string; name: string; style: string; level: string; discipline: string; isWeapon: boolean }[] }>('/api/v1/demo/kata/catalogue'),
   training: () => getJson<{ sessions: { id: string; title: string; kind: string; leader: string; startsAt: string; duration: number }[] }>('/api/v1/demo/training'),
+  rotation: (body: { fighters: string[]; mats: string[]; rounds: number }) =>
+    postJson<{ pairs: { round: number; mat: string; red: string; blue: string }[]; count: number }>('/api/v1/demo/rotation', body),
   kata: () => getJson<{ performances: KataPerformance[] }>('/api/v1/demo/kata'),
   createKata: (body: Record<string, unknown>) =>
     postJson<{ performances: KataPerformance[] }>('/api/v1/demo/kata/performances', body),

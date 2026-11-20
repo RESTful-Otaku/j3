@@ -407,7 +407,7 @@
       <div class="eyebrow">Step 5 of 5</div><h2>Review & launch</h2>
       {#if errors.length > 0}
         <div class="warning-panel">
-          <strong>{errors.length} thing{errors.length === 1 ? '' : 's'} need attention before launch:</strong>
+          <strong>{errors.length} {errors.length === 1 ? 'thing needs' : 'things need'} attention before launch:</strong>
           {#each errors as error}<button class="issue" on:click={() => go(error.step)}>⚠ {error.message} <span>Go to step {error.step + 1} →</span></button>{/each}
         </div>
       {:else}

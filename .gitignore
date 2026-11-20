@@ -23,6 +23,10 @@ dist/
 .env
 .env.*
 
+# Playwright artifacts
+web/test-results/
+web/playwright-report/
+
 # Capacitor generated web assets (regenerate with bun run mobile:sync)
 web/android/app/src/main/assets/public/
 web/android/app/src/main/assets/capacitor.config.json

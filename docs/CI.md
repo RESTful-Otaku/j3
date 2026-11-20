@@ -22,8 +22,12 @@
 Every push/PR runs:
 - **Go**: `go vet`, tests (unit/property/simulation), race detector, binary build.
 - **Web (Bun)**: type check, Vitest, production build.
-- **Smoke**: boots the real venue server and verifies 49 API/workflow/UI assertions.
+- **Smoke**: boots the real venue server and verifies 51 API/workflow/UI assertions.
+- **Load**: 200 concurrent requests against a running venue server.
+- **E2E**: Playwright journeys across every route plus axe-core WCAG A/AA scans.
 - **required-checks**: aggregate gate; PR cannot merge unless all pass.
+
+Local equivalents: `bun run smoke`, `bun run load`, `bun run e2e` (after `bun run e2e:install`).
 
 ## Mobile (`.github/workflows/mobile.yml`)
 

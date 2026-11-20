@@ -74,6 +74,7 @@ check "kata round create" "201" "$(status -X POST "$BASE/api/v1/demo/kata/perfor
 check "schedule drift" "200" "$(status -X POST "$BASE/api/v1/demo/schedule/drift" -H 'Content-Type: application/json' -d '{"minutes":5}')"
 check "medal award" "200" "$(status -X POST "$BASE/api/v1/demo/medals/award" -H 'Content-Type: application/json' -d '{"gold":"f01","silver":"f02","bronze":["f03","f04"]}')"
 check "tie-break standings" "200" "$(status "$BASE/api/v1/demo/standings?chain=wins,submissions,points_scored")"
+check "sparring rotation" "200" "$(status -X POST "$BASE/api/v1/demo/rotation" -H 'Content-Type: application/json' -d '{"fighters":["f01","f02","f03","f04"],"mats":["Mat 1","Mat 2"],"rounds":3}')"
 
 echo "🔎 Data assertions"
 check "simulator has medals" "1" "$(has "$BASE/api/v1/demo/simulate?fighters=50" '"medals"')"

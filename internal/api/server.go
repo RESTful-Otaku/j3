@@ -42,6 +42,7 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/demo/kata/catalogue", s.kataCatalogue)
 	mux.HandleFunc("GET /api/v1/demo/training", s.listTraining)
 	mux.HandleFunc("POST /api/v1/demo/training", s.createTraining)
+	mux.HandleFunc("POST /api/v1/demo/rotation", s.buildRotation)
 	mux.HandleFunc("POST /api/v1/demo/kata/performances", s.createKataPerformance)
 	mux.HandleFunc("POST /api/v1/demo/kata/{id}/scores", s.submitKataScore)
 	mux.HandleFunc("GET /api/v1/demo/schedule", s.listSchedule)
