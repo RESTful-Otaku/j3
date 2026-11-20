@@ -784,6 +784,9 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-20** — Added kata round advancement, environment-gated dev/staging/production deploy
+  workflow, and an optional signed-IPA build step gated on Apple signing secrets. Smoke runner now
+  builds a real binary to avoid stale servers; 52/52 checks passing.
 - **2026-11-20** — Verification complete: added Playwright E2E + axe accessibility suites (26/26
   passing), load test (200 concurrent requests), and wired both into CI. Fixed defects found:
   missing document title, mat console initial state, wizard validation copy. Added guided medal
@@ -890,11 +893,12 @@ _Format: `D-### | date | decision | rationale | status`._
    start/end times, mark-complete, mandated-rest warnings and a large live dashboard clock with
    "next up" on `/public`; PA announcements now also speak via browser TTS.
 4. **Kata & training — delivered**: panel judging with 3–9 judges, high/low drop, authoritative
-   totals, numbered rounds (shitei/tokuyi) and bunkai scores; a seeded kata catalogue (including
-   weapon kata), training sessions and a fair round-robin sparring rotation generator are available.
+   totals, numbered rounds (shitei/tokuyi), bunkai scores and top-performer advancement; a seeded
+   kata catalogue (including weapon kata), training sessions and a fair round-robin sparring
+   rotation generator are available.
 5. **Setup & ceremony — delivered**: saved tournament templates can recreate an event **or import
    its clubs/fighters**; `/ceremony` provides a guided animated podium sequence with PA callouts.
-6. **Verification — delivered**: `bun run smoke` (51 API/UI assertions), `bun run e2e` (26 browser
+6. **Verification — delivered**: `bun run smoke` (52 API/UI assertions), `bun run e2e` (26 browser
    journey + axe accessibility tests), `bun run load` (200 concurrent requests), Go race tests and
    web toast unit tests all pass. CI runs every gate on PRs before merge.
 

@@ -14,7 +14,8 @@ FAIL=0
 
 cleanup() {
   kill "$SERVER_PID" 2>/dev/null || true
-  rm -f "$DB" "$DB-wal" "$DB-shm"
+  pkill -f "j3-smoke-bin -addr 127.0.0.1:$PORT" 2>/dev/null || true
+  rm -f "$DB" "$DB-wal" "$DB-shm" /tmp/j3-smoke-bin
 }
 trap cleanup EXIT INT TERM
 
@@ -33,7 +34,9 @@ status() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
 has() { curl -s "$1" | grep -q "$2" && echo 1 || echo 0; }
 
 echo "🚀 Starting venue server on $PORT"
-go run ./cmd/j3d -addr "127.0.0.1:$PORT" -db "$DB" -seed >/tmp/j3-smoke-server.log 2>&1 &
+pkill -f "j3-smoke-bin -addr 127.0.0.1:$PORT" 2>/dev/null || true
+go build -o /tmp/j3-smoke-bin ./cmd/j3d
+/tmp/j3-smoke-bin -addr "127.0.0.1:$PORT" -db "$DB" -seed >/tmp/j3-smoke-server.log 2>&1 &
 SERVER_PID=$!
 for _ in $(seq 1 80); do
   curl -fsS "$BASE/healthz" >/dev/null 2>&1 && break
@@ -71,6 +74,7 @@ check "fight hold" "200" "$(status -X POST "$BASE/api/v1/fights/fight-01/hold" -
 check "assign official" "200" "$(status -X POST "$BASE/api/v1/demo/fights/fight-01/officials" -H 'Content-Type: application/json' -d '{"userId":"u-official","role":"referee"}')"
 check "fight submit" "200" "$(status -X POST "$BASE/api/v1/fights/fight-01/submit" -H 'Content-Type: application/json' -d '{"outcome":"win_red"}')"
 check "kata round create" "201" "$(status -X POST "$BASE/api/v1/demo/kata/performances" -H 'Content-Type: application/json' -d '{"fighterId":"f07","kataName":"Hekigan-ken","roundNumber":2,"kataType":"shitei","panelSize":5}')"
+check "kata advancement" "200" "$(status -X POST "$BASE/api/v1/demo/kata/advance" -H 'Content-Type: application/json' -d '{"advanceCount":8}')"
 check "schedule drift" "200" "$(status -X POST "$BASE/api/v1/demo/schedule/drift" -H 'Content-Type: application/json' -d '{"minutes":5}')"
 check "medal award" "200" "$(status -X POST "$BASE/api/v1/demo/medals/award" -H 'Content-Type: application/json' -d '{"gold":"f01","silver":"f02","bronze":["f03","f04"]}')"
 check "tie-break standings" "200" "$(status "$BASE/api/v1/demo/standings?chain=wins,submissions,points_scored")"

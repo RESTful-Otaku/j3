@@ -20,6 +20,9 @@
   async function submitScore(id: string, judge: number, value: number) {
     kataPerformances = (await api.kataScore(id, { judge, score: value })).performances;
   }
+  async function advanceKata() {
+    kataPerformances = (await api.advanceKata(8)).performances;
+  }
   function initials(name: string) { return name.split(' ').slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase(); }
   function kataScores(index: number) {
     const base = 7.2 + ((index * 7) % 27) / 10;
@@ -68,7 +71,10 @@
   {#if tab === 'kata'}
     <div class="card" style="margin-bottom:18px;">
       <h2>Panel judging</h2>
-      <p class="muted small">Scores are dropped high/low and averaged; totals are authoritative.</p>
+      <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+        <p class="muted small">Scores are dropped high/low and averaged; totals are authoritative.</p>
+        <button class="btn" on:click={advanceKata}>⏭ Advance top 8 to next round</button>
+      </div>
       <div style="display:grid; gap:12px; margin-top:14px;">
         {#each kataPerformances as performance (performance.id)}
           <div class="rule-card" style="padding:12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3);">

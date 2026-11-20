@@ -22,7 +22,7 @@
 Every push/PR runs:
 - **Go**: `go vet`, tests (unit/property/simulation), race detector, binary build.
 - **Web (Bun)**: type check, Vitest, production build.
-- **Smoke**: boots the real venue server and verifies 51 API/workflow/UI assertions.
+- **Smoke**: boots the real venue server and verifies 52 API/workflow/UI assertions.
 - **Load**: 200 concurrent requests against a running venue server.
 - **E2E**: Playwright journeys across every route plus axe-core WCAG A/AA scans.
 - **required-checks**: aggregate gate; PR cannot merge unless all pass.
@@ -33,10 +33,19 @@ Local equivalents: `bun run smoke`, `bun run load`, `bun run e2e` (after `bun ru
 
 - **Android**: syncs Capacitor, builds a debug APK, uploads it as a workflow artifact.
 - **iOS**: builds an unsigned simulator `.app` on macOS and uploads a zip artifact.
-  A device-installable IPA requires an Apple Developer signing identity; add a signing step before distribution.
+  A device-installable IPA is produced automatically when the `APPLE_CERTIFICATE_P12`,
+  `APPLE_CERTIFICATE_PASSWORD`, `APPLE_PROVISIONING_PROFILE`, `APPLE_TEAM_ID` and
+  `APPLE_PROVISIONING_PROFILE_NAME` secrets are configured; otherwise the simulator `.app` only.
 
 Download the artifact from the workflow run, unzip, and install the APK on Android via
 `adb install -r j3-debug.apk`. iOS simulator builds can be dragged onto the iOS Simulator.
+
+## Environments (`.github/workflows/deploy.yml`)
+
+Manual `workflow_dispatch` deploys to `development`, `staging` and `production` in order, each
+behind a GitHub **environment** (configure required reviewers in repository settings). Set
+`DEPLOY_HOST*`, `DEPLOY_USER` and `DEPLOY_PATH*` secrets to enable rsync deployment; without a
+host the workflow validates the bundle locally.
 
 ## Releases (`.github/workflows/release.yml`)
 

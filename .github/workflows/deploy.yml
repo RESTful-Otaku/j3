@@ -1,0 +1,101 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: development
+        type: choice
+        options: [development, staging, production]
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify before deploy
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Build release artifacts
+    needs: verify
+    uses: ./.github/workflows/release.yml
+    secrets: inherit
+
+  download:
+    name: Collect artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deploy-bundle
+          path: artifacts
+
+  development:
+    name: Development
+    needs: download
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'development'
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+      url: https://dev.example.invalid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deploy-bundle
+          path: artifacts
+      - run: bash scripts/deploy.sh development artifacts
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_DEV }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH_DEV }}
+
+  staging:
+    name: Staging
+    needs: [download, development]
+    if: always() && github.event_name == 'workflow_dispatch' && inputs.environment == 'staging' && needs.download.result == 'success' && needs.development.result != 'failure'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.example.invalid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deploy-bundle
+          path: artifacts
+      - run: bash scripts/deploy.sh staging artifacts
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH_STAGING }}
+
+  production:
+    name: Production
+    needs: [download, staging]
+    if: always() && github.event_name == 'workflow_dispatch' && inputs.environment == 'production' && needs.download.result == 'success' && needs.staging.result != 'failure'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://j3.example.invalid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deploy-bundle
+          path: artifacts
+      - run: bash scripts/deploy.sh production artifacts
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_PRODUCTION }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH_PRODUCTION }}

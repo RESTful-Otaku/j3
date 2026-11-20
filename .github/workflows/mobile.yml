@@ -78,3 +78,48 @@ jobs:
           name: j3-ios-app-${{ github.sha }}
           path: j3-ios-app.zip
           if-no-files-found: error
+      - name: Build signed IPA when Apple credentials are configured
+        if: github.event_name != 'pull_request'
+        env:
+          CERT_B64: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          CERT_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROFILE_B64: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.APPLE_PROVISIONING_PROFILE_NAME }}
+        run: |
+          if [ -z "${CERT_B64:-}" ] || [ -z "${PROFILE_B64:-}" ] || [ -z "${TEAM_ID:-}" ]; then
+            echo "ℹ️ Apple signing secrets not configured — simulator .app artifact only"
+            exit 0
+          fi
+          KEYCHAIN="$HOME/j3-build.keychain"
+          security create-keychain -p j3ci "$KEYCHAIN"
+          security default-keychain -s "$KEYCHAIN"
+          security unlock-keychain -p j3ci "$KEYCHAIN"
+          echo "$CERT_B64" | base64 --decode > /tmp/j3-cert.p12
+          security import /tmp/j3-cert.p12 -k "$KEYCHAIN" -P "$CERT_PASSWORD" -A
+          security set-key-partition-list -S apple-tool:,apple: -s -k j3ci "$KEYCHAIN"
+          echo "$PROFILE_B64" | base64 --decode > /tmp/j3.mobileprovision
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp /tmp/j3.mobileprovision "$HOME/Library/MobileDevice/Provisioning Profiles/j3.mobileprovision"
+          cat > /tmp/j3-export.plist <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict><key>method</key><string>ad-hoc</string><key>teamID</key><string>TEAM_ID_PLACEHOLDER</string></dict></plist>
+          PLIST
+          sed -i "" "s/TEAM_ID_PLACEHOLDER/$TEAM_ID/" /tmp/j3-export.plist
+          cd web/ios/App
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release \
+            -archivePath ../../../build/App.xcarchive archive \
+            CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="$TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
+          xcodebuild -exportArchive -archivePath ../../../build/App.xcarchive \
+            -exportPath ../../../build/export -exportOptionsPlist /tmp/j3-export.plist
+          cd ../../..
+          cp build/export/*.ipa j3-signed.ipa
+      - name: Upload signed IPA
+        if: hashFiles('j3-signed.ipa') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: j3-ios-signed-${{ github.sha }}
+          path: j3-signed.ipa
+          if-no-files-found: error

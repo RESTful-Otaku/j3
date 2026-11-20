@@ -62,6 +62,46 @@ func TestKataPanelScoringDropsHighAndLow(t *testing.T) {
 	}
 }
 
+func TestKataAdvancement(t *testing.T) {
+	srv := seededServer(t)
+	for i, fighter := range []string{"f05", "f06", "f07"} {
+		created := postJSON(t, srv, "/api/v1/demo/kata/performances", map[string]any{
+			"fighterId": fighter, "kataName": "Seiyunchin", "panelSize": 3,
+		})
+		if created.Code != http.StatusCreated {
+			t.Fatalf("create = %d", created.Code)
+		}
+		var body struct {
+			Performances []struct {
+				ID string `json:"id"`
+			} `json:"performances"`
+		}
+		if err := json.Unmarshal(created.Body.Bytes(), &body); err != nil {
+			t.Fatal(err)
+		}
+		performanceID := body.Performances[len(body.Performances)-1].ID
+		for judge := 1; judge <= 3; judge++ {
+			postJSON(t, srv, "/api/v1/demo/kata/"+performanceID+"/scores", map[string]any{
+				"judge": judge, "score": float64(6 + i),
+			})
+		}
+	}
+	advanced := postJSON(t, srv, "/api/v1/demo/kata/advance", map[string]any{"advanceCount": 2})
+	if advanced.Code != http.StatusOK {
+		t.Fatalf("advance = %d: %s", advanced.Code, advanced.Body.String())
+	}
+	var result struct {
+		Advanced int `json:"advanced"`
+		Round    int `json:"round"`
+	}
+	if err := json.Unmarshal(advanced.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	if result.Advanced != 2 || result.Round != 2 {
+		t.Fatalf("unexpected advancement: %+v", result)
+	}
+}
+
 func TestKataScoreValidation(t *testing.T) {
 	srv := seededServer(t)
 	created := postJSON(t, srv, "/api/v1/demo/kata/performances", map[string]any{"fighterId": "f06", "panelSize": 3})

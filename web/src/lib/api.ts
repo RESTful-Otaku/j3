@@ -75,6 +75,8 @@ export const api = {
     postJson<{ performances: KataPerformance[] }>('/api/v1/demo/kata/performances', body),
   kataScore: (id: string, body: Record<string, unknown>) =>
     postJson<{ performances: KataPerformance[] }>(`/api/v1/demo/kata/${encodeURIComponent(id)}/scores`, body),
+  advanceKata: (advanceCount = 8) =>
+    postJson<{ advanced: number; round: number; performances: KataPerformance[] }>('/api/v1/demo/kata/advance', { advanceCount }),
   schedule: () => getJson<{ items: ScheduleItem[] }>('/api/v1/demo/schedule?eventId=ev-demo'),
   setDrift: (minutes: number) =>
     postJson<{ items: ScheduleItem[] }>('/api/v1/demo/schedule/drift', { minutes }),
