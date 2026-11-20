@@ -20,11 +20,14 @@
 
   const uid = () => Math.random().toString(36).slice(2, 9);
   function addWidget(type: WidgetType) {
-    widgets = [...widgets, { id: uid(), type, span: 1 }];
+    widgets = [...widgets, { id: uid(), type, span: 1, rows: 1 }];
   }
   function removeWidget(id: string) { widgets = widgets.filter((widget) => widget.id !== id); }
   function resize(id: string, span: 1 | 2 | 3) {
     widgets = widgets.map((widget) => (widget.id === id ? { ...widget, span } : widget));
+  }
+  function resizeHeight(id: string, rows: 1 | 2 | 3) {
+    widgets = widgets.map((widget) => (widget.id === id ? { ...widget, rows } : widget));
   }
   function move(from: number, to: number) {
     if (from === to || from < 0 || to < 0) return;
@@ -47,7 +50,7 @@
     event.preventDefault();
     if (dragType) {
       const list = [...widgets];
-      list.splice(index, 0, { id: uid(), type: dragType, span: 1 });
+      list.splice(index, 0, { id: uid(), type: dragType, span: 1, rows: 1 });
       widgets = list;
     } else if (dragIndex >= 0) {
       move(dragIndex, index);
@@ -110,7 +113,7 @@
       </div>
       <div class="canvas" on:dragover={(event) => event.preventDefault()} on:drop={(event) => dropOn(widgets.length, event)} role="list" aria-label="View canvas">
         {#each widgets as widget, index (widget.id)}
-          <div class="canvas-item" role="listitem" draggable="true"
+          <div class="canvas-item" class:tall={widget.rows === 2} class:xtall={widget.rows === 3} role="listitem" draggable="true"
             on:dragstart={(event) => widgetDrag(event, index)}
             on:dragover={(event) => event.preventDefault()}
             on:drop={(event) => dropOn(index, event)}>
@@ -119,6 +122,9 @@
               <button class="tab" on:click={() => resize(widget.id, 1)} class:active={widget.span === 1}>S</button>
               <button class="tab" on:click={() => resize(widget.id, 2)} class:active={widget.span === 2}>M</button>
               <button class="tab" on:click={() => resize(widget.id, 3)} class:active={widget.span === 3}>L</button>
+              <button class="tab" on:click={() => resizeHeight(widget.id, 1)} class:active={widget.rows === 1}>H1</button>
+              <button class="tab" on:click={() => resizeHeight(widget.id, 2)} class:active={widget.rows === 2}>H2</button>
+              <button class="tab" on:click={() => resizeHeight(widget.id, 3)} class:active={widget.rows === 3}>H3</button>
               <button class="tab" on:click={() => move(index, Math.max(0, index - 1))}>←</button>
               <button class="tab" on:click={() => move(index, Math.min(widgets.length - 1, index + 1))}>→</button>
               <button class="tab" on:click={() => removeWidget(widget.id)}>✕</button>
@@ -154,8 +160,10 @@
 <style>
   .palette { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-ink); cursor:grab; font-size:.86rem; text-align:left; }
   .palette:hover { border-color:var(--brand-primary); }
-  .canvas { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:14px; min-height:280px; padding:12px; border:1px dashed var(--brand-border); border-radius:14px; }
+  .canvas { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); grid-auto-rows:minmax(130px,auto); gap:14px; min-height:280px; padding:12px; border:1px dashed var(--brand-border); border-radius:14px; }
   .canvas-item { position:relative; }
+  .canvas-item.tall { grid-row:span 2; }
+  .canvas-item.xtall { grid-row:span 3; }
   .canvas-item :global(.widget.wide) { grid-column:span 2; }
   .canvas-item :global(.widget.extra) { grid-column:span 3; }
   .widget-controls { display:flex; gap:4px; align-items:center; flex-wrap:wrap; margin-bottom:6px; }

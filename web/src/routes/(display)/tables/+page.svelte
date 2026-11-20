@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { initials } from '../../../lib/format';
-  import { api, livePoll, type StandingRow, type KataPerformance } from '../../../lib/api';
+  import { api, type StandingRow, type KataPerformance } from '../../../lib/api';
 
   let standings: StandingRow[] = [];
   let kataPerformances: KataPerformance[] = [];
@@ -9,11 +9,22 @@
   let category = '';
   let query = '';
   let group = '';
+  let loadError = '';
 
+  async function load() {
+    try {
+      const [ranking, kataData] = await Promise.all([api.standings(), api.kata()]);
+      standings = ranking.standings;
+      kataPerformances = kataData.performances;
+      loadError = '';
+    } catch {
+      loadError = 'Live results are temporarily unavailable. Retrying automatically…';
+    }
+  }
   onMount(() => {
-    const stopStandings = livePoll(api.standings, 3000, (data) => (standings = data.standings));
-    const stopKata = livePoll(api.kata, 5000, (data) => (kataPerformances = data.performances));
-    return () => { stopStandings(); stopKata(); };
+    void load();
+    const handle = setInterval(() => void load(), 3000);
+    return () => clearInterval(handle);
   });
 
   async function submitScore(id: string, judge: number, value: number) {
@@ -35,6 +46,7 @@
 <svelte:head><title>J3 · Tables & rankings</title></svelte:head>
 
 <div class="display-shell">
+  {#if loadError}<div class="card" style="margin-bottom:14px; border-color:var(--loss);">{loadError}</div>{/if}
   <header class="display-header">
     <div><div class="event-mark"><span class="crest">J3</span>Tables & rankings</div><div class="meta">Overall · category · medals · kata · live</div></div>
     <div class="tabs">

@@ -135,35 +135,9 @@
   {#if loading || !selected}
     <div class="placeholder">Connecting to the venue server…</div>
   {:else}
-    <div class="hero-scoreboard">
-      <section class="fighter-hero" class:celebrate={celebrate && method(selected, 'red').startsWith('W')}>
-        <div class="portrait">
-          {initials(selected.red.name || 'TBD')}
-          {#if selected.red.logoPath}<img src={selected.red.logoPath} alt="" />{/if}
-          <span class="club-crest" style="background:{selected.red.clubColour};">{initials(selected.red.club || 'IND')}</span>
-        </div>
-        <div class="who">
-          <div class="name">{selected.red.name || 'TBD'}</div>
-          <span class="belt" style="background:{selected.red.beltColour || '#fbbf24'};">{selected.red.belt || 'Independent'}</span>
-          <div class="stat">{selected.red.heightCm ? `${Math.round(selected.red.heightCm)} cm` : '—'} · {selected.red.weightKg ? `${selected.red.weightKg.toFixed(1)} kg` : '—'}</div>
-          <div class="stat">{selected.red.club || 'Independent'}</div>
-          <div class="moves-side">
-            {#each moves(selected, 'red').slice(-3) as move (move.seq)}
-              <div class="move-chip"><span>Last {move.seq} · {String(payload(move).technique ?? 'Score')}</span><span class="pts">+{payload(move).points ?? 0}</span></div>
-            {:else}<span class="stat">No moves recorded</span>{/each}
-            <div class="capabilities">
-              {#each fouls(selected, 'red') as foul (foul.seq)}
-                <span class="foul-card {String(payload(foul).card ?? 'yellow')}">{String(payload(foul).card ?? 'yellow').toUpperCase()}</span>
-              {/each}
-            </div>
-          </div>
-        </div>
-        <div class="big-score">{score(selected, 'red')}</div>
-        {#if method(selected, 'red')}<span class="badge fighter">{method(selected, 'red')}</span>{/if}
-      </section>
-
+    <div class="scoreboard-stage">
       <section class="clock-panel">
-        <div class="round">{matName} · {selected.round}</div>
+        <div class="round">{matName} · {selected.round} · {selected.category}</div>
         <div class="clock" class:paused-flash={liveState ? !liveState.running : paused}>{clockText(liveState?.seconds ?? seconds)}</div>
         <div class="meta">{(liveState ? !liveState.running : paused) ? 'Referee stoppage · timer paused' : 'Fight in progress'} · authoritative server clock</div>
         {#if liveState && liveState.holdSeconds > 0}
@@ -171,31 +145,63 @@
         {/if}
       </section>
 
-      <section class="fighter-hero blue" class:celebrate={celebrate && method(selected, 'blue').startsWith('W')}>
-        <div class="portrait">
-          {initials(selected.blue.name || 'TBD')}
-          {#if selected.blue.logoPath}<img src={selected.blue.logoPath} alt="" />{/if}
-          <span class="club-crest" style="background:{selected.blue.clubColour};">{initials(selected.blue.club || 'IND')}</span>
-        </div>
-        <div class="who">
-          <div class="name">{selected.blue.name || 'TBD'}</div>
-          <span class="belt" style="background:{selected.blue.beltColour || '#fbbf24'};">{selected.blue.belt || 'Independent'}</span>
-          <div class="stat">{selected.blue.heightCm ? `${Math.round(selected.blue.heightCm)} cm` : '—'} · {selected.blue.weightKg ? `${selected.blue.weightKg.toFixed(1)} kg` : '—'}</div>
-          <div class="stat">{selected.blue.club || 'Independent'}</div>
-          <div class="moves-side">
-            {#each moves(selected, 'blue').slice(-3) as move (move.seq)}
-              <div class="move-chip"><span>Last {move.seq} · {String(payload(move).technique ?? 'Score')}</span><span class="pts">+{payload(move).points ?? 0}</span></div>
-            {:else}<span class="stat">No moves recorded</span>{/each}
-            <div class="capabilities">
-              {#each fouls(selected, 'blue') as foul (foul.seq)}
-                <span class="foul-card {String(payload(foul).card ?? 'yellow')}">{String(payload(foul).card ?? 'yellow').toUpperCase()}</span>
+      <div class="fighter-row">
+        <section class="fighter-hero" class:celebrate={celebrate && method(selected, 'red').startsWith('W')}>
+          <div class="portrait">
+            {initials(selected.red.name || 'TBD')}
+            {#if selected.red.logoPath}<img src={selected.red.logoPath} alt="" />{/if}
+            <span class="club-crest" style="background:{selected.red.clubColour};">{initials(selected.red.club || 'IND')}</span>
+          </div>
+          <div class="who">
+            <div class="name">{selected.red.name || 'TBD'}</div>
+            <div class="badges">
+              <span class="belt" style="background:{selected.red.beltColour || '#fbbf24'};">{selected.red.belt || 'Independent'}</span>
+              {#if method(selected, 'red')}<span class="badge fighter">{method(selected, 'red')}</span>{/if}
+            </div>
+            <div class="stat">{selected.red.heightCm ? `${Math.round(selected.red.heightCm)} cm` : '—'} · {selected.red.weightKg ? `${selected.red.weightKg.toFixed(1)} kg` : '—'}</div>
+            <div class="stat">{selected.red.club || 'Independent'}</div>
+            <div class="moves-side">
+              {#each moves(selected, 'red').slice(-3) as move (move.seq)}
+                <div class="move-chip"><span>Last {move.seq} · {String(payload(move).technique ?? 'Score')}</span><span class="pts">+{payload(move).points ?? 0}</span></div>
+              {:else}<span class="stat">No moves recorded</span>{/each}
+            </div>
+            <div class="fouls">
+              {#each fouls(selected, 'red') as foul (foul.seq)}
+                <span class="foul-card {String(payload(foul).card ?? 'yellow')}">{String(payload(foul).card ?? 'yellow').toLowerCase() === 'red' ? 'R' : 'Y'}</span>
               {/each}
             </div>
           </div>
-        </div>
-        <div class="big-score">{score(selected, 'blue')}</div>
-        {#if method(selected, 'blue')}<span class="badge fighter">{method(selected, 'blue')}</span>{/if}
-      </section>
+          <div class="big-score">{score(selected, 'red')}</div>
+        </section>
+
+        <section class="fighter-hero blue" class:celebrate={celebrate && method(selected, 'blue').startsWith('W')}>
+          <div class="big-score">{score(selected, 'blue')}</div>
+          <div class="who">
+            <div class="name">{selected.blue.name || 'TBD'}</div>
+            <div class="badges">
+              <span class="belt" style="background:{selected.blue.beltColour || '#fbbf24'};">{selected.blue.belt || 'Independent'}</span>
+              {#if method(selected, 'blue')}<span class="badge fighter">{method(selected, 'blue')}</span>{/if}
+            </div>
+            <div class="stat">{selected.blue.heightCm ? `${Math.round(selected.blue.heightCm)} cm` : '—'} · {selected.blue.weightKg ? `${selected.blue.weightKg.toFixed(1)} kg` : '—'}</div>
+            <div class="stat">{selected.blue.club || 'Independent'}</div>
+            <div class="moves-side">
+              {#each moves(selected, 'blue').slice(-3) as move (move.seq)}
+                <div class="move-chip"><span>Last {move.seq} · {String(payload(move).technique ?? 'Score')}</span><span class="pts">+{payload(move).points ?? 0}</span></div>
+              {:else}<span class="stat">No moves recorded</span>{/each}
+            </div>
+            <div class="fouls">
+              {#each fouls(selected, 'blue') as foul (foul.seq)}
+                <span class="foul-card {String(payload(foul).card ?? 'yellow')}">{String(payload(foul).card ?? 'yellow').toLowerCase() === 'red' ? 'R' : 'Y'}</span>
+              {/each}
+            </div>
+          </div>
+          <div class="portrait">
+            {initials(selected.blue.name || 'TBD')}
+            {#if selected.blue.logoPath}<img src={selected.blue.logoPath} alt="" />{/if}
+            <span class="club-crest" style="background:{selected.blue.clubColour};">{initials(selected.blue.club || 'IND')}</span>
+          </div>
+        </section>
+      </div>
     </div>
 
     <div class="officials-strip">

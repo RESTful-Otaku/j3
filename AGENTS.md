@@ -793,6 +793,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-20** — UI/UX refinement: scoreboard clock moved to its own full-width row so it can no
+  longer be squashed; fighter cards reflow into a vertical stack on small screens; foul cards use
+  compact Y/R badges; tables show a friendly retry banner instead of a raw proxy 500; global
+  mobile breakpoints and resilient JSON parsing added; SQLite connection pool widened for file
+  databases; custom views support vertical (row-span) resizing as well as horizontal spans.
 - **2026-11-20** — Closed the documented outstanding list: check-in/weigh-in with out-of-class
   flagging, team rankings, CSV import/export, broadcast overlay, 11-locale shared label dictionary,
   full-route Playwright/axe coverage and final roadmap/definition-of-done update. Added entrants to

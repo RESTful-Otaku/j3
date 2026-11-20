@@ -26,7 +26,7 @@
   {#if view}
     <div class="view-grid">
       {#each view.widgets as widget (widget.id)}
-        <div class:wide={widget.span === 2} class:extra={widget.span === 3}>
+        <div class:wide={widget.span === 2} class:extra={widget.span === 3} class:tall={widget.rows === 2} class:xtall={widget.rows === 3}>
           <ViewWidget type={widget.type} title={widget.title} span={widget.span} />
         </div>
       {/each}
@@ -40,5 +40,7 @@
   .view-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:18px; }
   .wide { grid-column:span 2; }
   .extra { grid-column:span 3; }
+  .tall { grid-row:span 2; }
+  .xtall { grid-row:span 3; }
   @media (max-width: 900px) { .wide, .extra { grid-column:span 1; } }
 </style>

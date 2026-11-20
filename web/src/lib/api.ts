@@ -29,7 +29,11 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText} from ${url}`);
   }
-  return (await response.json()) as T;
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new Error('Venue server unavailable — retrying');
+  }
 }
 
 const getJson = <T>(url: string) => requestJson<T>(url);

@@ -21,6 +21,13 @@
   --font-display: 'Space Grotesk', var(--font);
 }
 
+@media (max-width: 700px) {
+  .shell { padding: 14px; }
+  .topbar { align-items: flex-start; flex-direction: column; }
+  .grid { grid-template-columns: 1fr !important; }
+  .card { padding: 16px; }
+  .action-row { flex-direction: column; align-items: stretch; }
+}
 [data-theme='street'] {
   --brand-primary: #ef4444; --brand-primary-soft: #7f1d1d; --brand-accent: #fbbf24;
   --brand-surface: #09090b; --brand-surface-2: #18181b; --brand-surface-3: #27272a;

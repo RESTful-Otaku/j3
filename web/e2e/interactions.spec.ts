@@ -186,6 +186,8 @@ test.describe('Interactive controls', () => {
     await page.getByRole('button', { name: 'Drag Clock' }).click();
     await expect(page.locator('.canvas-item')).toHaveCount(2);
     await page.locator('.canvas-item').first().getByRole('button', { name: 'M' }).click();
+    await page.locator('.canvas-item').first().getByRole('button', { name: 'H2' }).click();
+    await expect(page.locator('.canvas-item.tall')).toHaveCount(1);
     await page.getByPlaceholder('View name…').fill(`QA View ${Date.now()}`);
     await page.getByRole('button', { name: /Save view/ }).click();
     await expect(page.locator('.saved').first()).toBeVisible();

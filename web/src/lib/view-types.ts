@@ -7,6 +7,7 @@ export type ViewWidgetConfig = {
   type: WidgetType;
   title?: string;
   span: 1 | 2 | 3;
+  rows: 1 | 2 | 3;
 };
 
 export type SavedView = {

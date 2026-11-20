@@ -29,7 +29,13 @@ func Open(path string) (*DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite: %w", err)
 	}
-	conn.SetMaxOpenConns(1) // WAL + single writer keeps event-day writes deterministic.
+	// In-memory databases must stay on one connection; file-backed venues use a
+	// small pool with WAL so slow reads cannot block other requests.
+	maxOpen := 8
+	if path == ":memory:" {
+		maxOpen = 1
+	}
+	conn.SetMaxOpenConns(maxOpen)
 	for _, pragma := range []string{
 		`PRAGMA journal_mode = WAL`,
 		`PRAGMA foreign_keys = ON`,
