@@ -24,17 +24,50 @@ export type Role = components['schemas']['Role'];
 export type Action = components['schemas']['Action'];
 export type RoleInfo = components['schemas']['RoleInfo'];
 
-let authReady: Promise<void> | null = null;
+const SESSION_KEY = 'j3-session';
 
-async function ensureDemoAuth() {
-  if (localStorage.getItem('j3-session')) return;
+let authReady: Promise<void> | null = null;
+let authRecovery: Promise<boolean> | null = null;
+let lastAuthError = '';
+
+// A session can outlive a database reset, so validate its shape and expiry
+// before sending it. The server remains the authority on token validity.
+function storedToken(): string {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return '';
+    const parsed = JSON.parse(raw) as { token?: string; expiresAt?: string };
+    if (parsed.expiresAt && Date.parse(parsed.expiresAt) < Date.now()) {
+      localStorage.removeItem(SESSION_KEY);
+      return '';
+    }
+    return typeof parsed.token === 'string' ? parsed.token : '';
+  } catch {
+    localStorage.removeItem(SESSION_KEY);
+    return '';
+  }
+}
+
+async function demoLogin(): Promise<boolean> {
+  lastAuthError = '';
   try {
     const response = await fetch('/api/v1/auth/demo', { method: 'POST' });
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem('j3-session', JSON.stringify(data));
+    if (!response.ok) {
+      lastAuthError = `demo sign-in failed (${response.status})`;
+      return false;
     }
-  } catch { /* production requires a real sign-in */ }
+    const data = await response.json();
+    localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+    return true;
+  } catch {
+    lastAuthError = 'venue server is offline';
+    return false;
+  }
+}
+
+async function ensureDemoAuth() {
+  if (storedToken()) return;
+  await demoLogin();
 }
 
 function ensureAuth() {
@@ -42,25 +75,61 @@ function ensureAuth() {
   return authReady;
 }
 
-async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+// Called by the login/sign-out store and by 401 recovery.
+export function resetAuthCache() { authReady = null; }
+
+async function authorisedHeaders(init?: RequestInit): Promise<Headers> {
   await ensureAuth();
-  const session = localStorage.getItem('j3-session');
   const headers = new Headers(init?.headers);
   headers.set('Accept', 'application/json');
-  if (session) {
-    try {
-      const token = JSON.parse(session).token;
-      if (token) headers.set('Authorization', `Bearer ${token}`);
-    } catch { /* ignore malformed session */ }
+  const token = storedToken();
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  return headers;
+}
+
+async function recoverAuth(): Promise<boolean> {
+  localStorage.removeItem(SESSION_KEY);
+  resetAuthCache();
+  const ok = await demoLogin();
+  resetAuthCache();
+  return ok && Boolean(storedToken());
+}
+
+// Concurrent requests that all receive a 401 must share one re-authentication.
+function recoverAuthOnce(): Promise<boolean> {
+  if (!authRecovery) {
+    authRecovery = recoverAuth().finally(() => { authRecovery = null; });
   }
-  const response = await fetch(url, { ...init, headers });
+  return authRecovery;
+}
+
+function isAuthEndpoint(url: string) {
+  return url.startsWith('/api/v1/auth/') || url.startsWith('/api/v1/signup');
+}
+
+async function send(url: string, init: RequestInit | undefined, headers: Headers): Promise<Response> {
+  try {
+    return await fetch(url, { ...init, headers });
+  } catch {
+    throw new Error('Cannot reach the venue server — check that J3 is running');
+  }
+}
+
+async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+  let headers = await authorisedHeaders(init);
+  let response = await send(url, init, headers);
+  if (response.status === 401 && !isAuthEndpoint(url) && await recoverAuthOnce()) {
+    headers = await authorisedHeaders(init);
+    response = await send(url, init, headers);
+  }
   if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText} from ${url}`);
+    const hint = response.status === 401 && lastAuthError ? `: ${lastAuthError}` : '';
+    throw new Error(`${response.status} ${response.statusText} from ${url}${hint}`);
   }
   try {
     return (await response.json()) as T;
   } catch {
-    throw new Error('Venue server unavailable — retrying');
+    throw new Error('Venue server returned an invalid response');
   }
 }
 
@@ -171,19 +240,15 @@ export const api = {
   createTournament: (body: CreateTournamentRequest) =>
     postJson<CreateTournamentResponse>('/api/v1/tournaments', body),
   upload: async (file: File, kind: string, _role?: string): Promise<{ url: string; colour: string; highlight: string }> => {
-    await ensureAuth();
     const body = new FormData();
     body.append('kind', kind);
     body.append('file', file);
-    const session = localStorage.getItem('j3-session');
-    const headers = new Headers();
-    if (session) {
-      try {
-        const token = JSON.parse(session).token;
-        if (token) headers.set('Authorization', `Bearer ${token}`);
-      } catch { /* ignore malformed session */ }
+    let headers = await authorisedHeaders();
+    let response = await send('/api/v1/uploads', { method: 'POST', body }, headers);
+    if (response.status === 401 && await recoverAuthOnce()) {
+      headers = await authorisedHeaders();
+      response = await send('/api/v1/uploads', { method: 'POST', body }, headers);
     }
-    const response = await fetch('/api/v1/uploads', { method: 'POST', body, headers });
     if (!response.ok) throw new Error(`Upload failed (${response.status})`);
     return response.json() as Promise<{ url: string; colour: string; highlight: string }>;
   },

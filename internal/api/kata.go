@@ -60,8 +60,9 @@ func (s *Server) createKataPerformance(w http.ResponseWriter, r *http.Request) {
 	_, err := s.Store.ExecContext(r.Context(), `
 		INSERT INTO kata_performances
 		 (id, event_id, fighter_id, kata_name, panel_size, round_number, kata_type, bunkai_score)
-		VALUES (?, 'ev-demo', ?, ?, ?, ?, ?, ?)`,
-		id, body.FighterID, body.KataName, body.PanelSize, body.RoundNumber, body.KataType, body.BunkaiScore)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, s.eventIDFromRequest(r), body.FighterID, body.KataName, body.PanelSize,
+		body.RoundNumber, body.KataType, body.BunkaiScore)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -173,7 +174,7 @@ func (s *Server) listKata(r *http.Request) ([]kataPerformanceView, error) {
 		LEFT JOIN fighters f ON f.id = kp.fighter_id
 		LEFT JOIN clubs c ON c.id = f.club_id
 		LEFT JOIN belt_ranks b ON b.id = f.belt_rank_id
-		WHERE kp.event_id = 'ev-demo' ORDER BY kp.created_at`)
+		WHERE kp.event_id = ? ORDER BY kp.created_at`, s.eventIDFromRequest(r))
 	if err != nil {
 		return nil, err
 	}

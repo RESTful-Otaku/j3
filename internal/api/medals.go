@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 type medalView struct {
@@ -56,6 +57,10 @@ func (s *Server) awardMedals(w http.ResponseWriter, r *http.Request) {
 			INSERT INTO medals (id, event_id, category_id, fighter_id, kind)
 			VALUES (?, ?, NULLIF(?, ''), ?, ?)`,
 			newID("medal"), eventID, body.Category, award.id, award.kind); err != nil {
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+				writeJSON(w, http.StatusConflict, map[string]string{"error": "medal already awarded"})
+				return
+			}
 			writeError(w, err)
 			return
 		}
@@ -76,7 +81,7 @@ func (s *Server) listMedalsHandler(w http.ResponseWriter, r *http.Request) {
 		FROM medals m
 		LEFT JOIN fighters f ON f.id = m.fighter_id
 		LEFT JOIN clubs c ON c.id = f.club_id
-		WHERE m.event_id = 'ev-demo' ORDER BY m.awarded_at DESC`)
+		WHERE m.event_id = ? ORDER BY m.awarded_at DESC`, s.eventIDFromRequest(r))
 	if err != nil {
 		writeError(w, err)
 		return
@@ -90,6 +95,10 @@ func (s *Server) listMedalsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		medals = append(medals, medal)
+	}
+	if err := rows.Err(); err != nil {
+		writeError(w, err)
+		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"medals": medals})
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { login, passkey, verify, session, landingForRole, uiRole } from '../../lib/auth';
+  import { login, passkey, verify, session, landingForRole, uiRole, clearSession } from '../../lib/auth';
   import { setRole } from '../../lib/nav';
   import { notifyError, notifySuccess } from '../../lib/toast';
 
@@ -39,7 +39,7 @@
     } finally { busy = false; }
   }
 
-  function logout() { localStorage.removeItem('j3-session'); notifySuccess('Signed out'); }
+  function logout() { clearSession(); notifySuccess('Signed out'); }
 </script>
 
 <svelte:head><title>J3 · Sign in</title></svelte:head>

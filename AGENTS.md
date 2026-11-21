@@ -775,6 +775,9 @@ _Format: `D-### | date | decision | rationale | status`._
 - **D-036 | 2026-11-20 | Drag-and-drop custom view builder**
   — widgets are composable live components; users arrange/resize them, save/clone/delete named
   layouts and open them as standalone live screens. Status: accepted.
+- **D-037 | 2026-11-21 | Demo auth always resolves a real runner and browser sessions self-heal on 401**
+  — demo mode must never 500 because a particular seed is absent; the web client retries once with
+  a fresh demo session so a DB reset cannot leave every page permanently unauthorized. Status: accepted.
 - **D-035 | 2026-11-19 | Capability-scoped uploads with auto-generated colours**
   — photos for fighters/officials, logo+banner for clubs and runners; PNG/JPG/WEBP/SVG, size
   limit; backend extracts main/highlight colours with manual override. Status: accepted.
@@ -793,6 +796,16 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Fixed the reported `401 /api/v1/demo/accounts` and cascading 500s. Root cause:
+  `POST /api/v1/auth/demo` hard-coded `u-tony`, which only exists in the Okami seed, so on an empty
+  venue DB or a full-seed DB (`bun run demo:full`, TUI "Run live executable") it returned 500 with a
+  foreign-key error; the browser cached no session and every protected endpoint then returned 401.
+  Fixed by resolving/bootstrapping a runner in demo mode and returning `expiresAt`/`userId`;
+  tolerant session-expiry parsing; one-shot 401 recovery in the web API client (stale sessions after
+  a DB reset now self-heal); panic-recovery middleware; DB-derived event IDs for display, medals,
+  schedule, kata, event config and attendance; `rows.Err()` checks; duplicate medals now 409;
+  `bun run api` enables demo mode. Added Go, Vitest and Playwright regression tests. Verified with
+  `go test -race ./...`, smoke 70/70 + full smoke 70/70, E2E 80/80, load 200/200, check/build green.
 - **2026-11-21** — TUI verification: added numeric menu shortcuts, action logging and a scripted
   harness that drives and proves all 36 menu actions; added release-artifact build, local CI/CD and
   GitHub Actions verification options; fixed stale labels, seeded-tournament command and deploy

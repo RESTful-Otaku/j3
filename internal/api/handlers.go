@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/restful-otaku/j3/internal/auth"
 )
@@ -85,6 +86,16 @@ func (s *Server) defaultEventID(r *http.Request) string {
 		return id
 	}
 	return "ev-okami"
+}
+
+// eventIDFromRequest honours an explicit eventId but otherwise follows the
+// active event in the database. Display handlers must not assume a particular
+// seed produced a particular event ID.
+func (s *Server) eventIDFromRequest(r *http.Request) string {
+	if id := strings.TrimSpace(r.URL.Query().Get("eventId")); id != "" {
+		return id
+	}
+	return s.defaultEventID(r)
 }
 
 func writeError(w http.ResponseWriter, err error) {

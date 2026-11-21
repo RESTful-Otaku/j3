@@ -4,8 +4,10 @@ package api
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 
 	"github.com/restful-otaku/j3/internal/auth"
 	"github.com/restful-otaku/j3/internal/db"
@@ -114,6 +116,14 @@ func (s *Server) Handler() http.Handler { return s.handler }
 func (s *Server) middleware(next http.Handler) http.Handler {
 	origin := os.Getenv("J3_CORS_ORIGIN")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// A handler bug must never take down a live venue or leak a stack trace
+		// to a display. Log it and return a predictable JSON error instead.
+		defer func() {
+			if recovered := recover(); recovered != nil {
+				log.Printf("panic serving %s %s: %v\n%s", r.Method, r.URL.Path, recovered, debug.Stack())
+				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+			}
+		}()
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'")
 		if origin != "" {

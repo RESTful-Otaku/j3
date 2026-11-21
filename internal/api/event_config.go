@@ -8,10 +8,7 @@ import (
 // eventConfig exposes the full organiser configuration for public review and
 // for the different role-specific views.
 func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
-	eventID := r.URL.Query().Get("eventId")
-	if eventID == "" {
-		eventID = "ev-okami"
-	}
+	eventID := s.eventIDFromRequest(r)
 	var info struct {
 		Name         string `json:"name"`
 		Organiser    string `json:"organiser"`
@@ -52,6 +49,10 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 			kit = append(kit, struct{ Item, Note string }{item, note})
 		}
 	}
+	if err := kitRows.Err(); err != nil {
+		writeError(w, err)
+		return
+	}
 	kitRows.Close()
 
 	rules := []struct {
@@ -69,6 +70,10 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 			rules = append(rules, item)
 		}
 	}
+	if err := ruleRows.Err(); err != nil {
+		writeError(w, err)
+		return
+	}
 	ruleRows.Close()
 
 	staff := []struct{ Mat, Role, Name string }{}
@@ -85,6 +90,10 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 		if staffRows.Scan(&item.Mat, &item.Role, &item.Name) == nil {
 			staff = append(staff, item)
 		}
+	}
+	if err := staffRows.Err(); err != nil {
+		writeError(w, err)
+		return
 	}
 	staffRows.Close()
 
@@ -125,6 +134,10 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 			formats = append(formats, item)
 		}
 	}
+	if err := formatRows.Err(); err != nil {
+		writeError(w, err)
+		return
+	}
 	formatRows.Close()
 
 	writeJSON(w, http.StatusOK, map[string]any{
@@ -141,7 +154,7 @@ func (s *Server) attendance(w http.ResponseWriter, r *http.Request) {
 		SELECT ca.entrant_id, f.display_name, ca.attended, ca.excluded
 		FROM course_attendance ca JOIN entrants e ON e.id = ca.entrant_id
 		JOIN fighters f ON f.id = e.fighter_id
-		WHERE e.event_id = ? ORDER BY f.display_name`, "ev-okami")
+		WHERE e.event_id = ? ORDER BY f.display_name`, s.eventIDFromRequest(r))
 	if err != nil {
 		writeError(w, err)
 		return
@@ -159,6 +172,10 @@ func (s *Server) attendance(w http.ResponseWriter, r *http.Request) {
 			"entrantId": entrantID, "name": name,
 			"attended": attended == 1, "excluded": excluded == 1,
 		})
+	}
+	if err := rows.Err(); err != nil {
+		writeError(w, err)
+		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"attendance": items})
 }

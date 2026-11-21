@@ -1,8 +1,8 @@
 package api
 
 import (
-	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -10,6 +10,8 @@ import (
 
 	"github.com/restful-otaku/j3/internal/auth"
 )
+
+const sessionTimeLayout = "2006-01-02T15:04:05.000Z"
 
 var publicGetRoutes = map[string]bool{
 	"/healthz": true, "/readyz": true, "/api/v1/version": true, "/api/v1/roles": true,
@@ -56,13 +58,13 @@ func (s *Server) identityFromRequest(r *http.Request) (auth.Identity, bool) {
 	token := strings.TrimPrefix(header, "Bearer ")
 	var userID, role string
 	var expires string
-	err := s.Store.QueryRowContext(context.Background(),
+	err := s.Store.QueryRowContext(r.Context(),
 		`SELECT user_id, role, expires_at FROM sessions WHERE token = ?`, token).
 		Scan(&userID, &role, &expires)
 	if err != nil {
 		return auth.Identity{}, false
 	}
-	expiry, err := time.Parse("2006-01-02T15:04:05.999Z", expires)
+	expiry, err := parseSessionExpiry(expires)
 	if err != nil || time.Now().After(expiry) {
 		return auth.Identity{}, false
 	}
@@ -71,6 +73,19 @@ func (s *Server) identityFromRequest(r *http.Request) (auth.Identity, bool) {
 		return auth.Identity{}, false
 	}
 	return auth.Identity{UserID: userID, Role: canonical}, true
+}
+
+// parseSessionExpiry accepts every timestamp shape written by the login flows,
+// including SQLite's millisecond strftime format and RFC3339 variants with or
+// without fractional seconds. A token is never rejected just because its
+// expiry was stored at a different precision.
+func parseSessionExpiry(value string) (time.Time, error) {
+	for _, layout := range []string{sessionTimeLayout, time.RFC3339Nano, time.RFC3339} {
+		if expiry, err := time.Parse(layout, value); err == nil {
+			return expiry, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("unrecognised session expiry %q", value)
 }
 
 func (s *Server) requireAction(w http.ResponseWriter, r *http.Request, resource, action string) bool {

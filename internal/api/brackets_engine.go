@@ -264,7 +264,11 @@ func (s *Server) listBrackets(r *http.Request, eventID, categoryID string) ([]br
 			}
 			stage.Slots = append(stage.Slots, slot)
 		}
+		err = slotRows.Err()
 		slotRows.Close()
+		if err != nil {
+			return nil, err
+		}
 		stages = append(stages, stage)
 	}
 	return stages, nil

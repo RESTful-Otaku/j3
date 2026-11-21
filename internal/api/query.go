@@ -127,6 +127,10 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request) {
 		}
 		result = append(result, row)
 	}
+	if err := rows.Err(); err != nil {
+		writeError(w, err)
+		return
+	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"table": table, "columns": columns, "rows": result, "count": len(result),
 	})

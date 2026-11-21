@@ -57,10 +57,7 @@ func (s *Server) schedule(r *http.Request, eventID string) ([]scheduleItemView, 
 }
 
 func (s *Server) listSchedule(w http.ResponseWriter, r *http.Request) {
-	eventID := r.URL.Query().Get("eventId")
-	if eventID == "" {
-		eventID = "ev-demo"
-	}
+	eventID := s.eventIDFromRequest(r)
 	items, err := s.schedule(r, eventID)
 	if err != nil {
 		writeError(w, err)

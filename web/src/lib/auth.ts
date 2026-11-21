@@ -1,4 +1,4 @@
-import { postJson } from './api';
+import { postJson, resetAuthCache } from './api';
 
 export type Session = {
   token: string; email: string; role: string; expiresAt: string;
@@ -38,16 +38,25 @@ export function session(): Session | null {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Session;
-    if (new Date(parsed.expiresAt).getTime() < Date.now()) {
+    if (!parsed.token) return null;
+    // Older demo sessions had no expiry; the server still validates them.
+    if (parsed.expiresAt && Date.parse(parsed.expiresAt) < Date.now()) {
       localStorage.removeItem(KEY);
+      resetAuthCache();
       return null;
     }
     return parsed;
   } catch { return null; }
 }
 
-export function saveSession(value: Session) { localStorage.setItem(KEY, JSON.stringify(value)); }
-export function clearSession() { localStorage.removeItem(KEY); }
+export function saveSession(value: Session) {
+  localStorage.setItem(KEY, JSON.stringify(value));
+  resetAuthCache();
+}
+export function clearSession() {
+  localStorage.removeItem(KEY);
+  resetAuthCache();
+}
 
 export async function login(email: string, provider: string, password?: string) {
   return postJson<{ challengeId: string; mfaRequired: boolean; demoCode: string; provider: string }>(

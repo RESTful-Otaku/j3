@@ -74,5 +74,9 @@ func (s *Server) auditLog(w http.ResponseWriter, r *http.Request) {
 		}
 		entries = append(entries, entry)
 	}
+	if err := rows.Err(); err != nil {
+		writeError(w, err)
+		return
+	}
 	writeJSON(w, http.StatusOK, map[string]any{"entries": entries})
 }

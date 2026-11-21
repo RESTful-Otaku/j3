@@ -38,13 +38,14 @@ type standingRow struct {
 }
 
 func (s *Server) eventDisplay(w http.ResponseWriter, r *http.Request) {
+	eventID := s.eventIDFromRequest(r)
 	var info eventDisplayInfo
 	err := s.Store.QueryRowContext(r.Context(), `
 		SELECT e.name, COALESCE(t.banner_path, ''), COALESCE(t.logo_path, ''),
 		       COALESCE(t.tokens_json, '{}'), COALESCE(rs.config_json, '{}')
 		FROM events e LEFT JOIN themes t ON t.id = e.theme_id
 		LEFT JOIN rule_sets rs ON rs.id = e.rule_set_id
-		WHERE e.id = 'ev-demo'`).
+		WHERE e.id = ?`, eventID).
 		Scan(&info.Name, &info.BannerPath, &info.LogoPath, &info.ThemeTokens, &info.DetailsJSON)
 	if err != nil {
 		writeError(w, err)
@@ -52,7 +53,7 @@ func (s *Server) eventDisplay(w http.ResponseWriter, r *http.Request) {
 	}
 	info.Mats = []string{}
 	rows, err := s.Store.QueryContext(r.Context(),
-		`SELECT name FROM mats WHERE event_id = 'ev-demo' ORDER BY sort_order`)
+		`SELECT name FROM mats WHERE event_id = ? ORDER BY sort_order`, eventID)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -65,6 +66,10 @@ func (s *Server) eventDisplay(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		info.Mats = append(info.Mats, name)
+	}
+	if err := rows.Err(); err != nil {
+		writeError(w, err)
+		return
 	}
 	writeJSON(w, http.StatusOK, info)
 }
@@ -95,6 +100,10 @@ func (s *Server) displayOfficials(w http.ResponseWriter, r *http.Request) {
 		}
 		officials = append(officials, o)
 	}
+	if err := rows.Err(); err != nil {
+		writeError(w, err)
+		return
+	}
 	writeJSON(w, http.StatusOK, map[string]any{"officials": officials})
 }
 
@@ -116,7 +125,7 @@ func (s *Server) standings(w http.ResponseWriter, r *http.Request) {
 		LEFT JOIN entrants e ON e.fighter_id = f.id
 		LEFT JOIN categories c ON c.id = e.category_id
 		GROUP BY f.id, c.name, b.label, cl.name
-		ORDER BY 7 DESC, 9 DESC, f.display_name`)
+		ORDER BY 8 DESC, 10 DESC, f.display_name`)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -134,6 +143,10 @@ func (s *Server) standings(w http.ResponseWriter, r *http.Request) {
 		}
 		row.Points = row.Wins*3 + row.Draws
 		rowsData = append(rowsData, row)
+	}
+	if err := rows.Err(); err != nil {
+		writeError(w, err)
+		return
 	}
 	chain := []string{"wins", "draws", "points_scored", "points_conceded"}
 	if configured := r.URL.Query().Get("chain"); configured != "" {
