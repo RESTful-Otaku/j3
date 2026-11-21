@@ -36,7 +36,7 @@ select_menu() {
       fi
     done
     echo ""
-    printf "  %b↑/↓ move  ·  Enter select  ·  q back%b\n" "$YELLOW" "$NC"
+    printf "  %b↑/↓ move  ·  Enter select  ·  Esc / q / b back%b\n" "$YELLOW" "$NC"
     read -rsn1 key
     case "$key" in
       $'\033')
@@ -44,10 +44,11 @@ select_menu() {
         case "$rest" in
           '[A') selected=$(( (selected - 1 + ${#items[@]}) % ${#items[@]} )) ;;
           '[B') selected=$(( (selected + 1) % ${#items[@]} )) ;;
+          *) return 255 ;;
         esac
         ;;
       '') return "$selected" ;;
-      [qQ]) return 255 ;;
+      [qQbB]) return 255 ;;
     esac
   done
 }
@@ -135,6 +136,7 @@ qa_menu() {
       2) spinner "Full-data smoke" bun run smoke:full ;;
       3) spinner "Browser E2E" bun run e2e ;;
       4) spinner "Load test" bash scripts/load.sh ;;
+      5) return ;;
     esac
     pause
   done
@@ -151,6 +153,7 @@ data_menu() {
       1) spinner "Seeding demo data" go run ./cmd/j3d seed -db ./data/j3-demo.db ;;
       2) spinner "Seeding full tournament" go run ./cmd/j3d reset -full -db ./data/j3-demo.db ;;
       3) J3_DB=./data/j3-live.db ./bin/j3d -addr 127.0.0.1:8787 ;;
+      4) return ;;
     esac
     pause
   done
@@ -168,6 +171,7 @@ build_menu() {
       1) spinner "Deploying development" bash scripts/deploy.sh development artifacts ;;
       2) spinner "Deploying staging" bash scripts/deploy.sh staging artifacts ;;
       3) spinner "Deploying production" bash scripts/deploy.sh production artifacts ;;
+      4) return ;;
     esac
     pause
   done
@@ -185,6 +189,7 @@ mobile_menu() {
       1) spinner "Building Android APK" bun run mobile:android ;;
       2) spinner "Building iOS app" bun run mobile:ios ;;
       3) spinner "Installing Chromium" bun run e2e:install ;;
+      4) return ;;
     esac
     pause
   done
