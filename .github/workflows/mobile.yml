@@ -10,7 +10,7 @@ on:
 
 concurrency:
   group: mobile-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -52,6 +52,15 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
       - name: Upload APK
+        id: upload_apk
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: j3-android-apk-${{ github.sha }}
+          path: web/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+      - name: Retry APK upload
+        if: steps.upload_apk.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
           name: j3-android-apk-${{ github.sha }}
@@ -82,6 +91,15 @@ jobs:
           cp -R build/ios/Build/Products/Debug-iphonesimulator/App.app artifacts/J3.app
           cd artifacts && zip -r ../j3-ios-app.zip J3.app
       - name: Upload iOS app
+        id: upload_ios
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: j3-ios-app-${{ github.sha }}
+          path: j3-ios-app.zip
+          if-no-files-found: error
+      - name: Retry iOS upload
+        if: steps.upload_ios.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
           name: j3-ios-app-${{ github.sha }}
