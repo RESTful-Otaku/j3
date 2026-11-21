@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getJson, resetAuthCache } from './api';
+import { switchDemoUser } from './auth';
 
 type Call = { url: string; auth: string | null };
 
@@ -84,5 +85,26 @@ describe('venue session handling', () => {
     await getJson('/api/v1/demo/accounts');
     expect(calls[0].url).toBe('/api/v1/auth/demo');
     expect(calls[1].auth).toBe('Bearer fresh');
+  });
+
+  it('switching demo identity replaces the bearer token and the UI role guard', async () => {
+    localStorage.setItem('j3-session', JSON.stringify(freshSession));
+    const calls = mockApi((url) => {
+      if (url.includes('/api/v1/auth/demo')) {
+        return { status: 200, body: {
+          token: 'fighter-token', email: 'fighter@demo.j3', role: 'fighter',
+          userId: 'u-fighter', expiresAt: '2099-01-01T00:00:00Z',
+        } };
+      }
+      return { status: 200, body: {} };
+    });
+    const next = await switchDemoUser('u-fighter');
+    expect(next.token).toBe('fighter-token');
+    expect(calls[0].url).toBe('/api/v1/auth/demo');
+    expect(JSON.parse(localStorage.getItem('j3-session')!).token).toBe('fighter-token');
+    expect(localStorage.getItem('j3-role')).toBe('fighter');
+
+    await getJson('/api/v1/demo/standings');
+    expect(calls.at(-1)?.auth).toBe('Bearer fighter-token');
   });
 });

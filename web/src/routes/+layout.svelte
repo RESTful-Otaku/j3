@@ -5,6 +5,7 @@
   import NavShell from '../lib/components/NavShell.svelte';
   import TourOverlay from '../lib/components/TourOverlay.svelte';
   import { goto } from '$app/navigation';
+  import { syncRoleFromSession } from '../lib/auth';
   import { currentRole, itemsForRole } from '../lib/nav';
 
   let mobile = false;
@@ -15,12 +16,17 @@
     sync();
     window.addEventListener('resize', sync);
 
-    const path = window.location.pathname;
-    const open = new Set(['/', '/login', '/signup', '/welcome', '/public', '/event', '/brackets', '/tables', '/pools', '/details', '/simulate', '/view', '/ui']);
-    if (!open.has(path)) {
-      const allowed = itemsForRole(currentRole()).some((item) => item.href === path);
-      if (!allowed) void goto('/');
-    }
+    const guard = () => {
+      syncRoleFromSession();
+      const path = window.location.pathname;
+      const open = new Set(['/', '/login', '/signup', '/welcome', '/public', '/event', '/brackets', '/tables', '/pools', '/details', '/simulate', '/view', '/ui']);
+      if (!open.has(path)) {
+        const allowed = itemsForRole(currentRole()).some((item) => item.href === path);
+        if (!allowed) void goto('/');
+      }
+    };
+    guard();
+    window.addEventListener('j3-session-changed', guard);
     ready = true;
     const healthTimer = setInterval(async () => {
       try {
@@ -32,6 +38,7 @@
     }, 10000);
     return () => {
       window.removeEventListener('resize', sync);
+      window.removeEventListener('j3-session-changed', guard);
       clearInterval(healthTimer);
     };
   });

@@ -1,10 +1,11 @@
-import { postJson, resetAuthCache } from './api';
+import { demoSession, postJson, resetAuthCache } from './api';
+import { setRole, type Role } from './nav';
 
 export type Session = {
-  token: string; email: string; role: string; expiresAt: string;
+  token: string; email: string; role: string; expiresAt: string; userId?: string;
 };
 
-export function uiRole(role: string): string {
+export function uiRole(role: string): Role {
   switch (role) {
     case 'tournament_runner':
     case 'runner':
@@ -58,6 +59,21 @@ export function clearSession() {
   resetAuthCache();
 }
 
+// Local QA only: replace the bearer session with one issued for another seeded
+// user. Both the API identity and the UI role guard must change together.
+export async function switchDemoUser(userId: string) {
+  const next = await demoSession(userId);
+  setRole(uiRole(next.role));
+  window.dispatchEvent(new CustomEvent('j3-session-changed', { detail: next }));
+  return next;
+}
+
+// Keep the client-side route guard aligned with the verified session on load.
+export function syncRoleFromSession() {
+  const current = session();
+  if (current) setRole(uiRole(current.role));
+}
+
 export async function login(email: string, provider: string, password?: string) {
   return postJson<{ challengeId: string; mfaRequired: boolean; demoCode: string; provider: string }>(
     '/api/v1/auth/login', { email, password, provider },
@@ -67,6 +83,7 @@ export async function login(email: string, provider: string, password?: string) 
 export async function verify(email: string, code: string) {
   const result = await postJson<Session>('/api/v1/auth/verify', { email, code });
   saveSession(result);
+  setRole(uiRole(result.role));
   return result;
 }
 

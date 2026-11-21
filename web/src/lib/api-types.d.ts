@@ -522,8 +522,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** QA-only runner session (only active when J3_DEMO=1) */
+        /** QA-only session for the runner or a chosen seeded user (J3_DEMO=1) */
         post: operations["demoLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/identities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** QA-only non-sensitive account directory and verified session identity */
+        get: operations["demoIdentities"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1290,8 +1307,25 @@ export interface components {
             /** Format: email */
             email: string;
             role: string;
+            userId?: string;
             /** Format: date-time */
             expiresAt: string;
+        };
+        DemoLoginRequest: {
+            /** @description Active seeded user to sign in as; omit for the runner. */
+            userId?: string;
+        };
+        DemoIdentity: {
+            id: string;
+            name: string;
+            role: string;
+            roleLabel: string;
+            clubName: string;
+            actions: components["schemas"]["Action"][];
+        };
+        DemoIdentitiesResponse: {
+            identities: components["schemas"]["DemoIdentity"][];
+            current?: components["schemas"]["DemoIdentity"] | null;
         };
         HealthResponse: {
             status: string;
@@ -2399,14 +2433,47 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DemoLoginRequest"];
+            };
+        };
         responses: {
             /** @description Session */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            /** @description Disabled or unknown user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
                 content?: never;
+            };
+        };
+    };
+    demoIdentities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Switchable identities and the caller's verified identity */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoIdentitiesResponse"];
+                };
             };
             /** @description Disabled */
             404: {

@@ -547,11 +547,35 @@ paths:
   /api/v1/auth/demo:
     post:
       operationId: demoLogin
-      summary: QA-only runner session (only active when J3_DEMO=1)
+      summary: QA-only session for the runner or a chosen seeded user (J3_DEMO=1)
       security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemoLoginRequest'
       responses:
         '200':
           description: Session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '404':
+          description: Disabled or unknown user
+  /api/v1/demo/identities:
+    get:
+      operationId: demoIdentities
+      summary: QA-only non-sensitive account directory and verified session identity
+      security: []
+      responses:
+        '200':
+          description: Switchable identities and the caller's verified identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoIdentitiesResponse'
         '404':
           description: Disabled
   /api/v1/events/stream:
@@ -1073,9 +1097,54 @@ components:
           format: email
         role:
           type: string
+        userId:
+          type: string
         expiresAt:
           type: string
           format: date-time
+    DemoLoginRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Active seeded user to sign in as; omit for the runner.
+    DemoIdentity:
+      type: object
+      required:
+      - id
+      - name
+      - role
+      - roleLabel
+      - clubName
+      - actions
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        roleLabel:
+          type: string
+        clubName:
+          type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+    DemoIdentitiesResponse:
+      type: object
+      required:
+      - identities
+      properties:
+        identities:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemoIdentity'
+        current:
+          nullable: true
+          allOf:
+          - $ref: '#/components/schemas/DemoIdentity'
     HealthResponse:
       type: object
       required:

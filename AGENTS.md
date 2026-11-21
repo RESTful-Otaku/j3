@@ -8,7 +8,7 @@
 > |---|---|
 > | Status | Implementation — Phase 1c complete; verification/hardening in progress |
 > | Created | 2026-11-19 |
-> | Last updated | 2026-11-19 |
+> | Last updated | 2026-11-21 |
 > | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
 > | Repo | none yet (fresh workspace) |
 
@@ -778,6 +778,12 @@ _Format: `D-### | date | decision | rationale | status`._
 - **D-037 | 2026-11-21 | Demo auth always resolves a real runner and browser sessions self-heal on 401**
   — demo mode must never 500 because a particular seed is absent; the web client retries once with
   a fresh demo session so a DB reset cannot leave every page permanently unauthorized. Status: accepted.
+- **D-038 | 2026-11-21 | Demo identity switching mints a real bearer session**
+  — the old "act as" controls only changed display state, so QA never saw private/public RBAC
+  boundaries. `POST /api/v1/auth/demo` now accepts an optional `userId` and issues a real
+  server-side session for that account; both nav and dashboard switchers use it and re-apply the
+  UI role guard. A demo-only, non-sensitive identity directory keeps the switcher available to
+  low-privilege users without exposing private account fields. Status: accepted.
 - **D-035 | 2026-11-19 | Capability-scoped uploads with auto-generated colours**
   — photos for fighters/officials, logo+banner for clubs and runners; PNG/JPG/WEBP/SVG, size
   limit; backend extracts main/highlight colours with manual override. Status: accepted.
@@ -796,6 +802,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Demo QA identity switching now enforces real RBAC: `POST /api/v1/auth/demo`
+  accepts an optional `userId`, both switchers exchange it for a real bearer session, the nav and
+  route guard reapply the user role, and a demo-only identity directory keeps switching available
+  without leaking private account fields. Added Go/Vitest/Playwright coverage for the private/public
+  boundary and auto-login; smoke 70/70 + 70/70, E2E 83/83, load 200/200, race and build green.
 - **2026-11-21** — Fixed the reported `401 /api/v1/demo/accounts` and cascading 500s. Root cause:
   `POST /api/v1/auth/demo` hard-coded `u-tony`, which only exists in the Okami seed, so on an empty
   venue DB or a full-seed DB (`bun run demo:full`, TUI "Run live executable") it returned 500 with a
@@ -969,6 +980,9 @@ _Format: `D-### | date | decision | rationale | status`._
 - Multi-screen routes: `/display`, `/public`, `/brackets`, `/tables`, `/pools`, `/control`,
   `/setup`, `/data`, `/audit`, `/settings`, `/details`, `/simulate`; live polling, PA toasts,
   celebration animations, Street Fighter theme, ultrawide CSS, TUI `dev.sh`, Capacitor config.
+- Local demo/simulated runs auto-login as a runner; the dashboard and expanded nav both offer a
+  real identity switcher that mints a server-side session for any seeded account, so QA sees the
+  exact RBAC/public-private boundaries for that user.
 - Refinement batch delivered: editable point values per technique with presets + custom actions,
   combined age/height/weight/rank category ranges, second-level round durations, invite
   pagination + bulk delete, clone setup, per-config template library, drag handles separated from

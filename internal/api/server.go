@@ -31,6 +31,7 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/version", s.versionInfo)
 	mux.HandleFunc("GET /api/v1/roles", s.roles)
 	mux.HandleFunc("GET /api/v1/demo", s.demo)
+	mux.HandleFunc("GET /api/v1/demo/identities", s.demoIdentities)
 	mux.HandleFunc("GET /api/v1/demo/accounts", s.demoAccounts)
 	mux.HandleFunc("GET /api/v1/demo/view", s.demoView)
 	mux.HandleFunc("GET /api/v1/demo/fights", s.demoFights)
@@ -139,7 +140,15 @@ func (s *Server) middleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		if !isPublic(r) {
+		if isPublic(r) {
+			// Public endpoints may still personalise themselves (for example the
+			// demo identity directory). A bad token never blocks public data.
+			if r.Header.Get("Authorization") != "" {
+				if identity, ok := s.identityFromRequest(r); ok {
+					r = r.WithContext(auth.WithIdentity(r.Context(), identity))
+				}
+			}
+		} else {
 			var identity auth.Identity
 			var ok bool
 			if s.testToken != "" && r.Header.Get("Authorization") == "" {

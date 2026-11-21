@@ -199,12 +199,14 @@ func TestDemoFights(t *testing.T) {
 	}
 }
 
-func TestDemoViewResolvesActorCapabilities(t *testing.T) {
+func TestDemoViewUsesSessionIdentity(t *testing.T) {
 	t.Setenv("J3_DEMO", "1")
 	srv := seededAuthServer(t)
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/demo/view?actor=u-official", nil)
-	req.Header.Set("Authorization", "Bearer "+sessionToken(t, srv, "u-runner", "tournament_runner"))
+	// The actor query parameter is deliberately ignored: only the bearer
+	// session may determine the identity whose capabilities are reported.
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/demo/view?actor=u-runner", nil)
+	req.Header.Set("Authorization", "Bearer "+sessionToken(t, srv, "u-official", "official"))
 	srv.Handler().ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200: %s", rec.Code, rec.Body.String())

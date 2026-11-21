@@ -40,15 +40,61 @@ test.describe('J3 end-to-end journeys', () => {
     expect(errors).toEqual([]);
   });
 
-  test('account switcher changes visible permissions', async ({ page }) => {
+  test('account switcher changes the real session and visible permissions', async ({ page }) => {
     const errors = await expectNoPageErrors(page);
     await page.goto('/');
     await page.getByRole('button', { name: 'Accounts & roles' }).click();
     await page.getByRole('button', { name: /Aiko Tanaka \(Runner\)/ }).click();
+    await expect(page).toHaveURL(/\/admin$/);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Accounts & roles' }).click();
     await expect(page.locator('.cap.on')).toHaveCount(9);
+
     await page.getByRole('button', { name: /Sam Viewer/ }).click();
+    await expect(page).toHaveURL(/\/public$/);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Accounts & roles' }).click();
     await expect(page.locator('.cap.on')).toHaveCount(1);
     expect(errors).toEqual([]);
+  });
+
+  test('navigation identity picker switches the real session', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Expand navigation' }).click();
+    const picker = page.getByLabel('Sign in as demo user');
+    await expect(picker).not.toBeDisabled();
+    const option = picker.locator('option', { hasText: 'Sam Viewer' });
+    const value = await option.getAttribute('value');
+    expect(value).toBeTruthy();
+    await picker.selectOption(value!);
+    await expect(page).toHaveURL(/\/public$/);
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('j3-session') || '{}'));
+    expect(stored.userId).toBe(value);
+    expect(stored.role).toBe('spectator');
+  });
+
+  test('spectator identity is denied private APIs but can read public data', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Accounts & roles' }).click();
+    await page.getByRole('button', { name: /Sam Viewer/ }).click();
+    await expect(page).toHaveURL(/\/public$/);
+
+    const status = await page.evaluate(async () => {
+      const stored = JSON.parse(localStorage.getItem('j3-session') || '{}');
+      const request = async (url: string) => (await fetch(url, {
+        headers: { Authorization: `Bearer ${stored.token}` },
+      })).status;
+      return {
+        privateAccounts: await request('/api/v1/demo/accounts'),
+        privateQuery: await request('/api/v1/query?table=users&limit=1'),
+        publicStandings: await request('/api/v1/demo/standings'),
+        switcherDirectory: await request('/api/v1/demo/identities'),
+      };
+    });
+    expect(status.privateAccounts).toBe(403);
+    expect(status.privateQuery).toBe(403);
+    expect(status.publicStandings).toBe(200);
+    expect(status.switcherDirectory).toBe(200);
   });
 
   test('official bracket renders connector lines and rounds', async ({ page }) => {

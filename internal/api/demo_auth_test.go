@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/restful-otaku/j3/internal/api"
@@ -37,6 +38,19 @@ func authenticatedGet(t *testing.T, srv *api.Server, path, token string) *httpte
 	req.Header.Set("Authorization", "Bearer "+token)
 	srv.Handler().ServeHTTP(rec, req)
 	return rec
+}
+
+func demoLoginAs(t *testing.T, srv *api.Server, userID string) (*httptest.ResponseRecorder, demoSessionResponse) {
+	t.Helper()
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/demo", strings.NewReader(`{"userId":"`+userID+`"}`))
+	req.Header.Set("Content-Type", "application/json")
+	srv.Handler().ServeHTTP(rec, req)
+	var session demoSessionResponse
+	if rec.Code == http.StatusOK && json.Unmarshal(rec.Body.Bytes(), &session) != nil {
+		t.Fatalf("invalid demo session response: %s", rec.Body.String())
+	}
+	return rec, session
 }
 
 func TestDemoLoginBootstrapsEmptyVenueDatabase(t *testing.T) {
@@ -99,6 +113,85 @@ func TestDemoLoginDisabledOutsideDemoMode(t *testing.T) {
 	rec, _ := demoLoginRequest(t, newTestServer(t))
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("status = %d, want 404", rec.Code)
+	}
+}
+
+func TestDemoLoginMintsRealSessionForChosenUser(t *testing.T) {
+	t.Setenv("J3_DEMO", "1")
+	srv := seededAuthServer(t)
+	rec, session := demoLoginAs(t, srv, "u-official")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("demo login status = %d, want 200: %s", rec.Code, rec.Body.String())
+	}
+	if session.UserID != "u-official" || session.Role != "official" {
+		t.Fatalf("session identity = %s/%s, want u-official/official", session.UserID, session.Role)
+	}
+	var storedRole string
+	if err := srv.Store.QueryRow(`SELECT role FROM sessions WHERE token = ?`, session.Token).Scan(&storedRole); err != nil {
+		t.Fatalf("session was not persisted: %v", err)
+	}
+	if storedRole != "official" {
+		t.Fatalf("stored role = %q, want canonical official", storedRole)
+	}
+	createRec := httptest.NewRecorder()
+	createReq := httptest.NewRequest(http.MethodPost, "/api/v1/tournaments", strings.NewReader(`{}`))
+	createReq.Header.Set("Authorization", "Bearer "+session.Token)
+	createReq.Header.Set("Content-Type", "application/json")
+	srv.Handler().ServeHTTP(createRec, createReq)
+	if createRec.Code != http.StatusForbidden {
+		t.Fatalf("settings:create status = %d, want 403: %s", createRec.Code, createRec.Body.String())
+	}
+	if got := authenticatedGet(t, srv, "/api/v1/demo/standings", session.Token); got.Code != http.StatusOK {
+		t.Fatalf("public standings status = %d, want 200: %s", got.Code, got.Body.String())
+	}
+	identityRec := authenticatedGet(t, srv, "/api/v1/demo/identities", session.Token)
+	if identityRec.Code != http.StatusOK {
+		t.Fatalf("identities status = %d, want 200: %s", identityRec.Code, identityRec.Body.String())
+	}
+	var identityBody struct {
+		Current *struct {
+			ID   string `json:"id"`
+			Role string `json:"role"`
+		} `json:"current"`
+	}
+	if err := json.Unmarshal(identityRec.Body.Bytes(), &identityBody); err != nil {
+		t.Fatal(err)
+	}
+	if identityBody.Current == nil || identityBody.Current.ID != "u-official" || identityBody.Current.Role != "official" {
+		t.Fatalf("identities.current = %+v, want the verified official session", identityBody.Current)
+	}
+}
+
+func TestDemoIdentitiesArePublicOnlyInDemoMode(t *testing.T) {
+	srv := seededAuthServer(t)
+	t.Setenv("J3_DEMO", "1")
+	rec := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/v1/demo/identities", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("identities status = %d, want 200: %s", rec.Code, rec.Body.String())
+	}
+	var body struct {
+		Identities []struct {
+			ID        string `json:"id"`
+			Name      string `json:"name"`
+			Role      string `json:"role"`
+			RoleLabel string `json:"roleLabel"`
+		} `json:"identities"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if len(body.Identities) < 5 {
+		t.Fatalf("identities = %d, want at least 5 seeded roles", len(body.Identities))
+	}
+	if strings.Contains(rec.Body.String(), `"email"`) {
+		t.Fatal("identity directory must not expose private account fields")
+	}
+	t.Setenv("J3_DEMO", "0")
+	disabled := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(disabled, httptest.NewRequest(http.MethodGet, "/api/v1/demo/identities", nil))
+	if disabled.Code != http.StatusNotFound {
+		t.Fatalf("disabled identities status = %d, want 404", disabled.Code)
 	}
 }
 

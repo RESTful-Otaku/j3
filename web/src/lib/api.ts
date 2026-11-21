@@ -23,6 +23,9 @@ export type DemoFightEvent = components['schemas']['DemoFightEvent'];
 export type Role = components['schemas']['Role'];
 export type Action = components['schemas']['Action'];
 export type RoleInfo = components['schemas']['RoleInfo'];
+export type DemoSession = components['schemas']['Session'];
+export type DemoIdentity = components['schemas']['DemoIdentity'];
+export type DemoIdentitiesResponse = components['schemas']['DemoIdentitiesResponse'];
 
 const SESSION_KEY = 'j3-session';
 
@@ -48,21 +51,36 @@ function storedToken(): string {
   }
 }
 
+async function fetchDemoSession(userId?: string): Promise<DemoSession> {
+  const init: RequestInit = { method: 'POST' };
+  if (userId) {
+    init.headers = { 'Content-Type': 'application/json' };
+    init.body = JSON.stringify({ userId });
+  }
+  const response = await fetch('/api/v1/auth/demo', init);
+  if (!response.ok) throw new Error(`demo sign-in failed (${response.status})`);
+  return response.json() as Promise<DemoSession>;
+}
+
 async function demoLogin(): Promise<boolean> {
   lastAuthError = '';
   try {
-    const response = await fetch('/api/v1/auth/demo', { method: 'POST' });
-    if (!response.ok) {
-      lastAuthError = `demo sign-in failed (${response.status})`;
-      return false;
-    }
-    const data = await response.json();
+    const data = await fetchDemoSession();
     localStorage.setItem(SESSION_KEY, JSON.stringify(data));
     return true;
-  } catch {
-    lastAuthError = 'venue server is offline';
+  } catch (e) {
+    lastAuthError = e instanceof Error ? e.message : 'demo sign-in failed';
     return false;
   }
+}
+
+// Issues a real server-side session for a chosen QA account. Unlike the old
+// display-only actor switch, every subsequent API call carries this identity.
+export async function demoSession(userId: string): Promise<DemoSession> {
+  const data = await fetchDemoSession(userId);
+  localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+  resetAuthCache();
+  return data;
 }
 
 async function ensureDemoAuth() {
@@ -145,12 +163,10 @@ export const api = {
   version: () => getJson<{ name: string; version: string }>('/api/v1/version'),
   roles: () => getJson<{ roles: RoleInfo[] }>('/api/v1/roles'),
   demo: () => getJson<{ counts: DemoCounts }>('/api/v1/demo'),
+  identities: () => getJson<DemoIdentitiesResponse>('/api/v1/demo/identities'),
   accounts: () => getJson<{ accounts: DemoAccount[] }>('/api/v1/demo/accounts'),
   fights: () => getJson<{ fights: DemoFight[] }>('/api/v1/demo/fights'),
-  view: (actor?: string) =>
-    getJson<{ actor: DemoAccount; actions: Action[]; counts: DemoCounts }>(
-      `/api/v1/demo/view${actor ? `?actor=${encodeURIComponent(actor)}` : ''}`,
-    ),
+  view: () => getJson<{ actor: DemoAccount; actions: Action[]; counts: DemoCounts }>('/api/v1/demo/view'),
   signupPreview: (body: SignupRequest) =>
     postJson<SignupPreview>('/api/v1/signup/preview', body),
   signup: (body: SignupRequest) => postJson<SignupResult>('/api/v1/signup', body),

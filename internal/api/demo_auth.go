@@ -4,7 +4,11 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/restful-otaku/j3/internal/auth"
@@ -18,16 +22,32 @@ type demoRunnerAccount struct {
 	Role  string
 }
 
-// demoLogin is only active when J3_DEMO=1. It gives QA a runner session without
-// going through an external identity provider. The runner is resolved from the
-// database (and created on a completely empty venue DB) so the endpoint cannot
-// fail with a foreign-key error when no Okami seed is present.
+type demoLoginRequest struct {
+	UserID string `json:"userId"`
+}
+
+// demoLogin is only active when J3_DEMO=1. With no body it signs QA in as a
+// runner; with {"userId":"..."} it mints a real session for that seeded user so
+// role switching enforces the same RBAC as a real login. The runner is resolved
+// from the database (and created on an empty venue DB) so this endpoint cannot
+// fail with a foreign-key error when a particular seed is absent.
 func (s *Server) demoLogin(w http.ResponseWriter, r *http.Request) {
 	if !demoMode() {
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "not found"})
 		return
 	}
-	account, err := s.demoRunner(r)
+	var body demoLoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil && !errors.Is(err, io.EOF) {
+		writeError(w, err)
+		return
+	}
+	var account demoRunnerAccount
+	var err error
+	if strings.TrimSpace(body.UserID) != "" {
+		account, err = s.demoUser(r, strings.TrimSpace(body.UserID))
+	} else {
+		account, err = s.demoRunner(r)
+	}
 	if err != nil {
 		writeError(w, err)
 		return
@@ -39,17 +59,52 @@ func (s *Server) demoLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	token := hex.EncodeToString(buf)
 	expiresAt := time.Now().UTC().Add(demoSessionLifetime).Format(sessionTimeLayout)
+	canonical := auth.CanonicalRole(account.Role)
 	_, err = s.Store.ExecContext(r.Context(), `
 		INSERT INTO sessions (token, user_id, role, expires_at)
-		VALUES (?, ?, ?, ?)`, token, account.ID, account.Role, expiresAt)
+		VALUES (?, ?, ?, ?)`, token, account.ID, string(canonical), expiresAt)
 	if err != nil {
 		writeError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"token": token, "email": account.Email, "role": "runner",
+		"token": token, "email": account.Email, "role": demoUIRole(canonical),
 		"userId": account.ID, "expiresAt": expiresAt,
 	})
+}
+
+// demoUIRole keeps the session payload compatible with the short role names
+// used by the web UI while the database and middleware continue to use the
+// canonical RBAC role names.
+func demoUIRole(role auth.Role) string {
+	switch role {
+	case auth.RoleTournamentRunner:
+		return "runner"
+	case auth.RoleOfficial:
+		return "official"
+	case auth.RoleClubLeader:
+		return "club_leader"
+	case auth.RoleFighter:
+		return "fighter"
+	default:
+		return "spectator"
+	}
+}
+
+// demoUser resolves any active seeded account for QA impersonation. This is
+// deliberately demo-only: production sessions come from verified credentials.
+func (s *Server) demoUser(r *http.Request, userID string) (demoRunnerAccount, error) {
+	var account demoRunnerAccount
+	err := s.Store.QueryRowContext(r.Context(), `
+		SELECT id, email, role FROM users WHERE id = ? AND status = 'active'`, userID).
+		Scan(&account.ID, &account.Email, &account.Role)
+	if err != nil {
+		return demoRunnerAccount{}, err
+	}
+	if auth.CanonicalRole(account.Role) == "" {
+		return demoRunnerAccount{}, sql.ErrNoRows
+	}
+	return account, nil
 }
 
 // demoRunner prefers the seeded Okami/base runner, then any active runner, and

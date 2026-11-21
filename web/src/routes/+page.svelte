@@ -6,6 +6,7 @@
     allActions,
     type Action,
     type DemoAccount,
+    type DemoIdentity,
     type DemoCounts,
     type DemoFight,
     type Role,
@@ -15,13 +16,14 @@
     type PoolView,
     type SignupRequest,
   } from '../lib/api';
+  import { landingForRole, session, switchDemoUser } from '../lib/auth';
 
   let ready = false;
   let error = '';
   let counts: DemoCounts | null = null;
-  let accounts: DemoAccount[] = [];
+  let accounts: DemoIdentity[] = [];
   let fights: DemoFight[] = [];
-  let actorId = 'u-runner';
+  let actorId = '';
   let actor: DemoAccount | null = null;
   let capabilities: Action[] = [];
   let activeTab = 'overview';
@@ -91,30 +93,46 @@
     spectator: 'Spectators',
   };
 
+  function asAccount(identity: DemoIdentity | null | undefined): DemoAccount | null {
+    if (!identity) return null;
+    return {
+      id: identity.id, name: identity.name, email: '',
+      role: identity.role as DemoAccount['role'], roleLabel: identity.roleLabel,
+      clubName: identity.clubName, source: 'independent', status: 'active',
+      actions: identity.actions,
+    };
+  }
+
+  async function optional<T>(promise: Promise<T>): Promise<T | null> {
+    try { return await promise; } catch { return null; }
+  }
+
   onMount(async () => {
     try {
-      const [demo, accts, fs, view, eventInfo, beltInfo, clubInfo] = await Promise.all([
+      const [demo, identitiesResponse, fs, eventInfo, beltInfo, clubInfo] = await Promise.all([
         api.demo(),
-        api.accounts(),
+        api.identities(),
         api.fights(),
-        api.view(actorId),
         api.event(),
         api.belts(),
-        api.query({ table: 'clubs', limit: 100 }),
+        optional(api.query({ table: 'clubs', limit: 100 })),
       ]);
       try { eventDetails = JSON.parse(eventInfo.detailsJson || '{}'); } catch { eventDetails = {}; }
       beltRanks = beltInfo.belts;
-      clubs = [...clubs, ...clubInfo.rows.map((row) => ({ id: String(row.id), label: String(row.name) }))];
+      clubs = [...clubs, ...(clubInfo?.rows ?? []).map((row) => ({ id: String(row.id), label: String(row.name) }))];
       counts = demo.counts;
-      accounts = accts.accounts;
+      accounts = identitiesResponse.identities;
+      actorId = identitiesResponse.current?.id ?? session()?.userId ?? '';
       fights = fs.fights;
-      actor = view.actor;
-      capabilities = view.actions;
+      const [view, poolResponse, requestResponse] = await Promise.all([
+        optional(api.view()), optional(api.pools()), optional(api.roleRequests()),
+      ]);
+      actor = view?.actor ?? asAccount(identitiesResponse.current);
+      capabilities = view?.actions ?? identitiesResponse.current?.actions ?? [];
       const live = fights.find((f) => f.state === 'live') ?? fights[0];
       selectedFightId = live?.id ?? '';
-      const [poolResponse, requestResponse] = await Promise.all([api.pools(), api.roleRequests()]);
-      pools = poolResponse.pools;
-      roleRequests = requestResponse.requests;
+      pools = poolResponse?.pools ?? [];
+      roleRequests = requestResponse?.requests ?? [];
       ready = true;
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
@@ -122,11 +140,11 @@
   });
 
   async function switchActor(id: string) {
-    actorId = id;
+    if (id === actorId) return;
     try {
-      const view = await api.view(id);
-      actor = view.actor;
-      capabilities = view.actions;
+      const next = await switchDemoUser(id);
+      actorId = next.userId ?? id;
+      window.location.assign(landingForRole(next.role));
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     }
@@ -144,9 +162,9 @@
   async function submitSignup() {
     try {
       signupResult = await api.signup(signupForm);
-      const [accts, reqs] = await Promise.all([api.accounts(), api.roleRequests()]);
-      accounts = accts.accounts;
-      roleRequests = reqs.requests;
+      const identitiesResponse = await api.identities();
+      accounts = identitiesResponse.identities;
+      roleRequests = (await optional(api.roleRequests()))?.requests ?? [];
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     }
@@ -167,9 +185,9 @@
   async function approve(id: string) {
     try {
       await api.approveRoleRequest(id);
-      const [reqs, accts] = await Promise.all([api.roleRequests(), api.accounts()]);
+      const [reqs, identitiesResponse] = await Promise.all([api.roleRequests(), api.identities()]);
       roleRequests = reqs.requests;
-      accounts = accts.accounts;
+      accounts = identitiesResponse.identities;
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     }
@@ -203,7 +221,7 @@
 
   $: filteredAccounts = accounts.filter((a) => {
     const matchesRole = roleFilter === 'all' || a.role === roleFilter;
-    const matchesSearch = `${a.name} ${a.email} ${a.clubName}`
+    const matchesSearch = `${a.name} ${a.roleLabel} ${a.clubName}`
       .toLowerCase()
       .includes(search.toLowerCase());
     return matchesRole && matchesSearch;
@@ -388,13 +406,15 @@
             <button
               class="account"
               class:active={actorId === account.id}
+              title={`${account.name} (${account.roleLabel})`}
+              aria-label={`${account.name} (${account.roleLabel})`}
               on:click={() => switchActor(account.id)}
             >
               <span class="avatar">{initials(account.name)}</span>
               <span style="min-width:0;">
                 <span class="name" style="display:block; overflow:hidden; text-overflow:ellipsis;">{account.name}</span>
                 <span class="meta" style="display:block; overflow:hidden; text-overflow:ellipsis;">
-                  {account.clubName || account.source}
+                  {account.clubName || account.roleLabel}
                 </span>
               </span>
             </button>

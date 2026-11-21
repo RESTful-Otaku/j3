@@ -11,6 +11,18 @@ test('login with Google and MFA, then sign out', async ({ page }) => {
   await expect(page).toHaveURL(/\/admin$/);
 });
 
+test('local demo run auto signs in as a runner', async ({ page }) => {
+  await page.goto('/');
+  await expect.poll(async () => page.evaluate(() => {
+    const stored = JSON.parse(localStorage.getItem('j3-session') || '{}');
+    return stored.role;
+  })).toBe('runner');
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('j3-session') || '{}'));
+  expect(stored.userId).toBeTruthy();
+  expect(stored.token).toBeTruthy();
+  await expect(page.getByText('Tournament journey', { exact: true })).toBeVisible();
+});
+
 test('stale demo session is replaced automatically after a data reset', async ({ page }) => {
   const unauthorized: string[] = [];
   page.on('response', (response) => {

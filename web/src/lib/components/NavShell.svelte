@@ -1,24 +1,51 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { currentRole, itemsForRole, setRole, type Role } from '../nav';
+  import { api, type DemoIdentity } from '../api';
+  import { landingForRole, session, switchDemoUser, uiRole } from '../auth';
+  import { currentRole, itemsForRole, type Role } from '../nav';
 
   let expanded = false;
   let mobileOpen = false;
   let role: Role = 'runner';
   let items: ReturnType<typeof itemsForRole> = [];
   let isMobile = false;
+  let identities: DemoIdentity[] = [];
+  let identityId = '';
+  let switching = false;
+  let switchError = '';
 
   function syncViewport() {
     isMobile = window.innerWidth <= 820;
   }
 
-  onMount(() => {
-    role = currentRole();
+  function syncSession() {
+    const active = session();
+    role = active ? uiRole(active.role) : currentRole();
     items = itemsForRole(role);
+    identityId = active?.userId ?? '';
+  }
+
+  async function loadIdentities() {
+    try {
+      const response = await api.identities();
+      identities = response.identities;
+      if (response.current) identityId = response.current.id;
+    } catch {
+      identities = [];
+    }
+  }
+
+  onMount(() => {
     expanded = localStorage.getItem('j3-nav-expanded') === '1';
     syncViewport();
+    syncSession();
+    void loadIdentities();
     window.addEventListener('resize', syncViewport);
-    return () => window.removeEventListener('resize', syncViewport);
+    window.addEventListener('j3-session-changed', syncSession);
+    return () => {
+      window.removeEventListener('resize', syncViewport);
+      window.removeEventListener('j3-session-changed', syncSession);
+    };
   });
 
   function toggle() {
@@ -34,10 +61,20 @@
     mobileOpen = false;
     window.dispatchEvent(new CustomEvent('j3-start-tour', { detail: { role } }));
   }
-  function changeRole(value: string) {
-    role = value as Role;
-    setRole(role);
-    items = itemsForRole(role);
+  async function changeIdentity(value: string) {
+    if (!value || value === identityId || switching) return;
+    switching = true;
+    switchError = '';
+    try {
+      const next = await switchDemoUser(value);
+      role = uiRole(next.role);
+      items = itemsForRole(role);
+      window.location.assign(landingForRole(next.role));
+    } catch (e) {
+      switchError = e instanceof Error ? e.message : String(e);
+    } finally {
+      switching = false;
+    }
   }
 </script>
 
@@ -64,14 +101,22 @@
       </nav>
       <button class="help-btn" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
       <div class="role-picker">
-        <span class="muted small">Viewing as</span>
-        <select value={role} on:change={(event) => changeRole((event.target as HTMLSelectElement).value)} aria-label="Account role">
-          <option value="runner">Runner / organiser</option>
-          <option value="official">Official / moderator</option>
-          <option value="club_leader">Club leader</option>
-          <option value="fighter">Fighter</option>
-          <option value="spectator">Spectator</option>
+        <span class="muted small">QA demo · sign in as</span>
+        <select
+          value={identityId}
+          disabled={switching || identities.length === 0}
+          on:change={(event) => changeIdentity((event.target as HTMLSelectElement).value)}
+          aria-label="Sign in as demo user"
+        >
+          {#if identities.length === 0}
+            <option value="">Loading demo accounts…</option>
+          {:else}
+            {#each identities as identity (identity.id)}
+              <option value={identity.id}>{identity.name} · {identity.roleLabel}</option>
+            {/each}
+          {/if}
         </select>
+        {#if switchError}<span class="muted small">{switchError}</span>{/if}
       </div>
     </aside>
   {/if}
@@ -98,15 +143,23 @@
     {#if expanded}
       <button class="help-btn" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
       <div class="role-picker">
-        <span class="muted small">Viewing as</span>
-        <select value={role} on:change={(event) => changeRole((event.target as HTMLSelectElement).value)} aria-label="Account role">
-          <option value="runner">Runner / organiser</option>
-          <option value="official">Official / moderator</option>
-          <option value="club_leader">Club leader</option>
-          <option value="fighter">Fighter</option>
-          <option value="spectator">Spectator</option>
+        <span class="muted small">QA demo · sign in as</span>
+        <select
+          value={identityId}
+          disabled={switching || identities.length === 0}
+          on:change={(event) => changeIdentity((event.target as HTMLSelectElement).value)}
+          aria-label="Sign in as demo user"
+        >
+          {#if identities.length === 0}
+            <option value="">Loading demo accounts…</option>
+          {:else}
+            {#each identities as identity (identity.id)}
+              <option value={identity.id}>{identity.name} · {identity.roleLabel}</option>
+            {/each}
+          {/if}
         </select>
         <span class="muted small">{items.length} available views</span>
+        {#if switchError}<span class="muted small">{switchError}</span>{/if}
       </div>
     {:else}
       <div class="collapsed-role" title="Viewing as {role}">{role.slice(0, 1).toUpperCase()}</div>

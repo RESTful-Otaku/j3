@@ -16,6 +16,7 @@ const sessionTimeLayout = "2006-01-02T15:04:05.000Z"
 var publicGetRoutes = map[string]bool{
 	"/healthz": true, "/readyz": true, "/api/v1/version": true, "/api/v1/roles": true,
 	"/api/v1/demo": true, "/api/v1/demo/fights": true, "/api/v1/demo/standings": true,
+	"/api/v1/demo/identities": true,
 	"/api/v1/demo/event": true, "/api/v1/demo/belts": true, "/api/v1/demo/simulate": true,
 	"/api/v1/demo/stats": true, "/api/v1/demo/kata/catalogue": true,
 	"/api/v1/demo/brackets": true, "/api/v1/demo/pools": true, "/api/v1/demo/medals": true,
