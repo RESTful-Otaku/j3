@@ -111,6 +111,9 @@ func (s *Server) createTournament(w http.ResponseWriter, r *http.Request) {
 
 // importTemplate recreates an event from a saved template configuration.
 func (s *Server) importTemplate(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "settings", "create") {
+		return
+	}
 	id := r.PathValue("id")
 	var config string
 	if err := s.Store.QueryRowContext(r.Context(),

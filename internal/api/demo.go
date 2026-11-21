@@ -33,6 +33,9 @@ func roleLabel(role auth.Role) string {
 
 // demoAccounts lists every seeded account so QA can switch roles instantly.
 func (s *Server) demoAccounts(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "settings", "view") {
+		return
+	}
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT u.id, u.display_name, u.email, u.role,
 		       COALESCE(c.name, ''), u.source, u.status
@@ -66,12 +69,17 @@ func (s *Server) demoAccounts(w http.ResponseWriter, r *http.Request) {
 
 // demoView resolves the "acting as" account and returns what that user can do.
 func (s *Server) demoView(w http.ResponseWriter, r *http.Request) {
-	actorID := r.URL.Query().Get("actor")
-	if actorID == "" {
-		actorID = r.Header.Get("X-J3-Actor")
+	if !s.requireAction(w, r, "participants", "view") {
+		return
+	}
+	actorID := ""
+	if demoMode() {
+		actorID = r.URL.Query().Get("actor")
 	}
 	if actorID == "" {
-		actorID = "u-runner"
+		if identity, ok := auth.FromContext(r.Context()); ok {
+			actorID = identity.UserID
+		}
 	}
 	var a demoAccount
 	err := s.Store.QueryRowContext(r.Context(), `

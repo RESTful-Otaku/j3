@@ -156,11 +156,15 @@ func (s *Server) buildBracket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 	if _, err := tx.ExecContext(r.Context(),
-		`DELETE FROM bracket_slots WHERE stage_id IN (SELECT id FROM bracket_stages WHERE event_id = ?)`, req.EventID); err != nil {
+		`DELETE FROM bracket_slots WHERE stage_id IN (
+		    SELECT id FROM bracket_stages WHERE event_id = ? AND (? = '' OR category_id = ?))`,
+		req.EventID, req.CategoryID, req.CategoryID); err != nil {
 		writeError(w, err)
 		return
 	}
-	if _, err := tx.ExecContext(r.Context(), `DELETE FROM bracket_stages WHERE event_id = ?`, req.EventID); err != nil {
+	if _, err := tx.ExecContext(r.Context(),
+		`DELETE FROM bracket_stages WHERE event_id = ? AND (? = '' OR category_id = ?)`,
+		req.EventID, req.CategoryID, req.CategoryID); err != nil {
 		writeError(w, err)
 		return
 	}
@@ -305,24 +309,39 @@ func (s *Server) promoteSlot(w http.ResponseWriter, r *http.Request) {
 		}
 		icon = body.ResultIcon
 	}
-	if _, err := s.Store.ExecContext(r.Context(), `
+	tx, err := s.Store.BeginTx(r.Context(), nil)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	defer tx.Rollback()
+	if _, err := tx.ExecContext(r.Context(), `
 		UPDATE bracket_slots SET state = ?, result_icon = ? WHERE id = ?`, state, icon, slotID); err != nil {
 		writeError(w, err)
 		return
 	}
 	if body.Winner && fighterID != "" {
 		var nextSlot string
-		err := s.Store.QueryRowContext(r.Context(), `
+		err := tx.QueryRowContext(r.Context(), `
 			SELECT bs.id FROM bracket_slots bs
 			JOIN bracket_stages st ON st.id = bs.stage_id
-			WHERE st.event_id = (SELECT event_id FROM bracket_stages WHERE id = ?)
-			  AND st.sort_order > (SELECT sort_order FROM bracket_stages WHERE id = ?)
+			JOIN bracket_stages cur ON cur.id = ?
+			WHERE st.event_id = cur.event_id
+			  AND st.sort_order = cur.sort_order + 1
 			  AND bs.fighter_id IS NULL
-			ORDER BY st.sort_order, bs.position LIMIT 1`, stageID, stageID).Scan(&nextSlot)
+			ORDER BY bs.position LIMIT 1`, stageID).Scan(&nextSlot)
 		if err == nil {
-			_, _ = s.Store.ExecContext(r.Context(), `
-				UPDATE bracket_slots SET fighter_id = ?, source_slot = ? WHERE id = ?`, fighterID, slotID, nextSlot)
+			if _, err := tx.ExecContext(r.Context(), `
+				UPDATE bracket_slots SET fighter_id = ?, source_slot = ? WHERE id = ?`,
+				fighterID, slotID, nextSlot); err != nil {
+				writeError(w, err)
+				return
+			}
 		}
+	}
+	if err := tx.Commit(); err != nil {
+		writeError(w, err)
+		return
 	}
 	s.audit(r, "bracket.promote", "slot", slotID, fmt.Sprintf(`{"result":%q}`, icon))
 	stages, err := s.listBrackets(r, eventID, "")

@@ -25,7 +25,10 @@ func Open(path string) (*DB, error) {
 			}
 		}
 	}
-	conn, err := sql.Open("sqlite", path)
+	// Pragmas belong in the DSN so every pooled connection gets them; executing
+	// PRAGMA on *sql.DB only configures whichever connection handles that call.
+	dsn := path + "?_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)"
+	conn, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite: %w", err)
 	}
@@ -36,16 +39,9 @@ func Open(path string) (*DB, error) {
 		maxOpen = 1
 	}
 	conn.SetMaxOpenConns(maxOpen)
-	for _, pragma := range []string{
-		`PRAGMA journal_mode = WAL`,
-		`PRAGMA foreign_keys = ON`,
-		`PRAGMA busy_timeout = 5000`,
-		`PRAGMA synchronous = NORMAL`,
-	} {
-		if _, err := conn.Exec(pragma); err != nil {
-			conn.Close()
-			return nil, fmt.Errorf("%s: %w", pragma, err)
-		}
+	if err := conn.Ping(); err != nil {
+		conn.Close()
+		return nil, fmt.Errorf("connect sqlite: %w", err)
 	}
 	store := &DB{DB: conn, Path: path}
 	if err := store.Migrate(); err != nil {

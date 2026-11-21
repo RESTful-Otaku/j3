@@ -4,11 +4,29 @@ export type Session = {
   token: string; email: string; role: string; expiresAt: string;
 };
 
-export function landingForRole(role: string): string {
+export function uiRole(role: string): string {
   switch (role) {
+    case 'tournament_runner':
+    case 'runner':
+      return 'runner';
+    case 'official':
+    case 'moderator':
+      return 'official';
+    case 'club_leader':
+      return 'club_leader';
+    case 'fighter':
+      return 'fighter';
+    default:
+      return 'spectator';
+  }
+}
+
+export function landingForRole(role: string): string {
+  switch (uiRole(role)) {
     case 'runner': return '/admin';
     case 'official': return '/official';
     case 'club_leader': return '/club';
+    case 'fighter': return '/public';
     default: return '/public';
   }
 }

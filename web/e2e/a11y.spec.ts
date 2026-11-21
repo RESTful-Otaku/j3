@@ -4,7 +4,12 @@ import { disableTours } from './helpers';
 test.beforeEach(async ({ page }) => { await disableTours(page); });
 import AxeBuilder from '@axe-core/playwright';
 
-const routes = ['/', '/setup', '/public', '/brackets', '/tables', '/settings', '/details', '/mat'];
+const routes = [
+  '/', '/welcome', '/login', '/signup', '/setup', '/public', '/display', '/mat',
+  '/official', '/brackets', '/tables', '/pools', '/control', '/data', '/audit',
+  '/settings', '/details', '/simulate', '/ceremony', '/builder', '/ui', '/view',
+  '/operations', '/overlay', '/event', '/notifications', '/admin', '/club', '/permissions',
+];
 
 for (const route of routes) {
   test(`accessibility scan: ${route}`, async ({ page }) => {

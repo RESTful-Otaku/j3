@@ -793,6 +793,13 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Hardening/stabilisation pass: live scoring authorization now derives identity
+  from the verified session (spoofed headers rejected), RBAC defaults moved to migrations so they
+  cannot be self-initialised, privileged mutations guarded, signup passwords + reset flow added,
+  SQLite pragmas moved into the DSN for pooled connections, MFA rate limiting/constant-time
+  comparison, absolute-time clock, atomic score sequences/medals/kata advancement, scoped bracket
+  rebuilds, role-aware landing fix, uploads authenticated, public scoreboard made view-only,
+  full-route axe scans and stronger CI (pinned Bun, timeouts, generated-type parity, seeded smoke).
 - **2026-11-21** — Branding/mobile: integrated supplied J3 logo and banner artwork, applied the
   final palette (Midnight/Steel/Sky Blue, Energetic Orange, Light, Silver, Charcoal) with a bolder
   display font, club logos now render on fighter cards, tables, brackets and pools. Fixed Android
@@ -968,7 +975,7 @@ _Format: `D-### | date | decision | rationale | status`._
    official assignments; `/ceremony` provides a guided animated podium sequence with PA callouts.
    A drag-and-drop `/builder` lets users compose, resize, save, clone, load and delete live widget
    dashboards, with `/ui` as a Storybook-style component gallery.
-6. **Verification — delivered**: `bun run smoke` (70 API/UI assertions), `bun run e2e` (58 browser
+6. **Verification — delivered**: `bun run smoke:full` (70 API/UI assertions), `bun run e2e` (79 browser
    journey + axe accessibility tests), `bun run load` (200 concurrent requests), Go race tests and
    web toast unit tests all pass. CI runs every gate on PRs before merge.
 

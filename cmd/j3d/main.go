@@ -61,7 +61,9 @@ func serve() {
 	go func() {
 		log.Printf("J3 venue server listening on %s (db: %s)", *addr, *dbPath)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("serve: %v", err)
+			log.Printf("serve: %v", err)
+			server.Close()
+			return
 		}
 	}()
 
@@ -102,7 +104,8 @@ func seedCommand(args []string, reset bool) error {
 			return err
 		}
 		log.Printf("Okami Jiu Jitsu Challenger seeded")
-	} else if *full {
+	}
+	if *full {
 		if err := seed.EnsureFull(store); err != nil {
 			return err
 		}

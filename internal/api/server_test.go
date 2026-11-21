@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -61,6 +62,20 @@ func TestRoles(t *testing.T) {
 	}
 }
 
+func postAuthenticatedJSON(t *testing.T, srv *api.Server, token, path string, body any) *httptest.ResponseRecorder {
+	t.Helper()
+	data, err := json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, path, bytes.NewReader(data))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	srv.Handler().ServeHTTP(rec, req)
+	return rec
+}
+
 func TestDemoEndpoint(t *testing.T) {
 	rec := httptest.NewRecorder()
 	newTestServer(t).Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/v1/demo", nil))
@@ -80,8 +95,36 @@ func seededServer(t *testing.T) *api.Server {
 		t.Fatal(err)
 	}
 	srv := api.New(store, "test")
-	srv.TestToken = "test-only"
+	srv.EnableTestBypass()
 	return srv
+}
+
+// seededAuthServer returns a server with real bearer authentication (no test
+// bypass) so authorization tests exercise the production path.
+func seededAuthServer(t *testing.T) *api.Server {
+	t.Helper()
+	store, err := db.Open(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { store.Close() })
+	if err := seed.Ensure(store); err != nil {
+		t.Fatal(err)
+	}
+	return api.New(store, "test")
+}
+
+func sessionToken(t *testing.T, srv *api.Server, userID, role string) string {
+	t.Helper()
+	token := "tok-" + userID + "-" + role
+	_, err := srv.Store.Exec(
+		`INSERT OR REPLACE INTO sessions (token, user_id, role, expires_at)
+		 VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','+1 hour'))`,
+		token, userID, role)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return token
 }
 
 func TestDemoAccountsCoverEveryRole(t *testing.T) {
@@ -157,9 +200,12 @@ func TestDemoFights(t *testing.T) {
 }
 
 func TestDemoViewResolvesActorCapabilities(t *testing.T) {
+	t.Setenv("J3_DEMO", "1")
+	srv := seededAuthServer(t)
 	rec := httptest.NewRecorder()
-	seededServer(t).Handler().ServeHTTP(rec,
-		httptest.NewRequest(http.MethodGet, "/api/v1/demo/view?actor=u-official", nil))
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/demo/view?actor=u-official", nil)
+	req.Header.Set("Authorization", "Bearer "+sessionToken(t, srv, "u-runner", "tournament_runner"))
+	srv.Handler().ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200: %s", rec.Code, rec.Body.String())
 	}

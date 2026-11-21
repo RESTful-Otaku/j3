@@ -1,0 +1,1 @@
+ALTER TABLE fight_state ADD COLUMN ends_at TEXT NOT NULL DEFAULT '';

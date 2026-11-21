@@ -2,9 +2,12 @@ package api
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -27,16 +30,60 @@ type loginRequest struct {
 	Provider string `json:"provider"`
 }
 
+var mailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
+
 var challenges = struct {
 	mu sync.Mutex
 	m  map[string]authChallenge
 }{m: map[string]authChallenge{}}
 
 func randomCode() string {
-	buf := make([]byte, 4)
-	_, _ = rand.Read(buf)
-	code := fmt.Sprintf("%06d", (uint32(buf[0])<<24|uint32(buf[1])<<16|uint32(buf[2])<<8|uint32(buf[3]))%1000000)
-	return code
+	value, err := rand.Int(rand.Reader, big.NewInt(1000000))
+	if err != nil {
+		return fmt.Sprintf("%06d", time.Now().UnixNano()%1000000)
+	}
+	return fmt.Sprintf("%06d", value.Int64())
+}
+
+var mfaAttempts = struct {
+	mu sync.Mutex
+	m  map[string]*mfaAttempt
+}{m: map[string]*mfaAttempt{}}
+
+type mfaAttempt struct {
+	count       int
+	lockedUntil time.Time
+}
+
+func mfaAllowed(email string) bool {
+	mfaAttempts.mu.Lock()
+	defer mfaAttempts.mu.Unlock()
+	attempt, ok := mfaAttempts.m[email]
+	if !ok {
+		return true
+	}
+	if time.Now().Before(attempt.lockedUntil) {
+		return false
+	}
+	if time.Now().After(attempt.lockedUntil) && !attempt.lockedUntil.IsZero() {
+		delete(mfaAttempts.m, email)
+	}
+	return true
+}
+
+func recordMFAFailure(email string) {
+	mfaAttempts.mu.Lock()
+	defer mfaAttempts.mu.Unlock()
+	attempt := mfaAttempts.m[email]
+	if attempt == nil {
+		attempt = &mfaAttempt{}
+		mfaAttempts.m[email] = attempt
+	}
+	attempt.count++
+	if attempt.count >= 5 {
+		attempt.lockedUntil = time.Now().Add(10 * time.Minute)
+		attempt.count = 0
+	}
 }
 
 // startLogin verifies credentials where a password is supplied, then issues an
@@ -56,7 +103,8 @@ func (s *Server) startLogin(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, "unknown sign-in provider")
 		return
 	}
-	if body.Email == "" || !strings.Contains(body.Email, "@") {
+	body.Email = strings.ToLower(strings.TrimSpace(body.Email))
+	if !mailPattern.MatchString(body.Email) {
 		writeBadRequest(w, "a valid email is required")
 		return
 	}
@@ -64,7 +112,7 @@ func (s *Server) startLogin(w http.ResponseWriter, r *http.Request) {
 		var hash string
 		var status string
 		if err := s.Store.QueryRowContext(r.Context(),
-			`SELECT password_hash, status FROM users WHERE email = ?`, body.Email).Scan(&hash, &status); err != nil {
+			`SELECT password_hash, status FROM users WHERE lower(email) = ?`, body.Email).Scan(&hash, &status); err != nil {
 			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
 			return
 		}
@@ -104,20 +152,30 @@ func (s *Server) verifyLogin(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, err.Error())
 		return
 	}
+	email := strings.ToLower(strings.TrimSpace(body.Email))
+	if !mfaAllowed(email) {
+		writeJSON(w, http.StatusTooManyRequests, map[string]string{"error": "too many attempts; try again later"})
+		return
+	}
 	challenges.mu.Lock()
-	challenge, ok := challenges.m[body.Email]
+	challenge, ok := challenges.m[email]
 	challenges.mu.Unlock()
-	if !ok || time.Now().After(challenge.Expires) || challenge.Code != body.Code {
+	if !ok || time.Now().After(challenge.Expires) ||
+		subtle.ConstantTimeCompare([]byte(challenge.Code), []byte(body.Code)) != 1 {
+		recordMFAFailure(email)
 		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid or expired code"})
 		return
 	}
 	challenges.mu.Lock()
-	delete(challenges.m, body.Email)
+	delete(challenges.m, email)
+	mfaAttempts.mu.Lock()
+	delete(mfaAttempts.m, email)
+	mfaAttempts.mu.Unlock()
 	challenges.mu.Unlock()
 
 	var userID, role, status string
 	if err := s.Store.QueryRowContext(r.Context(),
-		`SELECT id, role, status FROM users WHERE email = ?`, body.Email).
+		`SELECT id, role, status FROM users WHERE lower(email) = ?`, email).
 		Scan(&userID, &role, &status); err != nil {
 		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unknown account"})
 		return

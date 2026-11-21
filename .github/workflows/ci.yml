@@ -35,6 +35,7 @@ jobs:
   go:
     name: Go venue server
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -57,16 +58,21 @@ jobs:
   web:
     name: Web (Bun)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.4.5
       - run: bun install --cwd web --frozen-lockfile
       - name: Type check
         run: bun run --cwd web check
       - name: Unit tests
         run: bun run --cwd web test
+      - name: Verify generated types are current
+        run: |
+          bun run generate:types
+          git diff --exit-code -- web/src/lib/api-types.d.ts
       - name: Production build
         run: bun run --cwd web build
       - uses: actions/upload-artifact@v4
@@ -84,14 +90,15 @@ jobs:
           go-version: '1.27'
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.4.5
       - run: bun install --cwd web --frozen-lockfile
-      - name: Full-stack smoke suite
-        run: bun run smoke
+      - name: Full-stack smoke suite (seeded tournament)
+        run: bun run smoke:full
 
   load:
     name: Load & stability
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -110,6 +117,7 @@ jobs:
   e2e:
     name: Browser E2E + accessibility
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -117,7 +125,7 @@ jobs:
           go-version: '1.27'
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.4.5
       - run: bun install --cwd web --frozen-lockfile
       - name: Install Chromium
         run: bunx --cwd web playwright install --with-deps chromium
@@ -128,6 +136,7 @@ jobs:
         with:
           name: playwright-report-${{ github.sha }}
           path: web/test-results
+          retention-days: 7
 
   required-checks:
     name: All checks passed

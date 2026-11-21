@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { login, passkey, verify, session, landingForRole } from '../../lib/auth';
+  import { login, passkey, verify, session, landingForRole, uiRole } from '../../lib/auth';
   import { setRole } from '../../lib/nav';
   import { notifyError, notifySuccess } from '../../lib/toast';
 
@@ -31,7 +31,7 @@
     busy = true;
     try {
       const result = await verify(email, code);
-      setRole(result.role as any);
+      setRole(uiRole(result.role) as any);
       notifySuccess(`Welcome, ${result.email}`);
       await goto(landingForRole(result.role));
     } catch (error) {

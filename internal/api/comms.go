@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 )
 
@@ -29,7 +30,7 @@ func (s *Server) sendAnnouncement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if body.EventID == "" {
-		body.EventID = "ev-okami"
+		body.EventID = s.defaultEventID(r)
 	}
 	if body.Channels == "" {
 		body.Channels = "push"
@@ -153,7 +154,13 @@ func (s *Server) suggestions(w http.ResponseWriter, r *http.Request) {
 	if weights["heavy"] > 0 {
 		suggestions = append(suggestions, suggestion{"category", "Heavy weight pool", fmt.Sprintf("%d athletes over 75kg", weights["heavy"])})
 	}
-	for category, count := range counts {
+	categoryNames := make([]string, 0, len(counts))
+	for category := range counts {
+		categoryNames = append(categoryNames, category)
+	}
+	sort.Strings(categoryNames)
+	for _, category := range categoryNames {
+		count := counts[category]
 		if category == "" {
 			continue
 		}

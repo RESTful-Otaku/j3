@@ -45,7 +45,8 @@ func ToCm(value float64, unit string) (float64, error) {
 
 // FeetInchesToCm combines imperial feet and inches into centimetres.
 func FeetInchesToCm(feet, inches float64) (float64, error) {
-	if feet < 0 || inches < 0 || inches >= 12 {
+	if math.IsNaN(feet) || math.IsNaN(inches) || math.IsInf(feet, 0) || math.IsInf(inches, 0) ||
+		feet < 0 || inches < 0 || inches >= 12 {
 		return 0, fmt.Errorf("invalid height %v ft %v in", feet, inches)
 	}
 	return feet*30.48 + inches*2.54, nil

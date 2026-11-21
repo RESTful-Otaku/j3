@@ -2,6 +2,7 @@
 # J3 developer / operator console — nested TUI with keyboard navigation.
 set -uo pipefail
 export PATH="$HOME/.bun/bin:$PATH"
+export J3_DEMO=1
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 

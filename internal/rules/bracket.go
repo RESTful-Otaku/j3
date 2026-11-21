@@ -64,7 +64,7 @@ type TieBreakStats struct {
 // Returns -1 if a wins, 1 if b wins, 0 if still level.
 func TieBreak(a, b TieBreakStats, chain []string) int {
 	if len(chain) == 0 {
-		chain = []string{"wins", "submissions", "points_scored", "head_to_head", "points_conceded"}
+		chain = []string{"wins", "submissions", "points_scored", "points_conceded"}
 	}
 	for _, criterion := range chain {
 		switch criterion {

@@ -38,6 +38,9 @@ func insertPeopleTx(ctx context.Context, tx *sql.Tx, req createTournamentRequest
 
 // importPeople loads only the clubs and fighters from a saved template.
 func (s *Server) importPeople(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "create") {
+		return
+	}
 	id := r.PathValue("id")
 	var config string
 	if err := s.Store.QueryRowContext(r.Context(),

@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** API index and health links */
+        get: operations["root"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -1430,6 +1447,7 @@ export interface components {
             name: string;
             /** Format: email */
             email: string;
+            password?: string;
             phone?: string;
             /** Format: date */
             dateOfBirth: string;
@@ -1655,6 +1673,24 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    root: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Service information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     healthz: {
         parameters: {
             query?: never;

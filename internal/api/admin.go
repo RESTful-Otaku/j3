@@ -16,7 +16,7 @@ type adminUser struct {
 }
 
 func (s *Server) adminUsers(w http.ResponseWriter, r *http.Request) {
-	if !s.requireAction(w, r, "participants", "view") {
+	if !s.requireAction(w, r, "settings", "view") {
 		return
 	}
 	rows, err := s.Store.QueryContext(r.Context(), `
@@ -54,7 +54,7 @@ func (s *Server) setUserStatus(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, err.Error())
 		return
 	}
-	allowed := map[string]bool{"active": true, "locked": true, "suspended": true}
+	allowed := map[string]bool{"active": true, "suspended": true}
 	if !allowed[body.Status] {
 		writeBadRequest(w, "invalid status")
 		return

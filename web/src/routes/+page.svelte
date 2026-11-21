@@ -33,6 +33,7 @@
   let signupForm: SignupRequest = {
     name: '',
     email: '',
+    password: '',
     phone: '',
     dateOfBirth: '1998-01-01',
     unitSystem: 'metric',
@@ -509,6 +510,7 @@
           <div class="grid" style="grid-template-columns: 1fr 1fr;">
             <label class="small">Full name<input class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink); cursor:text;" bind:value={signupForm.name} /></label>
             <label class="small">Email<input class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink); cursor:text;" bind:value={signupForm.email} /></label>
+            <label class="small">Password (8+ characters)<input class="tab" type="password" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink); cursor:text;" bind:value={signupForm.password} /></label>
             <label class="small">Phone<input class="tab" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink); cursor:text;" bind:value={signupForm.phone} /></label>
             <label class="small">Date of birth<input class="tab" type="date" style="display:block; width:100%; margin-top:5px; color:var(--brand-ink);" bind:value={signupForm.dateOfBirth} /></label>
           </div>

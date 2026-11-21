@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+
 	"fmt"
+	"github.com/restful-otaku/j3/internal/auth"
 	"net/http"
 	"strings"
 )
@@ -45,16 +47,18 @@ func (s *Server) forfeitFight(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
-	var seq int
-	if err := tx.QueryRowContext(r.Context(),
-		`SELECT COALESCE(MAX(seq), 0) + 1 FROM fight_events WHERE fight_id = ?`, fightID).Scan(&seq); err != nil {
-		writeError(w, err)
-		return
-	}
 	payload, _ := json.Marshal(map[string]string{"reason": body.Reason, "winner": body.Winner})
+	identity, _ := auth.FromContext(r.Context())
+	actor := identity.UserID
+	if actor == "" {
+		actor = "system"
+	}
 	if _, err := tx.ExecContext(r.Context(), `
-		INSERT INTO fight_events (fight_id, seq, kind, actor_user_id, payload_json)
-		VALUES (?, ?, 'forfeit', 'u-official', ?)`, fightID, seq, string(payload)); err != nil {
+		INSERT INTO score_events
+		 (fight_id, seq, kind, corner, points, technique, card, actor_user_id, payload_json)
+		SELECT ?, COALESCE(MAX(seq),0)+1, 'forfeit', ?, 0, ?, '', ?, ?
+		FROM score_events WHERE fight_id = ?`,
+		fightID, body.Winner, body.Reason, actor, string(payload), fightID); err != nil {
 		writeError(w, err)
 		return
 	}

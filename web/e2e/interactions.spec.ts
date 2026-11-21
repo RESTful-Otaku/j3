@@ -10,17 +10,17 @@ function watchErrors(page: Page) {
 }
 
 test.describe('Interactive controls', () => {
-  test('display: start, pause, resume and confirm', async ({ page }) => {
+  test('mat console: start, pause, resume and confirm', async ({ page }) => {
     const errors = watchErrors(page);
-    await page.goto('/display');
+    await page.goto('/mat');
     await page.getByRole('button', { name: /^▶ Start$/ }).click();
-    await expect(page.getByText(/authoritative server clock/)).toBeVisible();
+    await expect(page.locator('.clock').first()).toBeVisible();
     await page.getByRole('button', { name: /⏸ Pause/ }).click();
     await page.getByRole('button', { name: /▶ Resume/ }).click();
-    await page.getByRole('button', { name: 'Confirm result' }).first().click();
+    await page.getByRole('button', { name: /Submit result/ }).first().click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    await dialog.getByRole('button', { name: 'Confirm result' }).click();
+    await dialog.getByRole('button', { name: /Submit result/ }).click();
     expect(errors).toEqual([]);
   });
 
@@ -207,6 +207,7 @@ test.describe('Interactive controls', () => {
     await page.getByRole('button', { name: 'Sign up' }).click();
     await page.getByLabel('Full name').fill('QA Signup');
     await page.getByLabel('Email').fill(`qa-signup-${Date.now()}@example.com`);
+    await page.locator('input[type=password]').fill('password123');
     await page.getByRole('button', { name: /Check compatible categories/ }).click();
     await expect(page.getByText(/Adult -76/).first()).toBeVisible();
     await page.getByRole('button', { name: 'Create account' }).click();

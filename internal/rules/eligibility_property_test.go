@@ -9,17 +9,21 @@ import (
 )
 
 func eliCategories() []rules.Category {
+	mk := func(id, name, kind, gender string, min, max float64, belt string) rules.Category {
+		return rules.Category{ID: id, Name: name, Kind: kind, Gender: gender,
+			Min: min, Max: max, BeltRankID: belt}
+	}
 	return []rules.Category{
-		{"w60", "Under 60", "weight", "open", 0, 60, ""},
-		{"w70", "Under 70", "weight", "open", 60, 70, ""},
-		{"w80", "Under 80", "weight", "open", 70, 80, ""},
-		{"w90", "Under 90", "weight", "male", 80, 90, ""},
-		{"w120", "Under 120", "weight", "open", 100, 130, ""},
-		{"women", "Women", "weight", "female", 0, 90, ""},
-		{"u16", "U16", "age", "open", 0, 16, ""},
-		{"adult", "Adult", "age", "open", 17, 99, ""},
-		{"blue", "Blue", "belt", "open", 6, 6, "br-blue"},
-		{"open", "Open", "combined", "open", 0, 0, ""},
+		mk("w60", "Under 60", "weight", "open", 0, 60, ""),
+		mk("w70", "Under 70", "weight", "open", 60, 70, ""),
+		mk("w80", "Under 80", "weight", "open", 70, 80, ""),
+		mk("w90", "Under 90", "weight", "male", 80, 90, ""),
+		mk("w120", "Under 120", "weight", "open", 100, 130, ""),
+		mk("women", "Women", "weight", "female", 0, 90, ""),
+		mk("u16", "U16", "age", "open", 0, 16, ""),
+		mk("adult", "Adult", "age", "open", 17, 99, ""),
+		mk("blue", "Blue", "belt", "open", 6, 6, "br-blue"),
+		mk("open", "Open", "combined", "open", 0, 0, ""),
 	}
 }
 

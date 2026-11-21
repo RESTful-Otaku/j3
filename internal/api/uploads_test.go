@@ -14,12 +14,11 @@ import (
 	"github.com/restful-otaku/j3/internal/api"
 )
 
-func uploadRequest(t *testing.T, srv *api.Server, kind, role string, data []byte) *httptest.ResponseRecorder {
+func uploadRequest(t *testing.T, srv *api.Server, token, kind string, data []byte) *httptest.ResponseRecorder {
 	t.Helper()
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
 	_ = writer.WriteField("kind", kind)
-	_ = writer.WriteField("ownerRole", role)
 	part, err := writer.CreateFormFile("file", "brand.png")
 	if err != nil {
 		t.Fatal(err)
@@ -28,13 +27,14 @@ func uploadRequest(t *testing.T, srv *api.Server, kind, role string, data []byte
 	_ = writer.Close()
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads", &body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()
 	srv.Handler().ServeHTTP(rec, req)
 	return rec
 }
 
 func TestUploadColoursAndRoleLimits(t *testing.T) {
-	srv := seededServer(t)
+	srv := seededAuthServer(t)
 	img := image.NewRGBA(image.Rect(0, 0, 40, 40))
 	for y := 0; y < 40; y++ {
 		for x := 0; x < 40; x++ {
@@ -46,11 +46,13 @@ func TestUploadColoursAndRoleLimits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	denied := uploadRequest(t, srv, "banner", "fighter", encoded.Bytes())
-	if denied.Code != http.StatusBadRequest {
-		t.Fatalf("fighter banner status = %d, want 400", denied.Code)
+	denied := uploadRequest(t, srv,
+		sessionToken(t, srv, "u-fighter-01", "fighter"), "banner", encoded.Bytes())
+	if denied.Code != http.StatusForbidden {
+		t.Fatalf("fighter banner status = %d, want 403", denied.Code)
 	}
-	allowed := uploadRequest(t, srv, "logo", "club_leader", encoded.Bytes())
+	allowed := uploadRequest(t, srv,
+		sessionToken(t, srv, "u-leader", "club_leader"), "logo", encoded.Bytes())
 	if allowed.Code != http.StatusCreated {
 		t.Fatalf("club logo status = %d: %s", allowed.Code, allowed.Body.String())
 	}

@@ -39,7 +39,7 @@ echo "🚀 Starting venue server on $PORT"
 pkill -f "j3-smoke-bin -addr 127.0.0.1:$PORT" 2>/dev/null || true
 go build -o /tmp/j3-smoke-bin ./cmd/j3d
 if [ "${SMOKE_FULL:-0}" = "1" ]; then
-  /tmp/j3-smoke-bin reset -okami=false -full -db "$DB" >/dev/null 2>&1
+  /tmp/j3-smoke-bin reset -okami -full -db "$DB" >/dev/null 2>&1
 else
   /tmp/j3-smoke-bin reset -okami -db "$DB" >/dev/null 2>&1
 fi

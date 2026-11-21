@@ -125,10 +125,7 @@
         <span class="dot" class:off={!selected || selected.state !== 'live'}></span>{selected?.state ?? 'connecting…'}
       </span>
       <button class="btn" on:click={fullscreen}>⛶ Fullscreen</button>
-      <button class="btn" on:click={startFight}>▶ Start</button>
-      <button class="btn" on:click={pauseFight}>⏸ Pause (ref stoppage)</button>
-      <button class="btn" on:click={resumeFight}>▶ Resume</button>
-      <button class="btn primary" on:click={() => (confirmOpen = true)}>Confirm result</button>
+      <a class="btn" href="/mat" target="_blank" rel="noreferrer">🎛️ Operator console ↗</a>
     </div>
   </header>
 

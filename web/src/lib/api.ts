@@ -170,12 +170,20 @@ export const api = {
   templates: () => getJson<{ templates: Template[] }>('/api/v1/templates'),
   createTournament: (body: CreateTournamentRequest) =>
     postJson<CreateTournamentResponse>('/api/v1/tournaments', body),
-  upload: async (file: File, kind: string, role: string): Promise<{ url: string; colour: string; highlight: string }> => {
+  upload: async (file: File, kind: string, _role?: string): Promise<{ url: string; colour: string; highlight: string }> => {
+    await ensureAuth();
     const body = new FormData();
     body.append('kind', kind);
-    body.append('ownerRole', role);
     body.append('file', file);
-    const response = await fetch('/api/v1/uploads', { method: 'POST', body });
+    const session = localStorage.getItem('j3-session');
+    const headers = new Headers();
+    if (session) {
+      try {
+        const token = JSON.parse(session).token;
+        if (token) headers.set('Authorization', `Bearer ${token}`);
+      } catch { /* ignore malformed session */ }
+    }
+    const response = await fetch('/api/v1/uploads', { method: 'POST', body, headers });
     if (!response.ok) throw new Error(`Upload failed (${response.status})`);
     return response.json() as Promise<{ url: string; colour: string; highlight: string }>;
   },

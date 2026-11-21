@@ -22,9 +22,10 @@ func (s *Server) advanceKata(w http.ResponseWriter, r *http.Request) {
 		body.AdvanceCount = 8
 	}
 
+	eventID := s.defaultEventID(r)
 	var currentRound int
 	if err := s.Store.QueryRowContext(r.Context(),
-		`SELECT COALESCE(MAX(round_number),0) FROM kata_performances WHERE event_id = 'ev-demo'`).
+		`SELECT COALESCE(MAX(round_number),0) FROM kata_performances WHERE event_id = ?`, eventID).
 		Scan(&currentRound); err != nil {
 		writeError(w, err)
 		return
@@ -32,8 +33,8 @@ func (s *Server) advanceKata(w http.ResponseWriter, r *http.Request) {
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT fighter_id, kata_name, panel_size, bunkai_score
 		FROM kata_performances
-		WHERE event_id = 'ev-demo' AND round_number = ? AND status = 'complete'
-		ORDER BY total DESC LIMIT ?`, currentRound, body.AdvanceCount)
+		WHERE event_id = ? AND round_number = ? AND status = 'complete'
+		ORDER BY total DESC, fighter_id ASC LIMIT ?`, eventID, currentRound, body.AdvanceCount)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -55,17 +56,27 @@ func (s *Server) advanceKata(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 
+	tx, err := s.Store.BeginTx(r.Context(), nil)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	defer tx.Rollback()
 	for _, item := range promotions {
-		if _, err := s.Store.ExecContext(r.Context(), `
+		if _, err := tx.ExecContext(r.Context(), `
 			INSERT INTO kata_performances
 			 (id, event_id, fighter_id, kata_name, panel_size, round_number, kata_type, bunkai_score)
-			 VALUES (?, 'ev-demo', ?, ?, ?, ?, 'shitei', ?)`,
-			newID("kata"), item.fighter, item.kata, item.panel, currentRound+1, item.bunkai); err != nil {
+			 VALUES (?, ?, ?, ?, ?, ?, 'shitei', ?)`,
+			newID("kata"), eventID, item.fighter, item.kata, item.panel, currentRound+1, item.bunkai); err != nil {
 			writeError(w, err)
 			return
 		}
 	}
-	s.audit(r, "kata.advance", "event", "ev-demo",
+	if err := tx.Commit(); err != nil {
+		writeError(w, err)
+		return
+	}
+	s.audit(r, "kata.advance", "event", eventID,
 		`{"from":`+strconv.Itoa(currentRound)+`,"to":`+strconv.Itoa(currentRound+1)+`,"count":`+strconv.Itoa(len(promotions))+`}`)
 	items, err := s.listKata(r)
 	if err != nil {

@@ -8,7 +8,7 @@
 
   async function load() {
     try {
-      permissions = (await getJson<{ permissions: Permission[] }>('/api/v1/demo/permissions?init=1')).permissions;
+      permissions = (await getJson<{ permissions: Permission[] }>('/api/v1/demo/permissions')).permissions;
     } catch { permissions = []; }
   }
   onMount(load);

@@ -76,6 +76,17 @@ func (s *Server) counts(r *http.Request) (map[string]int, error) {
 	return counts, nil
 }
 
+// defaultEventID resolves the active event from the database instead of a
+// hard-coded demo identifier, so newly created events work with every handler.
+func (s *Server) defaultEventID(r *http.Request) string {
+	var id string
+	if err := s.Store.QueryRowContext(r.Context(),
+		`SELECT id FROM events ORDER BY created_at DESC LIMIT 1`).Scan(&id); err == nil {
+		return id
+	}
+	return "ev-okami"
+}
+
 func writeError(w http.ResponseWriter, err error) {
 	if errors.Is(err, sql.ErrNoRows) {
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "not found"})

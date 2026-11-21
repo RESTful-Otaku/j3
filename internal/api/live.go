@@ -2,20 +2,22 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
 	"github.com/restful-otaku/j3/internal/auth"
 )
 
-// requireRole enforces RBAC on live scoring mutations. The demo defaults to
-// official; clients may pass X-J3-Role to exercise other roles.
+// requireRole enforces RBAC from the authenticated session identity only.
+// Client-supplied role/actor headers are never trusted.
 func (s *Server) requireRole(w http.ResponseWriter, r *http.Request, action auth.Action) bool {
-	_, roleName := actorFromRequest(r)
-	if !auth.Can(auth.Role(roleName), action) {
+	identity, ok := auth.FromContext(r.Context())
+	if !ok || !auth.Can(identity.Role, action) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "your role cannot perform this action"})
 		return false
 	}
@@ -23,12 +25,15 @@ func (s *Server) requireRole(w http.ResponseWriter, r *http.Request, action auth
 }
 
 // requireAssigned enforces role and per-contest assignment in one place.
+// The runner is the event owner and may override assignment; officials must be
+// assigned to the contest they are scoring.
 func (s *Server) requireAssigned(w http.ResponseWriter, r *http.Request, action auth.Action, fightID string) bool {
-	if !s.requireRole(w, r, action) {
+	identity, ok := auth.FromContext(r.Context())
+	if !ok || !auth.Can(identity.Role, action) {
+		writeJSON(w, http.StatusForbidden, map[string]string{"error": "your role cannot perform this action"})
 		return false
 	}
-	actor := r.Header.Get("X-J3-User")
-	if actor != "" && !s.isAssigned(r, fightID, actor) {
+	if identity.Role != auth.RoleTournamentRunner && !s.isAssigned(r, fightID, identity.UserID) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "user is not assigned to this contest"})
 		return false
 	}
@@ -105,17 +110,29 @@ type FightStateView struct {
 func (s *Server) fightState(ctx context.Context, fightID string) (FightStateView, error) {
 	view := FightStateView{FightID: fightID, Events: []scoreEventView{}}
 	var running int
+	var endsAt string
 	err := s.Store.QueryRowContext(ctx, `
 		SELECT f.state, f.outcome, COALESCE(fs.running,0), COALESCE(fs.seconds_remaining,180),
-		       COALESCE(fs.round,1), COALESCE(fs.hold_seconds,0), COALESCE(fs.hold_corner,'')
+		       COALESCE(fs.round,1), COALESCE(fs.hold_seconds,0), COALESCE(fs.hold_corner,''),
+		       COALESCE(fs.ends_at, '')
 		FROM fights f LEFT JOIN fight_state fs ON fs.fight_id = f.id
 		WHERE f.id = ?`, fightID).
 		Scan(&view.State, &view.Outcome, &running, &view.Seconds, &view.Round,
-			&view.HoldSeconds, &view.HoldCorner)
+			&view.HoldSeconds, &view.HoldCorner, &endsAt)
 	if err != nil {
 		return view, err
 	}
 	view.Running = running == 1
+	if view.Running && endsAt != "" {
+		if deadline, err := time.Parse("2006-01-02T15:04:05.999Z", endsAt); err == nil {
+			remaining := int(time.Until(deadline).Seconds() + 0.999)
+			if remaining < 0 {
+				remaining = 0
+			}
+			view.Seconds = remaining
+			view.Running = remaining > 0
+		}
+	}
 	rows, err := s.Store.QueryContext(ctx, `
 		SELECT seq, kind, corner, points, technique, card, actor_user_id, created_at
 		FROM score_events WHERE fight_id = ? ORDER BY seq`, fightID)
@@ -172,7 +189,10 @@ func (s *Server) streamEvents(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if origin := os.Getenv("J3_CORS_ORIGIN"); origin != "" {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Vary", "Origin")
+	}
 	ch := s.Hub.subscribe()
 	defer s.Hub.unsubscribe(ch)
 	fmt.Fprint(w, "data: {\"type\":\"connected\"}\n\n")
@@ -206,13 +226,14 @@ func (s *Server) startFight(w http.ResponseWriter, r *http.Request) {
 		seconds = 180
 	}
 	_, err := s.Store.ExecContext(r.Context(), `
-		INSERT INTO fight_state (fight_id, seconds_remaining, running, round)
-		VALUES (?, ?, 1, ?)
+		INSERT INTO fight_state (fight_id, seconds_remaining, running, round, ends_at)
+		VALUES (?, ?, 1, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now', ?))
 		ON CONFLICT(fight_id) DO UPDATE SET running = 1,
-		  seconds_remaining = CASE WHEN excluded.seconds_remaining > 0
-		    THEN excluded.seconds_remaining ELSE fight_state.seconds_remaining END,
+		  seconds_remaining = excluded.seconds_remaining,
+		  ends_at = strftime('%Y-%m-%dT%H:%M:%fZ','now', ?),
 		  round = excluded.round`,
-		id, seconds, max(1, body.Round))
+		id, seconds, max(1, body.Round), fmt.Sprintf("+%d seconds", seconds),
+		fmt.Sprintf("+%d seconds", seconds))
 	if err != nil {
 		writeError(w, err)
 		return
@@ -238,7 +259,14 @@ func (s *Server) setRunning(w http.ResponseWriter, r *http.Request, value int, a
 	}
 	_, err := s.Store.ExecContext(r.Context(), `
 		INSERT INTO fight_state (fight_id, running) VALUES (?, ?)
-		ON CONFLICT(fight_id) DO UPDATE SET running = excluded.running`, id, value)
+		ON CONFLICT(fight_id) DO UPDATE SET
+		  running = excluded.running,
+		  ends_at = CASE WHEN excluded.running = 1
+		    THEN strftime('%Y-%m-%dT%H:%M:%fZ','now', '+' || fight_state.seconds_remaining || ' seconds')
+		    ELSE '' END,
+		  seconds_remaining = CASE WHEN excluded.running = 0 AND fight_state.ends_at <> ''
+		    THEN MAX(0, CAST((julianday(fight_state.ends_at) - julianday('now')) * 86400 AS INTEGER))
+		    ELSE fight_state.seconds_remaining END`, id, value)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -278,18 +306,21 @@ func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, "unknown event kind")
 		return
 	}
-	var seq int
-	if err := s.Store.QueryRowContext(r.Context(),
-		`SELECT COALESCE(MAX(seq),0)+1 FROM score_events WHERE fight_id = ?`, id).Scan(&seq); err != nil {
-		writeError(w, err)
-		return
+	identity, _ := auth.FromContext(r.Context())
+	actor := identity.UserID
+	if actor == "" {
+		actor = "system"
 	}
 	payload, _ := json.Marshal(body)
-	if _, err := s.Store.ExecContext(r.Context(), `
+	// A single INSERT ... SELECT derives the next sequence atomically, so two
+	// scorers submitting simultaneously cannot collide on the UNIQUE(fight_id,seq).
+	_, err := s.Store.ExecContext(r.Context(), `
 		INSERT INTO score_events
 		 (fight_id, seq, kind, corner, points, technique, card, actor_user_id, payload_json)
-		VALUES (?, ?, ?, ?, ?, ?, ?, 'u-official', ?)`,
-		id, seq, kind, body.Corner, body.Points, body.Technique, body.Card, string(payload)); err != nil {
+		SELECT ?, COALESCE(MAX(seq),0)+1, ?, ?, ?, ?, ?, ?, ?
+		FROM score_events WHERE fight_id = ?`,
+		id, kind, body.Corner, body.Points, body.Technique, body.Card, actor, string(payload), id)
+	if err != nil {
 		writeError(w, err)
 		return
 	}
@@ -340,12 +371,17 @@ func (s *Server) undoFightEvent(w http.ResponseWriter, r *http.Request) {
 	if !s.requireAssigned(w, r, auth.ActionScoreFight, id) {
 		return
 	}
-	var seq int
+	var nullableSeq sql.NullInt64
 	if err := s.Store.QueryRowContext(r.Context(),
-		`SELECT MAX(seq) FROM score_events WHERE fight_id = ?`, id).Scan(&seq); err != nil {
+		`SELECT MAX(seq) FROM score_events WHERE fight_id = ?`, id).Scan(&nullableSeq); err != nil {
 		writeError(w, err)
 		return
 	}
+	if !nullableSeq.Valid {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "nothing to undo"})
+		return
+	}
+	seq := int(nullableSeq.Int64)
 	if _, err := s.Store.ExecContext(r.Context(),
 		`DELETE FROM score_events WHERE fight_id = ? AND seq = ?`, id, seq); err != nil {
 		writeError(w, err)
@@ -392,8 +428,6 @@ func (s *Server) audit(r *http.Request, action, targetType, targetID, after stri
 	userID, role := "system", "system"
 	if identity, ok := auth.FromContext(r.Context()); ok {
 		userID, role = identity.UserID, string(identity.Role)
-	} else {
-		userID, role = actorFromRequest(r)
 	}
 	_, _ = s.Store.ExecContext(r.Context(), `
 		INSERT INTO audit_log
@@ -420,7 +454,7 @@ func (s *Server) StartClock(ctx context.Context) {
 
 func (s *Server) tickClock(ctx context.Context) {
 	rows, err := s.Store.QueryContext(ctx,
-		`SELECT fight_id FROM fight_state WHERE (running = 1 AND seconds_remaining > 0) OR hold_seconds > 0`)
+		`SELECT fight_id FROM fight_state WHERE running = 1 OR hold_seconds > 0`)
 	if err != nil {
 		return
 	}
@@ -435,9 +469,11 @@ func (s *Server) tickClock(ctx context.Context) {
 	for _, id := range ids {
 		_, _ = s.Store.ExecContext(ctx, `
 			UPDATE fight_state
-			SET seconds_remaining = CASE WHEN running = 1 AND seconds_remaining > 0
-			  THEN MAX(0, seconds_remaining - 1) ELSE seconds_remaining END,
-			  running = CASE WHEN running = 1 AND seconds_remaining <= 1 THEN 0 ELSE running END,
+			SET seconds_remaining = CASE WHEN running = 1 AND ends_at <> ''
+			  THEN MAX(0, CAST((julianday(ends_at) - julianday('now')) * 86400 AS INTEGER))
+			  ELSE seconds_remaining END,
+			  running = CASE WHEN running = 1 AND ends_at <> ''
+			    AND julianday(ends_at) <= julianday('now') THEN 0 ELSE running END,
 			  hold_seconds = MAX(0, hold_seconds - 1),
 			  hold_corner = CASE WHEN hold_seconds <= 1 THEN '' ELSE hold_corner END
 			WHERE fight_id = ?`, id)

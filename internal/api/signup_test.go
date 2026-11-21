@@ -26,7 +26,7 @@ func postJSON(t *testing.T, srv *api.Server, path string, body any) *httptest.Re
 func TestSignupConvertsImperialToMetric(t *testing.T) {
 	srv := seededServer(t)
 	rec := postJSON(t, srv, "/api/v1/signup", map[string]any{
-		"name": "Test Fighter", "email": "test-fighter@demo.j3", "phone": "+44 7700 900000",
+		"name": "Test Fighter", "email": "test-fighter@demo.j3", "password": "password123", "phone": "+44 7700 900000",
 		"dateOfBirth": "1997-05-01", "unitSystem": "imperial",
 		"heightFt": 5, "heightIn": 9, "weightLb": 165,
 		"beltRankId": "br-blue", "gender": "male", "accountType": "fighter",
@@ -58,7 +58,7 @@ func TestSignupPrivilegedRoleNeedsApproval(t *testing.T) {
 	srv := seededServer(t)
 	rec := postJSON(t, srv, "/api/v1/signup", map[string]any{
 		"name": "Request Official", "email": "req-official@demo.j3",
-		"dateOfBirth": "1990-01-01", "unitSystem": "metric",
+		"password": "password123", "dateOfBirth": "1990-01-01", "unitSystem": "metric",
 		"heightCm": 178, "weightKg": 80, "accountType": "official",
 	})
 	if rec.Code != http.StatusCreated {

@@ -97,6 +97,15 @@ func Compatible(categories []Category, stats Stats, on time.Time, consentMoveUp 
 			} else if consentMoveUp && age < int(cat.Min) {
 				moveUps = append(moveUps, candidate{cat, cat.Min, "older division with consent"})
 			}
+		case cat.Kind == "height":
+			if stats.HeightCm <= 0 {
+				continue
+			}
+			if stats.HeightCm >= cat.Min && stats.HeightCm <= cat.Max {
+				result = append(result, offer(cat.ID, cat.Name, "height in range", true, false))
+			} else if consentMoveUp && stats.HeightCm < cat.Min {
+				moveUps = append(moveUps, candidate{cat, cat.Min, "taller division with consent"})
+			}
 		case cat.Kind == "weight" || (cat.Kind == "combined" && cat.Max > 0):
 			if stats.WeightKg <= 0 {
 				continue

@@ -44,17 +44,28 @@ func (s *Server) awardMedals(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, "at least one medal is required")
 		return
 	}
+	eventID := s.defaultEventID(r)
+	tx, err := s.Store.BeginTx(r.Context(), nil)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	defer tx.Rollback()
 	for _, award := range awards {
-		if _, err := s.Store.ExecContext(r.Context(), `
+		if _, err := tx.ExecContext(r.Context(), `
 			INSERT INTO medals (id, event_id, category_id, fighter_id, kind)
-			VALUES (?, 'ev-demo', NULLIF(?, ''), ?, ?)`,
-			newID("medal"), body.Category, award.id, award.kind); err != nil {
+			VALUES (?, ?, NULLIF(?, ''), ?, ?)`,
+			newID("medal"), eventID, body.Category, award.id, award.kind); err != nil {
 			writeError(w, err)
 			return
 		}
 	}
+	if err := tx.Commit(); err != nil {
+		writeError(w, err)
+		return
+	}
 	encoded, _ := json.Marshal(body)
-	s.audit(r, "medals.award", "event", "ev-demo", string(encoded))
+	s.audit(r, "medals.award", "event", eventID, string(encoded))
 	s.listMedalsHandler(w, r)
 }
 

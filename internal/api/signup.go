@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/restful-otaku/j3/internal/auth"
 	"github.com/restful-otaku/j3/internal/rules"
 	"github.com/restful-otaku/j3/internal/units"
@@ -21,6 +23,7 @@ import (
 type signupRequest struct {
 	Name             string   `json:"name"`
 	Email            string   `json:"email"`
+	Password         string   `json:"password"`
 	Phone            string   `json:"phone"`
 	DOB              string   `json:"dateOfBirth"`
 	UnitSystem       string   `json:"unitSystem"`
@@ -273,6 +276,15 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 	if gender == "" {
 		gender = "open"
 	}
+	if len(req.Password) < 8 {
+		writeBadRequest(w, "password must be at least 8 characters")
+		return
+	}
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 	userID := newID("u")
 	status := "active"
 	roleRequestID := ""
@@ -313,15 +325,19 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 
 	_, err = tx.ExecContext(r.Context(), `
 		INSERT INTO users
-		 (id, tenant_id, club_id, role, display_name, email, phone, date_of_birth,
+		 (id, tenant_id, club_id, role, display_name, email, password_hash, phone, date_of_birth,
 		  height_cm, weight_kg, height_unit, weight_unit, belt_rank_id, gender,
 		  source, status, role_request, role_request_status)
-		VALUES (?, 'demo-tenant', NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		userID, req.ClubID, string(role), req.Name, req.Email, req.Phone, req.DOB,
+		VALUES (?, 'demo-tenant', NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		userID, req.ClubID, string(role), req.Name, req.Email, string(passwordHash), req.Phone, req.DOB,
 		heightCm, weightKg, req.UnitSystem, req.UnitSystem, nullIfEmpty(beltRankID),
 		gender, "independent", status,
 		nullIfEmpty(string(role)), roleRequestStatus)
 	if err != nil {
+		if strings.Contains(strings.ToLower(err.Error()), "unique") {
+			writeJSON(w, http.StatusConflict, map[string]string{"error": "an account with that email already exists"})
+			return
+		}
 		writeError(w, err)
 		return
 	}

@@ -60,7 +60,7 @@
             <td>{user.email}</td><td>{user.role.replaceAll('_',' ')}</td><td>{user.club || 'Independent'}</td>
             <td><span class="badge {user.status === 'active' ? 'fighter' : 'spectator'}">{user.status}</span></td>
             <td style="display:flex; gap:5px; flex-wrap:wrap;">
-              {#if user.status === 'active'}<button class="tab" on:click={() => status(user.id, 'locked')}>Lock</button>{/if}
+              {#if user.status === 'active'}<button class="tab" on:click={() => status(user.id, 'suspended')}>Suspend</button>{/if}
               {#if user.status !== 'active'}<button class="tab" on:click={() => status(user.id, 'active')}>Unlock</button>{/if}
               <button class="tab" on:click={() => reset(user.id)}>Reset password</button>
               {#if user.roleRequest}<span class="muted small">requested {user.roleRequest}</span>{/if}

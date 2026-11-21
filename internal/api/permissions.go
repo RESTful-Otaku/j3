@@ -5,23 +5,6 @@ import (
 	"strconv"
 )
 
-var defaultPermissions = []struct {
-	Role, Resource          string
-	View, Create, Edit, Del int
-}{
-	{"runner", "participants", 1, 1, 1, 1},
-	{"runner", "fights", 1, 1, 1, 1},
-	{"runner", "settings", 1, 1, 1, 1},
-	{"official", "participants", 1, 1, 1, 0},
-	{"official", "fights", 1, 1, 1, 0},
-	{"club_leader", "participants", 1, 1, 1, 0},
-	{"club_leader", "fights", 1, 0, 0, 0},
-	{"fighter", "participants", 1, 1, 1, 0},
-	{"fighter", "fights", 1, 0, 0, 0},
-	{"spectator", "participants", 0, 0, 0, 0},
-	{"spectator", "fights", 1, 0, 0, 0},
-}
-
 type permissionView struct {
 	Role      string `json:"role"`
 	Resource  string `json:"resource"`
@@ -32,14 +15,10 @@ type permissionView struct {
 }
 
 func (s *Server) permissions(w http.ResponseWriter, r *http.Request) {
-	var list []permissionView
-	if r.URL.Query().Get("init") == "1" {
-		for _, p := range defaultPermissions {
-			_, _ = s.Store.ExecContext(r.Context(), `
-				INSERT OR IGNORE INTO role_permissions (role, resource, can_view, can_create, can_edit, can_delete)
-				VALUES (?, ?, ?, ?, ?, ?)`, p.Role, p.Resource, p.View, p.Create, p.Edit, p.Del)
-		}
+	if !s.requireAction(w, r, "settings", "view") {
+		return
 	}
+	var list []permissionView
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT role, resource, can_view, can_create, can_edit, can_delete
 		FROM role_permissions ORDER BY role, resource`)
@@ -58,11 +37,6 @@ func (s *Server) permissions(w http.ResponseWriter, r *http.Request) {
 		}
 		item.CanView, item.CanCreate, item.CanEdit, item.CanDelete = view == 1, create == 1, edit == 1, del == 1
 		list = append(list, item)
-	}
-	if len(list) == 0 {
-		for _, p := range defaultPermissions {
-			list = append(list, permissionView{p.Role, p.Resource, p.View == 1, p.Create == 1, p.Edit == 1, p.Del == 1})
-		}
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"permissions": list})
 }

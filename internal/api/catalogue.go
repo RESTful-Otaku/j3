@@ -69,6 +69,9 @@ func (s *Server) listTraining(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) createTraining(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "settings", "create") {
+		return
+	}
 	var body struct {
 		Title, Kind, Leader, StartsAt string
 		Duration                      int

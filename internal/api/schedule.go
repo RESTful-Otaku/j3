@@ -74,24 +74,32 @@ func (s *Server) setDrift(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Minutes int `json:"minutes"`
+		Minutes int    `json:"minutes"`
+		EventID string `json:"eventId"`
 	}
 	if err := decodeJSON(r, &body); err != nil {
 		writeBadRequest(w, err.Error())
 		return
+	}
+	eventID := body.EventID
+	if eventID == "" {
+		eventID = r.URL.Query().Get("eventId")
+	}
+	if eventID == "" {
+		eventID = s.defaultEventID(r)
 	}
 	if body.Minutes < -480 || body.Minutes > 480 {
 		writeBadRequest(w, "drift must be between -480 and 480 minutes")
 		return
 	}
 	if _, err := s.Store.ExecContext(r.Context(), `
-		INSERT INTO schedule_state (event_id, offset_minutes) VALUES ('ev-demo', ?)
-		ON CONFLICT(event_id) DO UPDATE SET offset_minutes = excluded.offset_minutes`, body.Minutes); err != nil {
+		INSERT INTO schedule_state (event_id, offset_minutes) VALUES (?, ?)
+		ON CONFLICT(event_id) DO UPDATE SET offset_minutes = excluded.offset_minutes`, eventID, body.Minutes); err != nil {
 		writeError(w, err)
 		return
 	}
-	s.audit(r, "schedule.drift", "event", "ev-demo", fmt.Sprintf(`{"minutes":%d}`, body.Minutes))
-	items, err := s.schedule(r, "ev-demo")
+	s.audit(r, "schedule.drift", "event", eventID, fmt.Sprintf(`{"minutes":%d}`, body.Minutes))
+	items, err := s.schedule(r, eventID)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -104,6 +112,10 @@ func (s *Server) completeScheduleItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
+	eventID := r.URL.Query().Get("eventId")
+	if eventID == "" {
+		eventID = s.defaultEventID(r)
+	}
 	if _, err := s.Store.ExecContext(r.Context(), `
 		UPDATE schedule_items SET status='complete',
 		  actual_end = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`, id); err != nil {
@@ -111,7 +123,7 @@ func (s *Server) completeScheduleItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.audit(r, "schedule.complete", "schedule_item", id, `{"status":"complete"}`)
-	items, err := s.schedule(r, "ev-demo")
+	items, err := s.schedule(r, eventID)
 	if err != nil {
 		writeError(w, err)
 		return

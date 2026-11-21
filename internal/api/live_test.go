@@ -82,8 +82,9 @@ func TestAuthoritativeFightState(t *testing.T) {
 }
 
 func TestHoldTimerAndRoleEnforcement(t *testing.T) {
-	srv := seededServer(t)
-	hold := postJSON(t, srv, "/api/v1/fights/fight-05/hold", map[string]any{"corner": "blue", "seconds": 15})
+	srv := seededAuthServer(t)
+	runnerToken := sessionToken(t, srv, "u-runner", "tournament_runner")
+	hold := postAuthenticatedJSON(t, srv, runnerToken, "/api/v1/fights/fight-05/hold", map[string]any{"corner": "blue", "seconds": 15})
 	if hold.Code != http.StatusOK {
 		t.Fatalf("hold = %d: %s", hold.Code, hold.Body.String())
 	}
@@ -99,16 +100,32 @@ func TestHoldTimerAndRoleEnforcement(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/fights/fight-05/submit",
 		bytes.NewReader([]byte(`{"outcome":"win_red"}`)))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-J3-Role", "fighter")
+	req.Header.Set("Authorization", "Bearer "+sessionToken(t, srv, "u-fighter-01", "fighter"))
 	srv.Handler().ServeHTTP(rec, req)
 	if rec.Code != http.StatusForbidden {
 		t.Fatalf("fighter submit = %d, want 403", rec.Code)
 	}
 }
 
+func TestSpoofedRoleHeadersAreIgnored(t *testing.T) {
+	srv := seededAuthServer(t)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/fights/fight-01/submit",
+		bytes.NewReader([]byte(`{"outcome":"win_red"}`)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+sessionToken(t, srv, "u-fighter-01", "fighter"))
+	req.Header.Set("X-J3-Role", "tournament_runner")
+	req.Header.Set("X-J3-User", "u-official")
+	rec := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("spoofed scoring = %d, want 403", rec.Code)
+	}
+}
+
 func TestOfficialAssignmentEnforced(t *testing.T) {
-	srv := seededServer(t)
-	assigned := postJSON(t, srv, "/api/v1/demo/fights/fight-06/officials", map[string]any{
+	srv := seededAuthServer(t)
+	runnerToken := sessionToken(t, srv, "u-runner", "tournament_runner")
+	assigned := postAuthenticatedJSON(t, srv, runnerToken, "/api/v1/demo/fights/fight-06/officials", map[string]any{
 		"userId": "u-official", "role": "referee",
 	})
 	if assigned.Code != http.StatusOK {
@@ -118,7 +135,7 @@ func TestOfficialAssignmentEnforced(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/fights/fight-06/event",
 		bytes.NewReader([]byte(`{"corner":"red","points":2,"kind":"score"}`)))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-J3-User", "u-runner")
+	req.Header.Set("Authorization", "Bearer "+sessionToken(t, srv, "u-official-8", "official"))
 	denied := httptest.NewRecorder()
 	srv.Handler().ServeHTTP(denied, req)
 	if denied.Code != http.StatusForbidden {
@@ -128,7 +145,7 @@ func TestOfficialAssignmentEnforced(t *testing.T) {
 	req2 := httptest.NewRequest(http.MethodPost, "/api/v1/fights/fight-06/event",
 		bytes.NewReader([]byte(`{"corner":"red","points":2,"kind":"score"}`)))
 	req2.Header.Set("Content-Type", "application/json")
-	req2.Header.Set("X-J3-User", "u-official")
+	req2.Header.Set("Authorization", "Bearer "+sessionToken(t, srv, "u-official", "official"))
 	allowed := httptest.NewRecorder()
 	srv.Handler().ServeHTTP(allowed, req2)
 	if allowed.Code != http.StatusOK {

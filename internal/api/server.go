@@ -16,7 +16,7 @@ type Server struct {
 	Store     *db.DB
 	Version   string
 	Hub       *LiveHub
-	TestToken string // set by tests only; bypasses bearer lookup for in-process requests
+	testToken string // enabled only from _test.go; bypasses bearer lookup in in-process tests
 	handler   http.Handler
 }
 
@@ -79,6 +79,8 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("POST /api/v1/auth/login", s.startLogin)
 	mux.HandleFunc("POST /api/v1/auth/verify", s.verifyLogin)
 	mux.HandleFunc("POST /api/v1/auth/demo", s.demoLogin)
+	mux.HandleFunc("POST /api/v1/auth/reset", s.completeReset)
+	mux.HandleFunc("POST /api/v1/auth/reset/request", s.requestReset)
 	mux.HandleFunc("POST /api/v1/demo/announcements", s.sendAnnouncement)
 	mux.HandleFunc("GET /api/v1/demo/announcements", s.listAnnouncements)
 	mux.HandleFunc("GET /api/v1/demo/suggestions", s.suggestions)
@@ -130,7 +132,7 @@ func (s *Server) middleware(next http.Handler) http.Handler {
 		if !isPublic(r) {
 			var identity auth.Identity
 			var ok bool
-			if s.TestToken != "" && r.Header.Get("Authorization") == "" {
+			if s.testToken != "" && r.Header.Get("Authorization") == "" {
 				identity, ok = auth.Identity{UserID: "u-tony", Role: auth.RoleTournamentRunner}, true
 			} else {
 				identity, ok = s.identityFromRequest(r)

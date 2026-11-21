@@ -8,6 +8,8 @@
   import { currentRole, itemsForRole } from '../lib/nav';
 
   let mobile = false;
+  let ready = false;
+  let online = true;
   onMount(() => {
     const sync = () => (mobile = window.innerWidth <= 820);
     sync();
@@ -19,16 +21,34 @@
       const allowed = itemsForRole(currentRole()).some((item) => item.href === path);
       if (!allowed) void goto('/');
     }
-    return () => window.removeEventListener('resize', sync);
+    ready = true;
+    const healthTimer = setInterval(async () => {
+      try {
+        const response = await fetch('/healthz', { cache: 'no-store' });
+        online = response.ok;
+      } catch {
+        online = false;
+      }
+    }, 10000);
+    return () => {
+      window.removeEventListener('resize', sync);
+      clearInterval(healthTimer);
+    };
   });
 </script>
 
 <NavShell />
+<div class="link-status" aria-live="polite"><span class:down={!online}></span>{online ? 'Live link' : 'Offline'}</div>
 <ToastHost />
 <TourOverlay />
-<div class:mobile class="app-content"><slot /></div>
+<div class:mobile class="app-content">
+  {#if ready}<slot />{/if}
+</div>
 
 <style>
   .app-content { margin-left:228px; transition:margin-left .2s ease; min-height:100vh; }
   .app-content.mobile { margin-left:0; padding-top:60px; }
+  .link-status { position:fixed; right:12px; bottom:12px; z-index:700; display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:var(--brand-surface-2); border:1px solid var(--brand-border); color:var(--brand-muted); font-size:.72rem; }
+  .link-status span { width:8px; height:8px; border-radius:50%; background:var(--win); }
+  .link-status span.down { background:var(--loss); }
 </style>

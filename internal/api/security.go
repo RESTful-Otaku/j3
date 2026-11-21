@@ -59,7 +59,11 @@ func (s *Server) identityFromRequest(r *http.Request) (auth.Identity, bool) {
 	err := s.Store.QueryRowContext(context.Background(),
 		`SELECT user_id, role, expires_at FROM sessions WHERE token = ?`, token).
 		Scan(&userID, &role, &expires)
-	if err != nil || expires < nowString() {
+	if err != nil {
+		return auth.Identity{}, false
+	}
+	expiry, err := time.Parse("2006-01-02T15:04:05.999Z", expires)
+	if err != nil || time.Now().After(expiry) {
 		return auth.Identity{}, false
 	}
 	canonical := auth.CanonicalRole(role)
@@ -99,8 +103,4 @@ func (s *Server) requireAction(w http.ResponseWriter, r *http.Request, resource,
 		return false
 	}
 	return true
-}
-
-func nowString() string {
-	return time.Now().UTC().Format("2006-01-02T15:04:05.999Z")
 }

@@ -3,12 +3,15 @@ package api
 import (
 	"bytes"
 	"fmt"
+	_ "golang.org/x/image/webp"
 	"image"
 	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+
+	"github.com/restful-otaku/j3/internal/auth"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -46,7 +49,12 @@ func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	kind := r.FormValue("kind")
-	role := r.FormValue("ownerRole")
+	identity, ok := auth.FromContext(r.Context())
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "authentication required"})
+		return
+	}
+	role := string(identity.Role)
 	if !allowedUploadKinds[kind] {
 		writeBadRequest(w, "unsupported upload kind")
 		return
@@ -63,7 +71,7 @@ func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	ext := strings.ToLower(filepath.Ext(header.Filename))
 	if !allowedExtensions[ext] {
-		writeBadRequest(w, "use PNG, JPG, WEBP or SVG images")
+		writeBadRequest(w, "use PNG, JPG or WEBP images")
 		return
 	}
 

@@ -4,7 +4,7 @@
   import { notifySuccess, notifyError } from '../../lib/toast';
 
   let form: SignupRequest = {
-    name: '', email: '', phone: '', dateOfBirth: '2010-01-01',
+    name: '', email: '', password: '', phone: '', dateOfBirth: '2010-01-01',
     unitSystem: 'metric', heightCm: 150, weightKg: 45,
     heightFt: 5, heightIn: 0, weightLb: 100,
     beltRankId: 'br-white', customBeltLabel: '', customBeltColour: '',
@@ -68,6 +68,7 @@
       <div class="fields">
         <label>Full name<input bind:value={form.name} /></label>
         <label>Email<input type="email" bind:value={form.email} /></label>
+        <label>Password (8+ characters)<input type="password" bind:value={form.password} /></label>
         <label>Phone<input type="tel" bind:value={form.phone} /></label>
         <label>Date of birth<input type="date" bind:value={form.dateOfBirth} /></label>
         <label>Unit system<select bind:value={form.unitSystem}><option value="metric">Metric</option><option value="imperial">Imperial</option></select></label>
