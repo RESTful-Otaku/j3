@@ -102,8 +102,30 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 		"evening": decode(info.Evening), "course": decode(info.Course),
 		"attendanceRule": info.Attendance,
 	}
+	formats := []struct {
+		Discipline, Format, Knockout, Third, Order string
+		DualBronze, RetryTies                      bool
+	}{}
+	formatRows, err := s.Store.QueryContext(r.Context(), `
+		SELECT discipline_id, format, knockout, third_place, order_policy, dual_bronze, retry_ties
+		FROM discipline_formats WHERE event_id = ?`, eventID)
+	if err != nil { writeError(w, err); return }
+	for formatRows.Next() {
+		var item struct {
+			Discipline, Format, Knockout, Third, Order string
+			DualBronze, RetryTies                      bool
+		}
+		var dual, retry int
+		if formatRows.Scan(&item.Discipline, &item.Format, &item.Knockout, &item.Third,
+			&item.Order, &dual, &retry) == nil {
+			item.DualBronze, item.RetryTies = dual == 1, retry == 1
+			formats = append(formats, item)
+		}
+	}
+	formatRows.Close()
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"event": eventView, "kit": kit, "rules": rules, "staff": staff,
+		"event": eventView, "kit": kit, "rules": rules, "staff": staff, "formats": formats,
 	})
 }
 

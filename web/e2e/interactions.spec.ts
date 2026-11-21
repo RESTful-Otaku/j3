@@ -162,7 +162,7 @@ test.describe('Interactive controls', () => {
   test('home shows the tournament journey', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('Tournament journey')).toBeVisible();
-    await expect(page.getByRole('link', { name: /Dashboard/ })).toBeVisible();
+    await expect(page.locator('.journey a').first()).toBeVisible();
     await expect(page.getByRole('link', { name: /Arena/ })).toBeVisible();
   });
 

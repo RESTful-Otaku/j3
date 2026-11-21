@@ -793,6 +793,12 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Rebuilt Okami day order (kata → juniors → teens → adults with weight bands) and
+  competition formats: round robin then seeded single elimination for fighting/ground, full round
+  robin for randori, individual kata judged youngest→oldest/lowest→highest with tie retries, dual
+  bronze or third-place rematch configured per discipline. Added collapsible role-aware navigation
+  and a dedicated `/official` console with bilingual (English/romaji) technique palette, per-corner
+  scoring, penalties, kata panel scoring, submission instant-win override and confirm-before-commit.
 - **2026-11-21** — Okami Jiu Jitsu Challenger is now the default demo seed: 40 fighters across 4
   clubs, Tony Jamieson as organiser, 2 mats with 3 judges + a scorekeeper each, 8 volunteer
   officials, 8 discipline rule sets with exact timings/points, 7 kit requirements, 3-section kata

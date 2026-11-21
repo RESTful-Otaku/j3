@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 const routes = [
   '/', '/setup', '/display', '/mat', '/public', '/brackets', '/tables',
-  '/pools', '/control', '/data', '/audit', '/settings', '/details', '/simulate', '/ceremony', '/builder', '/ui', '/view', '/operations', '/overlay', '/event',
+  '/pools', '/control', '/data', '/audit', '/settings', '/details', '/simulate', '/ceremony', '/builder', '/ui', '/view', '/operations', '/overlay', '/event', '/official',
 ];
 
 async function expectNoPageErrors(page: Page) {

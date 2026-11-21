@@ -73,6 +73,7 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/demo/readiness", s.readiness)
 	mux.HandleFunc("GET /api/v1/demo/event-config", s.eventConfig)
 	mux.HandleFunc("GET /api/v1/demo/attendance", s.attendance)
+	mux.HandleFunc("GET /api/v1/demo/techniques", s.listTechniques)
 	mux.HandleFunc("POST /api/v1/demo/entrants/{id}/checkin", s.checkIn)
 	mux.HandleFunc("GET /api/v1/demo/team-rankings", s.teamRankings)
 	mux.HandleFunc("GET /api/v1/demo/export", s.exportCSV)

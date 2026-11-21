@@ -12,6 +12,7 @@
     kit: { item: string; note: string }[];
     rules: { name: string; kind: string; ages: string; rules: string }[];
     staff: { mat: string; role: string; name: string }[];
+    formats: { Discipline: string; Format: string; Knockout: string; Third: string; Order: string; DualBronze: boolean; RetryTies: boolean }[];
   };
   let config: Config | null = null;
   let attendance: { entrantId: string; name: string; attended: boolean; excluded: boolean }[] = [];
@@ -65,6 +66,23 @@
         <div class="card slide-in"><div class="eyebrow">Refreshments</div><h2>Bring your own</h2><p class="muted">{config.event.refreshments}</p></div>
       </div>
     {:else if tab === 'rules'}
+      <div class="card slide-in" style="margin-bottom:18px;">
+        <div class="eyebrow">Progression & fairness</div><h2>Competition formats</h2>
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:.86rem;">
+            <thead><tr class="muted small" style="text-align:left;"><th>Discipline</th><th>Format</th><th>Next stage</th><th>Third place</th><th>Order</th></tr></thead>
+            <tbody>
+              {#each config.formats ?? [] as format (format.Discipline)}
+                <tr style="border-top:1px solid var(--brand-border);">
+                  <td>{format.Discipline}</td><td>{format.Format}</td><td>{format.Knockout}</td>
+                  <td>{format.Third}{format.DualBronze ? ' · dual bronze' : ''}{format.RetryTies ? ' · retry ties' : ''}</td>
+                  <td>{format.Order}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      </div>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
         {#each config.rules as rule (rule.name)}
           <div class="card slide-in">

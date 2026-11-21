@@ -94,6 +94,7 @@ check "CSV export" "200" "$(status "$BASE/api/v1/demo/export?type=fights")"
 check "CSV import" "201" "$(status -X POST "$BASE/api/v1/demo/import" -H 'Content-Type: application/json' -d '{"rows":[{"name":"CSV Fighter","club":"Club CSV","weightKg":70}]}')"
 check "Okami event config" "200" "$(status "$BASE/api/v1/demo/event-config?eventId=ev-okami")"
 check "course attendance" "200" "$(status "$BASE/api/v1/demo/attendance")"
+check "techniques" "200" "$(status "$BASE/api/v1/demo/techniques")"
 
 echo "🔎 Data assertions"
 check "simulator has medals" "1" "$(has "$BASE/api/v1/demo/simulate?fighters=50" '"medals"')"

@@ -211,6 +211,28 @@ func EnsureOkami(store *db.DB) error {
 		"ok-disc-weapons", okamiEvent, "Weapons Kata",
 		`{"minimumBelt":"green","maxSeconds":120,"demoOnly":true,"noSharpBlades":true,"panel":3,"sections":["Etiquette","Demonstration","Would the application work"],"maxPerSection":10}`)
 
+	// Competition formats with fair progression and medal policies.
+	for _, format := range []struct {
+		discipline, format, knockout, third string
+		dualBronze, retryTies               int
+		orderPolicy                         string
+	}{
+		{"ok-disc-kata", "individual_panel", "none", "retry", 0, 1, "age_then_rank"},
+		{"ok-disc-weapons", "individual_panel", "none", "retry", 0, 1, "age_then_rank"},
+		{"ok-disc-randori", "round_robin", "none", "dual_bronze", 1, 1, "age_then_rank"},
+		{"ok-disc-ground", "round_robin", "single_elimination", "rematch", 1, 1, "weight_then_age"},
+		{"ok-disc-cont10", "round_robin", "single_elimination", "rematch", 1, 1, "weight_then_age"},
+		{"ok-disc-cont16", "round_robin", "single_elimination", "rematch", 1, 1, "weight_then_age"},
+		{"ok-disc-cont18", "round_robin", "single_elimination", "rematch", 1, 1, "weight_then_age"},
+		{"ok-disc-spar", "round_robin", "single_elimination", "dual_bronze", 1, 1, "weight_then_age"},
+	} {
+		add(`INSERT OR IGNORE INTO discipline_formats
+			(event_id, discipline_id, format, knockout, third_place, dual_bronze, retry_ties, order_policy)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			okamiEvent, format.discipline, format.format, format.knockout, format.third,
+			format.dualBronze, format.retryTies, format.orderPolicy)
+	}
+
 	for i, section := range []string{"Etiquette", "Demonstration", "Would the application work"} {
 		add(`INSERT OR IGNORE INTO kata_sections (id, event_id, name, max_score, sort_order) VALUES (?, ?, ?, 10, ?)`,
 			fmt.Sprintf("ok-section-%d", i+1), okamiEvent, section, i)
@@ -224,14 +246,13 @@ func EnsureOkami(store *db.DB) error {
 		{"09:15", "Registration", "general", 900},
 		{"09:30", "Course (Drills and Training) — age 6+", "course", 9000},
 		{"12:00", "Break / Lunch", "break", 1800},
-		{"12:30", "Tournament — Randori & Katamewaza (6-9)", "fight", 1800},
-		{"13:00", "Ground Fighting (10-14)", "fight", 1800},
-		{"13:30", "Continuous Fighting (10-15)", "fight", 1800},
-		{"14:00", "Continuous Fighting (16-17)", "fight", 1800},
-		{"14:30", "Continuous Fighting (18+)", "fight", 1800},
-		{"15:00", "Sparring (16+)", "fight", 1800},
-		{"15:30", "Open Hand Kata (any grade)", "kata", 1800},
-		{"16:00", "Weapons Kata (green belt+)", "kata", 1800},
+		{"12:30", "Open Hand Kata — youngest to oldest, lowest to highest grade", "kata", 1800},
+		{"13:00", "Weapons Kata — green belt and above, age order", "kata", 1800},
+		{"13:30", "Junior Randori / Katamewaza (6-9) — round robin", "fight", 1800},
+		{"14:00", "Junior Ground Fighting (10-14) — round robin into elimination", "fight", 1800},
+		{"14:30", "Teens Ground Fighting & Continuous (10-15) — round robin into elimination", "fight", 1800},
+		{"15:00", "Teens Continuous Fighting (16-17) — round robin into elimination", "fight", 1800},
+		{"15:30", "Adults Continuous Fighting (18+) — round robin into elimination", "fight", 1800},
 		{"19:00", "Evening event — The Vine Hotel", "social", 7200},
 	} {
 		add(`INSERT OR IGNORE INTO schedule_items
