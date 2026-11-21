@@ -793,6 +793,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — TUI verification: added numeric menu shortcuts, action logging and a scripted
+  harness that drives and proves all 36 menu actions; added release-artifact build, local CI/CD and
+  GitHub Actions verification options; fixed stale labels, seeded-tournament command and deploy
+  source path; `scripts/cicd.sh` now starts its own venue server. Local CI/CD and release scripts
+  executed successfully.
 - **2026-11-21** — GitHub Actions verified green on main: fixed missing Bun setup in two jobs,
   replaced broken `setup-android` action with the preinstalled SDK, corrected the iOS build to use
   `App.xcodeproj`, updated all actions to current majors, fixed a stale generated-types check, and

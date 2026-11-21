@@ -43,6 +43,9 @@ bun run demo     # skip the menu and start the full seeded demo immediately
 - API: <http://127.0.0.1:8787/api/v1/demo>
 - Reset the demo data: `bun run reset`
 - Run all checks: `bun run check && bun run test && bun run build`
+- Full local CI/CD: `bun run cicd`
+- Release artefacts: `bun run release`
+- Prove every TUI action: `bun run test:tui`
 
 ### Dedicated screens (each opens in its own tab)
 - `/display` — full-screen live scoreboard with officials, big fighter cards, timer and celebrations

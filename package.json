@@ -23,6 +23,9 @@
     "mobile:android": "bun run mobile:sync && bunx --cwd web cap build android",
     "mobile:ios": "bun run mobile:sync && bunx --cwd web cap build ios",
     "check:workflows": "python3 scripts/check-workflows.py",
-    "sync:api-docs": "bash scripts/sync-api-docs.sh"
+    "sync:api-docs": "bash scripts/sync-api-docs.sh",
+    "release": "bash scripts/release.sh",
+    "cicd": "bash scripts/cicd.sh",
+    "test:tui": "bash scripts/test-tui.sh"
   }
 }

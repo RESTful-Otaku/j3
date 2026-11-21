@@ -49,13 +49,34 @@ select_menu() {
         esac
         ;;
       '') return "$selected" ;;
+      [1-9]) return $((10#$key - 1)) ;;
       [qQbB]) return 255 ;;
     esac
   done
 }
 
+tui_log() {
+  if [ -n "${J3_TUI_LOG:-}" ]; then
+    printf '%s\n' "$1" >> "$J3_TUI_LOG"
+  fi
+}
+
+# In test mode, stub only actions that would block on a server or emulator.
+test_stub() {
+  local label="$1"
+  if [ "${J3_TUI_TEST:-0}" = "1" ]; then
+    echo "  ✅ $label (test mode)"
+    return 0
+  fi
+  return 1
+}
+
 spinner() {
   local msg="$1"; shift
+  if [ "${J3_TUI_TEST:-0}" = "1" ]; then
+    printf "  ✅ %s (test mode)\n" "$msg"
+    return 0
+  fi
   printf "  %b%s%b\n" "$YELLOW" "▶ $msg" "$NC"
   "$@" >"$LOG" 2>&1 &
   local pid=$! i=0
@@ -79,6 +100,7 @@ pause() {
 }
 
 run_demo() {
+  if test_stub "run-demo"; then return; fi
   mkdir -p data
   spinner "Installing web dependencies" bun install --cwd web
   (
@@ -96,9 +118,10 @@ run_demo() {
 }
 
 run_demo_full() {
+  if test_stub "run-demo-full"; then return; fi
   mkdir -p data
   spinner "Installing web dependencies" bun install --cwd web
-  spinner "Seeding complete tournament" go run ./cmd/j3d reset -full -db ./data/j3-demo.db
+  spinner "Seeding complete tournament" go run ./cmd/j3d reset -okami -full -db ./data/j3-demo.db
   (
     trap 'kill %1 2>/dev/null || true' EXIT INT TERM
     go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
@@ -125,6 +148,7 @@ qa_all() {
 }
 
 run_demo_phone() {
+  if test_stub "run-demo-phone"; then return; fi
   mkdir -p data
   spinner "Installing web dependencies" bun install --cwd web
   echo ""
@@ -145,17 +169,19 @@ open_api_docs() {
 qa_menu() {
   while true; do
     select_menu "QA & verification" \
-      "Run all QA checks" "Full-stack smoke (52 checks)" "Full-data smoke (seeded tournament)" \
-      "Browser E2E + axe accessibility" "Load test (200 concurrent)" "← Back"
+      "Run all QA checks" "Full-stack smoke" "Full-data smoke (seeded tournament)" \
+      "Browser E2E + axe accessibility" "Load test (200 concurrent)" \
+      "Verify GitHub Actions" "← Back"
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
-      0) qa_all ;;
-      1) spinner "Full-stack smoke" bun run smoke ;;
-      2) spinner "Full-data smoke" bun run smoke:full ;;
-      3) spinner "Browser E2E" bun run e2e ;;
-      4) spinner "Load test" bash scripts/load.sh ;;
-      5) return ;;
+      0) tui_log qa-all; qa_all ;;
+      1) tui_log qa-smoke; spinner "Full-stack smoke" bun run smoke:full ;;
+      2) tui_log qa-smoke-full; spinner "Full-data smoke" bun run smoke:full ;;
+      3) tui_log qa-e2e; spinner "Browser E2E" bun run e2e ;;
+      4) tui_log qa-load; spinner "Load test" bash scripts/load.sh ;;
+      5) tui_log qa-github; spinner "GitHub Actions" gh run list --repo RESTful-Otaku/j3 --limit 5 ;;
+      6) tui_log qa-back; return ;;
     esac
     pause
   done
@@ -168,11 +194,11 @@ data_menu() {
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
-      0) spinner "Resetting demo data" go run ./cmd/j3d reset -db ./data/j3-demo.db ;;
-      1) spinner "Seeding demo data" go run ./cmd/j3d seed -db ./data/j3-demo.db ;;
-      2) spinner "Seeding full tournament" go run ./cmd/j3d reset -full -db ./data/j3-demo.db ;;
-      3) J3_DB=./data/j3-live.db ./bin/j3d -addr 127.0.0.1:8787 ;;
-      4) return ;;
+      0) tui_log data-reset; spinner "Resetting demo data" go run ./cmd/j3d reset -db ./data/j3-demo.db ;;
+      1) tui_log data-seed; spinner "Seeding demo data" go run ./cmd/j3d seed -db ./data/j3-demo.db ;;
+      2) tui_log data-seed-full; spinner "Seeding full tournament" go run ./cmd/j3d reset -full -db ./data/j3-demo.db ;;
+      3) tui_log data-run-live; if ! test_stub "run-live"; then J3_DB=./data/j3-live.db ./bin/j3d -addr 127.0.0.1:8787; fi ;;
+      4) tui_log menu-back; return ;;
     esac
     pause
   done
@@ -181,16 +207,19 @@ data_menu() {
 build_menu() {
   while true; do
     select_menu "Build & deploy" \
-      "Build live executable + static UI" "Deploy to development" "Deploy to staging" \
+      "Build live executable + static UI" "Build release artifacts" \
+      "Run full CI/CD suite" "Deploy to development" "Deploy to staging" \
       "Deploy to production" "← Back"
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
-      0) spinner "Building live executable" go build -o bin/j3d ./cmd/j3d; spinner "Building web app" bun run --cwd web build ;;
-      1) spinner "Deploying development" bash scripts/deploy.sh development artifacts ;;
-      2) spinner "Deploying staging" bash scripts/deploy.sh staging artifacts ;;
-      3) spinner "Deploying production" bash scripts/deploy.sh production artifacts ;;
-      4) return ;;
+      0) tui_log build-exec; spinner "Building live executable" go build -o bin/j3d ./cmd/j3d; spinner "Building web app" bun run --cwd web build ;;
+      1) tui_log build-release; spinner "Building release artifacts" bash scripts/release.sh ;;
+      2) tui_log build-cicd; spinner "Full CI/CD suite" bash scripts/cicd.sh ;;
+      3) tui_log deploy-dev; spinner "Deploying development" bash scripts/deploy.sh development dist ;;
+      4) tui_log deploy-staging; spinner "Deploying staging" bash scripts/deploy.sh staging dist ;;
+      5) tui_log deploy-prod; spinner "Deploying production" bash scripts/deploy.sh production dist ;;
+      6) tui_log menu-back; return ;;
     esac
     pause
   done
@@ -205,15 +234,15 @@ mobile_menu() {
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
-      0) bash scripts/mobile.sh build ;;
-      1) bash scripts/mobile.sh emulator ;;
-      2) bash scripts/mobile.sh install ;;
-      3) bash scripts/mobile.sh build && bash scripts/mobile.sh install ;;
-      4) echo "  📡 Phone URL: $(bash scripts/mobile.sh url)" ;;
-      5) run_demo_phone ;;
-      6) spinner "Building iOS app" bun run mobile:ios ;;
-      7) spinner "Installing Chromium" bun run e2e:install ;;
-      8) return ;;
+      0) tui_log mobile-build-apk; if ! test_stub "build-apk"; then bash scripts/mobile.sh build; fi ;;
+      1) tui_log mobile-emulator; if ! test_stub "start-emulator"; then bash scripts/mobile.sh emulator; fi ;;
+      2) tui_log mobile-install; if ! test_stub "install-apk"; then bash scripts/mobile.sh install; fi ;;
+      3) tui_log mobile-build-install; if ! test_stub "build-install-launch"; then bash scripts/mobile.sh build && bash scripts/mobile.sh install; fi ;;
+      4) tui_log mobile-url; echo "  📡 Phone URL: $(bash scripts/mobile.sh url)" ;;
+      5) tui_log run-demo-phone; run_demo_phone ;;
+      6) tui_log mobile-build-ios; if ! test_stub "build-ios"; then spinner "Building iOS app" bun run mobile:ios; fi ;;
+      7) tui_log mobile-chromium; spinner "Installing Chromium" bun run e2e:install ;;
+      8) tui_log mobile-back; return ;;
 
     esac
     pause
@@ -227,13 +256,13 @@ while true; do
     "🔌 API explorer" "❌ Exit"
   choice=$?
   case "$choice" in
-    0) run_demo ;;
-    1) run_demo_full ;;
-    2) qa_menu ;;
-    3) data_menu ;;
-    4) build_menu ;;
-    5) mobile_menu ;;
-    6) open_api_docs ;;
-    7) echo "  👋 Bye!"; exit 0 ;;
+    0) tui_log run-demo; run_demo ;;
+    1) tui_log run-demo-full; run_demo_full ;;
+    2) tui_log qa-menu; qa_menu ;;
+    3) tui_log data-menu; data_menu ;;
+    4) tui_log build-menu; build_menu ;;
+    5) tui_log mobile-menu; mobile_menu ;;
+    6) tui_log api-docs; open_api_docs ;;
+    7) tui_log exit; echo "  👋 Bye!"; exit 0 ;;
   esac
 done
