@@ -61,6 +61,12 @@ Regenerate shared types after editing `api/openapi.yaml`:
 bun run generate:types
 ```
 
+## API explorer
+
+A developer/admin API console is available at <http://localhost:5173/apidocs> after `bun run dev`.
+It lists key endpoints, shows the OpenAPI contract and guide, and can send authenticated requests
+from the browser. Open it from the TUI menu with **🔌 API explorer**.
+
 ## Mobile QA
 
 ```sh

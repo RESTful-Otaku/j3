@@ -793,6 +793,12 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — GitHub Actions verified green on main: fixed missing Bun setup in two jobs,
+  replaced broken `setup-android` action with the preinstalled SDK, corrected the iOS build to use
+  `App.xcodeproj`, updated all actions to current majors, fixed a stale generated-types check, and
+  changed the runner landing assertion after role-aware login. Added an interactive `/apidocs`
+  explorer with live "try it" requests, synced OpenAPI contract + guide into the web app, and a TUI
+  menu option to open it. Both CI and Mobile builds now pass on GitHub runners.
 - **2026-11-21** — Hardening/stabilisation pass: live scoring authorization now derives identity
   from the verified session (spoofed headers rejected), RBAC defaults moved to migrations so they
   cannot be self-initialised, privileged mutations guarded, signup passwords + reset flow added,
