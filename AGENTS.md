@@ -778,6 +778,10 @@ _Format: `D-### | date | decision | rationale | status`._
 - **D-037 | 2026-11-21 | Demo auth always resolves a real runner and browser sessions self-heal on 401**
   — demo mode must never 500 because a particular seed is absent; the web client retries once with
   a fresh demo session so a DB reset cannot leave every page permanently unauthorized. Status: accepted.
+- **D-039 | 2026-11-21 | Android QA uses Android Studio's SDK and a Pixel 10 Pro AVD with `-gpu auto`**
+  — the Linuxbrew emulator and `-gpu swiftshader` segfault on this host (exit 139), so the mobile
+  helper now prefers `~/Android/Sdk`, defaults to `j3-pixel-10-pro`, and avoids the crashing
+  SwiftShader path. Status: accepted.
 - **D-038 | 2026-11-21 | Demo identity switching mints a real bearer session**
   — the old "act as" controls only changed display state, so QA never saw private/public RBAC
   boundaries. `POST /api/v1/auth/demo` now accepts an optional `userId` and issues a real
@@ -802,6 +806,12 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Android emulator QA is working: diagnosed repeated "terminated"/SIGSEGV crashes as
+  the Linuxbrew emulator plus `-gpu swiftshader` graphics backend (backtrace in SwiftShader/GLES).
+  `scripts/mobile.sh` now prefers Android Studio's `~/Android/Sdk`, targets the `j3-pixel-10-pro`
+  AVD, and launches with `-gpu auto`; the Pixel 10 Pro boots in ~22s, the APK installs, and J3
+  launches in the foreground. Screenshot/logcat saved under `docs/qa/`. GitHub Actions and local
+  CI/CD green; TUI harness passed all 36 menu actions.
 - **2026-11-21** — Demo QA identity switching now enforces real RBAC: `POST /api/v1/auth/demo`
   accepts an optional `userId`, both switchers exchange it for a real bearer session, the nav and
   route guard reapply the user role, and a demo-only identity directory keeps switching available
@@ -983,6 +993,8 @@ _Format: `D-### | date | decision | rationale | status`._
 - Local demo/simulated runs auto-login as a runner; the dashboard and expanded nav both offer a
   real identity switcher that mints a server-side session for any seeded account, so QA sees the
   exact RBAC/public-private boundaries for that user.
+- Android QA: Android Studio SDK + Pixel 10 Pro AVD (`-gpu auto`) boots reliably; the LAN-baked APK
+  installs and launches in the foreground, with screenshot/logcat evidence in `docs/qa/`.
 - Refinement batch delivered: editable point values per technique with presets + custom actions,
   combined age/height/weight/rank category ranges, second-level round durations, invite
   pagination + bulk delete, clone setup, per-config template library, drag handles separated from

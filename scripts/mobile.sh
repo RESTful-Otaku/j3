@@ -5,9 +5,17 @@ export PATH="$HOME/.bun/bin:$PATH"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-ANDROID_SDK="${ANDROID_HOME:-/home/linuxbrew/.linuxbrew/share/android-commandlinetools}"
-JAVA21="/home/linuxbrew/.linuxbrew/Cellar/openjdk@21/21.0.13.1/libexec"
-AVD_NAME="${J3_AVD:-j3-pixel}"
+STUDIO_SDK="$HOME/Android/Sdk"
+LEGACY_SDK="/home/linuxbrew/.linuxbrew/share/android-commandlinetools"
+if [ -n "${ANDROID_HOME:-}" ]; then
+  ANDROID_SDK="$ANDROID_HOME"
+elif [ -d "$STUDIO_SDK" ]; then
+  ANDROID_SDK="$STUDIO_SDK"
+else
+  ANDROID_SDK="$LEGACY_SDK"
+fi
+JAVA21="${JAVA_HOME:-/home/linuxbrew/.linuxbrew/Cellar/openjdk@21/21.0.13.1/libexec}"
+AVD_NAME="${J3_AVD:-j3-pixel-10-pro}"
 APK="web/android/app/build/outputs/apk/debug/app-debug.apk"
 
 setup_env() {
@@ -47,10 +55,10 @@ ensure_avd() {
     echo "✅ AVD $AVD_NAME exists"
     return 0
   fi
-  echo "📱 Creating Pixel 10 AVD (Android 36)…"
+  echo "📱 Creating Pixel 10 Pro AVD (Android 36)…"
   yes | sdkmanager --licenses >/dev/null 2>&1 || true
   sdkmanager "emulator" "platforms;android-36" "build-tools;36.0.0" "system-images;android-36;google_apis;x86_64" >/dev/null 2>&1
-  echo no | avdmanager create avd -n "$AVD_NAME" -k 'system-images;android-36;google_apis;x86_64' -d pixel_10 --force >/dev/null 2>&1
+  echo no | avdmanager create avd -n "$AVD_NAME" -k 'system-images;android-36;google_apis;x86_64' -d pixel_10_pro --force >/dev/null 2>&1
   echo "✅ AVD created"
 }
 
@@ -62,7 +70,7 @@ start_emulator() {
     return 0
   fi
   echo "🚀 Starting $AVD_NAME…"
-  nohup emulator -avd "$AVD_NAME" -no-snapshot -gpu swiftshader -no-audio >/tmp/j3-emulator.log 2>&1 &
+  nohup emulator -avd "$AVD_NAME" -no-snapshot -gpu auto -no-audio >/tmp/j3-emulator.log 2>&1 &
   adb wait-for-device
   echo "⏳ Waiting for boot (this can take up to two minutes)…"
   for _ in $(seq 1 90); do

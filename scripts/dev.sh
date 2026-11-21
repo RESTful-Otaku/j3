@@ -228,7 +228,7 @@ build_menu() {
 mobile_menu() {
   while true; do
     select_menu "Mobile (Android / iOS)" \
-      "Build demo APK" "Start Pixel emulator" "Install & launch APK" \
+      "Build demo APK" "Start Pixel 10 Pro emulator" "Install & launch APK" \
       "Build + install + launch" "Show phone server URL" "Run venue server for phone" \
       "Build iOS .app" "Install Playwright Chromium" "← Back"
     choice=$?

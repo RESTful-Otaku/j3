@@ -1,0 +1,545 @@
+--------- beginning of system
+11-21 23:34:13.685   691   912 D BackgroundInstallControlService: Package event received: 0
+--------- beginning of main
+11-21 23:34:13.685  1182  1191 D SliceBuilder: Creating slice for: com.android.settings.notification.MediaVolumePreferenceController
+11-21 23:34:13.686  1182  1191 D MediaVolumePreCtrl: The slice doesn't support end item
+11-21 23:34:13.686  1182  2240 D SlicesIndexer: Slices already indexed - returning.
+11-21 23:34:13.686   691   912 D BackgroundInstallControlService: Package event received: 0
+11-21 23:34:13.686  1182  2240 D VolumeSliceHelper: Registering uri for broadcast relay: content://com.android.settings.slices/action/notification_volume
+11-21 23:34:13.686  1182  3239 D SlicesIndexer: Slices already indexed - returning.
+11-21 23:34:13.687  1182  2240 D SettingsSliceProvider: Built slice (content://com.android.settings.slices/action/notification_volume) in: 1
+11-21 23:34:13.687  1182  3239 D VolumeSliceHelper: Registering uri for broadcast relay: content://com.android.settings.slices/action/notification_volume
+11-21 23:34:13.687  1182  3258 D SlicesIndexer: Slices already indexed - returning.
+11-21 23:34:13.687  1182  3239 D SettingsSliceProvider: Built slice (content://com.android.settings.slices/action/notification_volume) in: 1
+11-21 23:34:13.687   691   912 D BackgroundInstallControlService: Package event received: 0
+11-21 23:34:13.687  1182  3259 D SlicesIndexer: Slices already indexed - returning.
+11-21 23:34:13.687  1182  3258 D VolumeSliceHelper: Registering uri for broadcast relay: content://com.android.settings.slices/action/alarm_volume
+11-21 23:34:13.687  1182  3258 D SettingsSliceProvider: Built slice (content://com.android.settings.slices/action/alarm_volume) in: 0
+11-21 23:34:13.687  1182  3259 D VolumeSliceHelper: Registering uri for broadcast relay: content://com.android.settings.slices/action/alarm_volume
+11-21 23:34:13.687  1182  3259 D SettingsSliceProvider: Built slice (content://com.android.settings.slices/action/alarm_volume) in: 0
+11-21 23:34:13.688  1182  2240 D SlicesIndexer: Slices already indexed - returning.
+11-21 23:34:13.688  1182  2240 W SliceData: Highlight menu key res is empty: com.android.settings.deviceinfo.hardwareinfo.DeviceModelPreferenceController
+11-21 23:34:13.688  1182  1191 D SliceBuilder: Creating slice for: com.android.settings.deviceinfo.hardwareinfo.DeviceModelPreferenceController
+11-21 23:34:13.688  1182  2240 D SettingsSliceProvider: Built slice (content://com.android.settings.slices/action/hardware_info_device_model) in: 0
+11-21 23:34:13.688   691   912 D BackgroundInstallControlService: Package event received: 0
+11-21 23:34:13.689  1182  3239 D SlicesIndexer: Slices already indexed - returning.
+11-21 23:34:13.689   691   912 D BackgroundInstallControlService: Package event received: 0
+11-21 23:34:13.689  1182  3416 D SliceBuilder: Creating slice for: com.android.settings.fuelgauge.batterysaver.BatterySaverButtonPreferenceController
+11-21 23:34:13.689  1182  3239 D SettingsSliceProvider: Built slice (content://android.settings.slices/action/battery_saver) in: 0
+11-21 23:34:14.399   946   946 D wpa_supplicant: nl80211: Drv Event 34 (NL80211_CMD_NEW_SCAN_RESULTS) received for wlan0
+11-21 23:34:14.399   946   946 D wpa_supplicant: wlan0: nl80211: New scan results available
+11-21 23:34:14.399   946   946 D wpa_supplicant: nl80211: Scan probed for SSID ''
+11-21 23:34:14.399   946   946 D wpa_supplicant: nl80211: Scan included frequencies: 2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467 2472 2484
+11-21 23:34:14.399   946   946 D wpa_supplicant: wlan0: Event SCAN_RESULTS (3) received
+11-21 23:34:14.399   946   946 D wpa_supplicant: nl80211: Received scan results (1 BSSes)
+11-21 23:34:14.399   946   946 D wpa_supplicant: nl80211: Scan results indicate BSS status with 02:15:b2:00:00:01 as associated
+11-21 23:34:14.399   946   946 D wpa_supplicant: wlan0: BSS: Start scan result update 2
+11-21 23:34:14.399   946   946 D wpa_supplicant: BSS: last_scan_res_used=1/32
+11-21 23:34:14.399   946   946 D wpa_supplicant: wlan0: New scan results available (own=0 ext=1)
+11-21 23:34:14.399   691  2025 D WifiNl80211Manager: Scan result ready event
+11-21 23:34:14.399   946   946 D wpa_supplicant: wlan0: Do not use results from externally requested scan operation for network selection
+11-21 23:34:14.399   946   946 D wpa_supplicant: p2p-dev-wlan0: Updating scan results from sibling
+11-21 23:34:14.399   946   946 D wpa_supplicant: nl80211: Received scan results (1 BSSes)
+11-21 23:34:14.399   691  2025 D WifiNative: Scan result ready event
+11-21 23:34:14.399   946   946 D wpa_supplicant: p2p-dev-wlan0: BSS: Start scan result update 2
+11-21 23:34:14.399   946   946 D wpa_supplicant: BSS: last_scan_res_used=1/32
+11-21 23:34:14.399   946   946 D wpa_supplicant: p2p-dev-wlan0: New scan results available (own=0 ext=1)
+11-21 23:34:14.399   946   946 D wpa_supplicant: p2p-dev-wlan0: Do not use results from externally requested scan operation for network selection
+11-21 23:34:14.399   691   862 D WifiNl80211Manager: get 1 scan results from wificond
+11-21 23:34:14.399   691   862 D WifiNative: get 1 scan results from wificond
+11-21 23:34:14.399  1182  3416 I WifiScanner: onFullResults
+11-21 23:34:14.399   691   862 I WifiScanningService: singleScanResults: ClientInfo[uid=1000, package=com.android.settings, attributionTag=null, android.net.wifi.IWifiScannerListener$Stub$Proxy@1a99b1],results=1
+11-21 23:34:14.399  1221  2118 I WifiScanner: onFullResults
+11-21 23:34:14.399   691   862 I WifiScanningService: singleScanResults listener: ClientInfo[uid=1000, package=android, attributionTag=null, com.android.server.wifi.scanner.WifiScannerInternal$ScanListener@323d5cd],results=1
+11-21 23:34:14.399   691   862 I WifiScanningService: singleScanResults listener: ClientInfo[uid=1000, package=android, attributionTag=null, com.android.server.wifi.scanner.WifiScannerInternal$ScanListener@f2306fc],results=1
+11-21 23:34:14.399   691   862 I WifiScanningService: singleScanResults listener: ClientInfo[uid=1000, package=android, attributionTag=null, com.android.server.wifi.scanner.WifiScannerInternal$ScanListener@5055e9],results=1
+11-21 23:34:14.400   691   862 I WifiScanningService: singleScanResults listener: ClientInfo[uid=10147, package=com.google.android.gms, attributionTag=network_location_provider, android.net.wifi.IWifiScannerListener$Stub$Proxy@c780730],results=1
+11-21 23:34:14.400   691   862 I WifiScanningService: Unregistering listener= android.net.wifi.IWifiScannerListener$Stub$Proxy@1a99b1 uid=1000 packageName=com.android.settings workSource=WorkSource{1000}
+11-21 23:34:14.400   691   850 D WifiScanRequestProxy: Scan results received
+11-21 23:34:14.400   691   850 D WifiScanRequestProxy: Received 1 scan results
+11-21 23:34:14.400   691   850 D WifiHealthMonitor:  2G scanResult count: 1, Above2g scanResult count: 0
+11-21 23:34:14.400   691   850 V WifiConfigManager: getSavedNetworkFromScanResult Found "AndroidWifi"NONE for AndroidWifi[[ESS]]
+11-21 23:34:14.401   691   850 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+11-21 23:34:14.401   691   850 V WifiConnectivityManager: Clearing blocklist for REASON_FRAMEWORK_DISCONNECT_FAST_RECONNECT
+11-21 23:34:14.401   691   850 V WifiConnectivityManager: AllSingleScanListener onResults: start network selection
+11-21 23:34:14.401   691   850 V WifiConfigManager: getSavedNetworkFromScanResult Found "AndroidWifi"NONE for AndroidWifi[[ESS]]
+11-21 23:34:14.401   691   850 D WifiNetworkSelector: Current connected network: 0
+11-21 23:34:14.401   691   850 D WifiNetworkSelector: wlan0: Current connected network already sufficient. Skip network selection.
+11-21 23:34:14.401   691   850 V WifiLastResortWatchdog: updateAvailableNetworks: size = 0
+11-21 23:34:14.401   691   850 V WifiLastResortWatchdog: mWatchdogFeatureEnabled: true
+11-21 23:34:14.401   691   850 V WifiLastResortWatchdog: mWatchdogAllowedToTrigger: true
+11-21 23:34:14.401   691   850 V WifiLastResortWatchdog: mRecentAvailableNetworks: 1
+11-21 23:34:14.401   691   850 V WifiLastResortWatchdog:  02:15:b2:00:00:01: "AndroidWifi" HasEverConnected: true, Failures: {Assoc: 0, Auth: 0, Dhcp: 0}, Age: 1
+11-21 23:34:14.401   691   850 V WifiLastResortWatchdog: mSsidFailureCount:
+11-21 23:34:14.401   691   850 V WifiLastResortWatchdog: "AndroidWifi": 1, HasEverConnected: true, Failures: {Assoc: 0, Auth: 0, Dhcp: 0}
+11-21 23:34:14.401   691   850 V WifiConnectivityManager: AllSingleScanListener:  No candidates
+--------- beginning of kernel
+11-21 23:34:14.615     0     0 I init    : Sending signal 9 to service 'idmap2d' (pid 623) process group...
+11-21 23:34:14.479   691  2025 W OverlayManager: service 'idmap' died
+11-21 23:34:14.617     0     0 I libprocessgroup: Removed cgroup /sys/fs/cgroup/system/uid_1000/pid_623
+11-21 23:34:14.618     0     0 I init    : Control message: Processed ctl.stop for 'idmap2d' from pid: 691 (system_server)
+11-21 23:34:14.619     0     0 I init    : Service 'idmap2d' (pid 623) received signal 9
+11-21 23:34:14.620     0     0 I init    : Sending signal 9 to service 'idmap2d' (pid 623) process group...
+11-21 23:34:14.620     0     0 E libprocessgroup: Failed to write 1 to /sys/fs/cgroup/system/uid_1000/pid_623/cgroup.kill: No such file or directory
+11-21 23:34:14.622     0     0 E libprocessgroup: Failed to open /sys/fs/cgroup/system/uid_1000/pid_623/cgroup.procs: No such file or directory
+11-21 23:34:14.565  1221  1277 I NearbyUWB: Client com.google.android.gms (com.google.android.gms225570273) disconnecting  [CONTEXT service_id=49 ]
+11-21 23:34:14.565  1221  1947 I NearbyUWB: stop ranging called. [CONTEXT service_id=49 ]
+11-21 23:34:14.566  1221  1989 I NearbyUWB: User opted in for analytics reporting: false. [CONTEXT service_id=49 ]
+11-21 23:34:14.566  1221  1989 I NearbyUWB: AnalyticsLogger is shutdown. [CONTEXT service_id=49 ]
+11-21 23:34:15.219   691  2025 W JobInfo : Job 'com.google.android.settings.intelligence/.modules.routines.impl.RoutinesJobIntentService#1728' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+11-21 23:34:15.222   691  1051 I WifiService: getVerboseLoggingLevel uid=10136
+11-21 23:34:15.269   960   960 I ClipboardListener: Clipboard overlay suppressed.
+11-21 23:34:15.270  1628  1890 I AiAiTranslate: C2T - not in a conversation
+11-21 23:34:15.608   691   850 D WifiClientModeImpl[9918:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-50 TxLinkspeed=6 freq=2437 RxLinkSpeed=2
+11-21 23:34:15.608   691   850 D WifiDataStall: tx tput in kbps: 37000
+11-21 23:34:15.608   691   850 D WifiDataStall: rx tput in kbps: 37000
+11-21 23:34:15.608   691   850 V WifiConfigManager: Updating scan detail cache freq=2437 BSSID=02:15:b2:00:00:01 RSSI=-50 for "AndroidWifi"NONE
+11-21 23:34:15.608   691   850 D WifiThroughputPredictor:  utilization (LLS) 80 isBluetoothConnected: false final utilization: 80
+11-21 23:34:15.608   691   850 D WifiThroughputPredictor:  BW: 0 RSSI: -50 Nss: 1 Mode: 1 symDur: 4000 snrDb 30 bitPerTone: 4500 rate: 54 throughput: 37
+11-21 23:34:15.608   691   850 D WifiThroughputPredictor:  utilization (LLS) 80 isBluetoothConnected: false final utilization: 80
+11-21 23:34:15.608   691   850 D WifiThroughputPredictor:  BW: 0 RSSI: -50 Nss: 1 Mode: 1 symDur: 4000 snrDb 30 bitPerTone: 4500 rate: 54 throughput: 37
+11-21 23:34:15.608   691   850 D WifiThroughputPredictor:  utilization (LLS) 80 isBluetoothConnected: false final utilization: 80
+11-21 23:34:15.608   691   850 D WifiThroughputPredictor:  BW: 0 RSSI: -50 Nss: 1 Mode: 1 symDur: 4000 snrDb 30 bitPerTone: 4500 rate: 54 throughput: 37
+11-21 23:34:15.608   691   850 D WifiThroughputPredictor:  utilization (LLS) 80 isBluetoothConnected: false final utilization: 80
+11-21 23:34:15.608   691   850 D WifiThroughputPredictor:  BW: 0 RSSI: -50 Nss: 1 Mode: 1 symDur: 4000 snrDb 30 bitPerTone: 4500 rate: 54 throughput: 37
+11-21 23:34:15.608   691   850 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 843984011 SSID: "AndroidWifi", BSSID: 02:15:b2:00:00:01, MAC: 02:15:b2:00:00:00, IP: /10.0.2.16, Security type: 0, Supplicant state: COMPLETED, Wi-Fi standard: legacy, RSSI: -50, Link speed: 6Mbps, Tx Link speed: 6Mbps, Max Supported Tx Link speed: 54Mbps, Rx Link speed: 2Mbps, Max Supported Rx Link speed: 54Mbps, Frequency: 2437MHz, Net ID: 0, Metered hint: false, score: 60, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"AndroidWifi"openMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+11-21 23:34:15.608   691   850 D WifiScoreCard: txRate: 12 txSpeed: 6
+11-21 23:34:15.608   691   850 D WifiScoreCard: network update SIGNAL_POLL "AndroidWifi" ID: 114210108 RSSI -50 txSpeed 6
+11-21 23:34:15.608   691   850 D WifiClientModeImpl[9918:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 1 0 "AndroidWifi" 02:15:b2:00:00:01 rssi=-50 f=2437 sc=60 link=6 tx=11.2, 0.0, 0.0 rx=12.7 bcn=0 [on:0 tx:0 rx:0 period:3002] from screen [on:0 period:7725880] score=60
+11-21 23:34:15.848  1960  2079 I Bugle   : BugleStartup: Registering SIM change receiver...
+11-21 23:34:15.848  1960  2079 I Bugle   : BugleStartup: Updating app config...
+11-21 23:34:15.849  1960  2079 I Bugle   : BugleStartup: Done with SIM change receiver & app config.
+11-21 23:34:15.849  1960  2079 I Bugle   : BugleStartup: Handling shared prefs upgrade & Load MMS Configuration...
+11-21 23:34:15.850  1960  2079 I BugleDataModel: Scheduling country code detector action, because a subscription changed its state.
+11-21 23:34:15.851  1960  2042 I BugleRcsEngine: Unexpected action: android.intent.action.SIM_STATE_CHANGED [CONTEXT log_prefix="(Sim)" thread_id=49 ]
+11-21 23:34:15.851  1960  2079 I BugleDataModel: Scheduling self participants refresh action, because a subscription changed its state.
+11-21 23:34:15.851   691  1051 D PackageManager: Instant App installer not found with android.intent.action.INSTALL_INSTANT_APP_PACKAGE
+11-21 23:34:15.851   691  1051 D PackageManager: Clear ephemeral installer activity
+11-21 23:34:15.851  1960  3646 I BugleRcsEngine: do not delay first event [CONTEXT thread_id=92 ]
+11-21 23:34:15.852  1960  2099 I AsyncTelephonySimStateR: Received intent action: android.intent.action.SIM_STATE_CHANGED with extra SIM_STATE: LOADED
+11-21 23:34:15.852  1960  2099 I SimStateSchedulerImpl: Scheduling UPDATE_PHONE_SIMS_STATE. Delay Seconds: 0, UpdateTrigger: UPDATE_TRIGGER_SIM_STATE_LOADED
+11-21 23:34:15.852  1960  2099 I SimStateSchedulerImpl: Scheduling WORK_TYPE_UPDATE_PHONE_SIMS_STATE using PWQ. Delay Seconds: 0, UpdateTrigger: 6
+11-21 23:34:15.852  1960  2080 I Bugle   : BugleStartup: Initializing RCS availability...
+11-21 23:34:15.852  1960  2080 I Bugle   : BugleStartup: Done with RCS availability.
+11-21 23:34:15.853  1960  2079 I BugleSimStateTracker: Updating PhoneSimState
+11-21 23:34:15.853  1960  2080 I Bugle   : BugleStartup: Done initializing with enabled individual init failures.
+11-21 23:34:15.853  1960  2079 I BugleSimStateTracker: Update trigger: 1
+11-21 23:34:15.854  1960  2098 I .apps.messaging: AssetManager2(0x738d70552f78) locale list changing from [] to [en-US]
+11-21 23:34:15.854  1960  3646 I BugleRcsEngine: Processing an intent [CONTEXT log_prefix="(Sim)" thread_id=92 ]
+11-21 23:34:15.854  1960  3646 I BugleRcsEngine: SIM state LOADED [CONTEXT log_prefix="(Sim)" thread_id=92 ]
+11-21 23:34:15.854  1960  2098 W Bugle   : BuglePhoneNumberUtils: canonicalizeMccMnc: invalid mccmnc. mcc: null, mnc: null
+11-21 23:34:15.855  1960  2079 I BugleSimStateTracker: Is carrier config for identified carrier: true
+11-21 23:34:15.855  1960  2079 I BugleSimStateTracker: default call SIM: redacted-pii:sim_id[chars:20,last3:897], default sms SIM redacted-pii:sim_id[chars:20,last3:897]. default data SIM redacted-pii:sim_id[chars:20,last3:897].
+11-21 23:34:15.855  1960  2099 I Bugle   : BroadcastReceiverAsyncWorkTracker: Acknowledging broadcast of com.google.android.apps.messaging.shared.simstatetracker.AsyncTelephonySimStateReceiver@d078550
+11-21 23:34:15.856  1960  3646 I BugleRcsEngine: SIM changed: false. current id: redacted-pii:sim_id[chars:20,last3:897]; stored id: redacted-pii:sim_id[chars:20,last3:897]; isFiDevice: false; subId: 1; slotIndex: 0 [CONTEXT log_prefix="(Sim)" thread_id=92 ]
+11-21 23:34:15.857  1960  2080 W JobInfo : Requested important-while-foreground flag for job1030 is ignored and takes no effect
+11-21 23:34:15.857  1960  2080 D WM-SystemJobScheduler: Scheduling work ID c65329c7-aa8a-44b8-b31e-ea347f833cffJob ID 1030
+11-21 23:34:15.858  1960  2079 I BugleSimStateTracker: Looking up Fi through package names.
+11-21 23:34:15.859   691  1886 D OomAdjuster: Not killing cached processes
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: All newly built SimSubscriptionInfos: [(simId: redacted-pii:sim_id[chars:20,last3:897],
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: subId: 1,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: simSlot: 0,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: imsi: redacted-pii:imsi[chars:15],
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: phoneNumber: redacted-pii:phone_number[chars:12,last2:67],
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: countryCode: US,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: networkOperatorName: T-Mobile,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: subscriptionGroupUuid: ,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: mcc: 310,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: mnc: 260,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: simCarrierId: 1,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: iccid: redacted-pii:sim_iccid[chars:20],
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: isFi: false,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: loggableGuid: d6b354de-1793-4578-9eb9-2c1670185f0c,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: formattedMsisdn: redacted-pii:phone_number[chars:12,last2:67],
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: simOperatorName: T-Mobile,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: simOperator: 310260,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: groupIdLevel1: ,
+11-21 23:34:15.859  1960  2079 I BugleSimStateTracker: preferredSubscriptionName: T-Mobile)]
+11-21 23:34:15.860  1960  2080 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.860  1960  2080 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.860  1960  2080 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.860  1960  2080 D WM-GreedyScheduler: Starting work for c65329c7-aa8a-44b8-b31e-ea347f833cff
+11-21 23:34:15.860  1960  2080 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.860  1960  2079 I BugleSimStateTracker: Storing updatedSimSubscriptionInfos: [(redacted-pii:sim_id[chars:20,last3:897], d6b354de-1793-4578-9eb9-2c1670185f0c)]
+11-21 23:34:15.861  1960  2079 I BugleSimStateTracker: No newly loaded SIMs on phone sim state update.
+11-21 23:34:15.863  1960  2079 D WM-Processor: pst: processing WorkGenerationalId(workSpecId=c65329c7-aa8a-44b8-b31e-ea347f833cff, generation=0)
+11-21 23:34:15.864  1960  1960 D WM-SystemJobService: onStartJob for WorkGenerationalId(workSpecId=c65329c7-aa8a-44b8-b31e-ea347f833cff, generation=0)
+11-21 23:34:15.865  1960  2098 W JobInfo : Requested important-while-foreground flag for job1031 is ignored and takes no effect
+11-21 23:34:15.865  1960  2098 D WM-SystemJobScheduler: Scheduling work ID f6b0099b-d5f3-4d56-b2a1-366159b7d794Job ID 1031
+11-21 23:34:15.866  1960  2047 I GnpSdk  : set is [].
+11-21 23:34:15.867  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.867  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.867  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.867  1960  2098 D WM-GreedyScheduler: Starting tracking for f6b0099b-d5f3-4d56-b2a1-366159b7d794,2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.867  1960  3646 I BugleRcsEngine: Skipping writing subId because this is main bugle process. [CONTEXT log_prefix="(Sim)" thread_id=92 ]
+11-21 23:34:15.867  1960  1960 D WM-SystemJobService: onStartJob for WorkGenerationalId(workSpecId=f6b0099b-d5f3-4d56-b2a1-366159b7d794, generation=0)
+11-21 23:34:15.868  1960  2099 D MddListenableWorkerFactory: createWorker for class: com.google.android.apps.messaging.shared.datamodel.workqueue.WorkQueueWorkerShim
+11-21 23:34:15.868  1960  2098 D WM-Processor: Work WorkGenerationalId(workSpecId=c65329c7-aa8a-44b8-b31e-ea347f833cff, generation=0) is already enqueued for processing
+11-21 23:34:15.869  1960  2080 I BugleJobs: Starts to observe table change.
+11-21 23:34:15.869  1578  1578 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.notifications.capping.api.NotificationsCappingApiService.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.GmsApiService }
+11-21 23:34:15.869  1960  2098 D WM-Processor: pst: processing WorkGenerationalId(workSpecId=f6b0099b-d5f3-4d56-b2a1-366159b7d794, generation=0)
+11-21 23:34:15.870  1578  1578 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.notifications.capping.api.NotificationsCappingApiService.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.GmsApiService }
+11-21 23:34:15.870  1960  1960 D WM-WorkerWrapper: Starting work for com.google.android.apps.messaging.shared.datamodel.workqueue.WorkQueueWorkerShim
+11-21 23:34:15.870  1960  3646 I BugleRcsEngine: Updated SIM info: currentSimId: redacted-pii:sim_id[chars:20,last3:897]; imsi: redacted-pii:imsi[chars:15]; rawMsisdn: redacted-pii:phone_number[chars:12,last2:67]; formattedMsisdn: redacted-pii:phone_number[chars:12,last2:67]; mccmnc: redacted-pii:sim_operator[chars:6]; gid1: redacted-pii:sim_gid[chars:0]; isFiDevice: false; subId: 1; slotIndex: 0 [CONTEXT log_prefix="(Sim)" thread_id=92 ]
+11-21 23:34:15.873  1960  3646 I BugleRcsEngine: Handling SIM_LOADED in PhoneSimsStateUpdater. [CONTEXT log_prefix="(Sim)" thread_id=92 ]
+11-21 23:34:15.873  1960  2080 D MddListenableWorkerFactory: createWorker for class: com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker
+11-21 23:34:15.874  1960  1960 D WM-WorkerWrapper: Starting work for com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker
+11-21 23:34:15.875  1960  2098 I SimStateUpdateHandler: Handling SimStateUpdate. Request for 3 work type received.
+11-21 23:34:15.875  1960  2098 I SimStateUpdateHandler: Handling update phone SIM state.
+11-21 23:34:15.876  1960  2098 I BugleSimStateTracker: Updating PhoneSimState
+11-21 23:34:15.876  1960  2080 W DynamiteModule: Local module descriptor class for com.google.android.gms.providerinstaller.dynamite not found.
+11-21 23:34:15.876  1960  2078 I Forking : Starting analysis.
+11-21 23:34:15.876  1221  1432 W ProviderHelper: Unknown dynamite feature providerinstaller.dynamite
+11-21 23:34:15.876  1960  2080 I DynamiteModule: Considering local module com.google.android.gms.providerinstaller.dynamite:0 and remote module com.google.android.gms.providerinstaller.dynamite:0
+11-21 23:34:15.876  1960  2098 I BugleSimStateTracker: Update trigger: 6
+11-21 23:34:15.877  1960  2080 W ProviderInstaller: Failed to load providerinstaller module: No acceptable module com.google.android.gms.providerinstaller.dynamite found. Local version is 0 and remote version is 0.
+11-21 23:34:15.877  1960  2079 W JobInfo : Requested important-while-foreground flag for job1032 is ignored and takes no effect
+11-21 23:34:15.877  1960  2079 D WM-SystemJobScheduler: Scheduling work ID f2ff2033-c77e-43ae-967e-db40f1796a2bJob ID 1032
+11-21 23:34:15.878  1960  2080 I .apps.messaging: AssetManager2(0x738d7055a318) locale list changing from [] to [en-US]
+11-21 23:34:15.878  1960  2080 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/org.apache.http.legacy.jar
+11-21 23:34:15.878  1960  2080 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/com.android.media.remotedisplay.jar
+11-21 23:34:15.878  1960  2080 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/com.android.location.provider.jar
+11-21 23:34:15.878  1960  2080 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+11-21 23:34:15.879  1960  2080 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.sidecar.jar
+11-21 23:34:15.880  1960  1960 D WM-SystemJobService: onStartJob for WorkGenerationalId(workSpecId=f2ff2033-c77e-43ae-967e-db40f1796a2b, generation=0)
+11-21 23:34:15.880  1960  2078 I Misthreading: Starting analysis.
+11-21 23:34:15.880  1960  2080 D nativeloader: Configuring product-clns-11 for unbundled product apk /product/priv-app/PrebuiltGmsCore/PrebuiltGmsCore.apk. target_sdk_version=36, uses_libraries=, library_path=/product/priv-app/PrebuiltGmsCore/lib/x86_64:/product/priv-app/PrebuiltGmsCore/PrebuiltGmsCore.apk!/lib/x86_64:/product/lib64:/system/product/lib64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.gms:/product/lib64:/system/product/lib64
+11-21 23:34:15.881  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.881  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.881  1960  2080 I .apps.messaging: Waiting for a blocking GC ClassLinker
+11-21 23:34:15.881  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.881  1960  2079 D WM-GreedyScheduler: Starting work for f2ff2033-c77e-43ae-967e-db40f1796a2b
+11-21 23:34:15.881  1960  2079 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.883  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.883  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.883  1960  2098 I BugleSimStateTracker: Is carrier config for identified carrier: true
+11-21 23:34:15.883  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.883  1960  2079 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.883  1960  2079 D WM-Processor: pst: processing WorkGenerationalId(workSpecId=f2ff2033-c77e-43ae-967e-db40f1796a2b, generation=0)
+11-21 23:34:15.883  1960  2098 I BugleSimStateTracker: default call SIM: redacted-pii:sim_id[chars:20,last3:897], default sms SIM redacted-pii:sim_id[chars:20,last3:897]. default data SIM redacted-pii:sim_id[chars:20,last3:897].
+11-21 23:34:15.883  1960  2426 D WM-Processor: Work WorkGenerationalId(workSpecId=f2ff2033-c77e-43ae-967e-db40f1796a2b, generation=0) is already enqueued for processing
+11-21 23:34:15.884  1960  2079 W JobInfo : Requested important-while-foreground flag for job1033 is ignored and takes no effect
+11-21 23:34:15.884  1960  2079 D WM-SystemJobScheduler: Scheduling work ID 0ef452dc-c915-408b-b0aa-9f1f8496db26Job ID 1033
+11-21 23:34:15.885  1960  2098 I BugleSimStateTracker: Looking up Fi through package names.
+11-21 23:34:15.885  1960  1960 D WM-SystemJobService: onStartJob for WorkGenerationalId(workSpecId=0ef452dc-c915-408b-b0aa-9f1f8496db26, generation=0)
+11-21 23:34:15.886  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.886  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.886  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.886  1960  2079 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,0ef452dc-c915-408b-b0aa-9f1f8496db26,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.886  1960  2426 D MddListenableWorkerFactory: createWorker for class: com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker
+11-21 23:34:15.887  1960  1960 D WM-WorkerWrapper: Starting work for com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker
+11-21 23:34:15.887  1960  2046 I FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+11-21 23:34:15.888  1960  2426 D WM-GreedyScheduler: Constraints met: Scheduling work ID WorkGenerationalId(workSpecId=f6b0099b-d5f3-4d56-b2a1-366159b7d794, generation=0)
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: All newly built SimSubscriptionInfos: [(simId: redacted-pii:sim_id[chars:20,last3:897],
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: subId: 1,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: simSlot: 0,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: imsi: redacted-pii:imsi[chars:15],
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: phoneNumber: redacted-pii:phone_number[chars:12,last2:67],
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: countryCode: US,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: networkOperatorName: T-Mobile,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: subscriptionGroupUuid: ,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: mcc: 310,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: mnc: 260,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: simCarrierId: 1,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: iccid: redacted-pii:sim_iccid[chars:20],
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: isFi: false,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: loggableGuid: d6b354de-1793-4578-9eb9-2c1670185f0c,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: formattedMsisdn: redacted-pii:phone_number[chars:12,last2:67],
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: simOperatorName: T-Mobile,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: simOperator: 310260,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: groupIdLevel1: ,
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: preferredSubscriptionName: T-Mobile)]
+11-21 23:34:15.888  1960  2426 D WM-Processor: pst: processing WorkGenerationalId(workSpecId=0ef452dc-c915-408b-b0aa-9f1f8496db26, generation=0)
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: Storing updatedSimSubscriptionInfos: [(redacted-pii:sim_id[chars:20,last3:897], d6b354de-1793-4578-9eb9-2c1670185f0c)]
+11-21 23:34:15.888  1960  2098 I BugleSimStateTracker: No newly loaded SIMs on phone sim state update.
+11-21 23:34:15.889  1960  2079 D WM-Processor: Work WorkGenerationalId(workSpecId=f6b0099b-d5f3-4d56-b2a1-366159b7d794, generation=0) is already enqueued for processing
+11-21 23:34:15.889  1960  2099 D MddListenableWorkerFactory: createWorker for class: com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker
+11-21 23:34:15.890  1960  1960 D WM-WorkerWrapper: Starting work for com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker
+11-21 23:34:15.892  1960  2079 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=c65329c7-aa8a-44b8-b31e-ea347f833cff, tags={ com.google.android.apps.messaging.shared.datamodel.workqueue.WorkQueueWorkerShim,sim_state_update_queue-WORK_TYPE_UPDATE_PHONE_SIMS_STATE } ]
+11-21 23:34:15.892  1960  1960 D WM-Processor: pst c65329c7-aa8a-44b8-b31e-ea347f833cff executed; reschedule = false
+11-21 23:34:15.893  1960  1960 D WM-SystemJobService: c65329c7-aa8a-44b8-b31e-ea347f833cff executed on JobScheduler
+11-21 23:34:15.893  1960  2099 I BugleNetwork: FirebaseRegistrationStartupTask: Enabling Firebase component
+11-21 23:34:15.895  1960  2079 D WM-GreedyScheduler: Constraints met: Scheduling work ID WorkGenerationalId(workSpecId=0ef452dc-c915-408b-b0aa-9f1f8496db26, generation=0)
+11-21 23:34:15.895  1960  2079 D WM-GreedyScheduler: Cancelling work ID c65329c7-aa8a-44b8-b31e-ea347f833cff
+11-21 23:34:15.895  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.895  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.896  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.896  1960  2079 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.896  1960  2098 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=0ef452dc-c915-408b-b0aa-9f1f8496db26, tags={ com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker,GNP_SDK_JOB } ]
+11-21 23:34:15.896  1960  1960 D WM-Processor: pst 0ef452dc-c915-408b-b0aa-9f1f8496db26 executed; reschedule = false
+11-21 23:34:15.896  1960  1960 D WM-GreedyScheduler: Stopping tracking for WorkGenerationalId(workSpecId=0ef452dc-c915-408b-b0aa-9f1f8496db26, generation=0)
+11-21 23:34:15.896  1960  1960 D WM-SystemJobService: 0ef452dc-c915-408b-b0aa-9f1f8496db26 executed on JobScheduler
+11-21 23:34:15.897  1960  2098 D WM-SystemJobScheduler: Scheduling work ID 0ef452dc-c915-408b-b0aa-9f1f8496db26Job ID 1033
+11-21 23:34:15.897  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.897  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.897  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.897  1960  2098 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.898  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.898  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.898  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.898  1960  2079 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.898  1960  2098 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=f2ff2033-c77e-43ae-967e-db40f1796a2b, tags={ com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker,GNP_SDK_JOB } ]
+11-21 23:34:15.898  1960  1960 D WM-Processor: pst f2ff2033-c77e-43ae-967e-db40f1796a2b executed; reschedule = false
+11-21 23:34:15.898  1960  1960 D WM-SystemJobService: f2ff2033-c77e-43ae-967e-db40f1796a2b executed on JobScheduler
+11-21 23:34:15.898  1960  2098 D WM-Processor: pst: processing WorkGenerationalId(workSpecId=0ef452dc-c915-408b-b0aa-9f1f8496db26, generation=0)
+11-21 23:34:15.899  1960  2098 D WM-GreedyScheduler: Cancelling work ID 0ef452dc-c915-408b-b0aa-9f1f8496db26
+11-21 23:34:15.900  1221  1947 I .gms.persistent: AssetManager2(0x738d70567dd8) locale list changing from [] to [en-US]
+11-21 23:34:15.900  1960  2098 D WM-SystemJobScheduler: Scheduling work ID f2ff2033-c77e-43ae-967e-db40f1796a2bJob ID 1032
+11-21 23:34:15.900  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.901  1221  1221 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+11-21 23:34:15.902  1960  2420 D nativeloader: Load /product/priv-app/PrebuiltBugle/PrebuiltBugle.apk!/lib/x86_64/libscytale_v2_jni.so using class loader ns product-clns-10 (caller=/product/priv-app/PrebuiltBugle/PrebuiltBugle.apk!classes3.dex): ok
+11-21 23:34:15.903  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.903  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.903  1960  2098 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.908  1960  2420 W BugleE2eeEtouffee: E2eeStartupTask: No identities to perform prekey checking for.
+11-21 23:34:15.911  1960  2079 D WM-GreedyScheduler: Cancelling work ID f2ff2033-c77e-43ae-967e-db40f1796a2b
+11-21 23:34:15.911  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.911  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.911  1960  2079 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.911  1960  2079 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.912  1960  2420 D WM-WorkerWrapper: Delaying execution for com.google.android.libraries.notifications.platform.entrypoints.job.GnpWorker because it is being executed before schedule.
+11-21 23:34:15.914  1960  2420 D WM-WorkerWrapper: Status for 0ef452dc-c915-408b-b0aa-9f1f8496db26 is ENQUEUED; not doing any work and rescheduling for later execution
+11-21 23:34:15.914  1960  1960 D WM-Processor: pst 0ef452dc-c915-408b-b0aa-9f1f8496db26 executed; reschedule = true
+11-21 23:34:15.914  1960  2098 I BugleMDD: MddBackgroundStartupTask: Scheduled MDD periodic tasks.
+11-21 23:34:15.915  1960  1960 D WM-SystemJobService: 0ef452dc-c915-408b-b0aa-9f1f8496db26 executed on JobScheduler
+11-21 23:34:15.916  1960  2080 I .apps.messaging: WaitForGcToComplete blocked ClassLinker on Background for 35.013ms
+11-21 23:34:15.917  1221  1947 W BpBinder: Large outgoing transaction of 405724 bytes, interface descriptor , code 4 was sent
+11-21 23:34:15.918  1960  2420 D WM-GreedyScheduler: Cancelling work ID fe3906d4-974b-4708-b4ff-dccc4f1efc86
+11-21 23:34:15.919   691   912 D BackgroundInstallControlService: Package event received: 0
+11-21 23:34:15.919  1960  2420 W JobInfo : Requested important-while-foreground flag for job1034 is ignored and takes no effect
+11-21 23:34:15.919  1960  2420 D WM-SystemJobScheduler: Scheduling work ID fe3906d4-974b-4708-b4ff-dccc4f1efc86Job ID 1034
+11-21 23:34:15.919  1221  1221 D WearableService: Creating wearable service asynchronously.
+11-21 23:34:15.921  1960  2420 D WM-SystemJobScheduler: Scheduling work ID 0ef452dc-c915-408b-b0aa-9f1f8496db26Job ID 1035
+11-21 23:34:15.922  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.922  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.922  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.922  1960  2420 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.923  1960  2411 D WM-GreedyScheduler: Cancelling work ID f790ef81-e92c-49ec-b0f8-79a1e91e7385
+11-21 23:34:15.924  1960  2411 D WM-SystemJobScheduler: Scheduling work ID f790ef81-e92c-49ec-b0f8-79a1e91e7385Job ID 1036
+11-21 23:34:15.925  1221  1432 D WearableService: onGetService: waiting for onCreate to be completed.
+11-21 23:34:15.926  1960  2411 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.926  1960  2411 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.926  1960  2426 D ProfileInstaller: Installing profile for com.google.android.apps.messaging
+11-21 23:34:15.926  1960  2411 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.926  1960  3653 I fkev    : Unable to retrieve flag snapshot for com.google.android.gms.providerinstaller#com.google.android.apps.messaging, using defaults.
+11-21 23:34:15.926  1960  2411 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.927  1221  1281 I Wear_Controller: Wearable module requires a companion app to be installed.
+11-21 23:34:15.927  1221  1281 I WearableService: onCreate: Wearable Services not starting. Wear is not available on this device.
+11-21 23:34:15.927  1221  1432 W WearableService: onGetService: Wear is not available on this device.
+11-21 23:34:15.928  1960  2099 D WM-GreedyScheduler: Cancelling work ID 2026dcb2-9be4-40a7-915b-c6e6bef4b78b
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: Failed to get service from broker. 
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: java.lang.SecurityException: Unknown calling package name 'com.google.android.gms'.
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3340)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.Parcel.createException(Parcel.java:3324)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.Parcel.readException(Parcel.java:3307)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.Parcel.readException(Parcel.java:3249)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at aywi.a(:com.google.android.gms@252635038@25.26.35 (260800-783060121):36)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at ayup.z(:com.google.android.gms@252635038@25.26.35 (260800-783060121):143)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at aybo.run(:com.google.android.gms@252635038@25.26.35 (260800-783060121):42)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.Handler.handleCallback(Handler.java:995)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.Handler.dispatchMessage(Handler.java:103)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at cirt.mw(:com.google.android.gms@252635038@25.26.35 (260800-783060121):1)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at cirt.dispatchMessage(:com.google.android.gms@252635038@25.26.35 (260800-783060121):5)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.Looper.loopOnce(Looper.java:248)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.Looper.loop(Looper.java:338)
+11-21 23:34:15.929  1960  3652 E GoogleApiManager: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+11-21 23:34:15.929  1960  2099 W JobInfo : Requested important-while-foreground flag for job1037 is ignored and takes no effect
+11-21 23:34:15.929  1960  2099 D WM-SystemJobScheduler: Scheduling work ID 2026dcb2-9be4-40a7-915b-c6e6bef4b78bJob ID 1037
+11-21 23:34:15.929  1960  2099 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.929  1960  2099 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.929  1960  2099 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.929  1960  2099 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.930  1960  2098 D WM-GreedyScheduler: Cancelling work ID e73ff85f-46a5-4226-b633-b2f06d26415e
+11-21 23:34:15.931  1960  2098 W JobInfo : Requested important-while-foreground flag for job1038 is ignored and takes no effect
+11-21 23:34:15.931  1960  2098 D WM-SystemJobScheduler: Scheduling work ID e73ff85f-46a5-4226-b633-b2f06d26415eJob ID 1038
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: Failed to register com.google.android.gms.providerinstaller#com.google.android.apps.messaging
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: fkfh: 17: 17: API: Phenotype.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at fkfj.a(:com.google.android.gms@252635038@25.26.35 (260800-783060121):13)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at ggap.d(:com.google.android.gms@252635038@25.26.35 (260800-783060121):3)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at ggar.run(:com.google.android.gms@252635038@25.26.35 (260800-783060121):130)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at ggcy.execute(:com.google.android.gms@252635038@25.26.35 (260800-783060121):1)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at ggaz.f(:com.google.android.gms@252635038@25.26.35 (260800-783060121):1)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at ggaz.m(:com.google.android.gms@252635038@25.26.35 (260800-783060121):99)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at ggaz.r(:com.google.android.gms@252635038@25.26.35 (260800-783060121):17)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at fcog.hJ(:com.google.android.gms@252635038@25.26.35 (260800-783060121):35)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at eqsv.run(:com.google.android.gms@252635038@25.26.35 (260800-783060121):12)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at ggcy.execute(:com.google.android.gms@252635038@25.26.35 (260800-783060121):1)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at eqsw.b(:com.google.android.gms@252635038@25.26.35 (260800-783060121):18)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at eqtl.b(:com.google.android.gms@252635038@25.26.35 (260800-783060121):36)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at eqtn.d(:com.google.android.gms@252635038@25.26.35 (260800-783060121):25)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at axyx.c(:com.google.android.gms@252635038@25.26.35 (260800-783060121):9)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at aybm.q(:com.google.android.gms@252635038@25.26.35 (260800-783060121):48)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at aybm.d(:com.google.android.gms@252635038@25.26.35 (260800-783060121):10)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at aybm.g(:com.google.android.gms@252635038@25.26.35 (260800-783060121):185)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at aybm.onConnectionFailed(:com.google.android.gms@252635038@25.26.35 (260800-783060121):2)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at aybo.run(:com.google.android.gms@252635038@25.26.35 (260800-783060121):70)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at android.os.Handler.handleCallback(Handler.java:995)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at android.os.Handler.dispatchMessage(Handler.java:103)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at cirt.mw(:com.google.android.gms@252635038@25.26.35 (260800-783060121):1)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at cirt.dispatchMessage(:com.google.android.gms@252635038@25.26.35 (260800-783060121):5)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at android.os.Looper.loopOnce(Looper.java:248)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at android.os.Looper.loop(Looper.java:338)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at android.os.HandlerThread.run(HandlerThread.java:85)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: Caused by: axxl: 17: API: Phenotype.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null}
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at ayub.a(:com.google.android.gms@252635038@25.26.35 (260800-783060121):15)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at axza.a(:com.google.android.gms@252635038@25.26.35 (260800-783060121):1)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	at axyx.c(:com.google.android.gms@252635038@25.26.35 (260800-783060121):5)
+11-21 23:34:15.931  1960  3651 W FlagRegistrar: 	... 12 more
+11-21 23:34:15.931  1960  2411 I BugleRcsProvisioning: BugleSystemBindingManager: onBuglePhenotypeFlagChanged
+11-21 23:34:15.931  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.932  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.932  1960  2098 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.932  1960  2098 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.933  1960  2080 D nativeloader: Load /product/priv-app/PrebuiltGmsCore/PrebuiltGmsCore.apk!/lib/x86_64/libconscrypt_gmscore_jni.so using class loader ns product-clns-11 (caller=/product/priv-app/PrebuiltGmsCore/PrebuiltGmsCore.apk): ok
+11-21 23:34:15.934  1960  2047 I BugleRcsEngine: SystemBinding enabled: true [CONTEXT log_prefix="SystemBindingManager" thread_id=53 ]
+11-21 23:34:15.934  1960  2079 I BugleTransport: Retrieved RCS available simIds: []
+11-21 23:34:15.935  1960  2080 V NativeCrypto: Registering com/google/android/gms/org/conscrypt/NativeCrypto's 315 native methods...
+11-21 23:34:15.935  1960  2422 I BugleTransport: Deregister all SIMs except for SIMs with subIds: [] from chat transport: TACHYGRAM.
+11-21 23:34:15.935  1960  2099 W BugleRcsEngine: Unable to send diagnostic log [CONTEXT thread_id=62 ]
+11-21 23:34:15.935  1960  2419 I BugleTransport: Deregister all SIMs except for SIMs with subIds: [] from chat transport: SINGLE_REGISTRATION.
+11-21 23:34:15.935  1960  2044 I BugleTransport: Deregister all SIMs except for SIMs with subIds: [] from chat transport: DUAL_REGISTRATION.
+11-21 23:34:15.935  1960  2046 I BugleRcsEngine: System Binding updated [CONTEXT thread_id=52 ]
+11-21 23:34:15.936  1960  2420 D WM-GreedyScheduler: Cancelling work ID 0ef452dc-c915-408b-b0aa-9f1f8496db26
+11-21 23:34:15.936  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.936  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.936  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.936  1960  2420 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.936  1960  2099 W RcsClientLib: Service is deprecated skipping connection attempt: RcsEngineLifecycleServiceV2
+11-21 23:34:15.937  1960  2098 W BugleRcsEngine: Unable to send diagnostic log [CONTEXT thread_id=60 ]
+11-21 23:34:15.938  1960  2079 W RcsClientLib: Service is deprecated skipping connection attempt: RcsEngineLifecycleServiceV2
+11-21 23:34:15.938  1960  2385 E BugleRcs: RcsEngineLifecycleManagerV2: RcsServiceConnectionException was raised while waiting to connect to RcsEngineLifecycleServiceV2
+11-21 23:34:15.938  1960  2385 E BugleRcs: cumf: RcsServiceConnectionException:com.google.android.rcs.client.lifecycle.RcsEngineLifecycleServiceV2:UNKNOWN
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at culm.a(PG:54)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at kho.a(PG:19)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at culn.a(PG:14)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at elsk.a(PG:13)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at esfd.a(PG:3)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at eseb.run(PG:19)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at esff.run(PG:5)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at dubu.run(PG:7)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at dubb.run(PG:6)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at java.lang.Thread.run(Thread.java:1119)
+11-21 23:34:15.938  1960  2385 E BugleRcs: 	at ducv.run(PG:61)
+11-21 23:34:15.938  1960  2078 E BugleRcs: RcsEngineLifecycleManagerV2: RcsServiceConnectionException was raised while waiting to connect to RcsEngineLifecycleServiceV2
+11-21 23:34:15.938  1960  2078 E BugleRcs: cumf: RcsServiceConnectionException:com.google.android.rcs.client.lifecycle.RcsEngineLifecycleServiceV2:UNKNOWN
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at culm.a(PG:54)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at kho.a(PG:19)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at culn.a(PG:14)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at elsk.a(PG:13)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at esfd.a(PG:3)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at eseb.run(PG:19)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at esff.run(PG:5)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at dubu.run(PG:7)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at dubb.run(PG:6)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at java.lang.Thread.run(Thread.java:1119)
+11-21 23:34:15.938  1960  2078 E BugleRcs: 	at ducv.run(PG:61)
+11-21 23:34:15.948  1960  2080 I ProviderInstaller: Installed default security provider GmsCore_OpenSSL
+11-21 23:34:15.950  1960  2385 I BugleDataModel: 3 not running because already up to date, upgradeCommand: EXECUTE_UPGRADE, version: 2
+11-21 23:34:15.950  1960  2411 I BugleSatellite: Processing Phenotype flag changes.
+11-21 23:34:15.950  1960  2080 I BugleSatellite: Reporting to Telephony: SMS supported = true
+11-21 23:34:15.951  1960  2078 I BugleDataModel: 2 not running because already up to date, upgradeCommand: EXECUTE_UPGRADE, version: 2
+11-21 23:34:15.951  1960  2411 W JobInfo : Requested important-while-foreground flag for job1039 is ignored and takes no effect
+11-21 23:34:15.952  1960  2411 D WM-SystemJobScheduler: Scheduling work ID c4c38f57-5503-4d17-8077-28c835207bc2Job ID 1039
+11-21 23:34:15.952  1960  2411 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.952  1960  2411 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.952  1960  2411 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.953  1960  2411 D WM-GreedyScheduler: Starting work for c4c38f57-5503-4d17-8077-28c835207bc2
+11-21 23:34:15.953  1960  2411 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.953  1960  1960 D WM-SystemJobService: onStartJob for WorkGenerationalId(workSpecId=c4c38f57-5503-4d17-8077-28c835207bc2, generation=0)
+11-21 23:34:15.954  1960  2411 D WM-Processor: pst: processing WorkGenerationalId(workSpecId=c4c38f57-5503-4d17-8077-28c835207bc2, generation=0)
+11-21 23:34:15.954  1960  2420 D WM-Processor: Work WorkGenerationalId(workSpecId=c4c38f57-5503-4d17-8077-28c835207bc2, generation=0) is already enqueued for processing
+11-21 23:34:15.956  1960  2411 D WM-GreedyScheduler: Constraints not met: Cancelling work ID WorkGenerationalId(workSpecId=2026dcb2-9be4-40a7-915b-c6e6bef4b78b, generation=1)
+11-21 23:34:15.956  1960  2411 D WM-GreedyScheduler: Constraints not met: Cancelling work ID WorkGenerationalId(workSpecId=e73ff85f-46a5-4226-b633-b2f06d26415e, generation=1)
+11-21 23:34:15.956  1960  2411 D MddListenableWorkerFactory: createWorker for class: com.google.android.apps.messaging.shared.datamodel.workqueue.WorkQueueWorkerShim
+11-21 23:34:15.957  1960  1960 D WM-WorkerWrapper: Starting work for com.google.android.apps.messaging.shared.datamodel.workqueue.WorkQueueWorkerShim
+11-21 23:34:15.957   467  3654 I resolv  : GetAddrInfoHandler::run: {101 786533 101 983141 10145 0}
+11-21 23:34:15.958  1960  2411 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=c4c38f57-5503-4d17-8077-28c835207bc2, tags={ com.google.android.apps.messaging.shared.datamodel.workqueue.WorkQueueWorkerShim,data_upgrade- } ]
+11-21 23:34:15.959   467  3655 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+11-21 23:34:15.959   467  3656 I resolv  : res_nmkquery: (QUERY, IN, A)
+11-21 23:34:15.959  1960  1960 D WM-Processor: pst c4c38f57-5503-4d17-8077-28c835207bc2 executed; reschedule = false
+11-21 23:34:15.959  1960  1960 D WM-SystemJobService: c4c38f57-5503-4d17-8077-28c835207bc2 executed on JobScheduler
+11-21 23:34:15.960  1960  2420 D WM-GreedyScheduler: Cancelling work ID c4c38f57-5503-4d17-8077-28c835207bc2
+11-21 23:34:15.960   691  1978 W JobScheduler: Job didn't exist in JobStore: a9f26c0 {androidx.work.systemjobscheduler} #u0a145/1039 @androidx.work.systemjobscheduler@com.google.android.apps.messaging/androidx.work.impl.background.systemjob.SystemJobService
+11-21 23:34:15.961  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: cbd4b17c-4d46-4abd-9ed0-526e3aaae706}. Requires device idle.
+11-21 23:34:15.961  1960  1960 D WM-SystemJobService: onStopJob for WorkGenerationalId(workSpecId=c4c38f57-5503-4d17-8077-28c835207bc2, generation=0)
+11-21 23:34:15.961  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: fe3906d4-974b-4708-b4ff-dccc4f1efc86}. Requires device idle.
+11-21 23:34:15.961  1960  2420 D WM-GreedyScheduler: Ignoring {WorkSpec: bcfd646b-38df-4fe4-9cf5-6208a123d769}. Requires device idle.
+11-21 23:34:15.961  1960  2420 D WM-GreedyScheduler: Starting tracking for 2026dcb2-9be4-40a7-915b-c6e6bef4b78b,e73ff85f-46a5-4226-b633-b2f06d26415e,ab267a0d-707a-44df-a784-2a04545ecfca
+11-21 23:34:15.966   467  3655 I resolv  : res_nsend: used send_dg 273 terrno: 0
+11-21 23:34:15.966   467  3655 I resolv  : doQuery: rcode=0, ancount=8, return value=273
+11-21 23:34:15.966   467  3656 I resolv  : res_nsend: used send_dg 177 terrno: 0
+11-21 23:34:15.966   467  3656 I resolv  : doQuery: rcode=0, ancount=8, return value=177
+11-21 23:34:15.982  1960  1967 I .apps.messaging: Compiler allocated 4650KB to compile void orq.c(android.content.Context, java.util.concurrent.Executor, orp, boolean)
+11-21 23:34:16.003  1960  2426 I BugleRcsProvisioning: RcsProvisioningTrigger: Schedule provisioning on app startup
+11-21 23:34:16.003  1960  2426 I BugleRcsProvisioning: RcsProvisioningTrigger: updateAvailabilityForAllSimsAsync : hint = NO_HINT logTriggerEvent = false
+11-21 23:34:16.003  1960  2426 I Bugle   : RcsAvailabilityUtilForProvisioningEngineV2: updateAvailabilityForAllSimsAsync, hint: NO_HINT
+11-21 23:34:16.003  1960  2426 I BugleRcsProvisioning: updateAvailabilityForAllSimsAsync: scheduling updateAvailabilityForRcsProvisioningId call. Hint: NO_HINT, enableWelcomePopupWithoutGoogleTos: false, reshowSuccessPopup: false
+11-21 23:34:16.004  1960  2420 I BugleRcsProvisioning: updateRcsAvailabilityForMultipleSims: hint: NO_HINT, canReshowWelcomeMessage: false
+11-21 23:34:16.004  1960  2411 I BugleNetwork: Startup: registering tachyon.
+11-21 23:34:16.005  1960  2411 I BugleNetwork: Startup: registering tachyon for phone.
+11-21 23:34:16.005  1960  2411 I RcsProvisioningManager: Skipping backfill of identity mapping.
+11-21 23:34:16.005  1960  2385 W BugleRcs: getAvailablePhoneNumbers: accessing uninitialized provisioning identities.
+11-21 23:34:16.005  1960  2385 W BugleRcs: eoex: FULL
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at dkfd.m(PG:54)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at dknc.A(PG:3)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at dklo.apply(PG:5)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at elsr.apply(PG:13)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at esar.d(PG:3)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at esas.run(PG:38)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at dubu.run(PG:7)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at eosd.run(PG:44)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at duem.run(PG:18)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at dubc.run(PG:8)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at java.lang.Thread.run(Thread.java:1119)
+11-21 23:34:16.005  1960  2385 W BugleRcs: 	at ducv.run(PG:61)
+11-21 23:34:16.006  1960  2420 I BugleRcsEngine: [SR]: Single Registration is disabled. Skipping Single Registration capability check for subId: 1, OS.isAtLeastS:[true], enableSingleRegistrationProvisioning:[false] [CONTEXT thread_id=73 ]
+11-21 23:34:16.006  1960  2385 I BugleRcs: No phone numbers available.
+11-21 23:34:16.006  1960  2385 I BugleRcs: eoex: FULL
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at dkfd.m(PG:126)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at dknc.A(PG:3)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at dklo.apply(PG:5)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at elsr.apply(PG:13)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at esar.d(PG:3)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at esas.run(PG:38)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at dubu.run(PG:7)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at eosd.run(PG:44)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at duem.run(PG:18)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at dubc.run(PG:8)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at java.lang.Thread.run(Thread.java:1119)
+11-21 23:34:16.006  1960  2385 I BugleRcs: 	at ducv.run(PG:61)
+11-21 23:34:16.007  1960  3647 W BugleNetwork: No available phone number to start tachyon for.
+11-21 23:34:16.007  1960  2411 I Bugle   : VerifiedSmsEnabledCheckerImpl: VSMS is disabled via Phenotype flag.
+11-21 23:34:16.009  1960  2047 I Bugle   : VerifiedSmsStartupTask: Checking if Verified SMS tasks should be enqueued. feature supported: false, feature enabled: false, eligible / has registered key: false, C11N: false
+11-21 23:34:16.009  1960  2047 I Bugle   : VerifiedSmsStartupTask: Not enqueuing VSMS periodic task, VSMS is disabled or not supported.
+11-21 23:34:16.009  1960  2385 I Bugle   : VerifiedSmsStartupTask: Not calling C11N to get phone numbers.
+11-21 23:34:16.009  1960  2420 I BugleRcsEngine: No RCS Configuration was found in Bugle for simID: redacted-pii:sim_id[chars:20,last3:897] [CONTEXT log_prefix="ProvisioningEngineDataRetriever" thread_id=73 ]
+11-21 23:34:16.009  1960  2420 I BugleRcsProvisioning: RcsAvailability configuration availability and enabled status: simId: redacted-pii:sim_id[chars:20,last3:897], SipConnectionType: DUAL_REG, isConfigurationAvailableAndEnabled: false
+11-21 23:34:16.009  1960  2420 I BugleRcsProvisioning: Checking isConfigServerUrlAvailable with simId: redacted-pii:sim_id[chars:20,last3:897], 
+11-21 23:34:16.010  1960  2420 I BugleRcsEngine: getConfigServerUrl with simId: redacted-pii:sim_id[chars:20,last3:897] [CONTEXT log_prefix="ProvisioningServerUtil" thread_id=73 ]
+11-21 23:34:16.010  1960  2420 I BugleRcsEngine: Using config server URL from chgq [CONTEXT log_prefix="ProvisioningServerUtil" thread_id=73 ]
+11-21 23:34:16.011  1960  2420 I BugleRcsProvisioning: RcsAvailability: Subscription Id: 1, simId: redacted-pii:sim_id[chars:20,last3:897], sipConnectionType: DUAL_REG, isRcsAvailable: false
+11-21 23:34:16.011  1960  2420 I BugleRcsEngine: No RCS Configuration was found in Bugle for simID: redacted-pii:sim_id[chars:20,last3:897] [CONTEXT log_prefix="ProvisioningEngineDataRetriever" thread_id=73 ]
+11-21 23:34:16.011  1960  2420 I BugleRcsProvisioning: updateAvailabilityForRcsProvisioningId. SimId: redacted-pii:sim_id[chars:20,last3:897], currentAvailability: 10, newAvailability: 10, hint: NO_HINT
+11-21 23:34:16.012  1960  2426 I BugleRcsProvisioning: scheduleProvisioningForEligibleSims
+11-21 23:34:16.012  1960  2079 I BugleRcsProvisioning: RcsProvisioningTrigger: onRcsAvailabilityUpdate : availability is updated to Carrier RCS is not set up, lastAvailabilityLocal is Carrier RCS is not set up, simId hash = 4489057295559094434, simId = redacted-pii:sim_id[chars:20,last3:897], isPev3Enabled = true
+11-21 23:34:16.012  1960  2080 I cnab    : scheduleProvisioningForEligibleSims: operationTrigger: 5 bugle trigger event: 4
+11-21 23:34:16.012  1960  2080 I cnab    : scheduleProvisioningForAllEligibleSims: operationTrigger: 5 bugle trigger event: 4
+11-21 23:34:16.012  1960  2079 I cnab    : scheduleProvisioningForRcsProvisioningId: rcsProvisioningId: redacted-pii:sim_id[chars:20,last3:897] operationTrigger: 5 bugle trigger event: 4
+11-21 23:34:16.012  1960  2079 I BugleRcsEngine: [SR]: Single Registration is disabled. Skipping Single Registration capability check for subId: 1, OS.isAtLeastS:[true], enableSingleRegistrationProvisioning:[false] [CONTEXT thread_id=56 ]
+11-21 23:34:16.013  1960  2079 I cnab    : RcsProvisioningTrigger: DR is active, initializing DR provisioning. DUAL_REG
+11-21 23:34:16.013  1960  2080 I BugleRcsEngine: [SR]: Single Registration is disabled. Skipping Single Registration capability check for subId: 1, OS.isAtLeastS:[true], enableSingleRegistrationProvisioning:[false] [CONTEXT thread_id=57 ]
+11-21 23:34:16.014  1960  2080 I BugleRcsEngine: No RCS Configuration was found in Bugle for simID: redacted-pii:sim_id[chars:20,last3:897] [CONTEXT log_prefix="ProvisioningEngineDataRetriever" thread_id=57 ]
+11-21 23:34:16.014  1960  2080 I BugleRcsEngine: Scheduled provisioning task with 0 seconds delay, KEEP policy, trigger is APP_STARTUP, workerId is d350c075-549c-4e92-b96d-6460e6dc0389, simId is redacted-pii:sim_id[chars:20,last3:897] [CONTEXT log_prefix="provisioning" thread_id=57 ]
+11-21 23:34:16.116  3659  3659 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: activity
+11-21 23:34:16.172  3664  3664 W screencap: Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlingerAIDL
+11-21 23:34:16.173  3664  3664 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+11-21 23:34:16.173  3664  3664 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+11-21 23:34:16.181   544  1199 E HwcComposer: getLuts failed Status(-8, EX_SERVICE_SPECIFIC): '8: '
+11-21 23:34:16.181   544  1199 E HWComposer: getLuts: getLuts failed for display 4619827259835644672: UNSUPPORTED (8)
+11-21 23:34:16.321     0     0 I servicemanager: Caller(pid=3664,uid=2000,sid=u:r:shell:s0) Found android.hardware.graphics.allocator.IAllocator/default in device VINTF manifest.
+11-21 23:34:16.322     0     0 I servicemanager: Caller(pid=3664,uid=2000,sid=u:r:shell:s0) Found android.hardware.graphics.allocator.IAllocator/default in device VINTF manifest.
+11-21 23:34:16.324     0     0 I servicemanager: Caller(pid=3664,uid=2000,sid=u:r:shell:s0) Found mapper/ranchu in device VINTF manifest.
