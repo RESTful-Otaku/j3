@@ -73,7 +73,7 @@ jobs:
       - name: Build unsigned simulator app
         working-directory: web/ios/App
         run: |
-          xcodebuild -workspace App.xcworkspace -scheme App \
+          xcodebuild -project App.xcodeproj -scheme App \
             -configuration Debug -sdk iphonesimulator \
             -derivedDataPath ../../../build/ios CODE_SIGNING_ALLOWED=NO build
       - name: Package .app
@@ -117,7 +117,7 @@ jobs:
           PLIST
           sed -i "" "s/TEAM_ID_PLACEHOLDER/$TEAM_ID/" /tmp/j3-export.plist
           cd web/ios/App
-          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release \
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
             -archivePath ../../../build/App.xcarchive archive \
             CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="$TEAM_ID" \
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
