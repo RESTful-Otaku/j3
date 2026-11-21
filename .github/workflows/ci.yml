@@ -36,7 +36,10 @@ jobs:
     name: Workflow configuration
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.5
       - name: Validate workflow YAML and reusable workflow references
         run: bun run check:workflows
 
@@ -45,8 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: '1.27'
           cache: true
@@ -58,7 +61,7 @@ jobs:
         run: go test -race ./...
       - name: Build
         run: go build -o bin/j3d ./cmd/j3d
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: j3d-${{ github.sha }}
           path: bin/j3d
@@ -68,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
@@ -83,7 +86,7 @@ jobs:
           git diff --exit-code -- web/src/lib/api-types.d.ts
       - name: Production build
         run: bun run --cwd web build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: web-build-${{ github.sha }}
           path: web/build
@@ -92,8 +95,8 @@ jobs:
     name: End-to-end smoke
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: '1.27'
       - uses: oven-sh/setup-bun@v2
@@ -108,10 +111,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: '1.27'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.5
       - name: Start venue server
         run: |
           go run ./cmd/j3d -addr 127.0.0.1:8787 -db /tmp/j3-load.db -seed > /tmp/j3-load-server.log 2>&1 &
@@ -127,8 +133,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: '1.27'
       - uses: oven-sh/setup-bun@v2
@@ -139,7 +145,7 @@ jobs:
         run: bunx --cwd web playwright install --with-deps chromium
       - name: Run E2E and axe scans
         run: bun run e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report-${{ github.sha }}

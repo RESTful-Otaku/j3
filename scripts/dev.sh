@@ -135,6 +135,13 @@ run_demo_phone() {
     go run ./cmd/j3d -addr 0.0.0.0:8787 -db ./data/j3-demo.db -seed
 }
 
+open_api_docs() {
+  (cd "$ROOT" && bun run sync:api-docs)
+  local url="http://localhost:5173/apidocs"
+  echo "  🔌 API explorer: $url"
+  if command -v xdg-open >/dev/null 2>&1; then xdg-open "$url" >/dev/null 2>&1 & fi
+}
+
 qa_menu() {
   while true; do
     select_menu "QA & verification" \
@@ -216,7 +223,8 @@ mobile_menu() {
 while true; do
   select_menu "J3 developer console" \
     "▶ Run full local demo" "🚀 Run fully seeded tournament" "🧪 QA & verification  ▸" \
-    "💾 Demo data  ▸" "🏗 Build & deploy  ▸" "📱 Mobile  ▸" "❌ Exit"
+    "💾 Demo data  ▸" "🏗 Build & deploy  ▸" "📱 Mobile  ▸" \
+    "🔌 API explorer" "❌ Exit"
   choice=$?
   case "$choice" in
     0) run_demo ;;
@@ -225,6 +233,7 @@ while true; do
     3) data_menu ;;
     4) build_menu ;;
     5) mobile_menu ;;
-    6) echo "  👋 Bye!"; exit 0 ;;
+    6) open_api_docs ;;
+    7) echo "  👋 Bye!"; exit 0 ;;
   esac
 done

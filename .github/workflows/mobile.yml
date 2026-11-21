@@ -21,11 +21,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
@@ -33,7 +33,7 @@ jobs:
       - name: Install Android SDK packages
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - name: Restore Gradle cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/caches
@@ -48,7 +48,7 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: j3-android-apk-${{ github.sha }}
           path: web/android/app/build/outputs/apk/debug/*.apk
@@ -59,7 +59,7 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
@@ -78,7 +78,7 @@ jobs:
           cp -R build/ios/Build/Products/Debug-iphonesimulator/App.app artifacts/J3.app
           cd artifacts && zip -r ../j3-ios-app.zip J3.app
       - name: Upload iOS app
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: j3-ios-app-${{ github.sha }}
           path: j3-ios-app.zip
@@ -123,7 +123,7 @@ jobs:
           cp build/export/*.ipa j3-signed.ipa
       - name: Upload signed IPA
         if: hashFiles('j3-signed.ipa') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: j3-ios-signed-${{ github.sha }}
           path: j3-signed.ipa

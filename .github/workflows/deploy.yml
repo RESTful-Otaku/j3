@@ -31,11 +31,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
           merge-multiple: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: deploy-bundle
           path: artifacts
@@ -49,8 +49,8 @@ jobs:
       name: development
       url: https://dev.example.invalid
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: deploy-bundle
           path: artifacts
@@ -69,8 +69,8 @@ jobs:
       name: staging
       url: https://staging.example.invalid
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: deploy-bundle
           path: artifacts
@@ -89,8 +89,8 @@ jobs:
       name: production
       url: https://j3.example.invalid
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: deploy-bundle
           path: artifacts

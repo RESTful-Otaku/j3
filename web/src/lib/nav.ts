@@ -26,6 +26,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/club', label: 'My club', icon: '🏠', roles: ['club_leader'] },
   { href: '/notifications', label: 'Notifications', icon: '🔔', roles: ['runner', 'official', 'club_leader'] },
   { href: '/permissions', label: 'Access control', icon: '🔐', roles: ['runner'] },
+  { href: '/apidocs', label: 'API explorer', icon: '🔌', roles: ['runner', 'official', 'club_leader'] },
   { href: '/settings', label: 'Settings', icon: '⚙️', roles: ['runner', 'official', 'club_leader', 'fighter', 'spectator'] },
   { href: '/ui', label: 'Components', icon: '🧩', roles: ['runner'] },
 ];

@@ -1,0 +1,2158 @@
+openapi: 3.1.0
+info:
+  title: J3 Venue Server API
+  version: 0.1.0
+  description: 'Shared schema source of truth for the J3 venue server and UI.
+
+    Types are generated into web/src/lib/api-types.d.ts with `bun run generate:types`.
+
+    '
+servers:
+- url: http://127.0.0.1:8787
+  description: Local venue server
+paths:
+  /api/v1/auth/reset:
+    post:
+      operationId: completeReset
+      summary: Complete a password reset with a token and a new password
+      security: []
+      responses:
+        '200':
+          description: Password updated
+  /api/v1/auth/reset/request:
+    post:
+      operationId: requestReset
+      summary: Request a password reset link (always returns success to avoid enumeration)
+      security: []
+      responses:
+        '200':
+          description: Request accepted
+  /:
+    get:
+      operationId: root
+      summary: API index and health links
+      security: []
+      responses:
+        '200':
+          description: Service information
+  /healthz:
+    get:
+      operationId: healthz
+      summary: Liveness probe
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /readyz:
+    get:
+      operationId: readyz
+      summary: Readiness probe including database
+      responses:
+        '200':
+          description: Ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/v1/version:
+    get:
+      operationId: version
+      responses:
+        '200':
+          description: Version info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionInfo'
+  /api/v1/roles:
+    get:
+      operationId: roles
+      summary: RBAC roles and their capabilities
+      responses:
+        '200':
+          description: Roles
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - roles
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoleInfo'
+  /api/v1/demo:
+    get:
+      operationId: demo
+      summary: Seeded data counts for local QA
+      responses:
+        '200':
+          description: Counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoResponse'
+  /api/v1/demo/accounts:
+    get:
+      operationId: demoAccounts
+      summary: Dummy accounts for every RBAC level (QA only)
+      responses:
+        '200':
+          description: Accounts
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - accounts
+                properties:
+                  accounts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DemoAccount'
+  /api/v1/demo/view:
+    get:
+      operationId: demoView
+      summary: Resolve the acting account and its capabilities (QA only)
+      parameters:
+      - name: actor
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Actor view
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoViewResponse'
+  /api/v1/demo/fights:
+    get:
+      operationId: demoFights
+      summary: Fights with fighters, clubs and scoring events (QA only)
+      responses:
+        '200':
+          description: Fights
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - fights
+                properties:
+                  fights:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DemoFight'
+  /api/v1/query:
+    get:
+      operationId: query
+      summary: Allow-listed search/sort/filter/pagination over public data
+      parameters:
+      - name: table
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: sort
+        in: query
+        schema:
+          type: string
+      - name: order
+        in: query
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+      - name: limit
+        in: query
+        schema:
+          type: integer
+      - name: offset
+        in: query
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Query result
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - table
+                - columns
+                - rows
+                - count
+                properties:
+                  table:
+                    type: string
+                  columns:
+                    type: array
+                    items:
+                      type: string
+                  rows:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  count:
+                    type: integer
+  /api/v1/demo/audit:
+    get:
+      operationId: auditLog
+      summary: Accountability trail for runners and officials
+      parameters:
+      - name: actor
+        in: query
+        schema:
+          type: string
+      - name: action
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - entries
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditEntry'
+  /api/v1/demo/belts:
+    get:
+      operationId: belts
+      summary: Full JJJ grade spectrum with colours for the belt picker
+      responses:
+        '200':
+          description: Belt ranks
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - belts
+                properties:
+                  belts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BeltOption'
+  /api/v1/demo/event:
+    get:
+      operationId: eventDisplay
+      summary: Event title, banner, logo, theme tokens and mats
+      responses:
+        '200':
+          description: Event display info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDisplayInfo'
+  /api/v1/demo/officials:
+    get:
+      operationId: displayOfficials
+      summary: Referees, judges and scorekeepers shown on scoreboards
+      parameters:
+      - name: fightId
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Officials
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - officials
+                properties:
+                  officials:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DisplayOfficial'
+  /api/v1/demo/standings:
+    get:
+      operationId: standings
+      summary: Overall and category standings with points
+      responses:
+        '200':
+          description: Standings
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - standings
+                properties:
+                  standings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StandingRow'
+  /api/v1/demo/fights/{id}/forfeit:
+    post:
+      operationId: forfeitFight
+      summary: Record an injury, technical forfeit or disqualification
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Result
+  /api/v1/demo/entrants/{id}/status:
+    post:
+      operationId: entrantStatus
+      summary: Record a dropout, no-show or injury
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Updated
+  /api/v1/tournaments:
+    post:
+      operationId: createTournament
+      summary: Create a full tournament from the setup wizard payload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTournamentRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTournamentResponse'
+  /api/v1/templates:
+    get:
+      operationId: templates
+      summary: Saved tournament setup templates
+      responses:
+        '200':
+          description: Templates
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - templates
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Template'
+  /api/v1/uploads:
+    post:
+      operationId: upload
+      summary: Upload an avatar, logo or banner (PNG/JPG/WEBP, 5MB limit)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                kind:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Uploaded asset with extracted colours
+  /api/v1/signup/preview:
+    post:
+      operationId: signupPreview
+      summary: Convert stats to metric and list compatible categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '200':
+          description: Eligibility preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupPreview'
+  /api/v1/signup:
+    post:
+      operationId: signup
+      summary: Self-service sign-up (privileged roles become pending approval)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResult'
+  /api/v1/demo/role-requests:
+    get:
+      operationId: roleRequests
+      summary: Pending privileged-role requests (QA only)
+      responses:
+        '200':
+          description: Requests
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - requests
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoleRequest'
+  /api/v1/demo/role-requests/{id}/approve:
+    post:
+      operationId: approveRoleRequest
+      summary: Approve a role request (QA only; runner-gated in production)
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Approved
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/demo/pools:
+    get:
+      operationId: listPools
+      summary: Fight pools and members
+      security: []
+      responses:
+        '200':
+          description: Pools
+  /api/v1/demo/pools/generate:
+    post:
+      operationId: generatePools
+      summary: Generate balanced pools with club separation
+      responses:
+        '200':
+          description: Pools
+  /api/v1/auth/login:
+    post:
+      operationId: login
+      summary: Begin sign-in (password, google, apple or passkey) and issue an MFA challenge
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                provider:
+                  type: string
+                  enum:
+                  - password
+                  - google
+                  - apple
+                  - passkey
+      responses:
+        '200':
+          description: MFA challenge; demoCode only present when J3_DEMO=1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mfaRequired:
+                    type: boolean
+                  demoCode:
+                    type: string
+                  provider:
+                    type: string
+        '401':
+          description: Invalid credentials
+  /api/v1/auth/verify:
+    post:
+      operationId: verifyLogin
+      summary: Verify the six-digit MFA code and create a server-side session
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              - code
+              properties:
+                email:
+                  type: string
+                code:
+                  type: string
+                  length: 6
+      responses:
+        '200':
+          description: Session token and server-derived role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '401':
+          description: Invalid or expired code
+  /api/v1/auth/demo:
+    post:
+      operationId: demoLogin
+      summary: QA-only runner session (only active when J3_DEMO=1)
+      security: []
+      responses:
+        '200':
+          description: Session
+        '404':
+          description: Disabled
+  /api/v1/events/stream:
+    get:
+      operationId: eventStream
+      summary: Server-sent events for live scores, clocks and announcements
+      responses:
+        '200':
+          description: text/event-stream
+  /api/v1/fights/{id}/state:
+    get:
+      operationId: fightState
+      summary: Authoritative fight state and scored events
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Fight state
+  /api/v1/fights/{id}/start:
+    post:
+      operationId: startFight
+      summary: Start the authoritative timer and set a fight live
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Fight state
+  /api/v1/fights/{id}/pause:
+    post:
+      operationId: pauseFight
+      summary: Pause the timer (referee stoppage)
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Fight state
+  /api/v1/fights/{id}/resume:
+    post:
+      operationId: resumeFight
+      summary: Resume the timer
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Fight state
+  /api/v1/fights/{id}/event:
+    post:
+      operationId: addFightEvent
+      summary: Log a score, technique, hold or penalty (requires official assignment)
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - corner
+              - kind
+              properties:
+                corner:
+                  type: string
+                  enum:
+                  - red
+                  - blue
+                kind:
+                  type: string
+                  enum:
+                  - score
+                  - penalty
+                  - submission
+                  - hold
+                points:
+                  type: integer
+                technique:
+                  type: string
+                  maxLength: 120
+                card:
+                  type: string
+                  enum:
+                  - yellow
+                  - red
+                  - ''
+      responses:
+        '200':
+          description: Fight state
+        '403':
+          description: Not assigned
+  /api/v1/fights/{id}/hold:
+    post:
+      operationId: startHold
+      summary: Start a hold/pin countdown
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Fight state
+  /api/v1/fights/{id}/undo:
+    post:
+      operationId: undoFightEvent
+      summary: Undo the most recent scoring event
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Fight state
+  /api/v1/fights/{id}/submit:
+    post:
+      operationId: submitFight
+      summary: Confirm and lock the final result
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Fight state
+        '400':
+          description: Invalid outcome
+  /api/v1/demo/brackets:
+    get:
+      operationId: listBrackets
+      summary: List persisted bracket stages and slots
+      security: []
+      responses:
+        '200':
+          description: Stages
+  /api/v1/demo/brackets/build:
+    post:
+      operationId: buildBracket
+      summary: Generate pool and knockout stages from the entrants
+      responses:
+        '201':
+          description: Generated stages
+  /api/v1/demo/brackets/slots/{id}/promote:
+    post:
+      operationId: promoteSlot
+      summary: Record a result, retain the round's history and promote the winner
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Updated stages
+  /api/v1/demo/medals:
+    get:
+      operationId: listMedals
+      summary: Public medal table
+      security: []
+      responses:
+        '200':
+          description: Medals
+  /api/v1/demo/medals/award:
+    post:
+      operationId: awardMedals
+      summary: Award gold, silver and one or two bronzes
+      responses:
+        '200':
+          description: Updated medals
+  /api/v1/demo/kata:
+    get:
+      operationId: listKata
+      summary: Kata performances and panel scores
+      security: []
+      responses:
+        '200':
+          description: Performances
+  /api/v1/demo/kata/performances:
+    post:
+      operationId: createKataPerformance
+      summary: Create an individual kata performance
+      responses:
+        '201':
+          description: Performances
+  /api/v1/demo/kata/{id}/scores:
+    post:
+      operationId: submitKataScore
+      summary: Submit one judge's section score (0–10)
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Performances
+  /api/v1/demo/kata/advance:
+    post:
+      operationId: advanceKata
+      summary: Promote the top performers to the next round
+      responses:
+        '200':
+          description: Performances
+  /api/v1/demo/kata/catalogue:
+    get:
+      operationId: kataCatalogue
+      summary: Approved kata catalogue including weapon forms
+      security: []
+      responses:
+        '200':
+          description: Kata list
+  /api/v1/demo/training:
+    get:
+      operationId: listTraining
+      summary: Course and sparring sessions
+      security: []
+      responses:
+        '200':
+          description: Sessions
+    post:
+      operationId: createTraining
+      summary: Add a training or sparring session
+      responses:
+        '201':
+          description: Sessions
+  /api/v1/demo/rotation:
+    post:
+      operationId: buildRotation
+      summary: Generate a fair round-robin sparring rotation
+      responses:
+        '200':
+          description: Pairings
+  /api/v1/demo/auto-run:
+    post:
+      operationId: autoRun
+      summary: Generate pools, brackets and official assignments in one step
+      responses:
+        '200':
+          description: Counts
+  /api/v1/demo/readiness:
+    get:
+      operationId: readiness
+      summary: Divisions ready for bracket generation
+      responses:
+        '200':
+          description: Readiness
+  /api/v1/demo/schedule:
+    get:
+      operationId: listSchedule
+      summary: Authoritative event timeline
+      security: []
+      responses:
+        '200':
+          description: Timeline
+  /api/v1/demo/schedule/drift:
+    post:
+      operationId: setDrift
+      summary: Shift projected times when the event runs early or late
+      responses:
+        '200':
+          description: Timeline
+  /api/v1/demo/schedule/{id}/complete:
+    post:
+      operationId: completeScheduleItem
+      summary: Mark a schedule item complete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Timeline
+  /api/v1/demo/simulate:
+    get:
+      operationId: simulate
+      summary: Deterministic full-tournament simulation for QA
+      security: []
+      parameters:
+      - name: seed
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: fighters
+        in: query
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Simulation
+  /api/v1/demo/stats:
+    get:
+      operationId: stats
+      summary: Top moves, club medals and standings
+      security: []
+      responses:
+        '200':
+          description: Stats
+  /api/v1/demo/techniques:
+    get:
+      operationId: techniques
+      summary: Bilingual technique palette (English and romaji) with point values
+      security: []
+      responses:
+        '200':
+          description: Techniques
+  /api/v1/demo/event-config:
+    get:
+      operationId: eventConfig
+      summary: 'Full organiser configuration: costs, venue, kit, rules, staff, formats'
+      security: []
+      responses:
+        '200':
+          description: Event configuration
+  /api/v1/demo/attendance:
+    get:
+      operationId: attendance
+      summary: Morning-course attendance and exclusion flags
+      responses:
+        '200':
+          description: Attendance
+  /api/v1/demo/suggestions:
+    get:
+      operationId: suggestions
+      summary: Automatic category and format suggestions from participant data
+      security: []
+      responses:
+        '200':
+          description: Suggestions
+  /api/v1/demo/team-rankings:
+    get:
+      operationId: teamRankings
+      summary: Club medal table (gold 3, silver 2, bronze 1)
+      security: []
+      responses:
+        '200':
+          description: Teams
+  /api/v1/demo/announcements:
+    get:
+      operationId: listAnnouncements
+      summary: Broadcast history
+      security: []
+      responses:
+        '200':
+          description: Announcements
+    post:
+      operationId: sendAnnouncement
+      summary: Send a push/email/SMS announcement to an audience
+      responses:
+        '201':
+          description: Queued
+  /api/v1/demo/admin/users:
+    get:
+      operationId: adminUsers
+      summary: List accounts for the runner admin panel
+      responses:
+        '200':
+          description: Accounts
+  /api/v1/demo/admin/users/{id}/status:
+    post:
+      operationId: setUserStatus
+      summary: Lock, suspend or unlock an account
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Updated
+  /api/v1/demo/admin/users/{id}/reset:
+    post:
+      operationId: resetPassword
+      summary: Initiate a password reset for a user
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Reset token for QA
+  /api/v1/demo/permissions:
+    get:
+      operationId: permissions
+      summary: Per-role CRUD permissions
+      responses:
+        '200':
+          description: Permissions
+    post:
+      operationId: updatePermission
+      summary: Set one CRUD permission for a role and resource
+      responses:
+        '200':
+          description: Updated
+  /api/v1/demo/entrants/{id}/checkin:
+    post:
+      operationId: checkIn
+      summary: Record weigh-in and flag out-of-class athletes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Check-in result
+  /api/v1/demo/fights/{id}/officials:
+    post:
+      operationId: assignOfficial
+      summary: Assign a referee, judge or scorekeeper to a contest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Assignment
+  /api/v1/demo/import:
+    post:
+      operationId: importEntries
+      summary: Bulk-import clubs and fighters
+      responses:
+        '201':
+          description: Imported count
+  /api/v1/demo/export:
+    get:
+      operationId: exportCSV
+      summary: Export fights, entrants or standings as CSV
+      parameters:
+      - name: type
+        in: query
+        schema:
+          type: string
+          enum:
+          - fights
+          - entrants
+          - standings
+      responses:
+        '200':
+          description: text/csv
+  /api/v1/templates/{id}/import:
+    post:
+      operationId: importTemplate
+      summary: Recreate an event from a saved template
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Created event
+  /api/v1/templates/{id}/import-people:
+    post:
+      operationId: importPeople
+      summary: Import only the clubs and fighters from a template
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Imported counts
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+  schemas:
+    Session:
+      type: object
+      required:
+      - token
+      - email
+      - role
+      - expiresAt
+      properties:
+        token:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+    HealthResponse:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          type: string
+        database:
+          type: string
+    VersionInfo:
+      type: object
+      required:
+      - name
+      - version
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+    Role:
+      type: string
+      enum:
+      - tournament_runner
+      - official
+      - club_leader
+      - fighter
+      - spectator
+    Action:
+      type: string
+      enum:
+      - manage_tenant
+      - manage_event
+      - manage_users
+      - manage_club
+      - invite_fighters
+      - score_fight
+      - register_self
+      - view_private
+      - view_public
+    RoleInfo:
+      type: object
+      required:
+      - id
+      - label
+      - description
+      - rank
+      - actions
+      properties:
+        id:
+          $ref: '#/components/schemas/Role'
+        label:
+          type: string
+        description:
+          type: string
+        rank:
+          type: integer
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+    DemoCounts:
+      type: object
+      required:
+      - tenants
+      - clubs
+      - users
+      - fighters
+      - beltRanks
+      - events
+      - categories
+      - entrants
+      - mats
+      - fights
+      - fightEvents
+      properties:
+        tenants:
+          type: integer
+        clubs:
+          type: integer
+        users:
+          type: integer
+        fighters:
+          type: integer
+        beltRanks:
+          type: integer
+        events:
+          type: integer
+        categories:
+          type: integer
+        entrants:
+          type: integer
+        mats:
+          type: integer
+        fights:
+          type: integer
+        fightEvents:
+          type: integer
+    DemoResponse:
+      type: object
+      required:
+      - counts
+      properties:
+        counts:
+          $ref: '#/components/schemas/DemoCounts'
+    DemoAccount:
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - role
+      - roleLabel
+      - clubName
+      - source
+      - status
+      - actions
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+        roleLabel:
+          type: string
+        clubName:
+          type: string
+        source:
+          type: string
+          enum:
+          - independent
+          - club_invite
+        status:
+          type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+    DemoViewResponse:
+      type: object
+      required:
+      - actor
+      - actions
+      - counts
+      properties:
+        actor:
+          $ref: '#/components/schemas/DemoAccount'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+        counts:
+          $ref: '#/components/schemas/DemoCounts'
+    BeltOption:
+      type: object
+      required:
+      - id
+      - label
+      - colour
+      - sortOrder
+      - gradeKind
+      - isCustom
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        colour:
+          type: string
+        sortOrder:
+          type: integer
+        gradeKind:
+          type: string
+        isCustom:
+          type: boolean
+    DisplayOfficial:
+      type: object
+      required:
+      - id
+      - name
+      - role
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+    EventDisplayInfo:
+      type: object
+      required:
+      - name
+      - bannerPath
+      - logoPath
+      - themeTokens
+      - detailsJson
+      - mats
+      properties:
+        name:
+          type: string
+        bannerPath:
+          type: string
+        logoPath:
+          type: string
+        themeTokens:
+          type: string
+        detailsJson:
+          type: string
+        mats:
+          type: array
+          items:
+            type: string
+    StandingRow:
+      type: object
+      required:
+      - fighterId
+      - name
+      - category
+      - belt
+      - club
+      - clubColour
+      - wins
+      - losses
+      - draws
+      - points
+      properties:
+        fighterId:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        belt:
+          type: string
+        club:
+          type: string
+        clubColour:
+          type: string
+        wins:
+          type: integer
+        losses:
+          type: integer
+        draws:
+          type: integer
+        points:
+          type: integer
+    CreateDiscipline:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        style:
+          type: string
+        scoring:
+          type: string
+        matchSeconds:
+          type: integer
+        rounds:
+          type: integer
+        requirements:
+          type: array
+          items:
+            type: string
+        points:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              value:
+                type: number
+    CreateCategory:
+      type: object
+      required:
+      - name
+      - kind
+      properties:
+        name:
+          type: string
+        kind:
+          type: string
+        gender:
+          type: string
+        min:
+          type: number
+        max:
+          type: number
+        beltRankId:
+          type: string
+        ranges:
+          type: array
+          items:
+            type: object
+            properties:
+              kind:
+                type: string
+              min:
+                type: number
+              max:
+                type: number
+    CreateConstraints:
+      type: object
+      properties:
+        cap:
+          type: integer
+        maxPools:
+          type: integer
+        autoPlace:
+          type: boolean
+        separateClubs:
+          type: boolean
+        genderPolicy:
+          type: string
+    CreateInvite:
+      type: object
+      properties:
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+        clubName:
+          type: string
+    CreateTournamentRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        venue:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        theme:
+          type: string
+        templateName:
+          type: string
+        saveTemplate:
+          type: boolean
+        logoPath:
+          type: string
+        bannerPath:
+          type: string
+        disciplines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateDiscipline'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateCategory'
+        constraints:
+          $ref: '#/components/schemas/CreateConstraints'
+        invites:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateInvite'
+        clubs:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              colour:
+                type: string
+        fighters:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              club:
+                type: string
+              beltRankId:
+                type: string
+              weightKg:
+                type: number
+              dob:
+                type: string
+              gender:
+                type: string
+    CreateTournamentResponse:
+      type: object
+      required:
+      - eventId
+      - templateId
+      - disciplineCount
+      - categoryCount
+      - inviteCount
+      properties:
+        eventId:
+          type: string
+        templateId:
+          type: string
+        disciplineCount:
+          type: integer
+        categoryCount:
+          type: integer
+        inviteCount:
+          type: integer
+    Template:
+      type: object
+      required:
+      - ID
+      - Name
+      - ConfigJSON
+      - CreatedAt
+      properties:
+        ID:
+          type: string
+        Name:
+          type: string
+        ConfigJSON:
+          type: string
+        CreatedAt:
+          type: string
+    UploadResponse:
+      type: object
+      required:
+      - url
+      - path
+      - kind
+      - colour
+      - highlight
+      properties:
+        url:
+          type: string
+        path:
+          type: string
+        kind:
+          type: string
+        colour:
+          type: string
+        highlight:
+          type: string
+    AuditEntry:
+      type: object
+      required:
+      - id
+      - actorUserId
+      - actorRole
+      - action
+      - targetType
+      - targetId
+      - beforeJson
+      - afterJson
+      - createdAt
+      properties:
+        id:
+          type: integer
+        actorUserId:
+          type: string
+        actorRole:
+          type: string
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+        beforeJson:
+          type: string
+        afterJson:
+          type: string
+        createdAt:
+          type: string
+    SignupRequest:
+      type: object
+      required:
+      - name
+      - email
+      - dateOfBirth
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        phone:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        unitSystem:
+          type: string
+          enum:
+          - metric
+          - imperial
+        heightCm:
+          type: number
+        weightKg:
+          type: number
+        heightFt:
+          type: number
+        heightIn:
+          type: number
+        weightLb:
+          type: number
+        beltRankId:
+          type: string
+        customBeltLabel:
+          type: string
+        customBeltColour:
+          type: string
+        guardianName:
+          type: string
+          description: Required when the participant is under 16
+        guardianContact:
+          type: string
+          description: Guardian email or phone; required under 16
+        guardianConsent:
+          type: boolean
+          description: Guardian consent; required under 16
+        gender:
+          type: string
+          enum:
+          - male
+          - female
+          - open
+          - coed
+        accountType:
+          $ref: '#/components/schemas/Role'
+        clubId:
+          type: string
+        categoryIds:
+          type: array
+          items:
+            type: string
+        consentMoveUp:
+          type: boolean
+    Eligibility:
+      type: object
+      required:
+      - categoryId
+      - name
+      - strict
+      - moveUp
+      - reason
+      - capacity
+      - spaces
+      - full
+      properties:
+        categoryId:
+          type: string
+        name:
+          type: string
+        strict:
+          type: boolean
+        moveUp:
+          type: boolean
+        reason:
+          type: string
+        capacity:
+          type: integer
+        spaces:
+          type: integer
+        full:
+          type: boolean
+    SignupPreview:
+      type: object
+      required:
+      - heightCm
+      - weightKg
+      - eligible
+      properties:
+        heightCm:
+          type: number
+        weightKg:
+          type: number
+        eligible:
+          type: array
+          items:
+            $ref: '#/components/schemas/Eligibility'
+    SignupResult:
+      type: object
+      required:
+      - userId
+      - status
+      - role
+      - heightCm
+      - weightKg
+      - eligible
+      - selected
+      properties:
+        userId:
+          type: string
+        status:
+          type: string
+        role:
+          type: string
+        roleRequestId:
+          type: string
+        heightCm:
+          type: number
+        weightKg:
+          type: number
+        eligible:
+          type: array
+          items:
+            $ref: '#/components/schemas/Eligibility'
+        selected:
+          type: array
+          items:
+            type: string
+    RoleRequest:
+      type: object
+      required:
+      - ID
+      - Role
+      - Status
+      - Name
+      - Email
+      properties:
+        ID:
+          type: string
+        Role:
+          type: string
+        Status:
+          type: string
+        Name:
+          type: string
+        Email:
+          type: string
+    GeneratePoolsRequest:
+      type: object
+      properties:
+        eventId:
+          type: string
+        categoryId:
+          type: string
+        targetPoolSize:
+          type: integer
+        maxPools:
+          type: integer
+        sameClubSeparation:
+          type: boolean
+        seed:
+          type: integer
+          format: int64
+    PoolMember:
+      type: object
+      required:
+      - id
+      - name
+      - club
+      - clubColour
+      - belt
+      - seed
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        club:
+          type: string
+        clubColour:
+          type: string
+        belt:
+          type: string
+        seed:
+          type: integer
+    PoolView:
+      type: object
+      required:
+      - id
+      - name
+      - members
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/PoolMember'
+    PoolsResponse:
+      type: object
+      required:
+      - pools
+      properties:
+        pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/PoolView'
+        entrantCount:
+          type: integer
+    DemoFighter:
+      type: object
+      required:
+      - id
+      - name
+      - club
+      - clubColour
+      - logoPath
+      - belt
+      - beltColour
+      - heightCm
+      - weightKg
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        club:
+          type: string
+        clubColour:
+          type: string
+        logoPath:
+          type: string
+        belt:
+          type: string
+        beltColour:
+          type: string
+        heightCm:
+          type: number
+        weightKg:
+          type: number
+    DemoFightEvent:
+      type: object
+      required:
+      - seq
+      - kind
+      - payload
+      properties:
+        seq:
+          type: integer
+        kind:
+          type: string
+        payload:
+          type: object
+    DemoFight:
+      type: object
+      required:
+      - id
+      - category
+      - mat
+      - round
+      - state
+      - outcome
+      - red
+      - blue
+      - events
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+        mat:
+          type: string
+        round:
+          type: string
+        state:
+          type: string
+          enum:
+          - pending
+          - live
+          - paused
+          - complete
+          - forfeit
+        outcome:
+          type: string
+        red:
+          $ref: '#/components/schemas/DemoFighter'
+        blue:
+          $ref: '#/components/schemas/DemoFighter'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemoFightEvent'
+    Tenant:
+      type: object
+      required:
+      - id
+      - name
+      - slug
+      - locale
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        locale:
+          type: string
+    Theme:
+      type: object
+      required:
+      - id
+      - tenantId
+      - name
+      - tokensJson
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        name:
+          type: string
+        tokensJson:
+          type: string
+    Club:
+      type: object
+      required:
+      - id
+      - tenantId
+      - name
+      - primaryColour
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        name:
+          type: string
+        logoPath:
+          type: string
+        primaryColour:
+          type: string
+    BeltRank:
+      type: object
+      required:
+      - id
+      - tenantId
+      - label
+      - colour
+      - sortOrder
+      - gradeKind
+      - isCustom
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        label:
+          type: string
+        colour:
+          type: string
+        sortOrder:
+          type: integer
+        gradeKind:
+          type: string
+          enum:
+          - kyu
+          - dan
+          - youth
+          - custom
+        stripeCount:
+          type: integer
+        minAge:
+          type: integer
+          nullable: true
+        maxAge:
+          type: integer
+          nullable: true
+        isCustom:
+          type: boolean
+    Fighter:
+      type: object
+      required:
+      - id
+      - tenantId
+      - displayName
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        userId:
+          type: string
+          nullable: true
+        clubId:
+          type: string
+          nullable: true
+        beltRankId:
+          type: string
+          nullable: true
+        displayName:
+          type: string
+        dateOfBirth:
+          type: string
+        weightKg:
+          type: number
+          nullable: true
+        gender:
+          type: string
+          enum:
+          - male
+          - female
+          - open
+          - coed
+        avatarPath:
+          type: string
+    RuleSet:
+      type: object
+      required:
+      - id
+      - tenantId
+      - name
+      - version
+      - configJson
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        name:
+          type: string
+        version:
+          type: integer
+        configJson:
+          type: string
+    FormatPolicy:
+      type: object
+      required:
+      - id
+      - tenantId
+      - name
+      - version
+      - configJson
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        name:
+          type: string
+        version:
+          type: integer
+        configJson:
+          type: string
+    Event:
+      type: object
+      required:
+      - id
+      - tenantId
+      - name
+      - status
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        themeId:
+          type: string
+          nullable: true
+        ruleSetId:
+          type: string
+          nullable: true
+        formatPolicyId:
+          type: string
+          nullable: true
+        name:
+          type: string
+        startsAt:
+          type: string
+        endsAt:
+          type: string
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+          - live
+          - complete
+    Category:
+      type: object
+      required:
+      - id
+      - eventId
+      - name
+      - kind
+      properties:
+        id:
+          type: string
+        eventId:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+          enum:
+          - age
+          - weight
+          - belt
+          - gender
+          - combined
+        minValue:
+          type: number
+          nullable: true
+        maxValue:
+          type: number
+          nullable: true
+        beltRankId:
+          type: string
+          nullable: true
+        gender:
+          type: string
+        sortOrder:
+          type: integer
+    Fight:
+      type: object
+      required:
+      - id
+      - eventId
+      - state
+      - outcome
+      properties:
+        id:
+          type: string
+        eventId:
+          type: string
+        matId:
+          type: string
+          nullable: true
+        categoryId:
+          type: string
+          nullable: true
+        roundLabel:
+          type: string
+        redFighterId:
+          type: string
+          nullable: true
+        blueFighterId:
+          type: string
+          nullable: true
+        state:
+          type: string
+          enum:
+          - pending
+          - live
+          - paused
+          - complete
+          - forfeit
+        outcome:
+          type: string
+        bestOf:
+          type: integer
+        version:
+          type: integer
+    FightEvent:
+      type: object
+      required:
+      - fightId
+      - seq
+      - kind
+      properties:
+        fightId:
+          type: string
+        seq:
+          type: integer
+        kind:
+          type: string
+        actorUserId:
+          type: string
+          nullable: true
+        payloadJson:
+          type: string
+security:
+- bearerAuth: []
