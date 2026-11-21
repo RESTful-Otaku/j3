@@ -48,7 +48,7 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: j3-android-apk-${{ github.sha }}
           path: web/android/app/build/outputs/apk/debug/*.apk
@@ -78,7 +78,7 @@ jobs:
           cp -R build/ios/Build/Products/Debug-iphonesimulator/App.app artifacts/J3.app
           cd artifacts && zip -r ../j3-ios-app.zip J3.app
       - name: Upload iOS app
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: j3-ios-app-${{ github.sha }}
           path: j3-ios-app.zip
@@ -123,7 +123,7 @@ jobs:
           cp build/export/*.ipa j3-signed.ipa
       - name: Upload signed IPA
         if: hashFiles('j3-signed.ipa') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: j3-ios-signed-${{ github.sha }}
           path: j3-signed.ipa

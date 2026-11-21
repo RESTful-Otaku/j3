@@ -39,7 +39,7 @@ jobs:
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o dist/bin/j3d-windows-amd64.exe ./cmd/j3d
       - name: Build web app
         run: bun run --cwd web build && cp -R web/build dist/web
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: j3-executables-${{ github.sha }}
           path: dist
