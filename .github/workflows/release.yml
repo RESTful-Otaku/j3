@@ -4,6 +4,7 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: write
@@ -17,6 +18,7 @@ jobs:
     name: Mobile artifacts
     needs: verify
     uses: ./.github/workflows/mobile.yml
+    secrets: inherit
 
   package:
     name: Package executables

@@ -32,6 +32,14 @@ jobs:
             exit 1
           fi
 
+  workflows:
+    name: Workflow configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate workflow YAML and reusable workflow references
+        run: bun run check:workflows
+
   go:
     name: Go venue server
     runs-on: ubuntu-latest
@@ -141,7 +149,7 @@ jobs:
   required-checks:
     name: All checks passed
     if: always()
-    needs: [branch-name, go, web, smoke, load, e2e]
+    needs: [branch-name, workflows, go, web, smoke, load, e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all jobs succeeded
