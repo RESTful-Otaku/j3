@@ -37,7 +37,9 @@ echo "🚀 Starting venue server on $PORT"
 pkill -f "j3-smoke-bin -addr 127.0.0.1:$PORT" 2>/dev/null || true
 go build -o /tmp/j3-smoke-bin ./cmd/j3d
 if [ "${SMOKE_FULL:-0}" = "1" ]; then
-  /tmp/j3-smoke-bin reset -full -db "$DB" >/dev/null 2>&1
+  /tmp/j3-smoke-bin reset -okami=false -full -db "$DB" >/dev/null 2>&1
+else
+  /tmp/j3-smoke-bin reset -okami -db "$DB" >/dev/null 2>&1
 fi
 /tmp/j3-smoke-bin -addr "127.0.0.1:$PORT" -db "$DB" -seed >/tmp/j3-smoke-server.log 2>&1 &
 SERVER_PID=$!
@@ -90,6 +92,8 @@ check "check-in / weigh-in" "200" "$(status -X POST "$BASE/api/v1/demo/entrants/
 check "team rankings" "200" "$(status "$BASE/api/v1/demo/team-rankings")"
 check "CSV export" "200" "$(status "$BASE/api/v1/demo/export?type=fights")"
 check "CSV import" "201" "$(status -X POST "$BASE/api/v1/demo/import" -H 'Content-Type: application/json' -d '{"rows":[{"name":"CSV Fighter","club":"Club CSV","weightKg":70}]}')"
+check "Okami event config" "200" "$(status "$BASE/api/v1/demo/event-config?eventId=ev-okami")"
+check "course attendance" "200" "$(status "$BASE/api/v1/demo/attendance")"
 
 echo "🔎 Data assertions"
 check "simulator has medals" "1" "$(has "$BASE/api/v1/demo/simulate?fighters=50" '"medals"')"

@@ -36,7 +36,7 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   }
 }
 
-const getJson = <T>(url: string) => requestJson<T>(url);
+export const getJson = <T>(url: string) => requestJson<T>(url);
 const postJson = <T>(url: string, body: unknown) => requestJson<T>(url, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },

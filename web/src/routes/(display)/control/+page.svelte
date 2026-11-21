@@ -17,6 +17,7 @@
     { path: '/display', name: 'Full-screen scoreboard', icon: '🥊', note: 'Current fight, officials, moves' },
     { path: '/ceremony', name: 'Medal ceremony', icon: '🏆', note: 'Animated podium + PA call' },
     { path: '/public', name: 'Public dashboard', icon: '📺', note: 'Live, next up, leaderboard' },
+    { path: '/event', name: 'Event configuration', icon: '📋', note: 'Full organiser config for review' },
     { path: '/details', name: 'Event details', icon: '📋', note: 'Rules, protection, schedule, corners' },
     { path: '/brackets', name: 'Brackets', icon: '🏆', note: 'Elimination + round robin' },
     { path: '/tables', name: 'Tables & rankings', icon: '📊', note: 'Overall, medals, kata panel' },

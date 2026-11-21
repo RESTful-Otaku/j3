@@ -78,6 +78,7 @@ func seedCommand(args []string, reset bool) error {
 	flags := flag.NewFlagSet("seed", flag.ContinueOnError)
 	dbPath := flags.String("db", cfg.DBPath, "SQLite database path")
 	full := flags.Bool("full", false, "seed a complete verifiable tournament")
+	okami := flags.Bool("okami", true, "seed the Okami Jiu Jitsu Challenger demo")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -96,7 +97,12 @@ func seedCommand(args []string, reset bool) error {
 	if err := seed.Ensure(store); err != nil {
 		return err
 	}
-	if *full {
+	if *okami {
+		if err := seed.EnsureOkami(store); err != nil {
+			return err
+		}
+		log.Printf("Okami Jiu Jitsu Challenger seeded")
+	} else if *full {
 		if err := seed.EnsureFull(store); err != nil {
 			return err
 		}

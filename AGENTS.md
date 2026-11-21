@@ -793,6 +793,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Okami Jiu Jitsu Challenger is now the default demo seed: 40 fighters across 4
+  clubs, Tony Jamieson as organiser, 2 mats with 3 judges + a scorekeeper each, 8 volunteer
+  officials, 8 discipline rule sets with exact timings/points, 7 kit requirements, 3-section kata
+  panels, 12-event schedule, 3 pools per discipline group, course attendance rules and full venue
+  info. Added schema/config endpoints and `/event` review screen. 62 smoke + 50 E2E checks pass.
 - **2026-11-20** — UI/UX refinement: scoreboard clock moved to its own full-width row so it can no
   longer be squashed; fighter cards reflow into a vertical stack on small screens; foul cards use
   compact Y/R badges; tables show a friendly retry banner instead of a raw proxy 500; global
