@@ -208,7 +208,7 @@
               <div class="bracket-match">
                 {#each match.slots as slot (slot.id)}
                   <div class="bracket-slot" class:advanced={slot.state === 'advanced'} class:out={slot.state === 'eliminated'}>
-                    <span class="portrait tiny" style="background:{slot.clubColour || '#64748b'};">{initials(slot.fighterName || 'TBD')}</span>
+                    <span class="portrait tiny" style="background:{slot.clubColour || '#64748b'};">{#if slot.clubLogo}<img src={slot.clubLogo} alt="" />{:else}{initials(slot.fighterName || 'TBD')}{/if}</span>
                     <span style="flex:1; min-width:0;">
                       <strong>{slot.fighterName || 'TBD'}</strong>
                       <span class="muted small" style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{slot.club || 'Independent'} · {slot.belt}</span>
@@ -292,6 +292,7 @@
 />
 
 <style>
+  .portrait.tiny img { width:100%; height:100%; object-fit:contain; border-radius:inherit; }
   .small-portrait, .portrait.tiny { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: .85rem; flex: none; }
   .bracket-wrap { position:relative; display:flex; gap:clamp(18px,2vw,44px); align-items:stretch; overflow-x:auto; padding:12px 0 32px; min-height:min(68vh, 720px); min-width:max-content; }
   .bracket-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }

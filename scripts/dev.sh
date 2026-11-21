@@ -123,6 +123,17 @@ qa_all() {
   spinner "Production build" bun run build
 }
 
+run_demo_phone() {
+  mkdir -p data
+  spinner "Installing web dependencies" bun install --cwd web
+  echo ""
+  echo "  📡 Venue server for phone QA: $(bash scripts/mobile.sh url)"
+  echo "  ✅ Binds all interfaces with demo auth and CORS enabled."
+  echo ""
+  J3_DEMO=1 J3_ADDR=0.0.0.0:8787 J3_CORS_ORIGIN='*' \
+    go run ./cmd/j3d -addr 0.0.0.0:8787 -db ./data/j3-demo.db -seed
+}
+
 qa_menu() {
   while true; do
     select_menu "QA & verification" \
@@ -180,16 +191,22 @@ build_menu() {
 mobile_menu() {
   while true; do
     select_menu "Mobile (Android / iOS)" \
-      "Sync Capacitor projects" "Build Android APK" "Build iOS .app" \
-      "Install Playwright Chromium" "← Back"
+      "Build demo APK" "Start Pixel emulator" "Install & launch APK" \
+      "Build + install + launch" "Show phone server URL" "Run venue server for phone" \
+      "Build iOS .app" "Install Playwright Chromium" "← Back"
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
-      0) spinner "Syncing Capacitor" bun run mobile:sync ;;
-      1) spinner "Building Android APK" bun run mobile:android ;;
-      2) spinner "Building iOS app" bun run mobile:ios ;;
-      3) spinner "Installing Chromium" bun run e2e:install ;;
-      4) return ;;
+      0) bash scripts/mobile.sh build ;;
+      1) bash scripts/mobile.sh emulator ;;
+      2) bash scripts/mobile.sh install ;;
+      3) bash scripts/mobile.sh build && bash scripts/mobile.sh install ;;
+      4) echo "  📡 Phone URL: $(bash scripts/mobile.sh url)" ;;
+      5) run_demo_phone ;;
+      6) spinner "Building iOS app" bun run mobile:ios ;;
+      7) spinner "Installing Chromium" bun run e2e:install ;;
+      8) return ;;
+
     esac
     pause
   done

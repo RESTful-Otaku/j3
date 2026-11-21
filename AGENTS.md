@@ -793,6 +793,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Branding/mobile: integrated supplied J3 logo and banner artwork, applied the
+  final palette (Midnight/Steel/Sky Blue, Energetic Orange, Light, Silver, Charcoal) with a bolder
+  display font, club logos now render on fighter cards, tables, brackets and pools. Fixed Android
+  build (JDK 21 + SDK 36), added LAN server mode for phone QA, Pixel emulator AVD support and a
+  full Mobile menu in dev.sh; GitHub Actions now uses JDK 21 + Android SDK setup.
 - **2026-11-21** — Final closure: real sessions/RBAC/PII hardening, full 72-path OpenAPI contract
   with examples, route-parity and 401-boundary tests, guardian consent for minors, four seeded
   tournament templates, public landing/signup pages, notification centre, account admin, guided

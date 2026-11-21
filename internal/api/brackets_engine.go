@@ -25,6 +25,7 @@ type bracketSlotView struct {
 	FighterName string `json:"fighterName"`
 	Club        string `json:"club"`
 	ClubColour  string `json:"clubColour"`
+	ClubLogo    string `json:"clubLogo"`
 	Belt        string `json:"belt"`
 	State       string `json:"state"`
 	ResultIcon  string `json:"resultIcon"`
@@ -241,7 +242,7 @@ func (s *Server) listBrackets(r *http.Request, eventID, categoryID string) ([]br
 		slotRows, err := s.Store.QueryContext(r.Context(), `
 			SELECT bs.id, bs.position, COALESCE(bs.fighter_id,''), COALESCE(f.display_name,''),
 			       COALESCE(c.name,''), COALESCE(c.primary_colour,'#64748b'),
-			       COALESCE(b.label,''), bs.state, bs.result_icon, bs.source_slot
+			       COALESCE(c.logo_path,''), COALESCE(b.label,''), bs.state, bs.result_icon, bs.source_slot
 			FROM bracket_slots bs
 			LEFT JOIN fighters f ON f.id = bs.fighter_id
 			LEFT JOIN clubs c ON c.id = f.club_id
@@ -253,7 +254,7 @@ func (s *Server) listBrackets(r *http.Request, eventID, categoryID string) ([]br
 		for slotRows.Next() {
 			var slot bracketSlotView
 			if err := slotRows.Scan(&slot.ID, &slot.Position, &slot.FighterID, &slot.FighterName,
-				&slot.Club, &slot.ClubColour, &slot.Belt, &slot.State, &slot.ResultIcon, &slot.Source); err != nil {
+				&slot.Club, &slot.ClubColour, &slot.ClubLogo, &slot.Belt, &slot.State, &slot.ResultIcon, &slot.Source); err != nil {
 				slotRows.Close()
 				return nil, err
 			}

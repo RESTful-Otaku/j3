@@ -45,6 +45,7 @@
     <div class="meta">Live now · {live.length} contest{live.length === 1 ? '' : 's'} · {fights.length} total · updates automatically</div>
   </header>
 
+  <div class="brand-banner" aria-label="J3 banner"></div>
   <div class="clock-hero slide-in">
     <div>
       <div class="eyebrow">Venue time</div>
@@ -153,6 +154,7 @@
 
 <style>
   .small-portrait { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 800; }
+  .brand-banner { height:clamp(90px,10vw,160px); border-radius:16px; background:url('/brand/banner.png') center/cover no-repeat; border:1px solid var(--brand-border); margin-bottom:16px; }
   .clock-hero { display:flex; gap:clamp(14px,3vw,50px); align-items:center; flex-wrap:wrap; padding:clamp(16px,2vw,30px); border-radius:20px; border:1px solid var(--brand-primary); background:linear-gradient(135deg, rgba(59,130,246,.18), transparent), var(--brand-surface-2); box-shadow:var(--brand-shadow); }
   .big-clock { font-family:var(--font-display); font-size:clamp(3rem,8vw,8rem); font-weight:800; line-height:1; letter-spacing:.02em; color:var(--brand-accent); }
 </style>

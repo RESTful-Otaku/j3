@@ -61,6 +61,21 @@ Regenerate shared types after editing `api/openapi.yaml`:
 bun run generate:types
 ```
 
+## Mobile QA
+
+```sh
+bun run dev              # menu → Mobile → Build demo APK / Start Pixel emulator / Install & launch
+bash scripts/mobile.sh url       # LAN URL for a physical phone on the same Wi-Fi
+bash scripts/mobile.sh build     # builds artifacts/j3-demo.apk
+```
+
+For a physical phone, use the menu option **Run venue server for phone** (binds all interfaces
+with demo auth), then install `artifacts/j3-demo.apk` via `adb install -r` or by opening it on the
+device. The venue URL is baked into the APK at build time with `J3_SERVER_URL`.
+
+GitHub Actions builds the Android APK and an iOS simulator .app on every push/PR; signed IPA
+builds run when Apple secrets are configured.
+
 ## Status
 
 Phase 0 (foundation) in progress. See `AGENTS.md` §11 for the roadmap and §14 for decisions.

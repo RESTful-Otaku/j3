@@ -11,6 +11,7 @@ coverage.*
 *.db-shm
 *.db-wal
 /data/
+**/data/uploads/
 
 # Node / SvelteKit (Bun)
 node_modules/

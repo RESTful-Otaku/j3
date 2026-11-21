@@ -196,7 +196,7 @@ export type ScheduleItem = {
 
 export type BracketSlot = {
   id: string; position: number; fighterId: string; fighterName: string;
-  club: string; clubColour: string; belt: string; state: string;
+  club: string; clubColour: string; clubLogo: string; belt: string; state: string;
   resultIcon: string; source: string;
 };
 export type BracketStage = { id: string; name: string; kind: string; slots: BracketSlot[] };

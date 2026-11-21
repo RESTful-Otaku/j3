@@ -30,6 +30,7 @@ type standingRow struct {
 	Belt       string `json:"belt"`
 	Club       string `json:"club"`
 	ClubColour string `json:"clubColour"`
+	ClubLogo   string `json:"clubLogo"`
 	Wins       int    `json:"wins"`
 	Losses     int    `json:"losses"`
 	Draws      int    `json:"draws"`
@@ -101,7 +102,7 @@ func (s *Server) standings(w http.ResponseWriter, r *http.Request) {
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT f.id, f.display_name, COALESCE(c.name, 'Open'),
 		       COALESCE(b.label, ''), COALESCE(cl.name, 'Independent'),
-		       COALESCE(cl.primary_colour, '#64748b'),
+		       COALESCE(cl.primary_colour, '#64748b'), COALESCE(cl.logo_path, ''),
 		       COALESCE(SUM(CASE WHEN (ft.red_fighter_id = f.id AND ft.outcome = 'win_red')
 		                  OR (ft.blue_fighter_id = f.id AND ft.outcome = 'win_blue') THEN 1 ELSE 0 END), 0),
 		       COALESCE(SUM(CASE WHEN (ft.red_fighter_id = f.id AND ft.outcome = 'win_blue')
@@ -126,7 +127,7 @@ func (s *Server) standings(w http.ResponseWriter, r *http.Request) {
 		var row standingRow
 		if err := rows.Scan(
 			&row.FighterID, &row.Name, &row.Category, &row.Belt, &row.Club, &row.ClubColour,
-			&row.Wins, &row.Losses, &row.Draws,
+			&row.ClubLogo, &row.Wins, &row.Losses, &row.Draws,
 		); err != nil {
 			writeError(w, err)
 			return

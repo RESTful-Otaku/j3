@@ -20,6 +20,7 @@ type poolMember struct {
 	Name       string `json:"name"`
 	Club       string `json:"club"`
 	ClubColour string `json:"clubColour"`
+	ClubLogo   string `json:"clubLogo"`
 	Belt       string `json:"belt"`
 	Seed       int    `json:"seed"`
 }
