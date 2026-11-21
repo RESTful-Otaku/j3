@@ -8,7 +8,7 @@ test('login with Google and MFA, then sign out', async ({ page }) => {
   await page.getByRole('button', { name: /Google/ }).click();
   await expect(page.getByText('Two-factor verification')).toBeVisible();
   await page.getByRole('button', { name: 'Verify & sign in' }).click();
-  await expect(page).toHaveURL(/\/$|\/login$/);
+  await expect(page).toHaveURL(/\/admin$/);
 });
 
 test('admin can toggle a permission', async ({ page }) => {
