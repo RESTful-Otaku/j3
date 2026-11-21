@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { disableTours } from './helpers';
+
+test.beforeEach(async ({ page }) => { await disableTours(page); });
 
 test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 

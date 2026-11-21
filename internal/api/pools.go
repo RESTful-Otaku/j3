@@ -31,6 +31,9 @@ type poolView struct {
 }
 
 func (s *Server) generatePools(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	var req generatePoolsRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, err)

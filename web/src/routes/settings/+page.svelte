@@ -90,7 +90,13 @@
     <a class="btn" href="/">← Back to dashboard</a>
   </header>
 
-  <div class="card">
+  <div class="card" style="margin-bottom:18px;">
+    <div class="eyebrow">Getting started</div><h2>Guided walkthrough</h2>
+    <p class="muted small">Repeat the short guided tour for your account type at any time.</p>
+    <button class="btn" style="margin-top:10px;" on:click={() => window.dispatchEvent(new CustomEvent('j3-start-tour', { detail: { role: settings.accountRole === 'tournament_runner' ? 'runner' : settings.accountRole === 'official' ? 'official' : settings.accountRole === 'club_leader' ? 'club_leader' : 'fighter' } }))}>▶ Restart guided tour</button>
+  </div>
+
+<div class="card">
     <h2>Profile</h2>
     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top:14px;">
       <label class="field">Full name<input bind:value={settings.name} /></label>

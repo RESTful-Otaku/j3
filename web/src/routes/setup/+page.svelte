@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { api, type CreateTournamentRequest } from '../../lib/api';
   import { notify, notifySuccess, notifyError, notifyWarning } from '../../lib/toast';
+  import HelpTip from '../../lib/components/HelpTip.svelte';
 
   type ScoreValue = { id: string; label: string; value: number };
   type Discipline = {
@@ -58,6 +59,7 @@
   let newTemplateName = '';
   type Readiness = { id: string; name: string; entrants: number; ready: boolean; poolCount: number };
   let readiness: Readiness[] = [];
+  let autoRunResult = '';
 
   onMount(() => {
     try {
@@ -211,7 +213,8 @@
   async function autoRun() {
     try {
       const result = await api.autoRun();
-      notifySuccess(`Auto-generated ${result.pools} pools, ${result.stages} rounds and ${result.officials} official assignments`);
+      autoRunResult = `Auto-generated ${result.pools} pools, ${result.stages} rounds and ${result.officials} official assignments`;
+      notifySuccess(autoRunResult);
     } catch (error) {
       notifyError(error instanceof Error ? error.message : 'Auto-generation failed');
     }
@@ -275,7 +278,7 @@
 
   <div class="card setup-card" on:input={persist} on:change={touch}>
     {#if wizard.step === 0}
-      <div class="eyebrow">Step 1 of 5</div><h2>Event & identity</h2>
+      <div class="eyebrow">Step 1 of 5</div><h2>Event & identity <HelpTip text="Name your event and choose a theme. You can upload a logo and banner here; everything can be changed later." /></h2>
       <p class="muted small">Give the event a name and look. Pick a theme or upload your own branding.</p>
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top:18px;">
         <label class="field">Tournament name<input bind:value={wizard.name} placeholder="Autumn Challenge 2026" /></label>
@@ -439,6 +442,7 @@
       </div>
       {#if wizard.saveTemplate}<label class="field" style="margin-top:12px;">Template name<input bind:value={wizard.templateName} placeholder="{wizard.name || 'My tournament'} template" /></label>{/if}
       <div style="margin-top:22px; border-top:1px solid var(--brand-border); padding-top:18px;">
+        {#if autoRunResult}<div class="stat small" style="margin-bottom:10px; border-color:var(--win);">{autoRunResult}</div>{/if}
         <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
           <div><h3>Readiness check</h3><p class="muted small">Divisions need at least two entrants before a bracket is valid.</p></div>
           <button class="btn primary" on:click={autoRun}>⚡ Auto-generate pools, brackets & officials</button>

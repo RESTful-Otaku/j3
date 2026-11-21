@@ -98,6 +98,9 @@ func writeBadRequest(w http.ResponseWriter, message string) {
 }
 
 func (s *Server) createTournament(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "settings", "create") {
+		return
+	}
 	var req createTournamentRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeBadRequest(w, err.Error())

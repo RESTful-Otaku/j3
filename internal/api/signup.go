@@ -32,6 +32,9 @@ type signupRequest struct {
 	BeltRankID       string   `json:"beltRankId"`
 	CustomBeltLabel  string   `json:"customBeltLabel"`
 	CustomBeltColour string   `json:"customBeltColour"`
+	GuardianName     string   `json:"guardianName"`
+	GuardianContact  string   `json:"guardianContact"`
+	GuardianConsent  bool     `json:"guardianConsent"`
 	Gender           string   `json:"gender"`
 	AccountType      string   `json:"accountType"`
 	ClubID           string   `json:"clubId"`
@@ -64,6 +67,19 @@ func decodeJSON(r *http.Request, target any) error {
 		return fmt.Errorf("invalid JSON: %w", err)
 	}
 	return nil
+}
+
+func athleteAge(dob string) int {
+	birth, err := time.Parse("2006-01-02", dob)
+	if err != nil {
+		return -1
+	}
+	now := time.Now()
+	age := now.Year() - birth.Year()
+	if now.Month() < birth.Month() || (now.Month() == birth.Month() && now.Day() < birth.Day()) {
+		age--
+	}
+	return age
 }
 
 func canonicalStats(req signupRequest) (heightCm, weightKg float64, err error) {
@@ -200,6 +216,14 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, "date of birth must be YYYY-MM-DD")
 		return
 	}
+	if age := athleteAge(req.DOB); age < 0 || age > 110 {
+		writeBadRequest(w, "date of birth is not plausible")
+		return
+	} else if age < 16 && (strings.TrimSpace(req.GuardianName) == "" ||
+		strings.TrimSpace(req.GuardianContact) == "" || !req.GuardianConsent) {
+		writeBadRequest(w, "participants under 16 require guardian details and consent")
+		return
+	}
 	heightCm, weightKg, err := canonicalStats(req)
 	if err != nil {
 		writeBadRequest(w, err.Error())
@@ -224,11 +248,24 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 	}
 	eligible := s.enrichCapacity(r, rules.Compatible(categories, stats, time.Now(), req.ConsentMoveUp))
 	for _, selected := range req.CategoryIDs {
+		matched := false
 		for _, item := range eligible {
-			if item.CategoryID == selected && item.Full {
+			if item.CategoryID != selected {
+				continue
+			}
+			matched = true
+			if item.Full {
 				writeBadRequest(w, fmt.Sprintf("category %s is full", item.Name))
 				return
 			}
+			if item.MoveUp && !req.ConsentMoveUp {
+				writeBadRequest(w, fmt.Sprintf("category %s requires consent to move up", item.Name))
+				return
+			}
+		}
+		if !matched {
+			writeBadRequest(w, "selected category is not compatible with your stats")
+			return
 		}
 	}
 
@@ -304,10 +341,10 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		if _, err := tx.ExecContext(r.Context(), `
 			INSERT INTO fighters
 			 (id, tenant_id, user_id, club_id, belt_rank_id, display_name, date_of_birth,
-			  weight_kg, gender)
-			VALUES (?, 'demo-tenant', ?, NULLIF(?, ''), ?, ?, ?, ?, ?)`,
+			  weight_kg, gender, guardian_name, guardian_contact, guardian_consent)
+			VALUES (?, 'demo-tenant', ?, NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?)`,
 			fighterID, userID, req.ClubID, nullIfEmpty(beltRankID), req.Name,
-			req.DOB, weightKg, gender); err != nil {
+			req.DOB, weightKg, gender, req.GuardianName, req.GuardianContact, req.GuardianConsent); err != nil {
 			writeError(w, err)
 			return
 		}
@@ -345,6 +382,9 @@ func nullIfEmpty(value string) any {
 }
 
 func (s *Server) roleRequests(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "view") {
+		return
+	}
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT rr.id, rr.requested_role, rr.status, u.display_name, u.email
 		FROM role_requests rr JOIN users u ON u.id = rr.user_id
@@ -370,6 +410,9 @@ func (s *Server) roleRequests(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) approveRoleRequest(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "settings", "edit") {
+		return
+	}
 	id := r.PathValue("id")
 	tx, err := s.Store.BeginTx(r.Context(), nil)
 	if err != nil {

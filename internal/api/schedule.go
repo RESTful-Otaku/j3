@@ -70,6 +70,9 @@ func (s *Server) listSchedule(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) setDrift(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	var body struct {
 		Minutes int `json:"minutes"`
 	}
@@ -97,6 +100,9 @@ func (s *Server) setDrift(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) completeScheduleItem(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	id := r.PathValue("id")
 	if _, err := s.Store.ExecContext(r.Context(), `
 		UPDATE schedule_items SET status='complete',

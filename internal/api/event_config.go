@@ -134,6 +134,9 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 
 // attendanceList supports the "must attend the morning course" rule.
 func (s *Server) attendance(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "view") {
+		return
+	}
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT ca.entrant_id, f.display_name, ca.attended, ca.excluded
 		FROM course_attendance ca JOIN entrants e ON e.id = ca.entrant_id

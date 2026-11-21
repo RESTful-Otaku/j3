@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Non-interactive full local demo: venue server + UI with seeded data.
 set -euo pipefail
+export J3_DEMO=1
 export PATH="$HOME/.bun/bin:$PATH"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"

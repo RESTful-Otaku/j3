@@ -7,15 +7,17 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/restful-otaku/j3/internal/auth"
 	"github.com/restful-otaku/j3/internal/db"
 )
 
 // Server holds dependencies for the venue HTTP API.
 type Server struct {
-	Store   *db.DB
-	Version string
-	Hub     *LiveHub
-	handler http.Handler
+	Store     *db.DB
+	Version   string
+	Hub       *LiveHub
+	TestToken string // set by tests only; bypasses bearer lookup for in-process requests
+	handler   http.Handler
 }
 
 // New builds a server with its middleware chain.
@@ -76,6 +78,13 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/demo/techniques", s.listTechniques)
 	mux.HandleFunc("POST /api/v1/auth/login", s.startLogin)
 	mux.HandleFunc("POST /api/v1/auth/verify", s.verifyLogin)
+	mux.HandleFunc("POST /api/v1/auth/demo", s.demoLogin)
+	mux.HandleFunc("POST /api/v1/demo/announcements", s.sendAnnouncement)
+	mux.HandleFunc("GET /api/v1/demo/announcements", s.listAnnouncements)
+	mux.HandleFunc("GET /api/v1/demo/suggestions", s.suggestions)
+	mux.HandleFunc("GET /api/v1/demo/admin/users", s.adminUsers)
+	mux.HandleFunc("POST /api/v1/demo/admin/users/{id}/status", s.setUserStatus)
+	mux.HandleFunc("POST /api/v1/demo/admin/users/{id}/reset", s.resetPassword)
 	mux.HandleFunc("GET /api/v1/demo/permissions", s.permissions)
 	mux.HandleFunc("POST /api/v1/demo/permissions", s.updatePermission)
 	mux.HandleFunc("POST /api/v1/demo/entrants/{id}/checkin", s.checkIn)
@@ -93,25 +102,46 @@ func New(store *db.DB, version string) *Server {
 	_ = os.MkdirAll("data/uploads", 0o755)
 	mux.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("data/uploads"))))
 	mux.HandleFunc("GET /", s.root)
-	s.handler = middleware(mux)
+	s.handler = s.middleware(mux)
 	return s
 }
 
 // Handler returns the root handler, suitable for http.Server or httptest.
 func (s *Server) Handler() http.Handler { return s.handler }
 
-func middleware(next http.Handler) http.Handler {
+func (s *Server) middleware(next http.Handler) http.Handler {
+	origin := os.Getenv("J3_CORS_ORIGIN")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'")
+		if origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			w.Header().Set("Vary", "Origin")
+		}
 		if id := requestID(); id != "" {
 			w.Header().Set("X-Request-ID", id)
 		}
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
+		}
+		if !isPublic(r) {
+			var identity auth.Identity
+			var ok bool
+			if s.TestToken != "" && r.Header.Get("Authorization") == "" {
+				identity, ok = auth.Identity{UserID: "u-tony", Role: auth.RoleTournamentRunner}, true
+			} else {
+				identity, ok = s.identityFromRequest(r)
+			}
+			if !ok {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				_, _ = w.Write([]byte(`{"error":"authentication required"}`))
+				return
+			}
+			r = r.WithContext(auth.WithIdentity(r.Context(), identity))
 		}
 		next.ServeHTTP(w, r)
 	})

@@ -34,6 +34,9 @@ type auditEntry struct {
 
 // auditLog exposes the accountability trail to runners and officials.
 func (s *Server) auditLog(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "view") {
+		return
+	}
 	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 	if err != nil || limit < 1 || limit > 1000 {
 		limit = 250

@@ -8,6 +8,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/restful-otaku/j3/internal/auth"
 )
 
 type authChallenge struct {
@@ -29,14 +33,15 @@ var challenges = struct {
 }{m: map[string]authChallenge{}}
 
 func randomCode() string {
-	buf := make([]byte, 3)
+	buf := make([]byte, 4)
 	_, _ = rand.Read(buf)
-	return fmt.Sprintf("%06d", (int(buf[0])<<16|int(buf[1])<<8|int(buf[2]))%1000000)
+	code := fmt.Sprintf("%06d", (uint32(buf[0])<<24|uint32(buf[1])<<16|uint32(buf[2])<<8|uint32(buf[3]))%1000000)
+	return code
 }
 
-// startLogin supports password, Google/Apple demo providers and passkeys.
-// Real OAuth/WebAuthn verification requires provider credentials and a WebAuthn
-// relying-party config; this endpoint models the complete UX and MFA flow.
+// startLogin verifies credentials where a password is supplied, then issues an
+// MFA challenge. External providers require their own credentials; in demo
+// mode the code is returned so the full flow can be QA'd locally.
 func (s *Server) startLogin(w http.ResponseWriter, r *http.Request) {
 	var body loginRequest
 	if err := decodeJSON(r, &body); err != nil {
@@ -47,26 +52,47 @@ func (s *Server) startLogin(w http.ResponseWriter, r *http.Request) {
 	if provider == "" {
 		provider = "password"
 	}
-	if provider == "password" && body.Password == "" {
-		writeBadRequest(w, "password is required")
-		return
-	}
 	if provider != "password" && provider != "google" && provider != "apple" && provider != "passkey" {
 		writeBadRequest(w, "unknown sign-in provider")
 		return
 	}
-	if provider != "password" && body.Email == "" {
-		writeBadRequest(w, "email is required")
+	if body.Email == "" || !strings.Contains(body.Email, "@") {
+		writeBadRequest(w, "a valid email is required")
 		return
 	}
+	if provider == "password" {
+		var hash string
+		var status string
+		if err := s.Store.QueryRowContext(r.Context(),
+			`SELECT password_hash, status FROM users WHERE email = ?`, body.Email).Scan(&hash, &status); err != nil {
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
+			return
+		}
+		if status != "active" {
+			writeJSON(w, http.StatusForbidden, map[string]string{"error": "account is not active"})
+			return
+		}
+		if bcrypt.CompareHashAndPassword([]byte(hash), []byte(body.Password)) != nil {
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
+			return
+		}
+	}
+	if provider != "password" && !demoMode() {
+		writeJSON(w, http.StatusNotImplemented, map[string]string{"error": "external sign-in is not configured"})
+		return
+	}
+
 	code := randomCode()
 	challenges.mu.Lock()
 	challenges.m[body.Email] = authChallenge{Email: body.Email, Method: provider, Code: code, Expires: time.Now().Add(5 * time.Minute)}
 	challenges.mu.Unlock()
-	// Demo mode surfaces the code so the flow can be QA'd without email/SMS.
-	writeJSON(w, http.StatusOK, map[string]any{
-		"challengeId": body.Email, "mfaRequired": true, "demoCode": code, "provider": provider,
-	})
+	response := map[string]any{
+		"challengeId": body.Email, "mfaRequired": true, "provider": provider,
+	}
+	if demoMode() {
+		response["demoCode"] = code
+	}
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) verifyLogin(w http.ResponseWriter, r *http.Request) {
@@ -80,16 +106,38 @@ func (s *Server) verifyLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	challenges.mu.Lock()
 	challenge, ok := challenges.m[body.Email]
-	delete(challenges.m, body.Email)
 	challenges.mu.Unlock()
 	if !ok || time.Now().After(challenge.Expires) || challenge.Code != body.Code {
 		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid or expired code"})
 		return
 	}
-	tokenBuf := make([]byte, 16)
-	_, _ = rand.Read(tokenBuf)
+	challenges.mu.Lock()
+	delete(challenges.m, body.Email)
+	challenges.mu.Unlock()
+
+	var userID, role, status string
+	if err := s.Store.QueryRowContext(r.Context(),
+		`SELECT id, role, status FROM users WHERE email = ?`, body.Email).
+		Scan(&userID, &role, &status); err != nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unknown account"})
+		return
+	}
+	if status != "active" {
+		writeJSON(w, http.StatusForbidden, map[string]string{"error": "account is not active"})
+		return
+	}
+	buf := make([]byte, 24)
+	_, _ = rand.Read(buf)
+	token := hex.EncodeToString(buf)
+	_, err := s.Store.ExecContext(r.Context(), `
+		INSERT INTO sessions (token, user_id, role, expires_at)
+		VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','+12 hours'))`, token, userID, role)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"token": hex.EncodeToString(tokenBuf), "email": body.Email,
-		"role": "runner", "expiresAt": time.Now().Add(12 * time.Hour).Format(time.RFC3339),
+		"token": token, "email": body.Email,
+		"role": auth.CanonicalRole(role), "expiresAt": time.Now().Add(12 * time.Hour).Format(time.RFC3339),
 	})
 }

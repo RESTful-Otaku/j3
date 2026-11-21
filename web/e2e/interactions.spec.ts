@@ -1,4 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
+import { disableTours } from './helpers';
+
+test.beforeEach(async ({ page }) => { await disableTours(page); });
 
 function watchErrors(page: Page) {
   const errors: string[] = [];
@@ -155,7 +158,7 @@ test.describe('Interactive controls', () => {
     await page.locator('.step').nth(4).click();
     await expect(page.getByText('Readiness check')).toBeVisible();
     await page.getByRole('button', { name: /Auto-generate pools/ }).click();
-    await expect(page.getByText(/Auto-generated/)).toBeVisible();
+    await expect(page.getByText(/Auto-generated/).first()).toBeVisible();
     expect(errors).toEqual([]);
   });
 

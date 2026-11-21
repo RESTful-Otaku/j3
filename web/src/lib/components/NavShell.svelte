@@ -30,6 +30,10 @@
     }
   }
   function closeMobile() { mobileOpen = false; }
+  function startTour() {
+    mobileOpen = false;
+    window.dispatchEvent(new CustomEvent('j3-start-tour', { detail: { role } }));
+  }
   function changeRole(value: string) {
     role = value as Role;
     setRole(role);
@@ -58,6 +62,7 @@
           <a class="nav-item" href={item.href} on:click={closeMobile}><span class="icon">{item.icon}</span><span>{item.label}</span></a>
         {/each}
       </nav>
+      <button class="help-btn" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
       <div class="role-picker">
         <span class="muted small">Viewing as</span>
         <select value={role} on:change={(event) => changeRole((event.target as HTMLSelectElement).value)} aria-label="Account role">
@@ -79,6 +84,7 @@
         {expanded ? '✕' : '☰'}
       </button>
     </div>
+    <button class="help-btn" aria-label="Start guided tour" title="Guided tour" on:click={startTour}>❓{#if expanded}<span>Help & tour</span>{/if}</button>
 
     <nav aria-label="Main navigation">
       {#each items as item (item.href)}
@@ -90,6 +96,7 @@
     </nav>
 
     {#if expanded}
+      <button class="help-btn" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
       <div class="role-picker">
         <span class="muted small">Viewing as</span>
         <select value={role} on:change={(event) => changeRole((event.target as HTMLSelectElement).value)} aria-label="Account role">
@@ -125,6 +132,8 @@
   .nav-item .icon { font-size:1.15rem; width:24px; text-align:center; flex:none; }
   .nav-item:hover, .nav-item:focus-visible { background:var(--brand-surface-3); color:var(--brand-ink); text-decoration:none; }
   .nav-item.icon-only { justify-content:center; padding:12px 0; }
+  .help-btn { display:flex; gap:10px; align-items:center; width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-ink); cursor:pointer; font-size:.86rem; }
+  .nav-shell.collapsed .help-btn { justify-content:center; padding:11px 0; }
   .role-picker { display:grid; gap:7px; padding:14px 8px 4px; border-top:1px solid var(--brand-border); }
   .role-picker select { padding:9px; border-radius:9px; background:var(--brand-surface-3); color:var(--brand-ink); border:1px solid var(--brand-border); }
   .collapsed-role { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--brand-primary); color:#fff; font-weight:800; margin-top:auto; }

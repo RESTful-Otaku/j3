@@ -15,6 +15,9 @@ type medalView struct {
 }
 
 func (s *Server) awardMedals(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	var body struct {
 		Gold     string   `json:"gold"`
 		Silver   string   `json:"silver"`

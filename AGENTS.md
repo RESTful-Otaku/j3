@@ -793,6 +793,18 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Final closure: real sessions/RBAC/PII hardening, full 72-path OpenAPI contract
+  with examples, route-parity and 401-boundary tests, guardian consent for minors, four seeded
+  tournament templates, public landing/signup pages, notification centre, account admin, guided
+  walkthroughs with help tooltips and role-aware login destinations. Smoke 70/70 and E2E 58/58.
+- **2026-11-21** — Security & production hardening: server-side sessions with bcrypt password
+  verification and six-digit MFA, bearer authentication middleware (public routes allow-listed),
+  role enforced from the database, per-contest assignment checks, real RBAC CRUD enforcement,
+  private-route gating for query/audit/admin/export/attendance, guardian consent for under-16s,
+  safe error mapping (404/400/401/403, generic 500), SVG uploads disabled, wildcard CORS removed,
+  localhost bind by default, full 72-path OpenAPI spec with security schemes and route-parity test,
+  API documentation with worked examples, four seeded tournament templates, landing/signup pages,
+  guided walkthroughs with help tooltips and role-based login destinations.
 - **2026-11-21** — Responsive/auth/RBAC push: icon-only collapsed nav with proper spacing, full-screen
   sliding mobile drawer, phone/tablet/landscape layouts across all 24 routes, login with password,
   Google/Apple demo providers, passkey/biometric flow and six-digit MFA, runner-configurable
@@ -951,7 +963,7 @@ _Format: `D-### | date | decision | rationale | status`._
    official assignments; `/ceremony` provides a guided animated podium sequence with PA callouts.
    A drag-and-drop `/builder` lets users compose, resize, save, clone, load and delete live widget
    dashboards, with `/ui` as a Storybook-style component gallery.
-6. **Verification — delivered**: `bun run smoke` (56 API/UI assertions), `bun run e2e` (46 browser
+6. **Verification — delivered**: `bun run smoke` (70 API/UI assertions), `bun run e2e` (58 browser
    journey + axe accessibility tests), `bun run load` (200 concurrent requests), Go race tests and
    web toast unit tests all pass. CI runs every gate on PRs before merge.
 

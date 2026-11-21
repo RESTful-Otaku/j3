@@ -45,6 +45,9 @@ func (s *Server) readiness(w http.ResponseWriter, r *http.Request) {
 // autoRun performs the heavy lifting: pools, brackets and official assignments
 // for every category that has entrants, from the organiser's configuration.
 func (s *Server) autoRun(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	const eventID = "ev-demo"
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT c.id, COALESCE(e.n, 0)

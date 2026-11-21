@@ -4,6 +4,8 @@ package seed
 import (
 	"fmt"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/restful-otaku/j3/internal/db"
 )
 
@@ -374,6 +376,28 @@ func EnsureOkami(store *db.DB) error {
 		if _, err := tx.Exec(statement.query, statement.args...); err != nil {
 			return fmt.Errorf("okami seed %q: %w", statement.query, err)
 		}
+	}
+	// Ready-to-clone templates: a full example and three empty starting points.
+	for _, template := range []struct{ id, name, config string }{
+		{"tpl-okami", "Okami Challenger (full)",
+			`{"name":"Okami Jiu Jitsu Challenger","disciplines":[{"name":"Open Hand Kata"}],"categories":[{"name":"Adults","kind":"age","min":18,"max":99}],"saveTemplate":true}`},
+		{"tpl-club", "Club open day (empty)",
+			`{"name":"Club Open Day","disciplines":[],"categories":[],"constraints":{"cap":50,"maxPools":8},"saveTemplate":true}`},
+		{"tpl-kata", "Kata only (empty)",
+			`{"name":"Kata Challenge","disciplines":[{"name":"Open Hand Kata"},{"name":"Weapons Kata"}],"categories":[],"saveTemplate":true}`},
+		{"tpl-newhaza", "Newaza tournament (empty)",
+			`{"name":"Newaza Tournament","disciplines":[{"name":"Randori / Katamewaza"},{"name":"Ground Fighting"}],"categories":[],"saveTemplate":true}`},
+	} {
+		add(`INSERT OR IGNORE INTO tournament_templates (id, tenant_id, name, config_json) VALUES (?, 'demo-tenant', ?, ?)`,
+			template.id, template.name, template.config)
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte("demo"), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.Exec(`UPDATE users SET password_hash = ? WHERE tenant_id = 'demo-tenant' AND password_hash = ''`, string(passwordHash)); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

@@ -18,7 +18,7 @@ type Config struct {
 // Load reads configuration with sensible, non-technical defaults.
 func Load() Config {
 	return Config{
-		Addr:     env("J3_ADDR", ":8787"),
+		Addr:     env("J3_ADDR", "127.0.0.1:8787"),
 		DBPath:   env("J3_DB", "./data/j3.db"),
 		Version:  env("J3_VERSION", "dev"),
 		SeedDemo: os.Getenv("J3_SEED_DEMO") == "1",

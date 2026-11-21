@@ -1,4 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
+import { disableTours } from './helpers';
+
+test.beforeEach(async ({ page }) => { await disableTours(page); });
 
 const routes = [
   '/', '/setup', '/display', '/mat', '/public', '/brackets', '/tables',

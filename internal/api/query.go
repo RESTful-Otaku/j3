@@ -23,7 +23,7 @@ var querySpecs = map[string]querySpec{
 	"fights":     {[]string{"id", "event_id", "mat_id", "category_id", "round_label", "red_fighter_id", "blue_fighter_id", "state", "outcome"}, []string{"id"}},
 	"pools":      {[]string{"id", "event_id", "category_id", "name", "sort_order"}, []string{"name"}},
 	"belt_ranks": {[]string{"id", "label", "colour", "sort_order", "grade_kind", "is_custom"}, []string{"label"}},
-	"users":      {[]string{"id", "display_name", "role", "club_id", "status"}, []string{"display_name", "email"}},
+	"users":      {[]string{"id", "display_name", "role", "club_id", "status"}, []string{"display_name"}},
 	"audit_log":  {[]string{"id", "actor_user_id", "actor_role", "action", "target_type", "target_id", "created_at"}, []string{"action"}},
 }
 
@@ -40,6 +40,11 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		writeBadRequest(w, "unknown or private table")
 		return
+	}
+	if table == "fighters" || table == "entrants" || table == "users" || table == "audit_log" {
+		if !s.requireAction(w, r, "participants", "view") {
+			return
+		}
 	}
 
 	where := []string{}

@@ -24,8 +24,36 @@ export type Role = components['schemas']['Role'];
 export type Action = components['schemas']['Action'];
 export type RoleInfo = components['schemas']['RoleInfo'];
 
+let authReady: Promise<void> | null = null;
+
+async function ensureDemoAuth() {
+  if (localStorage.getItem('j3-session')) return;
+  try {
+    const response = await fetch('/api/v1/auth/demo', { method: 'POST' });
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('j3-session', JSON.stringify(data));
+    }
+  } catch { /* production requires a real sign-in */ }
+}
+
+function ensureAuth() {
+  if (!authReady) authReady = ensureDemoAuth();
+  return authReady;
+}
+
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  await ensureAuth();
+  const session = localStorage.getItem('j3-session');
+  const headers = new Headers(init?.headers);
+  headers.set('Accept', 'application/json');
+  if (session) {
+    try {
+      const token = JSON.parse(session).token;
+      if (token) headers.set('Authorization', `Bearer ${token}`);
+    } catch { /* ignore malformed session */ }
+  }
+  const response = await fetch(url, { ...init, headers });
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText} from ${url}`);
   }

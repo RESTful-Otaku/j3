@@ -14,7 +14,8 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      command: 'cd .. && rm -f /tmp/j3-e2e.db* && go run ./cmd/j3d -addr 127.0.0.1:8791 -db /tmp/j3-e2e.db -seed',
+      command: 'cd .. && rm -f /tmp/j3-e2e.db* && go run ./cmd/j3d reset -okami -db /tmp/j3-e2e.db >/dev/null && go run ./cmd/j3d -addr 127.0.0.1:8791 -db /tmp/j3-e2e.db -seed',
+      env: { J3_DEMO: '1' },
       url: 'http://127.0.0.1:8791/healthz',
       reuseExistingServer: true,
       timeout: 120_000,
@@ -22,7 +23,7 @@ export default defineConfig({
     {
       command: 'bun run dev -- --port 5180',
       url: 'http://127.0.0.1:5180/',
-      env: { VITE_API_TARGET: 'http://127.0.0.1:8791' },
+      env: { VITE_API_TARGET: 'http://127.0.0.1:8791', J3_DEMO: '1' },
       reuseExistingServer: true,
       timeout: 120_000,
     },

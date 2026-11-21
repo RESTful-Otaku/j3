@@ -79,7 +79,9 @@ func seededServer(t *testing.T) *api.Server {
 	if err := seed.Ensure(store); err != nil {
 		t.Fatal(err)
 	}
-	return api.New(store, "test")
+	srv := api.New(store, "test")
+	srv.TestToken = "test-only"
+	return srv
 }
 
 func TestDemoAccountsCoverEveryRole(t *testing.T) {

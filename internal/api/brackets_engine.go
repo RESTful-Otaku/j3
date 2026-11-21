@@ -44,6 +44,9 @@ type bracketEntrant struct {
 }
 
 func (s *Server) buildBracket(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	var req bracketRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeBadRequest(w, err.Error())
@@ -270,6 +273,9 @@ type promoteRequest struct {
 // promoteSlot records a result in the current round (keeping the card there for
 // history) and copies the winner into the next stage's first free slot.
 func (s *Server) promoteSlot(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	slotID := r.PathValue("id")
 	var body promoteRequest
 	if err := decodeJSON(r, &body); err != nil {
@@ -291,6 +297,11 @@ func (s *Server) promoteSlot(w http.ResponseWriter, r *http.Request) {
 		state, icon = "advanced", "WP"
 	}
 	if body.ResultIcon != "" {
+		allowedIcons := map[string]bool{"WP": true, "LP": true, "DP": true, "WS": true, "LS": true, "WT": true, "LT": true}
+		if !allowedIcons[body.ResultIcon] {
+			writeBadRequest(w, "invalid result icon")
+			return
+		}
 		icon = body.ResultIcon
 	}
 	if _, err := s.Store.ExecContext(r.Context(), `

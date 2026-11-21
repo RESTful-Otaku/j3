@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { disableTours } from './helpers';
+
+test.beforeEach(async ({ page }) => { await disableTours(page); });
 import AxeBuilder from '@axe-core/playwright';
 
 const routes = ['/', '/setup', '/public', '/brackets', '/tables', '/settings', '/details', '/mat'];

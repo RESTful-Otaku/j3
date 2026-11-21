@@ -9,6 +9,9 @@ type officialAssignment struct {
 
 // assignOfficial assigns a referee, judge or scorekeeper to a contest.
 func (s *Server) assignOfficial(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	fightID := r.PathValue("id")
 	var body officialAssignment
 	if err := decodeJSON(r, &body); err != nil {

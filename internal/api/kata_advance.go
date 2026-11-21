@@ -8,6 +8,9 @@ import (
 // advanceKata promotes the top performers of the current round into the next
 // round, retaining their previous performance for the audit trail.
 func (s *Server) advanceKata(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	var body struct {
 		AdvanceCount int `json:"advanceCount"`
 	}

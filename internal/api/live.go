@@ -389,7 +389,12 @@ func (s *Server) submitFight(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) audit(r *http.Request, action, targetType, targetID, after string) {
-	userID, role := actorFromRequest(r)
+	userID, role := "system", "system"
+	if identity, ok := auth.FromContext(r.Context()); ok {
+		userID, role = identity.UserID, string(identity.Role)
+	} else {
+		userID, role = actorFromRequest(r)
+	}
 	_, _ = s.Store.ExecContext(r.Context(), `
 		INSERT INTO audit_log
 		 (tenant_id, actor_user_id, actor_role, action, target_type, target_id, after_json)

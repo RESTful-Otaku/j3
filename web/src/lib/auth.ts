@@ -4,6 +4,15 @@ export type Session = {
   token: string; email: string; role: string; expiresAt: string;
 };
 
+export function landingForRole(role: string): string {
+  switch (role) {
+    case 'runner': return '/admin';
+    case 'official': return '/official';
+    case 'club_leader': return '/club';
+    default: return '/public';
+  }
+}
+
 const KEY = 'j3-session';
 
 export function session(): Session | null {

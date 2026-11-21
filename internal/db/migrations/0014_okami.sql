@@ -60,6 +60,14 @@ CREATE TABLE IF NOT EXISTS kata_section_scores (
   PRIMARY KEY (performance_id, section_id, judge)
 );
 
+CREATE TABLE IF NOT EXISTS password_resets (
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token      TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  used       INTEGER NOT NULL DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS course_attendance (
   entrant_id   TEXT PRIMARY KEY REFERENCES entrants(id) ON DELETE CASCADE,
   attended     INTEGER NOT NULL DEFAULT 0,

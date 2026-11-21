@@ -30,7 +30,7 @@ var uploadRights = map[string]map[string]bool{
 }
 
 var allowedExtensions = map[string]bool{
-	".png": true, ".jpg": true, ".jpeg": true, ".webp": true, ".svg": true,
+	".png": true, ".jpg": true, ".jpeg": true, ".webp": true,
 }
 
 const maxUploadBytes = 5 << 20
@@ -38,6 +38,9 @@ const maxUploadBytes = 5 << 20
 // upload stores media locally with the venue data so white-label branding,
 // fighter photos, club symbols and banners survive offline events.
 func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "settings", "create") {
+		return
+	}
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
 		writeBadRequest(w, "invalid upload")
 		return

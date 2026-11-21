@@ -10,6 +10,9 @@ import (
 
 // checkIn records arrival and an official weigh-in, flagging out-of-class athletes.
 func (s *Server) checkIn(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "edit") {
+		return
+	}
 	entrantID := r.PathValue("id")
 	var body struct {
 		WeightKg float64 `json:"weightKg"`
@@ -96,6 +99,9 @@ func (s *Server) teamRankings(w http.ResponseWriter, r *http.Request) {
 
 // exportCSV provides a simple data export for spreadsheets and printed reports.
 func (s *Server) exportCSV(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "view") {
+		return
+	}
 	var query, header string
 	switch r.URL.Query().Get("type") {
 	case "entrants":
@@ -126,9 +132,14 @@ func (s *Server) exportCSV(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename=j3-export.csv")
 	writer := csv.NewWriter(w)
 	_ = writer.Write(strings.Split(header, ","))
+	columns, err := rows.Columns()
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 	for rows.Next() {
-		values := make([]any, 4)
-		pointers := make([]any, 4)
+		values := make([]any, len(columns))
+		pointers := make([]any, len(columns))
 		for i := range values {
 			pointers[i] = &values[i]
 		}
@@ -145,6 +156,9 @@ func (s *Server) exportCSV(w http.ResponseWriter, r *http.Request) {
 
 // importEntries bulk-adds clubs and fighters from a CSV-like payload.
 func (s *Server) importEntries(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "create") {
+		return
+	}
 	var body struct {
 		Rows []struct {
 			Name, Club, Belt string

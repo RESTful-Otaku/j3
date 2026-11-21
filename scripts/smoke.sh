@@ -3,6 +3,7 @@
 # every critical endpoint and UI route. Exits non-zero on any failure.
 set -uo pipefail
 export PATH="$HOME/.bun/bin:$PATH"
+export J3_DEMO=1
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
@@ -30,7 +31,8 @@ check() {
   fi
 }
 
-status() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
+status() { curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$@"; }
+status_noauth() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
 has() { curl -s "$1" | grep -q "$2" && echo 1 || echo 0; }
 
 echo "🚀 Starting venue server on $PORT"
@@ -48,7 +50,8 @@ for _ in $(seq 1 80); do
   sleep 0.25
 done
 
-echo "🔎 API checks"
+TOKEN=$(curl -s -X POST "$BASE/api/v1/auth/demo" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("token",""))' 2>/dev/null || true)
+echo "🔎 API checks (authenticated runner session)"
 check "healthz" "200" "$(status "$BASE/healthz")"
 check "readyz" "200" "$(status "$BASE/readyz")"
 check "roles" "200" "$(status "$BASE/api/v1/roles")"
@@ -95,14 +98,19 @@ check "CSV import" "201" "$(status -X POST "$BASE/api/v1/demo/import" -H 'Conten
 check "Okami event config" "200" "$(status "$BASE/api/v1/demo/event-config?eventId=ev-okami")"
 check "course attendance" "200" "$(status "$BASE/api/v1/demo/attendance")"
 check "techniques" "200" "$(status "$BASE/api/v1/demo/techniques")"
-check "login" "200" "$(status -X POST "$BASE/api/v1/auth/login" -H 'Content-Type: application/json' -d '{"email":"qa@j3.test","provider":"password","password":"demo"}')"
+check "login" "200" "$(status -X POST "$BASE/api/v1/auth/login" -H 'Content-Type: application/json' -d '{"email":"tony@okami.j3","provider":"password","password":"demo"}')"
 check "permissions" "200" "$(status "$BASE/api/v1/demo/permissions?init=1")"
+check "announcements" "200" "$(status "$BASE/api/v1/demo/announcements")"
+check "suggestions" "200" "$(status "$BASE/api/v1/demo/suggestions")"
+check "templates" "200" "$(status "$BASE/api/v1/templates")"
+check "minor guardian required" "400" "$(status -X POST "$BASE/api/v1/signup" -H 'Content-Type: application/json' -d '{"name":"Minor","email":"minor@example.com","dateOfBirth":"2015-01-01","unitSystem":"metric","heightCm":140,"weightKg":35,"accountType":"fighter"}')"
+check "mutation without token" "401" "$(status_noauth -X POST "$BASE/api/v1/demo/brackets/build" -H 'Content-Type: application/json' -d '{}')"
 
 echo "🔎 Data assertions"
 check "simulator has medals" "1" "$(has "$BASE/api/v1/demo/simulate?fighters=50" '"medals"')"
 check "query rejects bad table" "400" "$(status "$BASE/api/v1/query?table=sqlite_master")"
 check "signup rejects bad email" "400" "$(status -X POST "$BASE/api/v1/signup" -H 'Content-Type: application/json' -d '{"name":"A","email":"bad","dateOfBirth":"1990-01-01"}')"
-check "fighter cannot submit result" "403" "$(status -X POST "$BASE/api/v1/fights/fight-01/submit" -H 'Content-Type: application/json' -H 'X-J3-Role: fighter' -d '{"outcome":"win_red"}')"
+check "unauthenticated submit is blocked" "401" "$(status_noauth -X POST "$BASE/api/v1/fights/fight-01/submit" -H 'Content-Type: application/json' -d '{"outcome":"win_red"}')"
 
 echo "🔎 UI routes"
 export PATH="$HOME/.bun/bin:$PATH"

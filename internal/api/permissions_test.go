@@ -7,9 +7,10 @@ import (
 )
 
 func TestLoginMFAAndPermissions(t *testing.T) {
+	t.Setenv("J3_DEMO", "1")
 	srv := seededServer(t)
 	start := postJSON(t, srv, "/api/v1/auth/login", map[string]any{
-		"email": "tony@okami.j3", "provider": "google",
+		"email": "runner@demo.j3", "provider": "google",
 	})
 	if start.Code != http.StatusOK {
 		t.Fatalf("login = %d: %s", start.Code, start.Body.String())
@@ -25,7 +26,7 @@ func TestLoginMFAAndPermissions(t *testing.T) {
 	}
 
 	verified := postJSON(t, srv, "/api/v1/auth/verify", map[string]any{
-		"email": "tony@okami.j3", "code": challenge.DemoCode,
+		"email": "runner@demo.j3", "code": challenge.DemoCode,
 	})
 	if verified.Code != http.StatusOK {
 		t.Fatalf("verify = %d: %s", verified.Code, verified.Body.String())
@@ -40,7 +41,7 @@ func TestLoginMFAAndPermissions(t *testing.T) {
 		t.Fatal("no token")
 	}
 
-	bad := postJSON(t, srv, "/api/v1/auth/verify", map[string]any{"email": "tony@okami.j3", "code": "000000"})
+	bad := postJSON(t, srv, "/api/v1/auth/verify", map[string]any{"email": "runner@demo.j3", "code": "000000"})
 	if bad.Code != http.StatusUnauthorized {
 		t.Fatalf("replayed code = %d", bad.Code)
 	}

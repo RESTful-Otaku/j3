@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { disableTours } from './helpers';
+
+test.beforeEach(async ({ page }) => { await disableTours(page); });
 
 test('login with Google and MFA, then sign out', async ({ page }) => {
   await page.goto('/login');

@@ -3,6 +3,7 @@
   import '../app.css';
   import ToastHost from '../lib/components/ToastHost.svelte';
   import NavShell from '../lib/components/NavShell.svelte';
+  import TourOverlay from '../lib/components/TourOverlay.svelte';
   import { goto } from '$app/navigation';
   import { currentRole, itemsForRole } from '../lib/nav';
 
@@ -13,7 +14,7 @@
     window.addEventListener('resize', sync);
 
     const path = window.location.pathname;
-    const open = new Set(['/', '/login', '/public', '/event', '/brackets', '/tables', '/pools', '/details', '/simulate', '/view', '/ui']);
+    const open = new Set(['/', '/login', '/signup', '/welcome', '/public', '/event', '/brackets', '/tables', '/pools', '/details', '/simulate', '/view', '/ui']);
     if (!open.has(path)) {
       const allowed = itemsForRole(currentRole()).some((item) => item.href === path);
       if (!allowed) void goto('/');
@@ -24,6 +25,7 @@
 
 <NavShell />
 <ToastHost />
+<TourOverlay />
 <div class:mobile class="app-content"><slot /></div>
 
 <style>

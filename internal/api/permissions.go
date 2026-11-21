@@ -68,6 +68,9 @@ func (s *Server) permissions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) updatePermission(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "settings", "edit") {
+		return
+	}
 	var body struct {
 		Role, Resource, Flag string
 		Value                bool

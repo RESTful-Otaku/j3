@@ -10,6 +10,9 @@ import (
 // forfeitFight records an injury, technical forfeit or disqualification and
 // locks the result so downstream displays and standings stay consistent.
 func (s *Server) forfeitFight(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	fightID := r.PathValue("id")
 	var body struct {
 		Reason string `json:"reason"`
@@ -70,6 +73,9 @@ var allowedEntrantStatuses = map[string]bool{
 // entrantStatus handles dropouts and no-shows; pool generation automatically
 // excludes inactive entrants on the next generate call.
 func (s *Server) entrantStatus(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "edit") {
+		return
+	}
 	entrantID := r.PathValue("id")
 	var body struct {
 		Status string `json:"status"`

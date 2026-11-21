@@ -27,7 +27,8 @@ Every push/PR runs:
 - **E2E**: Playwright journeys across every route plus axe-core WCAG A/AA scans.
 - **required-checks**: aggregate gate; PR cannot merge unless all pass.
 
-Local equivalents: `bun run smoke`, `bun run load`, `bun run e2e` (after `bun run e2e:install`).
+Local equivalents: `bun run smoke` (70 checks), `bun run load`, `bun run e2e` (58 checks;
+`bun run e2e:install` once). The E2E suite also verifies guardian consent, guided tours and RBAC.
 
 The E2E suite includes phone (390×844), tablet portrait (768×1024) and tablet landscape
 (1024×768) checks, plus login/MFA and RBAC permission tests.

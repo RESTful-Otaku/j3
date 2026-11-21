@@ -149,3 +149,14 @@ func TestGenerateAndListPools(t *testing.T) {
 		t.Fatalf("list status = %d", listed.Code)
 	}
 }
+
+func TestMinorRequiresGuardianConsent(t *testing.T) {
+	srv := seededServer(t)
+	rec := postJSON(t, srv, "/api/v1/signup", map[string]any{
+		"name": "Minor", "email": "minor@example.com", "dateOfBirth": "2014-05-01",
+		"unitSystem": "metric", "heightCm": 140, "weightKg": 35, "accountType": "fighter",
+	})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("minor without guardian = %d", rec.Code)
+	}
+}

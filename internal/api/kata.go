@@ -28,6 +28,9 @@ type kataPerformanceView struct {
 }
 
 func (s *Server) createKataPerformance(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "create") {
+		return
+	}
 	var body struct {
 		FighterID   string  `json:"fighterId"`
 		KataName    string  `json:"kataName"`
@@ -73,6 +76,9 @@ func (s *Server) createKataPerformance(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) submitKataScore(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "fights", "edit") {
+		return
+	}
 	id := r.PathValue("id")
 	var body struct {
 		Judge int     `json:"judge"`
