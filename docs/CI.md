@@ -29,6 +29,12 @@ Every push/PR runs:
 
 Local equivalents: `bun run smoke`, `bun run load`, `bun run e2e` (after `bun run e2e:install`).
 
+The E2E suite includes phone (390×844), tablet portrait (768×1024) and tablet landscape
+(1024×768) checks, plus login/MFA and RBAC permission tests.
+
+Real Google/Apple OAuth and device passkeys require provider credentials and an Apple
+developer account; the demo models the complete UX with visible MFA codes for QA.
+
 ## Mobile (`.github/workflows/mobile.yml`)
 
 - **Android**: syncs Capacitor, builds a debug APK, uploads it as a workflow artifact.

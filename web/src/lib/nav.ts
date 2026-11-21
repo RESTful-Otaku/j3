@@ -8,6 +8,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Dashboard', icon: '🏠', roles: ['runner', 'official', 'club_leader', 'fighter', 'spectator'] },
   { href: '/public', label: 'Public board', icon: '📺', roles: ['runner', 'official', 'club_leader', 'fighter', 'spectator'] },
   { href: '/display', label: 'Live scoreboard', icon: '🥊', roles: ['runner', 'official'] },
+  { href: '/ceremony', label: 'Medal ceremony', icon: '🏅', roles: ['runner', 'official', 'club_leader', 'fighter', 'spectator'] },
   { href: '/official', label: 'Official console', icon: '🎯', roles: ['runner', 'official'] },
   { href: '/mat', label: 'Mat control', icon: '🎛️', roles: ['runner', 'official'] },
   { href: '/brackets', label: 'Brackets', icon: '🏆', roles: ['runner', 'official', 'club_leader', 'fighter', 'spectator'] },
@@ -21,6 +22,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/audit', label: 'Audit trail', icon: '📜', roles: ['runner', 'official'] },
   { href: '/data', label: 'Data explorer', icon: '🔎', roles: ['runner', 'official'] },
   { href: '/control', label: 'Display control', icon: '🖥️', roles: ['runner', 'official'] },
+  { href: '/permissions', label: 'Access control', icon: '🔐', roles: ['runner'] },
   { href: '/settings', label: 'Settings', icon: '⚙️', roles: ['runner', 'official', 'club_leader', 'fighter', 'spectator'] },
   { href: '/ui', label: 'Components', icon: '🧩', roles: ['runner'] },
 ];

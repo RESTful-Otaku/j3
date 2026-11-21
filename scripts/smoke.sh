@@ -95,6 +95,8 @@ check "CSV import" "201" "$(status -X POST "$BASE/api/v1/demo/import" -H 'Conten
 check "Okami event config" "200" "$(status "$BASE/api/v1/demo/event-config?eventId=ev-okami")"
 check "course attendance" "200" "$(status "$BASE/api/v1/demo/attendance")"
 check "techniques" "200" "$(status "$BASE/api/v1/demo/techniques")"
+check "login" "200" "$(status -X POST "$BASE/api/v1/auth/login" -H 'Content-Type: application/json' -d '{"email":"qa@j3.test","provider":"password","password":"demo"}')"
+check "permissions" "200" "$(status "$BASE/api/v1/demo/permissions?init=1")"
 
 echo "🔎 Data assertions"
 check "simulator has medals" "1" "$(has "$BASE/api/v1/demo/simulate?fighters=50" '"medals"')"

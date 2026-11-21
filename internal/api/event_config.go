@@ -109,7 +109,10 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 	formatRows, err := s.Store.QueryContext(r.Context(), `
 		SELECT discipline_id, format, knockout, third_place, order_policy, dual_bronze, retry_ties
 		FROM discipline_formats WHERE event_id = ?`, eventID)
-	if err != nil { writeError(w, err); return }
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 	for formatRows.Next() {
 		var item struct {
 			Discipline, Format, Knockout, Third, Order string

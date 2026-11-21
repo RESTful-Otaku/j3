@@ -1,0 +1,49 @@
+import { postJson } from './api';
+
+export type Session = {
+  token: string; email: string; role: string; expiresAt: string;
+};
+
+const KEY = 'j3-session';
+
+export function session(): Session | null {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Session;
+    if (new Date(parsed.expiresAt).getTime() < Date.now()) {
+      localStorage.removeItem(KEY);
+      return null;
+    }
+    return parsed;
+  } catch { return null; }
+}
+
+export function saveSession(value: Session) { localStorage.setItem(KEY, JSON.stringify(value)); }
+export function clearSession() { localStorage.removeItem(KEY); }
+
+export async function login(email: string, provider: string, password?: string) {
+  return postJson<{ challengeId: string; mfaRequired: boolean; demoCode: string; provider: string }>(
+    '/api/v1/auth/login', { email, password, provider },
+  );
+}
+
+export async function verify(email: string, code: string) {
+  const result = await postJson<Session>('/api/v1/auth/verify', { email, code });
+  saveSession(result);
+  return result;
+}
+
+export async function passkey(email: string) {
+  if ('PublicKeyCredential' in window) {
+    // Real relying-party verification is configured server-side in production.
+    try {
+      await navigator.credentials.create({ publicKey: {
+        challenge: new Uint8Array(32), rp: { name: 'J3' },
+        user: { id: new Uint8Array(16), name: email, displayName: email },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+      } });
+    } catch { /* demo falls back to the MFA code */ }
+  }
+  return login(email, 'passkey');
+}

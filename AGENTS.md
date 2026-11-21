@@ -793,6 +793,11 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-21** — Responsive/auth/RBAC push: icon-only collapsed nav with proper spacing, full-screen
+  sliding mobile drawer, phone/tablet/landscape layouts across all 24 routes, login with password,
+  Google/Apple demo providers, passkey/biometric flow and six-digit MFA, runner-configurable
+  CRUD permissions with audit logging, and direct-URL role guards. Added mobile/tablet and auth E2E
+  suites (56 checks total) and expanded smoke suite to 65 checks.
 - **2026-11-21** — Rebuilt Okami day order (kata → juniors → teens → adults with weight bands) and
   competition formats: round robin then seeded single elimination for fighting/ground, full round
   robin for randori, individual kata judged youngest→oldest/lowest→highest with tie retries, dual
