@@ -120,11 +120,14 @@ jobs:
           bun-version: 1.4.5
       - name: Start venue server
         run: |
-          go run ./cmd/j3d -addr 127.0.0.1:8787 -db /tmp/j3-load.db -seed > /tmp/j3-load-server.log 2>&1 &
-          for _ in $(seq 1 60); do
-            curl -fsS http://127.0.0.1:8787/healthz >/dev/null && break
-            sleep 0.25
+          go build -o /tmp/j3-load-bin ./cmd/j3d
+          /tmp/j3-load-bin -addr 127.0.0.1:8787 -db /tmp/j3-load.db -seed > /tmp/j3-load-server.log 2>&1 &
+          for _ in $(seq 1 90); do
+            curl -fsS http://127.0.0.1:8787/healthz >/dev/null && exit 0
+            sleep 1
           done
+          cat /tmp/j3-load-server.log
+          exit 1
       - name: 200 concurrent requests
         run: bun run load
 
