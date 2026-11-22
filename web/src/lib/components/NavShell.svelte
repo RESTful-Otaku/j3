@@ -124,16 +124,21 @@
 
 {#if isMobile}
   <header class="mobile-bar">
-    <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard" on:click={closeMobile}>J3</a>
-    <span class="mobile-title">{$eventTitle}</span>
-    <button class="hamburger" data-guide="nav-mobile-menu" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
+    <div class="mobile-bar-row">
+      <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard" on:click={closeMobile}>J3</a>
+      <button class="hamburger" data-guide="nav-mobile-menu" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
+    </div>
+    <div class="mobile-event" title={$eventTitle}>
+      <span class="mobile-event-label">Event</span>
+      <span class="mobile-event-title">{$eventTitle}</span>
+    </div>
   </header>
 
   {#if mobileOpen}
     <button class="scrim" aria-label="Close navigation" on:click={closeMobile}></button>
     <aside class="mobile-drawer" aria-label="Navigation">
-      <div class="drawer-head">
-        <span class="brand-name">{$eventTitle}</span>
+      <div class="drawer-head" title={$eventTitle}>
+        <span class="event-card-title">{$eventTitle}</span>
         <button class="hamburger" aria-label="Close navigation" on:click={closeMobile}>✕</button>
       </div>
       <nav aria-label="Main navigation">
@@ -195,11 +200,16 @@
   <aside class:collapsed={!expanded} class="nav-shell">
     <div class="nav-head">
       <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard">J3</a>
-      {#if expanded}<span class="brand-name">{$eventTitle}</span>{/if}
       <button class="hamburger" aria-label={expanded ? 'Collapse navigation' : 'Expand navigation'} aria-expanded={expanded} on:click={toggle}>
         {expanded ? '✕' : '☰'}
       </button>
     </div>
+    {#if expanded}
+      <div class="event-card" title={$eventTitle}>
+        <span class="event-card-label">Event</span>
+        <span class="event-card-title">{$eventTitle}</span>
+      </div>
+    {/if}
     <button class="help-btn" data-guide="nav-help-compact" aria-label="Start guided tour" title="Guided tour" on:click={startTour}>
       ❓{#if expanded}<span>Help & guided tour</span>{/if}
     </button>
@@ -267,9 +277,11 @@
     box-shadow:8px 0 30px rgba(0,0,0,.25); transition:width .2s ease;
   }
   .nav-shell.collapsed { width:76px; padding:18px 10px; align-items:center; }
-  .nav-head { display:flex; align-items:center; gap:10px; min-height:46px; padding:2px 4px 12px; }
+  .nav-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:46px; padding:2px 4px 8px; }
   .nav-shell.collapsed .nav-head { flex-direction:column; gap:8px; width:100%; padding:2px 0 10px; }
-  .brand-name { font-family:var(--font-display); font-weight:800; white-space:nowrap; font-size:1.05rem; }
+  .event-card { display:grid; gap:2px; min-width:0; padding:10px 12px; border-radius:12px; background:var(--brand-surface-3); border:1px solid var(--brand-border); }
+  .event-card-label, .mobile-event-label { text-transform:uppercase; letter-spacing:.14em; font-size:.58rem; font-weight:900; color:var(--brand-muted); }
+  .event-card-title { font-family:var(--font-display); font-weight:800; font-size:.88rem; line-height:1.25; min-width:0; overflow:hidden; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; }
   .hamburger { background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-ink); border-radius:9px; padding:8px 10px; cursor:pointer; line-height:1; font-size:1rem; min-width:38px; }
   .nav-shell.collapsed .hamburger { margin:0 auto; }
   nav { display:grid; gap:2px; overflow-y:auto; flex:1; width:100%; scrollbar-width:thin; }
@@ -288,8 +300,10 @@
   .role-picker { display:grid; gap:7px; padding:14px 8px 4px; border-top:1px solid var(--brand-border); }
   .role-picker select { padding:9px; border-radius:9px; background:var(--brand-surface-3); color:var(--brand-ink); border:1px solid var(--brand-border); }
   .collapsed-role { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--brand-primary); color:#fff; font-weight:800; margin-top:auto; }
-  .mobile-bar { position:fixed; top:0; left:0; right:0; height:60px; z-index:810; display:flex; align-items:center; gap:12px; padding:0 14px; background:var(--brand-surface-2); border-bottom:1px solid var(--brand-border); }
-  .mobile-title { font-family:var(--font-display); font-weight:800; }
+  .mobile-bar { position:fixed; top:0; left:0; right:0; z-index:810; display:grid; gap:3px; padding:7px 14px 8px; background:var(--brand-surface-2); border-bottom:1px solid var(--brand-border); }
+  .mobile-bar-row { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:34px; }
+  .mobile-event { display:grid; gap:1px; min-width:0; }
+  .mobile-event-title { font-family:var(--font-display); font-weight:800; font-size:.8rem; line-height:1.2; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mobile-bar .hamburger { margin-left:auto; }
   .mobile-bottom {
     position:fixed; left:0; right:0; bottom:0; z-index:815;
@@ -309,7 +323,8 @@
   .quick-item:hover, .quick-item:focus-visible { color:var(--brand-ink); text-decoration:none; }
   .scrim { position:fixed; inset:0; z-index:820; background:rgba(2,6,23,.65); border:0; cursor:pointer; }
   .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(86vw, 340px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:18px; display:flex; flex-direction:column; gap:12px; box-shadow:-16px 0 44px rgba(0,0,0,.45); animation:slide .22s ease-out; }
-  .drawer-head { display:flex; align-items:center; justify-content:space-between; }
+  .drawer-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; }
+  .drawer-head .event-card-title { flex:1; }
   .mobile-drawer nav { display:grid; gap:3px; overflow-y:auto; flex:1; }
   .mobile-drawer .nav-item { min-height:46px; }
   .mobile-drawer .group-label, .mobile-drawer .group-toggle { margin-top:10px; }

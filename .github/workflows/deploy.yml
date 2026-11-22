@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          pattern: deploy-production-*
+          pattern: j3-server-release-*
           path: artifacts
           merge-multiple: true
       - uses: actions/upload-artifact@v7

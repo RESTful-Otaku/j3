@@ -31,7 +31,7 @@ jobs:
     secrets: inherit
 
   package:
-    name: Production server & web client
+    name: Hosted server executable
     needs: [verify, mobile]
     runs-on: ubuntu-latest
     steps:
@@ -39,60 +39,48 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: '1.27'
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.5
-      - run: bun install --cwd web --frozen-lockfile
-      - name: Build production server binaries
+      - name: Build production server executable
         run: |
-          mkdir -p dist/bin dist/web
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o dist/bin/j3d-linux-amd64 ./cmd/j3d
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -o dist/bin/j3d-linux-arm64 ./cmd/j3d
-          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -o dist/bin/j3d-darwin-arm64 ./cmd/j3d
-          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -o dist/bin/j3d-windows-amd64.exe ./cmd/j3d
-      - name: Build final production web client
-        run: |
-          bun run sync:api-docs
-          bun run --cwd web build
-          cp -R web/build/. dist/web/
-          cp LICENSE dist/LICENSE
-      - name: Verify production bundle
-        run: |
-          test -x dist/bin/j3d-linux-amd64
-          test -x dist/bin/j3d-linux-arm64
-          test -x dist/bin/j3d-darwin-arm64
-          test -f dist/bin/j3d-windows-amd64.exe
-          test -f dist/web/index.html
-          test -f dist/web/openapi.yaml
-          test -f dist/web/docs/manifest.json
-          test -f dist/web/docs/HOSTING.md
-          test -f dist/web/docs/hosting.html
-          test -f dist/LICENSE
-          tar -czf "dist/j3-production-${GITHUB_SHA::7}.tar.gz" -C dist bin web LICENSE
-          test -s "dist/j3-production-${GITHUB_SHA::7}.tar.gz"
-          echo "✅ Production server, client, API, docs site and licence are packaged"
+          mkdir -p dist
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath \
+            -o dist/j3-server-linux-amd64 ./cmd/j3d
+          test -x dist/j3-server-linux-amd64
+          echo "✅ Hosted server executable built"
       - uses: actions/upload-artifact@v7
         with:
-          name: j3-production-release-${{ github.sha }}
-          path: dist/j3-production-*.tar.gz
-      - uses: actions/upload-artifact@v7
-        with:
-          name: deploy-production-${{ github.sha }}
-          path: dist
+          name: j3-server-release-${{ github.sha }}
+          path: dist/j3-server-linux-amd64
+          if-no-files-found: error
 
   publish:
     name: Publish GitHub release
     needs: [verify, mobile, package]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v8
+      - name: Download server executable
+        uses: actions/download-artifact@v8
         with:
-          pattern: j3-*
+          name: j3-server-release-${{ github.sha }}
           path: artifacts
-          merge-multiple: true
+      - name: Download Android client
+        uses: actions/download-artifact@v8
+        with:
+          name: j3-android-release-${{ github.sha }}
+          path: artifacts
+      - name: Download iOS client
+        uses: actions/download-artifact@v8
+        with:
+          name: j3-ios-production-${{ github.sha }}
+          path: artifacts
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
-          files: artifacts/**
+          # GitHub auto-attaches "Source code (zip/tar.gz)" for every release.
+          # Only the hosted server executable, production APK and simulator .app
+          # are uploaded here, matching the published-asset policy.
+          files: |
+            artifacts/j3-server-linux-amd64
+            artifacts/j3-android-*.apk
+            artifacts/j3-ios-*.app.zip
           generate_release_notes: true
           draft: false
