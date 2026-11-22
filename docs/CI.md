@@ -2,73 +2,29 @@
 
 ## Branches
 
-`main` is protected: all changes arrive through a pull request. Use a prefixed branch:
-
-| Prefix | Purpose |
-|---|---|
-| `feature/` | new capability |
-| `bug/` | defect |
-| `fix/` | correction |
-| `chore/` | maintenance |
-| `perf/` | performance work |
-| `improv/` | UI/UX refinement |
-| `release/` | release preparation |
-| `hotfix/` | urgent production fix |
-
-`develop` is optional integration branch. `ci.yml` validates the branch prefix on PRs.
+`main` is protected. PRs run verification; release tags build artifacts.
 
 ## Automated gates (`.github/workflows/ci.yml`)
 
-Every push/PR runs:
-- **Go**: `go vet`, tests (unit/property/simulation), race detector, binary build.
-- **Web (Bun)**: type check, Vitest, production build.
-- **Smoke**: boots the real venue server and verifies 52 API/workflow/UI assertions.
-- **Load**: 200 concurrent requests against a running venue server.
-- **E2E**: Playwright journeys across every route plus axe-core WCAG A/AA scans.
-- **required-checks**: aggregate gate; PR cannot merge unless all pass.
-
-Local equivalents: `bun run smoke:full` (70 checks, seeded tournament), `bun run load`, `bun run e2e` (58 checks;
-`bun run e2e:install` once). The E2E suite also verifies guardian consent, guided tours and RBAC.
-
-The E2E suite includes phone (390×844), tablet portrait (768×1024) and tablet landscape
-(1024×768) checks, plus login/MFA and RBAC permission tests.
-
-Real Google/Apple OAuth and device passkeys require provider credentials and an Apple
-developer account; the demo models the complete UX with visible MFA codes for QA.
+Go vet/test/race/build; Bun check/test/build; generated-type parity; OpenAPI route parity; smoke
+suite; Playwright + axe E2E; workflow syntax checks. All must pass before merge.
 
 ## Mobile (`.github/workflows/mobile.yml`)
 
-- **Android**: syncs Capacitor, builds a debug APK, uploads it as a workflow artifact.
-- **iOS**: builds an unsigned simulator `.app` on macOS and uploads a zip artifact.
-  A device-installable IPA is produced automatically when the `APPLE_CERTIFICATE_P12`,
-  `APPLE_CERTIFICATE_PASSWORD`, `APPLE_PROVISIONING_PROFILE`, `APPLE_TEAM_ID` and
-  `APPLE_PROVISIONING_PROFILE_NAME` secrets are configured; otherwise the simulator `.app` only.
-
-Download the artifact from the workflow run, unzip, and install the APK on Android via
-`adb install -r j3-debug.apk`. iOS simulator builds can be dragged onto the iOS Simulator.
+Builds an Android APK and iOS simulator app. Mobile builds regenerate icons, seed a mid-event Okami
+2027 database, capture a read-only API snapshot and set `VITE_OFFLINE_DEMO=1`. Artifacts are uploaded
+for QA.
 
 ## Environments (`.github/workflows/deploy.yml`)
 
-Manual `workflow_dispatch` deploys to `development`, `staging` and `production` in order, each
-behind a GitHub **environment** (configure required reviewers in repository settings). Set
-`DEPLOY_HOST*`, `DEPLOY_USER` and `DEPLOY_PATH*` secrets to enable rsync deployment; without a
-host the workflow validates the bundle locally.
+Staging/production deploys are environment-gated. Hosted owner credentials come from `J3_OWNER_*`;
+never commit passwords.
 
 ## Releases (`.github/workflows/release.yml`)
 
-Triggered by pushing a `v*` tag (or manual dispatch). It re-runs CI, builds mobile artifacts,
-packages the Go binaries (Linux, macOS, Windows), copies the static web build, and publishes
-everything as a GitHub release with generated notes.
+Tag-driven release builds attach server binaries and mobile artifacts. Signed IPA needs Apple secrets.
 
 ## Local rigour
 
-```sh
-git config core.hooksPath .githooks   # enable pre-push checks
-bun run test                          # Go + web unit tests
-bun run check                         # types
-bun run build                         # production build
-bun run smoke                         # full-stack verification
-bun run demo                          # manual QA
-```
-
-The pre-push hook rejects badly named branches and runs the test suite before pushing.
+Run `bun run cicd` or `bun run test:tui` before pushing. `bun run docs` rebuilds the documentation
+site; `bun run sync:api-docs` keeps the contract/guides/search index in sync.

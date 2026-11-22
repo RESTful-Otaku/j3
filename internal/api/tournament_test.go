@@ -26,12 +26,28 @@ func TestCreateTournamentAndAudit(t *testing.T) {
 		TemplateID      string `json:"templateId"`
 		DisciplineCount int    `json:"disciplineCount"`
 		InviteCount     int    `json:"inviteCount"`
+		InviteLinks     []struct {
+			Email     string `json:"email"`
+			Role      string `json:"role"`
+			Token     string `json:"token"`
+			InviteURL string `json:"inviteUrl"`
+		} `json:"inviteLinks"`
 	}
 	if err := json.Unmarshal(rec.Body.Bytes(), &created); err != nil {
 		t.Fatal(err)
 	}
 	if created.EventID == "" || created.TemplateID == "" || created.DisciplineCount != 1 || created.InviteCount != 1 {
 		t.Fatalf("unexpected result: %+v", created)
+	}
+	if len(created.InviteLinks) != 1 || created.InviteLinks[0].Token == "" ||
+		created.InviteLinks[0].InviteURL != "/invite/"+created.InviteLinks[0].Token {
+		t.Fatalf("wizard invite links = %+v", created.InviteLinks)
+	}
+	accepted := postJSON(t, srv, "/api/v1/invites/accept", map[string]any{
+		"token": created.InviteLinks[0].Token, "name": "Judge Example", "password": "newpassword123",
+	})
+	if accepted.Code != http.StatusOK {
+		t.Fatalf("wizard invite acceptance = %d: %s", accepted.Code, accepted.Body.String())
 	}
 
 	templates := httptest.NewRecorder()

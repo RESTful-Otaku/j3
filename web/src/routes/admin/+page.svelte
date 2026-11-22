@@ -1,12 +1,39 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getJson, postJson } from '../../lib/api';
+  import { getJson, postJson, type InviteLink } from '../../lib/api';
   import { notifySuccess, notifyError } from '../../lib/toast';
 
   type Account = { id: string; name: string; email: string; role: string; status: string; club: string; roleRequest: string };
   let users: Account[] = [];
   let search = '';
   let role = '';
+
+  let inviteName = '';
+  let inviteEmail = '';
+  let inviteRole = 'fighter';
+  let inviteClub = '';
+  let lastInvite: InviteLink | null = null;
+  let inviting = false;
+
+  const inviteRoles = [
+    ['admin', 'Admin / owner'],
+    ['tournament_runner', 'Tournament runner'],
+    ['official', 'Official'],
+    ['club_leader', 'Club leader'],
+    ['fighter', 'Fighter'],
+    ['spectator', 'Spectator'],
+  ];
+
+  async function copyInvite() {
+    if (!lastInvite) return;
+    const url = new URL(lastInvite.inviteUrl ?? `/invite/${lastInvite.token}`, window.location.origin).toString();
+    try {
+      await navigator.clipboard.writeText(url);
+      notifySuccess('Invite link copied');
+    } catch {
+      notifyError('Copy failed — select and copy the link manually');
+    }
+  }
 
   async function load() {
     try { users = (await getJson<{ users: Account[] }>('/api/v1/demo/admin/users')).users; }
@@ -28,6 +55,22 @@
     } catch (error) { notifyError(error instanceof Error ? error.message : 'Reset failed'); }
   }
 
+  async function sendInvite() {
+    if (!inviteEmail.trim()) { notifyError('Enter an email address'); return; }
+    inviting = true;
+    try {
+      lastInvite = await postJson<InviteLink>('/api/v1/invites', {
+        name: inviteName.trim(), email: inviteEmail.trim(), role: inviteRole,
+        ...(inviteClub.trim() ? { clubName: inviteClub.trim() } : {}),
+      });
+      notifySuccess(`Invite sent to ${inviteEmail.trim()}`);
+      inviteName = ''; inviteEmail = ''; inviteClub = '';
+      await load();
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : 'Could not send invite');
+    } finally { inviting = false; }
+  }
+
   $: filtered = users.filter((user) =>
     (!role || user.role === role) &&
     `${user.name} ${user.email} ${user.club}`.toLowerCase().includes(search.toLowerCase()));
@@ -41,11 +84,33 @@
     <a class="btn" href="/permissions">🔐 Permissions</a>
   </header>
 
+  <section class="card invite-card">
+    <h2>Invite an account</h2>
+    <p class="muted small">Invitations are bound to your authority: club leaders can only invite into their own club.</p>
+    <div class="invite-grid">
+      <label class="field">Name<input aria-label="Invite name" bind:value={inviteName} /></label>
+      <label class="field">Email<input type="email" aria-label="Invite email" bind:value={inviteEmail} /></label>
+      <label class="field">Role<select aria-label="Invite role" bind:value={inviteRole}>
+        {#each inviteRoles as [value, label]}<option {value}>{label}</option>{/each}
+      </select></label>
+      <label class="field">Club name (optional)<input aria-label="Club name" bind:value={inviteClub} /></label>
+    </div>
+    <button class="btn primary" disabled={inviting} on:click={sendInvite}>Send invite</button>
+    {#if lastInvite}
+      <div class="invite-result" role="status">
+        <strong>Invite ready for {lastInvite.email}</strong>
+        <div><span class="muted small">Link</span> <code>{lastInvite.inviteUrl ?? `/invite/${lastInvite.token}`}</code></div>
+        <div><span class="muted small">Token</span> <code>{lastInvite.token}</code></div>
+        <button class="btn" on:click={copyInvite}>Copy link</button>
+      </div>
+    {/if}
+  </section>
+
   <div class="card" style="margin-bottom:16px; display:flex; gap:10px; flex-wrap:wrap;">
     <input class="tab" style="color:var(--brand-ink); cursor:text;" placeholder="Search name, email or club…" bind:value={search} />
     <select class="tab" style="color:var(--brand-ink);" bind:value={role}>
       <option value="">All roles</option>
-      {#each ['tournament_runner','official','club_leader','fighter','spectator'] as r}<option value={r}>{r}</option>{/each}
+      {#each ['admin','tournament_runner','official','club_leader','fighter','spectator'] as r}<option value={r}>{r}</option>{/each}
     </select>
     <span class="pill">{filtered.length} shown</span>
   </div>
@@ -73,5 +138,11 @@
 </div>
 
 <style>
+  .invite-card { margin-bottom:16px; }
+  .invite-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin:12px 0; }
+  .field { display:grid; gap:4px; font-size:.8rem; color:var(--brand-muted); }
+  .field input, .field select { padding:9px; border-radius:9px; background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-ink); }
+  .invite-result { margin-top:14px; padding:12px; border-radius:12px; background:var(--brand-surface-3); display:grid; gap:6px; }
+  code { background:var(--brand-surface-2); padding:2px 6px; border-radius:6px; word-break:break-all; }
   @media (max-width: 820px) { table { display:block; overflow-x:auto; white-space:nowrap; } }
 </style>

@@ -9,6 +9,14 @@
       "file": "USER_GUIDE.md"
     },
     {
+      "slug": "auth",
+      "title": "Accounts & invitations",
+      "description": "Demo logins, hosted owner bootstrap and the admin-to-participant invite chain.",
+      "icon": "🔑",
+      "group": "Start here",
+      "file": "AUTH_GUIDE.md"
+    },
+    {
       "slug": "runner",
       "title": "Runner guide",
       "description": "The full event path: create, check in, score, publish and audit.",

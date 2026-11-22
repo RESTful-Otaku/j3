@@ -25,11 +25,12 @@ var allowedUploadKinds = map[string]bool{
 
 // Upload rights follow the RBAC hierarchy: fighters and officials may upload a
 // photo; clubs and runners may upload a logo and banner.
-var uploadRights = map[string]map[string]bool{
-	"fighter":           {"photo": true, "avatar": true},
-	"official":          {"photo": true, "avatar": true},
-	"club_leader":       {"club": true, "logo": true, "banner": true},
-	"tournament_runner": {"logo": true, "banner": true},
+var uploadRights = map[auth.Role]map[string]bool{
+	auth.RoleAdmin:            {"photo": true, "avatar": true, "logo": true, "banner": true, "club": true},
+	auth.RoleTournamentRunner: {"logo": true, "banner": true},
+	auth.RoleOfficial:         {"photo": true, "avatar": true},
+	auth.RoleClubLeader:       {"club": true, "logo": true, "banner": true},
+	auth.RoleFighter:          {"photo": true, "avatar": true},
 }
 
 var allowedExtensions = map[string]bool{
@@ -49,12 +50,11 @@ func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	kind := r.FormValue("kind")
-	identity, ok := auth.FromContext(r.Context())
+	role, ok := s.effectiveRole(r)
 	if !ok {
 		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "authentication required"})
 		return
 	}
-	role := string(identity.Role)
 	if !allowedUploadKinds[kind] {
 		writeBadRequest(w, "unsupported upload kind")
 		return

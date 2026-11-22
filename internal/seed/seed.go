@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"sort"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/restful-otaku/j3/internal/db"
 )
 
@@ -88,13 +90,22 @@ func Ensure(store *db.DB) error {
 			rank.id, tenantID, rank.label, rank.colour, i+1, rank.kind, custom)
 	}
 
-	// --- Users: 2 runners, 8 officials, 4 club leaders, 48 fighters, 1 spectator.
+	// --- Users: 1 admin, 2 runners, 8 officials, 4 club leaders, 48 fighters, 1 spectator.
+	// One shared demo password makes every seeded account easy to test.
+	demoHash, _ := bcrypt.GenerateFromPassword([]byte("demo"), bcrypt.DefaultCost)
 	addUser := func(id, name, email, role, clubID, source string) {
 		add(`INSERT OR IGNORE INTO users
-			(id, tenant_id, club_id, role, display_name, email, source, status)
-			VALUES (?, ?, NULLIF(?, ''), ?, ?, ?, ?, 'active')`,
-			id, tenantID, clubID, role, name, email, source)
+			(id, tenant_id, club_id, role, display_name, email, password_hash, source, status)
+			VALUES (?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?, 'active')`,
+			id, tenantID, clubID, role, name, email, string(demoHash), source)
 	}
+	// Owner/admin: a flagged runner so the original role CHECK stays valid.
+	// This account can invite other admins, runners, officials and club owners.
+	add(`INSERT OR IGNORE INTO users
+		(id, tenant_id, role, is_admin, display_name, email, password_hash, source, status)
+		VALUES ('u-owner', ?, 'tournament_runner', 1, 'J3 Owner (Admin)',
+		        'owner@demo.j3', ?, 'independent', 'active')`, tenantID, string(demoHash))
+
 	addUser("u-runner", "Aiko Tanaka (Runner)", "runner@demo.j3", "tournament_runner", "", "independent")
 	addUser("u-runner-2", "Marcus Bell (Runner)", "runner2@demo.j3", "tournament_runner", "", "independent")
 

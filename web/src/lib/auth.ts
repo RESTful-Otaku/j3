@@ -1,12 +1,23 @@
-import { demoSession, postJson, resetAuthCache } from './api';
+import { api, demoSession, postJson, resetAuthCache } from './api';
 import { setRole, type Role } from './nav';
 
 export type Session = {
   token: string; email: string; role: string; expiresAt: string; userId?: string;
+  mustChangePassword?: boolean;
 };
 
+// Dynamic session roles are intentionally typed as the pre-admin guide role
+// union: guides and overlays have no admin-specific steps, and an admin follows
+// the runner walkthrough. The literal `'admin'` overload keeps the real role
+// visible to callers that switch identities explicitly.
+type GuideRole = Exclude<Role, 'admin'>;
+
+export function uiRole(role: 'admin'): 'admin';
+export function uiRole(role: string): GuideRole;
 export function uiRole(role: string): Role {
   switch (role) {
+    case 'admin':
+      return 'admin';
     case 'tournament_runner':
     case 'runner':
       return 'runner';
@@ -23,7 +34,8 @@ export function uiRole(role: string): Role {
 }
 
 export function landingForRole(role: string): string {
-  switch (uiRole(role)) {
+  switch (uiRole(role) as Role) {
+    case 'admin':
     case 'runner': return '/admin';
     case 'official': return '/official';
     case 'club_leader': return '/club';
@@ -99,4 +111,11 @@ export async function passkey(email: string) {
     } catch { /* demo falls back to the MFA code */ }
   }
   return login(email, 'passkey');
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const result = await api.changePassword(currentPassword, newPassword);
+  const current = session();
+  if (current) saveSession({ ...current, mustChangePassword: result.mustChangePassword });
+  return result;
 }

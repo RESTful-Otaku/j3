@@ -114,6 +114,38 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/DemoAccount'
+  /api/v1/demo/credentials:
+    get:
+      operationId: demoCredentials
+      summary: Seeded demo credentials and representative accounts (J3_DEMO=1)
+      security: []
+      responses:
+        '200':
+          description: Shared demo password and account sheets
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - password
+                - accounts
+                - quickAccounts
+                - total
+                properties:
+                  password:
+                    type: string
+                  accounts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DemoCredential'
+                  quickAccounts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DemoCredential'
+                  total:
+                    type: integer
+        '404':
+          description: Disabled outside demo mode
   /api/v1/demo/view:
     get:
       operationId: demoView
@@ -585,6 +617,134 @@ paths:
                 $ref: '#/components/schemas/Session'
         '404':
           description: Disabled or unknown user
+  /api/v1/auth/password:
+    post:
+      operationId: changeOwnPassword
+      summary: Replace the signed-in account's one-time or current password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - changed
+                - mustChangePassword
+                properties:
+                  changed:
+                    type: boolean
+                  mustChangePassword:
+                    type: boolean
+        '400':
+          description: Invalid request
+        '401':
+          description: Current password is incorrect
+  /api/v1/invites:
+    get:
+      operationId: listInvites
+      summary: Invitations visible within the caller's authority
+      responses:
+        '200':
+          description: Invitations
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - invites
+                properties:
+                  invites:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InviteView'
+    post:
+      operationId: createInvite
+      summary: Invite a user within the caller's invite authority
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInviteRequest'
+      responses:
+        '201':
+          description: Created invitation with its one-time token and URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteView'
+        '400':
+          description: Invalid request
+        '403':
+          description: Invitation outside the caller's authority
+        '409':
+          description: An active account already uses this email
+  /api/v1/invites/accept:
+    post:
+      operationId: acceptInvite
+      summary: Activate an invited account using its one-time token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptInviteRequest'
+      responses:
+        '200':
+          description: Activated account
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - email
+                - role
+                - userId
+                - status
+                properties:
+                  email:
+                    type: string
+                    format: email
+                  role:
+                    type: string
+                  userId:
+                    type: string
+                  status:
+                    type: string
+        '400':
+          description: Invalid, used or expired invitation
+  /api/v1/invites/{id}/revoke:
+    post:
+      operationId: revokeInvite
+      summary: Revoke a pending invitation
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Invitation revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - revoked
+                properties:
+                  revoked:
+                    type: boolean
+        '404':
+          description: Invitation not found
   /api/v1/demo/identities:
     get:
       operationId: demoIdentities
@@ -1212,12 +1372,14 @@ components:
         expiresAt:
           type: string
           format: date-time
+        mustChangePassword:
+          type: boolean
     DemoLoginRequest:
       type: object
       properties:
         userId:
           type: string
-          description: Active seeded user to sign in as; omit for the runner.
+          description: Active seeded user to sign in as; omit for the seeded admin (u-owner in demo builds).
     DemoIdentity:
       type: object
       required:
@@ -1277,6 +1439,7 @@ components:
     Role:
       type: string
       enum:
+      - admin
       - tournament_runner
       - official
       - club_leader
@@ -1396,6 +1559,35 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Action'
+    DemoCredential:
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - role
+      - roleLabel
+      - club
+      - password
+      - status
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+        roleLabel:
+          type: string
+        club:
+          type: string
+        password:
+          type: string
+        status:
+          type: string
     DemoViewResponse:
       type: object
       required:
@@ -1671,6 +1863,19 @@ components:
           type: integer
         inviteCount:
           type: integer
+        inviteLinks:
+          type: array
+          items:
+            type: object
+            properties:
+              email:
+                type: string
+              role:
+                type: string
+              token:
+                type: string
+              inviteUrl:
+                type: string
     Template:
       type: object
       required:
@@ -2405,6 +2610,89 @@ components:
           type: string
           nullable: true
         payloadJson:
+          type: string
+    InviteView:
+      type: object
+      required:
+      - id
+      - email
+      - name
+      - role
+      - club
+      - state
+      - expiresAt
+      - createdAt
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+        club:
+          type: string
+        state:
+          type: string
+          enum:
+          - pending
+          - accepted
+          - revoked
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        inviteUrl:
+          type: string
+        token:
+          type: string
+    CreateInviteRequest:
+      type: object
+      required:
+      - email
+      - role
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+        clubId:
+          type: string
+        clubName:
+          type: string
+        phone:
+          type: string
+        eventId:
+          type: string
+    AcceptInviteRequest:
+      type: object
+      required:
+      - token
+      - name
+      - password
+      properties:
+        token:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+    ChangePasswordRequest:
+      type: object
+      required:
+      - currentPassword
+      - newPassword
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
           type: string
 security:
 - bearerAuth: []

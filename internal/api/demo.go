@@ -32,6 +32,10 @@ func roleLabel(role auth.Role) string {
 	return string(role)
 }
 
+func effectiveStoredRole(persisted string, admin int) auth.Role {
+	return auth.VirtualRole(persisted, admin == 1)
+}
+
 type demoIdentity struct {
 	ID        string        `json:"id"`
 	Name      string        `json:"name"`
@@ -50,10 +54,10 @@ func (s *Server) demoIdentities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rows, err := s.Store.QueryContext(r.Context(), `
-		SELECT u.id, u.display_name, u.role, COALESCE(c.name, '')
+		SELECT u.id, u.display_name, u.role, u.is_admin, COALESCE(c.name, '')
 		FROM users u LEFT JOIN clubs c ON c.id = u.club_id
 		WHERE u.status = 'active'
-		ORDER BY CASE u.role
+		ORDER BY u.is_admin DESC, CASE u.role
 		  WHEN 'tournament_runner' THEN 0 WHEN 'official' THEN 1
 		  WHEN 'club_leader' THEN 2 WHEN 'fighter' THEN 3 ELSE 4 END,
 		  u.display_name`)
@@ -65,11 +69,13 @@ func (s *Server) demoIdentities(w http.ResponseWriter, r *http.Request) {
 	identities := []demoIdentity{}
 	for rows.Next() {
 		var item demoIdentity
-		var role auth.Role
-		if err := rows.Scan(&item.ID, &item.Name, &role, &item.ClubName); err != nil {
+		var persisted string
+		var admin int
+		if err := rows.Scan(&item.ID, &item.Name, &persisted, &admin, &item.ClubName); err != nil {
 			writeError(w, err)
 			return
 		}
+		role := effectiveStoredRole(persisted, admin)
 		item.Role = string(role)
 		item.RoleLabel = roleLabel(role)
 		item.Actions = auth.Actions(role)
@@ -83,12 +89,14 @@ func (s *Server) demoIdentities(w http.ResponseWriter, r *http.Request) {
 	var current *demoIdentity
 	if identity, ok := auth.FromContext(r.Context()); ok {
 		var item demoIdentity
-		var role auth.Role
+		var persisted string
+		var admin int
 		err := s.Store.QueryRowContext(r.Context(), `
-			SELECT u.id, u.display_name, u.role, COALESCE(c.name, '')
+			SELECT u.id, u.display_name, u.role, u.is_admin, COALESCE(c.name, '')
 			FROM users u LEFT JOIN clubs c ON c.id = u.club_id WHERE u.id = ?`, identity.UserID).
-			Scan(&item.ID, &item.Name, &role, &item.ClubName)
+			Scan(&item.ID, &item.Name, &persisted, &admin, &item.ClubName)
 		if err == nil {
+			role := effectiveStoredRole(persisted, admin)
 			item.Role = string(role)
 			item.RoleLabel = roleLabel(role)
 			item.Actions = auth.Actions(role)
@@ -107,10 +115,10 @@ func (s *Server) demoAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rows, err := s.Store.QueryContext(r.Context(), `
-		SELECT u.id, u.display_name, u.email, u.role,
+		SELECT u.id, u.display_name, u.email, u.role, u.is_admin,
 		       COALESCE(c.name, ''), u.source, u.status
 		FROM users u LEFT JOIN clubs c ON c.id = u.club_id
-		ORDER BY CASE u.role
+		ORDER BY u.is_admin DESC, CASE u.role
 		  WHEN 'tournament_runner' THEN 0 WHEN 'official' THEN 1
 		  WHEN 'club_leader' THEN 2 WHEN 'fighter' THEN 3 ELSE 4 END,
 		  u.display_name`)
@@ -122,10 +130,14 @@ func (s *Server) demoAccounts(w http.ResponseWriter, r *http.Request) {
 	accounts := []demoAccount{}
 	for rows.Next() {
 		var a demoAccount
-		if err := rows.Scan(&a.ID, &a.Name, &a.Email, &a.Role, &a.ClubName, &a.Source, &a.Status); err != nil {
+		var persisted string
+		var admin int
+		if err := rows.Scan(&a.ID, &a.Name, &a.Email, &persisted, &admin,
+			&a.ClubName, &a.Source, &a.Status); err != nil {
 			writeError(w, err)
 			return
 		}
+		a.Role = effectiveStoredRole(persisted, admin)
 		a.RoleLabel = roleLabel(a.Role)
 		a.Actions = auth.Actions(a.Role)
 		accounts = append(accounts, a)
@@ -151,16 +163,19 @@ func (s *Server) demoView(w http.ResponseWriter, r *http.Request) {
 	}
 	actorID := identity.UserID
 	var a demoAccount
+	var persisted string
+	var admin int
 	err := s.Store.QueryRowContext(r.Context(), `
-		SELECT u.id, u.display_name, u.email, u.role,
+		SELECT u.id, u.display_name, u.email, u.role, u.is_admin,
 		       COALESCE(c.name, ''), u.source, u.status
 		FROM users u LEFT JOIN clubs c ON c.id = u.club_id
 		WHERE u.id = ?`, actorID).
-		Scan(&a.ID, &a.Name, &a.Email, &a.Role, &a.ClubName, &a.Source, &a.Status)
+		Scan(&a.ID, &a.Name, &a.Email, &persisted, &admin, &a.ClubName, &a.Source, &a.Status)
 	if err != nil {
 		writeError(w, err)
 		return
 	}
+	a.Role = effectiveStoredRole(persisted, admin)
 	a.RoleLabel = roleLabel(a.Role)
 	a.Actions = auth.Actions(a.Role)
 	counts, err := s.counts(r)

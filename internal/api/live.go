@@ -32,7 +32,8 @@ func (s *Server) requireAssigned(w http.ResponseWriter, r *http.Request, action 
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "your role cannot perform this action"})
 		return false
 	}
-	if identity.Role != auth.RoleTournamentRunner && !s.isAssigned(r, fightID, identity.UserID) {
+	if identity.Role != auth.RoleAdmin && identity.Role != auth.RoleTournamentRunner &&
+		!s.isAssigned(r, fightID, identity.UserID) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "user is not assigned to this contest"})
 		return false
 	}

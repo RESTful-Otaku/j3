@@ -11,12 +11,12 @@ test('login with Google and MFA, then sign out', async ({ page }) => {
   await expect(page).toHaveURL(/\/admin$/);
 });
 
-test('local demo run auto signs in as a runner', async ({ page }) => {
+test('local demo run auto signs in as the admin', async ({ page }) => {
   await page.goto('/');
   await expect.poll(async () => page.evaluate(() => {
     const stored = JSON.parse(localStorage.getItem('j3-session') || '{}');
     return stored.role;
-  })).toBe('runner');
+  })).toBe('admin');
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('j3-session') || '{}'));
   expect(stored.userId).toBeTruthy();
   expect(stored.token).toBeTruthy();

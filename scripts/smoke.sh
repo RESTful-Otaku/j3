@@ -51,12 +51,15 @@ for _ in $(seq 1 80); do
 done
 
 TOKEN=$(curl -s -X POST "$BASE/api/v1/auth/demo" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("token",""))' 2>/dev/null || true)
-echo "🔎 API checks (authenticated runner session)"
+echo "🔎 API checks (authenticated admin session)"
 check "healthz" "200" "$(status "$BASE/healthz")"
 check "readyz" "200" "$(status "$BASE/readyz")"
 check "roles" "200" "$(status "$BASE/api/v1/roles")"
 check "demo counts" "200" "$(status "$BASE/api/v1/demo")"
 check "demonstration accounts" "200" "$(status "$BASE/api/v1/demo/accounts")"
+check "demo credential sheet" "200" "$(status "$BASE/api/v1/demo/credentials")"
+check "invites list" "200" "$(status "$BASE/api/v1/invites")"
+check "create invite" "201" "$(status -X POST "$BASE/api/v1/invites" -H 'Content-Type: application/json' -d "{\"name\":\"Smoke Invitee\",\"email\":\"smoke-invite-$$@demo.j3\",\"role\":\"official\"}")"
 check "fights" "200" "$(status "$BASE/api/v1/demo/fights")"
 check "standings" "200" "$(status "$BASE/api/v1/demo/standings")"
 check "event details" "200" "$(status "$BASE/api/v1/demo/event")"
@@ -102,6 +105,7 @@ check "technique search" "200" "$(status "$BASE/api/v1/demo/techniques?eventId=e
 check "my contests" "200" "$(status "$BASE/api/v1/demo/my-contests")"
 check "technical result" "200" "$(status -X POST "$BASE/api/v1/fights/ok-fight-24/technical" -H 'Content-Type: application/json' -d '{"winner":"red","reason":"no_show"}')"
 check "login" "200" "$(status -X POST "$BASE/api/v1/auth/login" -H 'Content-Type: application/json' -d '{"email":"tony@okami.j3","provider":"password","password":"demo"}')"
+check "password rejects wrong current" "401" "$(status -X POST "$BASE/api/v1/auth/password" -H 'Content-Type: application/json' -d '{"currentPassword":"not-the-demo-password","newPassword":"changed-password"}')"
 check "permissions" "200" "$(status "$BASE/api/v1/demo/permissions?init=1")"
 check "announcements" "200" "$(status "$BASE/api/v1/demo/announcements")"
 check "suggestions" "200" "$(status "$BASE/api/v1/demo/suggestions")"
@@ -124,7 +128,7 @@ if command -v bun >/dev/null 2>&1; then
     curl -fsS http://127.0.0.1:5173/ >/dev/null 2>&1 && break
     sleep 0.25
   done
-  for route in / /setup /display /mat /public /brackets /tables /pools /control /data /audit /settings /details /simulate /ceremony; do
+  for route in / /login /demo-accounts /invite/smoke-token /setup /display /mat /public /brackets /tables /pools /control /data /audit /settings /details /simulate /ceremony; do
     check "UI $route" "200" "$(status "http://127.0.0.1:5173$route")"
   done
   kill "$WEB_PID" 2>/dev/null || true

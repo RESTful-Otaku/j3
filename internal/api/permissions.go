@@ -3,7 +3,13 @@ package api
 import (
 	"net/http"
 	"strconv"
+
+	"github.com/restful-otaku/j3/internal/auth"
 )
+
+var permissionResources = map[string]bool{
+	"participants": true, "fights": true, "settings": true, "users": true, "invites": true,
+}
 
 type permissionView struct {
 	Role      string `json:"role"`
@@ -15,7 +21,7 @@ type permissionView struct {
 }
 
 func (s *Server) permissions(w http.ResponseWriter, r *http.Request) {
-	if !s.requireAction(w, r, "settings", "view") {
+	if !s.requireOrgRole(w, r) {
 		return
 	}
 	var list []permissionView
@@ -42,7 +48,7 @@ func (s *Server) permissions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) updatePermission(w http.ResponseWriter, r *http.Request) {
-	if !s.requireAction(w, r, "settings", "edit") {
+	if !s.requireAdmin(w, r) {
 		return
 	}
 	var body struct {
@@ -61,16 +67,25 @@ func (s *Server) updatePermission(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, "role, resource and a valid flag are required")
 		return
 	}
+	role := auth.CanonicalRole(body.Role)
+	if !auth.Valid(role) {
+		writeBadRequest(w, "unknown role")
+		return
+	}
+	if !permissionResources[body.Resource] {
+		writeBadRequest(w, "unknown resource")
+		return
+	}
 	_, err := s.Store.ExecContext(r.Context(), `
 		INSERT INTO role_permissions (role, resource, `+column+`)
 		VALUES (?, ?, ?)
 		ON CONFLICT(role, resource) DO UPDATE SET `+column+` = excluded.`+column,
-		body.Role, body.Resource, strconv.FormatBool(body.Value) == "true")
+		string(role), body.Resource, strconv.FormatBool(body.Value) == "true")
 	if err != nil {
 		writeError(w, err)
 		return
 	}
-	s.audit(r, "role.permission", "role", body.Role,
+	s.audit(r, "role.permission", "role", string(role),
 		`{"resource":"`+body.Resource+`","flag":"`+body.Flag+`","value":`+strconv.FormatBool(body.Value)+`}`)
-	writeJSON(w, http.StatusOK, map[string]any{"role": body.Role, "resource": body.Resource, "flag": body.Flag, "value": body.Value})
+	writeJSON(w, http.StatusOK, map[string]any{"role": role, "resource": body.Resource, "flag": body.Flag, "value": body.Value})
 }

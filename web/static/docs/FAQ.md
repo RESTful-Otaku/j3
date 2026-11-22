@@ -2,56 +2,48 @@
 
 ## Can I use J3 with no internet at the venue?
 
-Yes. The venue server, database and web app all run on a local machine or LAN box. Phones and
-displays connect to it over Wi-Fi. Nothing in the normal scoring flow needs the cloud. A single
-SQLite file is the backup.
+Yes. The venue server and LAN displays work offline. The Android APK bundles a seeded database and
+read-only snapshot, so phone screens work even with the server stopped; scoring needs the LAN.
 
 ## Do I need to know federation rules?
 
-No. Pick a template or accept the defaults. Every value — points, match length, penalties,
-categories, tie-break order, display layout — is editable in plain language before the event.
-Nothing is hard-coded per federation.
+No. Pick a preset or enter plain-language values; J3 stores per-event rule snapshots. Advanced raw
+config is optional.
 
 ## Can one fighter enter more than one category?
 
-That depends on your rule set. Some federations allow more than one age division, others allow one
-age and one weight. The compatibility policy is configured in the event, not fixed in the code.
+Only if the event's category policy allows it; some disciplines restrict athletes to one age and
+one weight division.
 
 ## What happens if a category has only two entrants?
 
-J3 selects an appropriate format from your policy. Two entrants can use best of three, three use a
-round robin, and small or uneven pools fall back to round robin rather than producing a broken
-bracket.
+J3 suggests best-of-three or round robin instead of a broken elimination bracket. Empty categories
+are flagged, not rendered as invalid matches.
 
 ## How are same-club meetings avoided?
 
-Seeding uses controlled randomisation with a same-club separation constraint. You can override a
-placement by dragging a fighter; the move is recorded in the audit trail.
+Seeding and pool generation spread clubs/countries with controlled randomisation where the rules
+allow it. Organisers can override with drag-and-drop.
 
 ## Who can change a score?
 
-Only an official assigned to that contest, with a role that has the `fights` capability. The
-scorekeeper controls the board, the referee controls the clock, and a runner can override a locked
-result. Every change records the actor, timestamp and before/after values.
+Only an assigned official or an admin/runner override. Every write is attributed, audited and
+correctable with a recorded undo.
 
 ## How do I put different views on different screens?
 
-Each view has its own URL. Open it in a new tab, then drag that tab onto the second monitor or
-full-screen it. Use **View builder** to compose a saved layout from live widgets, then assign that
-template to a screen in **Display control**.
+Each display route has its own URL. Open it in a new tab on the target TV/projector; use Display
+control to assign saved dashboard templates.
 
 ## Which languages are supported?
 
-The shared label dictionary includes English, French, German, Spanish, Portuguese, Hindi,
-Punjabi, Arabic, Japanese, Korean and Mandarin. Appearance follows the system by default and can
-be overridden per user.
+Eleven locales for shared labels: EN, FR, DE, ES, PT, HI, PA, AR, JA, KO, ZH.
 
 ## Can I restore a tournament after a crash?
 
-Yes. SQLite runs in WAL mode and the venue file can be backed up or restored mid-event. Results
-are committed as they are confirmed, so a restart continues from the last committed state.
+Yes. SQLite WAL plus a single-file backup allow recovery; restore the database and restart the venue
+server.
 
 ## Where do I find the raw API contract?
 
-Use the [API reference](/docs/api), the raw [OpenAPI file](/openapi.yaml) or the
-[API guide](/docs/api-guide).
+See the [API guide](/docs/api-guide) or the interactive API reference at `/docs/api`.

@@ -44,6 +44,13 @@ func serve() {
 	must(err)
 	defer store.Close()
 
+	generatedOwnerPassword, err := seed.EnsureOwner(store, cfg, *seedDemo)
+	must(err)
+	if generatedOwnerPassword != "" {
+		log.Printf("J3 owner admin created with a generated one-time password: %s", generatedOwnerPassword)
+		log.Printf("Sign in as %s, then change it at /login", cfg.OwnerEmail)
+	}
+
 	if *seedDemo {
 		must(seed.Ensure(store))
 		log.Printf("demo data ready")

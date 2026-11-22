@@ -57,8 +57,11 @@ func TestRoles(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
 		t.Fatal(err)
 	}
-	if len(body.Roles) != 5 {
-		t.Fatalf("roles = %d, want 5", len(body.Roles))
+	if len(body.Roles) != 6 {
+		t.Fatalf("roles = %d, want 6", len(body.Roles))
+	}
+	if body.Roles[0].ID != "admin" {
+		t.Fatalf("first role = %q, want admin", body.Roles[0].ID)
 	}
 }
 
@@ -147,8 +150,8 @@ func TestDemoAccountsCoverEveryRole(t *testing.T) {
 		seen[a.Role] = true
 	}
 	for _, role := range []auth.Role{
-		auth.RoleTournamentRunner, auth.RoleOfficial, auth.RoleClubLeader,
-		auth.RoleFighter, auth.RoleSpectator,
+		auth.RoleAdmin, auth.RoleTournamentRunner, auth.RoleOfficial,
+		auth.RoleClubLeader, auth.RoleFighter, auth.RoleSpectator,
 	} {
 		if !seen[role] {
 			t.Errorf("no demo account for role %s", role)

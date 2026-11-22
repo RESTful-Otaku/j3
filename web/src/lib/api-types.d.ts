@@ -156,6 +156,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Seeded demo credentials and representative accounts (J3_DEMO=1) */
+        get: operations["demoCredentials"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/demo/view": {
         parameters: {
             query?: never;
@@ -541,6 +558,75 @@ export interface paths {
         put?: never;
         /** QA-only session for the runner or a chosen seeded user (J3_DEMO=1) */
         post: operations["demoLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replace the signed-in account's one-time or current password */
+        post: operations["changeOwnPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Invitations visible within the caller's authority */
+        get: operations["listInvites"];
+        put?: never;
+        /** Invite a user within the caller's invite authority */
+        post: operations["createInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invites/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate an invited account using its one-time token */
+        post: operations["acceptInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invites/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke a pending invitation */
+        post: operations["revokeInvite"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1344,9 +1430,10 @@ export interface components {
             userId?: string;
             /** Format: date-time */
             expiresAt: string;
+            mustChangePassword?: boolean;
         };
         DemoLoginRequest: {
-            /** @description Active seeded user to sign in as; omit for the runner. */
+            /** @description Active seeded user to sign in as; omit for the seeded admin (u-owner in demo builds). */
             userId?: string;
         };
         DemoIdentity: {
@@ -1370,7 +1457,7 @@ export interface components {
             version: string;
         };
         /** @enum {string} */
-        Role: "tournament_runner" | "official" | "club_leader" | "fighter" | "spectator";
+        Role: "admin" | "tournament_runner" | "official" | "club_leader" | "fighter" | "spectator";
         /** @enum {string} */
         Action: "manage_tenant" | "manage_event" | "manage_users" | "manage_club" | "invite_fighters" | "score_fight" | "register_self" | "view_private" | "view_public";
         RoleInfo: {
@@ -1408,6 +1495,17 @@ export interface components {
             source: "independent" | "club_invite";
             status: string;
             actions: components["schemas"]["Action"][];
+        };
+        DemoCredential: {
+            id: string;
+            name: string;
+            /** Format: email */
+            email: string;
+            role: components["schemas"]["Role"];
+            roleLabel: string;
+            club: string;
+            password: string;
+            status: string;
         };
         DemoViewResponse: {
             actor: components["schemas"]["DemoAccount"];
@@ -1520,6 +1618,12 @@ export interface components {
             disciplineCount: number;
             categoryCount: number;
             inviteCount: number;
+            inviteLinks?: {
+                email?: string;
+                role?: string;
+                token?: string;
+                inviteUrl?: string;
+            }[];
         };
         Template: {
             ID: string;
@@ -1792,6 +1896,41 @@ export interface components {
             actorUserId?: string | null;
             payloadJson?: string;
         };
+        InviteView: {
+            id: string;
+            /** Format: email */
+            email: string;
+            name: string;
+            role: string;
+            club: string;
+            /** @enum {string} */
+            state: "pending" | "accepted" | "revoked";
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date-time */
+            createdAt: string;
+            inviteUrl?: string;
+            token?: string;
+        };
+        CreateInviteRequest: {
+            /** Format: email */
+            email: string;
+            name?: string;
+            role: string;
+            clubId?: string;
+            clubName?: string;
+            phone?: string;
+            eventId?: string;
+        };
+        AcceptInviteRequest: {
+            token: string;
+            name: string;
+            password: string;
+        };
+        ChangePasswordRequest: {
+            currentPassword: string;
+            newPassword: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1976,6 +2115,38 @@ export interface operations {
                         accounts: components["schemas"]["DemoAccount"][];
                     };
                 };
+            };
+        };
+    };
+    demoCredentials: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shared demo password and account sheets */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        password: string;
+                        accounts: components["schemas"]["DemoCredential"][];
+                        quickAccounts: components["schemas"]["DemoCredential"][];
+                        total: number;
+                    };
+                };
+            };
+            /** @description Disabled outside demo mode */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2532,6 +2703,182 @@ export interface operations {
                 };
             };
             /** @description Disabled or unknown user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    changeOwnPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Password changed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        changed: boolean;
+                        mustChangePassword: boolean;
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Current password is incorrect */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listInvites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invitations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        invites: components["schemas"]["InviteView"][];
+                    };
+                };
+            };
+        };
+    };
+    createInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInviteRequest"];
+            };
+        };
+        responses: {
+            /** @description Created invitation with its one-time token and URL */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InviteView"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invitation outside the caller's authority */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An active account already uses this email */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    acceptInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptInviteRequest"];
+            };
+        };
+        responses: {
+            /** @description Activated account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: email */
+                        email: string;
+                        role: string;
+                        userId: string;
+                        status: string;
+                    };
+                };
+            };
+            /** @description Invalid, used or expired invitation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    revokeInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invitation revoked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        revoked: boolean;
+                    };
+                };
+            };
+            /** @description Invitation not found */
             404: {
                 headers: {
                     [name: string]: unknown;

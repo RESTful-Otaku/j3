@@ -47,7 +47,7 @@ func (s *Server) completeReset(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 	if _, err := tx.ExecContext(r.Context(),
-		`UPDATE users SET password_hash = ?, status = CASE WHEN status='invited' THEN 'active' ELSE status END,
+		`UPDATE users SET password_hash = ?, must_change_password = 0,
 		 updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`, string(hash), userID); err != nil {
 		writeError(w, err)
 		return

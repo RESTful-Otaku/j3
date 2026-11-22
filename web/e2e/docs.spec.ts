@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 test('documentation home loads the guide index and server status', async ({ page }) => {
   await page.goto('/docs');
   await expect(page.getByRole('heading', { name: /everything you need to run j3/i })).toBeVisible();
-  await expect(page.locator('.doc-card')).toHaveCount(13);
+  await expect(page.locator('.doc-card')).toHaveCount(14);
   await expect(page.locator('.status')).toContainText('Venue server online');
   await expect(page.getByRole('link', { name: /organiser guide/i }).first()).toBeVisible();
 });

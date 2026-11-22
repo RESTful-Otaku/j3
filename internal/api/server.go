@@ -33,6 +33,7 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/roles", s.roles)
 	mux.HandleFunc("GET /api/v1/demo", s.demo)
 	mux.HandleFunc("GET /api/v1/demo/identities", s.demoIdentities)
+	mux.HandleFunc("GET /api/v1/demo/credentials", s.demoCredentials)
 	mux.HandleFunc("GET /api/v1/demo/accounts", s.demoAccounts)
 	mux.HandleFunc("GET /api/v1/demo/view", s.demoView)
 	mux.HandleFunc("GET /api/v1/demo/fights", s.demoFights)
@@ -87,6 +88,11 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("POST /api/v1/auth/demo", s.demoLogin)
 	mux.HandleFunc("POST /api/v1/auth/reset", s.completeReset)
 	mux.HandleFunc("POST /api/v1/auth/reset/request", s.requestReset)
+	mux.HandleFunc("POST /api/v1/auth/password", s.changeOwnPassword)
+	mux.HandleFunc("GET /api/v1/invites", s.listInvites)
+	mux.HandleFunc("POST /api/v1/invites", s.createInvite)
+	mux.HandleFunc("POST /api/v1/invites/accept", s.acceptInvite)
+	mux.HandleFunc("POST /api/v1/invites/{id}/revoke", s.revokeInvite)
 	mux.HandleFunc("POST /api/v1/demo/announcements", s.sendAnnouncement)
 	mux.HandleFunc("GET /api/v1/demo/announcements", s.listAnnouncements)
 	mux.HandleFunc("GET /api/v1/demo/suggestions", s.suggestions)
@@ -182,6 +188,15 @@ func (s *Server) middleware(next http.Handler) http.Handler {
 				return
 			}
 			r = r.WithContext(auth.WithIdentity(r.Context(), identity))
+			// A one-time/generated password grants access to the change form
+			// only. Public boards remain readable so the login page still works.
+			if identity.MustChangePassword && r.URL.Path != "/api/v1/auth/password" {
+				writeJSON(w, http.StatusForbidden, map[string]string{
+					"error":   "password_change_required",
+					"message": "Set a new password before using this account.",
+				})
+				return
+			}
 		}
 		next.ServeHTTP(w, r)
 	})

@@ -47,7 +47,10 @@
   }
 
   async function start(selected?: Role, stepIndex?: number) {
-    role = selected ?? role;
+    // Auto-login can finish after this component mounts; always re-read the
+    // verified session so an admin follows the runner guide with one progress key.
+    const activeSession = session();
+    role = selected ?? (activeSession ? uiRole(activeSession.role) : role);
     const current = guideForRole(role);
     const next = typeof stepIndex === 'number' && Number.isFinite(stepIndex)
       ? Math.max(0, Math.min(stepIndex, current.steps.length - 1))

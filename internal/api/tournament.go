@@ -1,10 +1,14 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
+
+	"github.com/restful-otaku/j3/internal/auth"
 )
 
 type createDiscipline struct {
@@ -98,7 +102,7 @@ func writeBadRequest(w http.ResponseWriter, message string) {
 }
 
 func (s *Server) createTournament(w http.ResponseWriter, r *http.Request) {
-	if !s.requireAction(w, r, "settings", "create") {
+	if !s.requireOrgRole(w, r) {
 		return
 	}
 	var req createTournamentRequest
@@ -111,7 +115,7 @@ func (s *Server) createTournament(w http.ResponseWriter, r *http.Request) {
 
 // importTemplate recreates an event from a saved template configuration.
 func (s *Server) importTemplate(w http.ResponseWriter, r *http.Request) {
-	if !s.requireAction(w, r, "settings", "create") {
+	if !s.requireOrgRole(w, r) {
 		return
 	}
 	id := r.PathValue("id")
@@ -229,6 +233,11 @@ func (s *Server) createFromRequest(w http.ResponseWriter, r *http.Request, req c
 		writeError(w, err)
 		return
 	}
+	actorID, actorRole := "system", "system"
+	if identity, ok := auth.FromContext(r.Context()); ok {
+		actorID, actorRole = identity.UserID, string(identity.Role)
+	}
+	inviteLinks := []map[string]string{}
 	for _, invite := range req.Invites {
 		var clubID any
 		if invite.ClubName != "" {
@@ -239,14 +248,70 @@ func (s *Server) createFromRequest(w http.ResponseWriter, r *http.Request, req c
 				clubID = found
 			}
 		}
-		exec(`INSERT INTO invitations
-			(id, tenant_id, event_id, club_id, role, email, token_hash, expires_at)
-			VALUES (?, 'demo-tenant', ?, ?, ?, ?, ?, '')`,
-			newID("inv"), eventID, clubID, invite.Role, invite.Email, newID("tok"))
+		target := auth.CanonicalRole(invite.Role)
+		if target == "" {
+			writeBadRequest(w, "unknown invitation role")
+			return
+		}
+		var existingID, existingStatus string
+		err := tx.QueryRowContext(r.Context(),
+			`SELECT id, status FROM users WHERE tenant_id = 'demo-tenant' AND lower(email) = lower(?)`, invite.Email).
+			Scan(&existingID, &existingStatus)
+		if err != nil && err != sql.ErrNoRows {
+			writeError(w, err)
+			return
+		}
+		if err == nil && existingStatus != "invited" {
+			writeJSON(w, http.StatusConflict, map[string]string{
+				"error": "an active account already uses this email",
+			})
+			return
+		}
+		persisted, isAdmin := auth.PersistedRole(target)
+		userID := existingID
+		if userID == "" {
+			userID = newID("user")
+			source := "independent"
+			if clubID != nil {
+				source = "club_invite"
+			}
+			_, err = tx.ExecContext(r.Context(), `
+				INSERT INTO users (id, tenant_id, club_id, role, is_admin, display_name, email,
+				                   password_hash, source, status, invited_by, updated_at)
+				VALUES (?, 'demo-tenant', ?, ?, ?, ?, ?, '', ?, 'invited', ?, strftime('%Y-%m-%dT%H:%M:%fZ','now'))`,
+				userID, clubID, persisted, boolInt(isAdmin), invite.Email, invite.Email, source, actorID)
+		} else {
+			_, err = tx.ExecContext(r.Context(), `
+				UPDATE users SET club_id = ?, role = ?, is_admin = ?, invited_by = ?,
+				       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`,
+				clubID, persisted, boolInt(isAdmin), actorID, userID)
+		}
 		if err != nil {
 			writeError(w, err)
 			return
 		}
+
+		token, err := newInviteToken()
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		expiresAt := time.Now().UTC().Add(inviteLifetime).Format(sessionTimeLayout)
+		exec(`INSERT INTO invitations
+			(id, tenant_id, event_id, club_id, role, email, token_hash, state,
+			 expires_at, invited_by, actor_role, created_at)
+			VALUES (?, 'demo-tenant', ?, ?, ?, ?, ?, 'pending', ?, ?, ?,
+			        strftime('%Y-%m-%dT%H:%M:%fZ','now'))`,
+			newID("inv"), eventID, clubID, string(target), invite.Email,
+			hashInviteToken(token), expiresAt, actorID, actorRole)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		inviteLinks = append(inviteLinks, map[string]string{
+			"email": invite.Email, "role": string(target),
+			"token": token, "inviteUrl": "/invite/" + token,
+		})
 	}
 	if templateID != "" {
 		exec(`INSERT INTO tournament_templates (id, tenant_id, name, config_json)
@@ -269,7 +334,7 @@ func (s *Server) createFromRequest(w http.ResponseWriter, r *http.Request, req c
 		"eventId": eventID, "templateId": templateID,
 		"disciplineCount": len(req.Disciplines), "categoryCount": len(req.Categories),
 		"inviteCount": len(req.Invites), "categoryJson": string(categoryJSON),
-		"inviteJson": string(inviteJSON),
+		"inviteJson": string(inviteJSON), "inviteLinks": inviteLinks,
 	})
 }
 

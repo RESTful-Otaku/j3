@@ -46,7 +46,8 @@ func TestLoginMFAAndPermissions(t *testing.T) {
 		t.Fatalf("replayed code = %d", bad.Code)
 	}
 
-	perms := httptestRecorder(srv, http.MethodGet, "/api/v1/demo/permissions?init=1")
+	adminToken := sessionToken(t, srv, "u-owner", "admin")
+	perms := getJSONPath(t, srv, "/api/v1/demo/permissions?init=1", adminToken)
 	if perms.Code != http.StatusOK {
 		t.Fatalf("permissions = %d", perms.Code)
 	}
@@ -62,7 +63,7 @@ func TestLoginMFAAndPermissions(t *testing.T) {
 		t.Fatal("no permissions")
 	}
 
-	updated := postJSON(t, srv, "/api/v1/demo/permissions", map[string]any{
+	updated := postAuthenticatedJSON(t, srv, adminToken, "/api/v1/demo/permissions", map[string]any{
 		"role": "fighter", "resource": "fights", "flag": "delete", "value": true,
 	})
 	if updated.Code != http.StatusOK {

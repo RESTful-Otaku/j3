@@ -40,6 +40,8 @@ curl -fsS "http://127.0.0.1:$PORT/healthz" >/dev/null || {
 SESSION="$(curl -fsS -X POST "http://127.0.0.1:$PORT/api/v1/auth/demo")"
 TOKEN="$(jq -r '.token' <<<"$SESSION")"
 USER_ID="$(jq -r '.userId // ""' <<<"$SESSION")"
+ROLE="$(jq -r '.role // "admin"' <<<"$SESSION")"
+EMAIL="$(jq -r '.email // "j3@local"' <<<"$SESSION")"
 
 ENDPOINTS=(
   /healthz
@@ -47,6 +49,7 @@ ENDPOINTS=(
   /api/v1/roles
   /api/v1/demo
   /api/v1/demo/accounts
+  /api/v1/demo/credentials
   /api/v1/demo/attendance
   /api/v1/demo/belts
   /api/v1/demo/brackets
@@ -90,11 +93,13 @@ done
 
 jq \
   --arg userId "$USER_ID" \
+  --arg role "$ROLE" \
+  --arg email "$EMAIL" \
   --arg generated "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   '.[ "session" ] = {
       token: "offline-demo",
-      email: "demo@j3.local",
-      role: "tournament_runner",
+      email: $email,
+      role: $role,
       expiresAt: "2099-01-01T00:00:00Z",
       userId: $userId
     }

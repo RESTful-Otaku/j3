@@ -78,6 +78,8 @@ func (s *Server) demoLogin(w http.ResponseWriter, r *http.Request) {
 // canonical RBAC role names.
 func demoUIRole(role auth.Role) string {
 	switch role {
+	case auth.RoleAdmin:
+		return "admin"
 	case auth.RoleTournamentRunner:
 		return "runner"
 	case auth.RoleOfficial:
@@ -95,15 +97,18 @@ func demoUIRole(role auth.Role) string {
 // deliberately demo-only: production sessions come from verified credentials.
 func (s *Server) demoUser(r *http.Request, userID string) (demoRunnerAccount, error) {
 	var account demoRunnerAccount
+	var admin int
 	err := s.Store.QueryRowContext(r.Context(), `
-		SELECT id, email, role FROM users WHERE id = ? AND status = 'active'`, userID).
-		Scan(&account.ID, &account.Email, &account.Role)
+		SELECT id, email, role, is_admin FROM users WHERE id = ? AND status = 'active'`, userID).
+		Scan(&account.ID, &account.Email, &account.Role, &admin)
 	if err != nil {
 		return demoRunnerAccount{}, err
 	}
-	if auth.CanonicalRole(account.Role) == "" {
+	role := auth.VirtualRole(account.Role, admin == 1)
+	if role == "" {
 		return demoRunnerAccount{}, sql.ErrNoRows
 	}
+	account.Role = string(role)
 	return account, nil
 }
 
@@ -111,16 +116,18 @@ func (s *Server) demoUser(r *http.Request, userID string) (demoRunnerAccount, er
 // finally bootstraps a minimal tenant + runner on an empty venue database.
 func (s *Server) demoRunner(r *http.Request) (demoRunnerAccount, error) {
 	var account demoRunnerAccount
+	var admin int
 	lookup := func() error {
 		return s.Store.QueryRowContext(r.Context(), `
-			SELECT id, email, role FROM users
+			SELECT id, email, role, is_admin FROM users
 			WHERE role = 'tournament_runner' AND status = 'active'
-			ORDER BY CASE id WHEN 'u-tony' THEN 0 WHEN 'u-runner' THEN 1 ELSE 2 END, id
-			LIMIT 1`).Scan(&account.ID, &account.Email, &account.Role)
+			ORDER BY is_admin DESC,
+			         CASE id WHEN 'u-owner' THEN 0 WHEN 'u-tony' THEN 1 WHEN 'u-runner' THEN 2 ELSE 3 END, id
+			LIMIT 1`).Scan(&account.ID, &account.Email, &account.Role, &admin)
 	}
 	err := lookup()
 	if err == nil {
-		account.Role = string(auth.CanonicalRole(account.Role))
+		account.Role = string(auth.VirtualRole(account.Role, admin == 1))
 		return account, nil
 	}
 	if err != sql.ErrNoRows {
@@ -148,6 +155,6 @@ func (s *Server) demoRunner(r *http.Request) (demoRunnerAccount, error) {
 	if err := lookup(); err != nil {
 		return demoRunnerAccount{}, err
 	}
-	account.Role = string(auth.CanonicalRole(account.Role))
+	account.Role = string(auth.VirtualRole(account.Role, admin == 1))
 	return account, nil
 }

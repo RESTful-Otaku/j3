@@ -54,31 +54,18 @@ func TestSignupConvertsImperialToMetric(t *testing.T) {
 	}
 }
 
-func TestSignupPrivilegedRoleNeedsApproval(t *testing.T) {
+func TestSignupRejectsPrivilegedSelfRegistration(t *testing.T) {
 	srv := seededServer(t)
-	rec := postJSON(t, srv, "/api/v1/signup", map[string]any{
-		"name": "Request Official", "email": "req-official@demo.j3",
-		"password": "password123", "dateOfBirth": "1990-01-01", "unitSystem": "metric",
-		"heightCm": 178, "weightKg": 80, "accountType": "official",
-	})
-	if rec.Code != http.StatusCreated {
-		t.Fatalf("status = %d: %s", rec.Code, rec.Body.String())
-	}
-	var result struct {
-		Status        string `json:"status"`
-		RoleRequestID string `json:"roleRequestId"`
-	}
-	if err := json.Unmarshal(rec.Body.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
-	if result.Status != "invited" || result.RoleRequestID == "" {
-		t.Fatalf("unexpected result: %+v", result)
-	}
-	approve := httptest.NewRecorder()
-	srv.Handler().ServeHTTP(approve, httptest.NewRequest(http.MethodPost,
-		"/api/v1/demo/role-requests/"+result.RoleRequestID+"/approve", nil))
-	if approve.Code != http.StatusOK {
-		t.Fatalf("approve status = %d: %s", approve.Code, approve.Body.String())
+	for _, role := range []string{"admin", "tournament_runner", "official", "club_leader"} {
+		email := "req-" + role + "@demo.j3"
+		rec := postJSON(t, srv, "/api/v1/signup", map[string]any{
+			"name": "Request " + role, "email": email,
+			"password": "password123", "dateOfBirth": "1990-01-01", "unitSystem": "metric",
+			"heightCm": 178, "weightKg": 80, "accountType": role,
+		})
+		if rec.Code != http.StatusForbidden {
+			t.Errorf("%s status = %d, want 403: %s", role, rec.Code, rec.Body.String())
+		}
 	}
 }
 

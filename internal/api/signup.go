@@ -233,12 +233,16 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role := auth.Role(req.AccountType)
-	if !auth.Valid(role) {
+	role := auth.CanonicalRole(req.AccountType)
+	if role == "" {
 		role = auth.RoleFighter
 	}
-	privileged := role == auth.RoleOfficial || role == auth.RoleTournamentRunner ||
-		role == auth.RoleClubLeader
+	if !auth.SelfSignupRoles(role) {
+		writeJSON(w, http.StatusForbidden, map[string]string{
+			"error": "admins, runners, moderators and club owners must be invited by an existing organiser",
+		})
+		return
+	}
 
 	categories, err := s.categoriesForSignup(r, "ev-demo")
 	if err != nil {
@@ -287,13 +291,6 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 	}
 	userID := newID("u")
 	status := "active"
-	roleRequestID := ""
-	roleRequestStatus := "none"
-	if privileged {
-		status = "invited"
-		roleRequestStatus = "pending"
-		roleRequestID = newID("req")
-	}
 
 	tx, err := s.Store.BeginTx(r.Context(), nil)
 	if err != nil {
@@ -323,16 +320,19 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	source := "independent"
+	if strings.TrimSpace(req.ClubID) != "" {
+		source = "club_invite"
+	}
 	_, err = tx.ExecContext(r.Context(), `
 		INSERT INTO users
 		 (id, tenant_id, club_id, role, display_name, email, password_hash, phone, date_of_birth,
 		  height_cm, weight_kg, height_unit, weight_unit, belt_rank_id, gender,
-		  source, status, role_request, role_request_status)
-		VALUES (?, 'demo-tenant', NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		  source, status)
+		VALUES (?, 'demo-tenant', NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		userID, req.ClubID, string(role), req.Name, req.Email, string(passwordHash), req.Phone, req.DOB,
 		heightCm, weightKg, req.UnitSystem, req.UnitSystem, nullIfEmpty(beltRankID),
-		gender, "independent", status,
-		nullIfEmpty(string(role)), roleRequestStatus)
+		gender, source, status)
 	if err != nil {
 		if strings.Contains(strings.ToLower(err.Error()), "unique") {
 			writeJSON(w, http.StatusConflict, map[string]string{"error": "an account with that email already exists"})
@@ -340,16 +340,6 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		}
 		writeError(w, err)
 		return
-	}
-
-	if roleRequestID != "" {
-		if _, err := tx.ExecContext(r.Context(), `
-			INSERT INTO role_requests (id, tenant_id, user_id, requested_role, status)
-			VALUES (?, 'demo-tenant', ?, ?, 'pending')`,
-			roleRequestID, userID, string(role)); err != nil {
-			writeError(w, err)
-			return
-		}
 	}
 
 	if role == auth.RoleFighter {
@@ -384,7 +374,7 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		selected = []string{}
 	}
 	result := signupResult{
-		UserID: userID, Status: status, Role: string(role), RoleRequestID: roleRequestID,
+		UserID: userID, Status: status, Role: string(role),
 		HeightCm: heightCm, WeightKg: weightKg, Selected: selected, Eligible: eligible,
 	}
 	writeJSON(w, http.StatusCreated, result)
@@ -429,6 +419,11 @@ func (s *Server) approveRoleRequest(w http.ResponseWriter, r *http.Request) {
 	if !s.requireAction(w, r, "settings", "edit") {
 		return
 	}
+	actorRole, ok := s.effectiveRole(r)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "authentication required"})
+		return
+	}
 	id := r.PathValue("id")
 	tx, err := s.Store.BeginTx(r.Context(), nil)
 	if err != nil {
@@ -443,6 +438,12 @@ func (s *Server) approveRoleRequest(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
+	requested := auth.CanonicalRole(role)
+	if !auth.CanApprove(actorRole, requested) {
+		writeJSON(w, http.StatusForbidden, map[string]string{"error": "your role cannot approve this account"})
+		return
+	}
+	persisted, isAdmin := auth.PersistedRole(requested)
 	if _, err := tx.ExecContext(r.Context(), `
 		UPDATE role_requests SET status = 'approved', reviewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
 		WHERE id = ?`, id); err != nil {
@@ -450,8 +451,9 @@ func (s *Server) approveRoleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if _, err := tx.ExecContext(r.Context(), `
-		UPDATE users SET role = ?, status = 'active', role_request_status = 'approved',
-		  updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`, role, userID); err != nil {
+		UPDATE users SET role = ?, is_admin = ?, status = 'active', role_request_status = 'approved',
+		  updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`,
+		persisted, boolInt(isAdmin), userID); err != nil {
 		writeError(w, err)
 		return
 	}

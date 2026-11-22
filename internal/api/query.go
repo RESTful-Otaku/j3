@@ -15,16 +15,17 @@ type querySpec struct {
 // Only these tables and columns may be queried. Values are always bound as
 // parameters, so user input can never become SQL.
 var querySpecs = map[string]querySpec{
-	"fighters":   {[]string{"id", "display_name", "date_of_birth", "weight_kg", "gender", "club_id", "belt_rank_id"}, []string{"display_name"}},
-	"entrants":   {[]string{"id", "fighter_id", "category_id", "club_id", "seed", "status"}, []string{"fighter_id"}},
-	"clubs":      {[]string{"id", "name", "primary_colour", "logo_path"}, []string{"name"}},
-	"events":     {[]string{"id", "name", "starts_at", "ends_at", "status"}, []string{"name"}},
-	"categories": {[]string{"id", "event_id", "name", "kind", "gender", "min_value", "max_value", "sort_order"}, []string{"name"}},
-	"fights":     {[]string{"id", "event_id", "mat_id", "category_id", "round_label", "red_fighter_id", "blue_fighter_id", "state", "outcome"}, []string{"id"}},
-	"pools":      {[]string{"id", "event_id", "category_id", "name", "sort_order"}, []string{"name"}},
-	"belt_ranks": {[]string{"id", "label", "colour", "sort_order", "grade_kind", "is_custom"}, []string{"label"}},
-	"users":      {[]string{"id", "display_name", "role", "club_id", "status"}, []string{"display_name"}},
-	"audit_log":  {[]string{"id", "actor_user_id", "actor_role", "action", "target_type", "target_id", "created_at"}, []string{"action"}},
+	"fighters":    {[]string{"id", "display_name", "date_of_birth", "weight_kg", "gender", "club_id", "belt_rank_id"}, []string{"display_name"}},
+	"entrants":    {[]string{"id", "fighter_id", "category_id", "club_id", "seed", "status"}, []string{"fighter_id"}},
+	"clubs":       {[]string{"id", "name", "primary_colour", "logo_path"}, []string{"name"}},
+	"events":      {[]string{"id", "name", "starts_at", "ends_at", "status"}, []string{"name"}},
+	"categories":  {[]string{"id", "event_id", "name", "kind", "gender", "min_value", "max_value", "sort_order"}, []string{"name"}},
+	"fights":      {[]string{"id", "event_id", "mat_id", "category_id", "round_label", "red_fighter_id", "blue_fighter_id", "state", "outcome"}, []string{"id"}},
+	"pools":       {[]string{"id", "event_id", "category_id", "name", "sort_order"}, []string{"name"}},
+	"belt_ranks":  {[]string{"id", "label", "colour", "sort_order", "grade_kind", "is_custom"}, []string{"label"}},
+	"users":       {[]string{"id", "display_name", "role", "is_admin", "club_id", "status"}, []string{"display_name"}},
+	"invitations": {[]string{"id", "role", "email", "club_id", "state", "expires_at", "created_at", "invited_by"}, []string{"email"}},
+	"audit_log":   {[]string{"id", "actor_user_id", "actor_role", "action", "target_type", "target_id", "created_at"}, []string{"action"}},
 }
 
 var reservedQueryParams = map[string]bool{
@@ -45,6 +46,9 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request) {
 		if !s.requireAction(w, r, "participants", "view") {
 			return
 		}
+	}
+	if table == "invitations" && !s.requireOrgRole(w, r) {
+		return
 	}
 
 	where := []string{}

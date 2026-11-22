@@ -1,14 +1,16 @@
 // Package auth defines the RBAC hierarchy used across J3.
 //
-// Authority flows down the invite chain: tournament runner -> officials ->
-// club leaders -> fighters. RBAC controls both what a user may do and what
-// they may see (private vs public), which is central to integrity and fairness.
+// Authority flows down the invite chain: admin -> tournament runners ->
+// officials/moderators -> club leaders/owners -> fighters/participants. RBAC
+// controls both what a user may do and what they may see (private vs public),
+// which is central to integrity and fairness.
 package auth
 
 // Role identifies a user's authority in a tournament.
 type Role string
 
 const (
+	RoleAdmin            Role = "admin"
 	RoleTournamentRunner Role = "tournament_runner"
 	RoleOfficial         Role = "official"
 	RoleClubLeader       Role = "club_leader"
@@ -41,20 +43,24 @@ type RoleInfo struct {
 }
 
 var roleInfos = []RoleInfo{
-	{RoleTournamentRunner, "Tournament runner", "Full administrative control of the event.", 0, []Action{
+	{RoleAdmin, "Admin / owner", "Owns the platform, creates runners and can invite any role.", 0, []Action{
 		ActionManageTenant, ActionManageEvent, ActionManageUsers, ActionManageClub,
 		ActionInviteFighters, ActionScoreFight, ActionRegisterSelf, ActionViewPrivate, ActionViewPublic,
 	}},
-	{RoleOfficial, "Official / moderator", "Scores and officiates assigned contests.", 1, []Action{
-		ActionScoreFight, ActionRegisterSelf, ActionViewPrivate, ActionViewPublic,
+	{RoleTournamentRunner, "Tournament runner / organiser", "Creates events and tournament templates, manages officials and clubs.", 1, []Action{
+		ActionManageTenant, ActionManageEvent, ActionManageUsers, ActionManageClub,
+		ActionInviteFighters, ActionScoreFight, ActionRegisterSelf, ActionViewPrivate, ActionViewPublic,
 	}},
-	{RoleClubLeader, "Club leader", "Manages their own club and its participants.", 2, []Action{
+	{RoleOfficial, "Official / moderator", "Scores and officiates assigned contests and can invite club owners.", 2, []Action{
+		ActionScoreFight, ActionManageUsers, ActionInviteFighters, ActionRegisterSelf, ActionViewPrivate, ActionViewPublic,
+	}},
+	{RoleClubLeader, "Club owner / leader", "Manages their own club and its participants.", 3, []Action{
 		ActionManageClub, ActionInviteFighters, ActionRegisterSelf, ActionViewPrivate, ActionViewPublic,
 	}},
-	{RoleFighter, "Fighter", "Registers independently or via a club invitation.", 3, []Action{
+	{RoleFighter, "Fighter / participant", "Registers independently or via a club invitation.", 4, []Action{
 		ActionRegisterSelf, ActionViewPublic,
 	}},
-	{RoleSpectator, "Spectator", "Sees only explicitly published information.", 4, []Action{
+	{RoleSpectator, "Spectator", "Sees only explicitly published information.", 5, []Action{
 		ActionViewPublic,
 	}},
 }

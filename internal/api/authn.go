@@ -108,11 +108,14 @@ func (s *Server) startLogin(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, "a valid email is required")
 		return
 	}
+	var mustChangePassword bool
 	if provider == "password" {
 		var hash string
 		var status string
+		var mustChange int
 		if err := s.Store.QueryRowContext(r.Context(),
-			`SELECT password_hash, status FROM users WHERE lower(email) = ?`, body.Email).Scan(&hash, &status); err != nil {
+			`SELECT password_hash, status, must_change_password FROM users WHERE lower(email) = ?`, body.Email).
+			Scan(&hash, &status, &mustChange); err != nil {
 			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
 			return
 		}
@@ -124,6 +127,7 @@ func (s *Server) startLogin(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
 			return
 		}
+		mustChangePassword = mustChange == 1
 	}
 	if provider != "password" && !demoMode() {
 		writeJSON(w, http.StatusNotImplemented, map[string]string{"error": "external sign-in is not configured"})
@@ -136,6 +140,7 @@ func (s *Server) startLogin(w http.ResponseWriter, r *http.Request) {
 	challenges.mu.Unlock()
 	response := map[string]any{
 		"challengeId": body.Email, "mfaRequired": true, "provider": provider,
+		"mustChangePassword": mustChangePassword,
 	}
 	if demoMode() {
 		response["demoCode"] = code
@@ -173,13 +178,15 @@ func (s *Server) verifyLogin(w http.ResponseWriter, r *http.Request) {
 	mfaAttempts.mu.Unlock()
 	challenges.mu.Unlock()
 
-	var userID, role, status string
+	var userID, persisted, status string
+	var admin, mustChange int
 	if err := s.Store.QueryRowContext(r.Context(),
-		`SELECT id, role, status FROM users WHERE lower(email) = ?`, email).
-		Scan(&userID, &role, &status); err != nil {
+		`SELECT id, role, status, is_admin, must_change_password FROM users WHERE lower(email) = ?`, email).
+		Scan(&userID, &persisted, &status, &admin, &mustChange); err != nil {
 		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unknown account"})
 		return
 	}
+	role := auth.VirtualRole(persisted, admin == 1)
 	if status != "active" {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "account is not active"})
 		return
@@ -189,13 +196,61 @@ func (s *Server) verifyLogin(w http.ResponseWriter, r *http.Request) {
 	token := hex.EncodeToString(buf)
 	_, err := s.Store.ExecContext(r.Context(), `
 		INSERT INTO sessions (token, user_id, role, expires_at)
-		VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','+12 hours'))`, token, userID, role)
+		VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','+12 hours'))`, token, userID, string(role))
 	if err != nil {
 		writeError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"token": token, "email": body.Email,
-		"role": auth.CanonicalRole(role), "expiresAt": time.Now().Add(12 * time.Hour).Format(time.RFC3339),
+		"role": string(role), "userId": userID,
+		"mustChangePassword": mustChange == 1,
+		"expiresAt":          time.Now().Add(12 * time.Hour).Format(time.RFC3339),
 	})
+}
+
+// changeOwnPassword lets a freshly bootstrapped owner replace the one-time
+// password printed in the server log without an administrator round-trip.
+func (s *Server) changeOwnPassword(w http.ResponseWriter, r *http.Request) {
+	identity, ok := auth.FromContext(r.Context())
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "authentication required"})
+		return
+	}
+	var body struct {
+		CurrentPassword string `json:"currentPassword"`
+		NewPassword     string `json:"newPassword"`
+	}
+	if err := decodeJSON(r, &body); err != nil {
+		writeBadRequest(w, err.Error())
+		return
+	}
+	if len(body.NewPassword) < 8 {
+		writeBadRequest(w, "new password must be at least 8 characters")
+		return
+	}
+	var hash string
+	if err := s.Store.QueryRowContext(r.Context(),
+		`SELECT password_hash FROM users WHERE id = ?`, identity.UserID).Scan(&hash); err != nil {
+		writeError(w, err)
+		return
+	}
+	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(body.CurrentPassword)) != nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "current password is incorrect"})
+		return
+	}
+	next, err := bcrypt.GenerateFromPassword([]byte(body.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	if _, err := s.Store.ExecContext(r.Context(), `
+		UPDATE users SET password_hash = ?, must_change_password = 0,
+		       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`,
+		string(next), identity.UserID); err != nil {
+		writeError(w, err)
+		return
+	}
+	s.audit(r, "auth.password_change", "user", identity.UserID, "")
+	writeJSON(w, http.StatusOK, map[string]any{"changed": true, "mustChangePassword": false})
 }

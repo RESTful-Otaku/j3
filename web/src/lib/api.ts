@@ -26,6 +26,47 @@ export type RoleInfo = components['schemas']['RoleInfo'];
 export type DemoSession = components['schemas']['Session'];
 export type DemoIdentity = components['schemas']['DemoIdentity'];
 export type DemoIdentitiesResponse = components['schemas']['DemoIdentitiesResponse'];
+
+// Inline until the generated contract includes the demo credential sheet and
+// invite responses. Shape mirrors GET /api/v1/demo/credentials and POST
+// /api/v1/invites; keeping it here avoids hand-editing api-types.d.ts.
+export type DemoCredentialAccount = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  roleLabel: string;
+  club: string;
+  password: string;
+  status: string;
+};
+export type DemoCredentialsSheet = {
+  password: string;
+  accounts: DemoCredentialAccount[];
+  quickAccounts: DemoCredentialAccount[];
+  total: number;
+};
+export type InviteRequest = {
+  email: string;
+  name?: string;
+  role: string;
+  clubName?: string;
+  clubId?: string;
+  phone?: string;
+  eventId?: string;
+};
+export type InviteLink = {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  club: string;
+  state: string;
+  expiresAt: string;
+  createdAt: string;
+  inviteUrl?: string;
+  token?: string;
+};
 export type Technique = components['schemas']['Technique'];
 export type TechniqueGroup = components['schemas']['TechniqueGroup'];
 export type TechniquePointOption = components['schemas']['TechniquePointOption'];
@@ -43,6 +84,15 @@ export type TechnicalResultRequest = {
 };
 
 const SESSION_KEY = 'j3-session';
+
+// The server refuses every protected route until a generated password is
+// replaced. Callers can catch this to guide the user back to the change form.
+export class PasswordChangeRequiredError extends Error {
+  constructor() {
+    super('A new password is required before you can continue.');
+    this.name = 'PasswordChangeRequiredError';
+  }
+}
 
 // On web this is empty, so relative URLs keep working. Native builds bake the
 // venue server URL into the bundle and load their UI from local Capacitor
@@ -110,6 +160,55 @@ function storedToken(): string {
   }
 }
 
+// Map a canonical RBAC role (or a shortened session role) to the UI role used
+// by the route guard and nav. Mirrors demoUIRole on the venue server.
+function offlineUiRole(role: string): string {
+  switch (role) {
+    case 'admin': return 'admin';
+    case 'tournament_runner':
+    case 'runner': return 'runner';
+    case 'official':
+    case 'moderator': return 'official';
+    case 'club_leader': return 'club_leader';
+    case 'fighter': return 'fighter';
+    default: return 'spectator';
+  }
+}
+
+// A bundled snapshot may include the credential sheet as an endpoint key or
+// under `credentials`; either shape lets an offline APK sign in as any seeded
+// account without a live venue server.
+function snapshotSession(snapshot: LocalSnapshot, userId?: string): DemoSession | null {
+  // The default snapshot session is fine for auto-login, but an explicit
+  // identity switch must come from the credential sheet so every seeded role
+  // remains selectable while the LAN server is unavailable.
+  if (snapshot.session && !userId) return snapshot.session;
+  const raw = snapshot.credentials ?? snapshot['/api/v1/demo/credentials'];
+  if (!raw || typeof raw !== 'object') return null;
+  const sheet = raw as Partial<DemoCredentialsSheet>;
+  const accounts = Array.isArray(sheet.accounts) ? sheet.accounts : [];
+  if (!accounts.length) return null;
+  const candidates = Array.isArray(sheet.quickAccounts) && sheet.quickAccounts.length
+    ? [...sheet.quickAccounts, ...accounts]
+    : accounts;
+  const account = userId
+    ? candidates.find((item) => item.id === userId)
+    : candidates.find((item) => item.role === 'admin')
+      ?? candidates.find((item) => item.role === 'tournament_runner' || item.role === 'runner')
+      ?? accounts[0];
+  if (!account?.id) {
+    if (userId && snapshot.session?.userId === userId) return snapshot.session;
+    return null;
+  }
+  return {
+    token: `offline-${account.id}`,
+    email: account.email ?? '',
+    role: offlineUiRole(account.role),
+    userId: account.id,
+    expiresAt: '2099-01-01T00:00:00Z',
+  };
+}
+
 async function fetchDemoSession(userId?: string): Promise<DemoSession> {
   const init: RequestInit = { method: 'POST' };
   if (userId) {
@@ -122,7 +221,8 @@ async function fetchDemoSession(userId?: string): Promise<DemoSession> {
     return await response.json() as DemoSession;
   } catch (error) {
     const snapshot = await bundledSnapshot();
-    if (snapshot?.session) return snapshot.session;
+    const offline = snapshot ? snapshotSession(snapshot, userId) : null;
+    if (offline) return offline;
     throw error;
   }
 }
@@ -208,6 +308,16 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
     response = await send(url, init, headers);
   }
   if (!response.ok) {
+    let detail: { error?: string } = {};
+    try { detail = await response.clone().json() as { error?: string }; } catch { /* plain error */ }
+    if (response.status === 403 && detail.error === 'password_change_required') {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(SESSION_KEY);
+        resetAuthCache();
+        window.dispatchEvent(new Event('j3-password-change-required'));
+      }
+      throw new PasswordChangeRequiredError();
+    }
     const hint = response.status === 401 && lastAuthError ? `: ${lastAuthError}` : '';
     throw new Error(`${response.status} ${response.statusText} from ${url}${hint}`);
   }
@@ -231,6 +341,11 @@ export const api = {
   roles: () => getJson<{ roles: RoleInfo[] }>('/api/v1/roles'),
   demo: () => getJson<{ counts: DemoCounts }>('/api/v1/demo'),
   identities: () => getJson<DemoIdentitiesResponse>('/api/v1/demo/identities'),
+  credentials: () => getJson<DemoCredentialsSheet>('/api/v1/demo/credentials'),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    postJson<{ changed: boolean; mustChangePassword: boolean }>('/api/v1/auth/password', {
+      currentPassword, newPassword,
+    }),
   accounts: () => getJson<{ accounts: DemoAccount[] }>('/api/v1/demo/accounts'),
   fights: () => getJson<{ fights: DemoFight[] }>('/api/v1/demo/fights'),
   myContests: () => getJson<{ contests: DemoFight[]; role: string }>('/api/v1/demo/my-contests'),
@@ -352,6 +467,8 @@ export const api = {
   },
   createTournament: (body: CreateTournamentRequest) =>
     postJson<CreateTournamentResponse>('/api/v1/tournaments', body),
+  invites: () => getJson<{ invites: InviteLink[] }>('/api/v1/invites'),
+  createInvite: (body: InviteRequest) => postJson<InviteLink>('/api/v1/invites', body),
   upload: async (file: File, kind: string, _role?: string): Promise<{ url: string; colour: string; highlight: string }> => {
     const body = new FormData();
     body.append('kind', kind);

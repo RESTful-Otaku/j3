@@ -27,7 +27,7 @@ func Open(path string) (*DB, error) {
 	}
 	// Pragmas belong in the DSN so every pooled connection gets them; executing
 	// PRAGMA on *sql.DB only configures whichever connection handles that call.
-	dsn := path + "?_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)"
+	dsn := path + "?_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_txlock=immediate"
 	conn, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite: %w", err)

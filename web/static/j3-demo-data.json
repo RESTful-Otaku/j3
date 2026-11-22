@@ -10,10 +10,27 @@
   "/api/v1/roles": {
     "roles": [
       {
-        "id": "tournament_runner",
-        "label": "Tournament runner",
-        "description": "Full administrative control of the event.",
+        "id": "admin",
+        "label": "Admin / owner",
+        "description": "Owns the platform, creates runners and can invite any role.",
         "rank": 0,
+        "actions": [
+          "manage_tenant",
+          "manage_event",
+          "manage_users",
+          "manage_club",
+          "invite_fighters",
+          "score_fight",
+          "register_self",
+          "view_private",
+          "view_public"
+        ]
+      },
+      {
+        "id": "tournament_runner",
+        "label": "Tournament runner / organiser",
+        "description": "Creates events and tournament templates, manages officials and clubs.",
+        "rank": 1,
         "actions": [
           "manage_tenant",
           "manage_event",
@@ -29,10 +46,12 @@
       {
         "id": "official",
         "label": "Official / moderator",
-        "description": "Scores and officiates assigned contests.",
-        "rank": 1,
+        "description": "Scores and officiates assigned contests and can invite club owners.",
+        "rank": 2,
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -40,9 +59,9 @@
       },
       {
         "id": "club_leader",
-        "label": "Club leader",
+        "label": "Club owner / leader",
         "description": "Manages their own club and its participants.",
-        "rank": 2,
+        "rank": 3,
         "actions": [
           "manage_club",
           "invite_fighters",
@@ -53,9 +72,9 @@
       },
       {
         "id": "fighter",
-        "label": "Fighter",
+        "label": "Fighter / participant",
         "description": "Registers independently or via a club invitation.",
-        "rank": 3,
+        "rank": 4,
         "actions": [
           "register_self",
           "view_public"
@@ -65,7 +84,7 @@
         "id": "spectator",
         "label": "Spectator",
         "description": "Sees only explicitly published information.",
-        "rank": 4,
+        "rank": 5,
         "actions": [
           "view_public"
         ]
@@ -84,17 +103,38 @@
       "fights": 40,
       "mats": 6,
       "tenants": 1,
-      "users": 121
+      "users": 122
     }
   },
   "/api/v1/demo/accounts": {
     "accounts": [
       {
+        "id": "u-owner",
+        "name": "J3 Owner (Admin)",
+        "email": "owner@demo.j3",
+        "role": "admin",
+        "roleLabel": "Admin / owner",
+        "clubName": "",
+        "source": "independent",
+        "status": "active",
+        "actions": [
+          "manage_tenant",
+          "manage_event",
+          "manage_users",
+          "manage_club",
+          "invite_fighters",
+          "score_fight",
+          "register_self",
+          "view_private",
+          "view_public"
+        ]
+      },
+      {
         "id": "u-runner",
         "name": "Aiko Tanaka (Runner)",
         "email": "runner@demo.j3",
         "role": "tournament_runner",
-        "roleLabel": "Tournament runner",
+        "roleLabel": "Tournament runner / organiser",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -115,7 +155,7 @@
         "name": "Marcus Bell (Runner)",
         "email": "runner2@demo.j3",
         "role": "tournament_runner",
-        "roleLabel": "Tournament runner",
+        "roleLabel": "Tournament runner / organiser",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -136,7 +176,7 @@
         "name": "Tony Jamieson",
         "email": "tony@okami.j3",
         "role": "tournament_runner",
-        "roleLabel": "Tournament runner",
+        "roleLabel": "Tournament runner / organiser",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -163,6 +203,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -179,6 +221,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -195,6 +239,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -211,6 +257,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -227,6 +275,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -243,6 +293,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -259,6 +311,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -275,6 +329,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -291,6 +347,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -307,6 +365,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -323,6 +383,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -339,6 +401,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -355,6 +419,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -371,6 +437,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -387,6 +455,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -403,6 +473,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -419,6 +491,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -435,6 +509,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -451,6 +527,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -467,6 +545,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -483,6 +563,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -499,6 +581,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -515,6 +599,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -531,6 +617,8 @@
         "status": "active",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -541,7 +629,7 @@
         "name": "Laura Mills (Riverside Jiu Jitsu)",
         "email": "leader1@demo.j3",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "Riverside Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -558,7 +646,7 @@
         "name": "Laura Mills (Riverside)",
         "email": "leader@demo.j3",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "Riverside Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -575,7 +663,7 @@
         "name": "Marcus Reed (Hilltop Dojo)",
         "email": "leader2@demo.j3",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "Hilltop Dojo",
         "source": "independent",
         "status": "active",
@@ -592,7 +680,7 @@
         "name": "Priya Shah (City Warriors)",
         "email": "leader3@demo.j3",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "City Warriors",
         "source": "independent",
         "status": "active",
@@ -609,7 +697,7 @@
         "name": "Yoshi Tanaka (Sakura Jiu Jitsu Academy)",
         "email": "leader4@demo.j3",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "independent",
         "status": "active",
@@ -626,7 +714,7 @@
         "name": "Adam Mori",
         "email": "fighter-f33@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -640,7 +728,7 @@
         "name": "Aiden Mori",
         "email": "fighter-f03@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -654,7 +742,7 @@
         "name": "Aiko Farouk (Fighter)",
         "email": "fighter-41@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -668,7 +756,7 @@
         "name": "Aiko Moore",
         "email": "fighter-f10@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -682,7 +770,7 @@
         "name": "Aiko Tanaka (Fighter)",
         "email": "fighter-17@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -696,7 +784,7 @@
         "name": "Aisha Khan (Fighter)",
         "email": "fighter-03@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -710,7 +798,7 @@
         "name": "Aisha Nakamura (Fighter)",
         "email": "fighter-27@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -724,7 +812,7 @@
         "name": "Ali Sato",
         "email": "fighter-f25@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -738,7 +826,7 @@
         "name": "Amara Brown",
         "email": "fighter-f14@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -752,7 +840,7 @@
         "name": "Carlos Ahmed (Fighter)",
         "email": "fighter-38@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -766,7 +854,7 @@
         "name": "Carlos Silva (Fighter)",
         "email": "fighter-14@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -780,7 +868,7 @@
         "name": "Daniel Cruz (Fighter)",
         "email": "fighter-02@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -794,7 +882,7 @@
         "name": "Daniel Khan (Fighter)",
         "email": "fighter-26@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -808,7 +896,7 @@
         "name": "Elena Kim (Fighter)",
         "email": "fighter-43@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -822,7 +910,7 @@
         "name": "Elena Petrov (Fighter)",
         "email": "fighter-19@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -836,7 +924,7 @@
         "name": "Ella Wilson",
         "email": "fighter-f06@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -850,7 +938,7 @@
         "name": "Emma Smith",
         "email": "fighter-f22@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -864,7 +952,7 @@
         "name": "Emma Watanabe (Fighter)",
         "email": "fighter-33@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -878,7 +966,7 @@
         "name": "Emma Wilson (Fighter)",
         "email": "fighter-09@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -892,7 +980,7 @@
         "name": "Ethan Ito",
         "email": "fighter-f39@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -906,7 +994,7 @@
         "name": "Finlay Tanaka",
         "email": "fighter-f31@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -920,7 +1008,7 @@
         "name": "Freya Wilson",
         "email": "fighter-f36@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -934,7 +1022,7 @@
         "name": "Grace Brown",
         "email": "fighter-f24@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -948,7 +1036,7 @@
         "name": "Hana Ito (Fighter)",
         "email": "fighter-13@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -962,7 +1050,7 @@
         "name": "Hana Silva (Fighter)",
         "email": "fighter-37@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -976,7 +1064,7 @@
         "name": "Hana Wilson",
         "email": "fighter-f26@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -990,7 +1078,7 @@
         "name": "Haruto Brown (Fighter)",
         "email": "fighter-30@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -1004,7 +1092,7 @@
         "name": "Haruto Sato (Fighter)",
         "email": "fighter-06@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -1018,7 +1106,7 @@
         "name": "Haruto Tanaka",
         "email": "fighter-f01@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1032,7 +1120,7 @@
         "name": "Hiro Ito",
         "email": "fighter-f19@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1046,7 +1134,7 @@
         "name": "Isla Davis",
         "email": "fighter-f28@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -1060,7 +1148,7 @@
         "name": "Ivy Davis",
         "email": "fighter-f38@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -1074,7 +1162,7 @@
         "name": "JUnit Khan",
         "email": "fighter-f17@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1088,7 +1176,7 @@
         "name": "Jun Kim (Fighter)",
         "email": "fighter-20@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1102,7 +1190,7 @@
         "name": "Jun Okafor (Fighter)",
         "email": "fighter-44@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1116,7 +1204,7 @@
         "name": "Kai Chen (Fighter)",
         "email": "fighter-24@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1130,7 +1218,7 @@
         "name": "Kai Mori (Fighter)",
         "email": "fighter-48@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1144,7 +1232,7 @@
         "name": "Kai Sato",
         "email": "fighter-f05@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1158,7 +1246,7 @@
         "name": "Ken Ito",
         "email": "fighter-f29@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1172,7 +1260,7 @@
         "name": "Kenji Haddad (Fighter)",
         "email": "fighter-34@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -1186,7 +1274,7 @@
         "name": "Kenji Watanabe (Fighter)",
         "email": "fighter-10@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -1200,7 +1288,7 @@
         "name": "Layla Haddad (Fighter)",
         "email": "fighter-11@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -1214,7 +1302,7 @@
         "name": "Layla Meyer (Fighter)",
         "email": "fighter-35@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -1228,7 +1316,7 @@
         "name": "Leo Tanaka",
         "email": "fighter-f11@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1242,7 +1330,7 @@
         "name": "Liam Novak (Fighter)",
         "email": "fighter-16@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1256,7 +1344,7 @@
         "name": "Liam Tanaka (Fighter)",
         "email": "fighter-40@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1270,7 +1358,7 @@
         "name": "Lily Moore",
         "email": "fighter-f20@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -1284,7 +1372,7 @@
         "name": "Mateo Diaz (Fighter)",
         "email": "fighter-22@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -1298,7 +1386,7 @@
         "name": "Mateo Yamamoto (Fighter)",
         "email": "fighter-46@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -1312,7 +1400,7 @@
         "name": "Maya Moore",
         "email": "fighter-f30@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -1326,7 +1414,7 @@
         "name": "Mei Wilson",
         "email": "fighter-f16@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -1340,7 +1428,7 @@
         "name": "Mia Brown (Fighter)",
         "email": "fighter-07@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -1354,7 +1442,7 @@
         "name": "Mia Patel (Fighter)",
         "email": "fighter-31@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -1368,7 +1456,7 @@
         "name": "Mika Smith",
         "email": "fighter-f02@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -1382,7 +1470,7 @@
         "name": "Milo Sato",
         "email": "fighter-f35@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1396,7 +1484,7 @@
         "name": "Nao Moore",
         "email": "fighter-f40@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -1410,7 +1498,7 @@
         "name": "Nina Diaz (Fighter)",
         "email": "fighter-45@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -1424,7 +1512,7 @@
         "name": "Nina Okafor (Fighter)",
         "email": "fighter-21@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -1438,7 +1526,7 @@
         "name": "Nina Smith",
         "email": "fighter-f12@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -1452,7 +1540,7 @@
         "name": "Noah Ito",
         "email": "fighter-f09@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1466,7 +1554,7 @@
         "name": "Noah Ito (Fighter)",
         "email": "fighter-36@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -1480,7 +1568,7 @@
         "name": "Noah Meyer (Fighter)",
         "email": "fighter-12@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1494,7 +1582,7 @@
         "name": "Omar Farouk (Fighter)",
         "email": "fighter-18@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -1508,7 +1596,7 @@
         "name": "Omar Petrov (Fighter)",
         "email": "fighter-42@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "source": "club_invite",
         "status": "active",
@@ -1522,7 +1610,7 @@
         "name": "Owen Sato",
         "email": "fighter-f15@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1536,7 +1624,7 @@
         "name": "Ravi Patel (Fighter)",
         "email": "fighter-08@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -1550,7 +1638,7 @@
         "name": "Ravi Tanaka",
         "email": "fighter-f21@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1564,7 +1652,7 @@
         "name": "Ravi Wilson (Fighter)",
         "email": "fighter-32@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1578,7 +1666,7 @@
         "name": "Riku Khan",
         "email": "fighter-f07@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1592,7 +1680,7 @@
         "name": "Rin Smith",
         "email": "fighter-f32@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -1606,7 +1694,7 @@
         "name": "Sakura Chen (Fighter)",
         "email": "fighter-47@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -1620,7 +1708,7 @@
         "name": "Sakura Yamamoto (Fighter)",
         "email": "fighter-23@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -1634,7 +1722,7 @@
         "name": "Sofia Davis",
         "email": "fighter-f08@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -1648,7 +1736,7 @@
         "name": "Sofia Rossi (Fighter)",
         "email": "fighter-05@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -1662,7 +1750,7 @@
         "name": "Sofia Sato (Fighter)",
         "email": "fighter-29@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -1676,7 +1764,7 @@
         "name": "Sota Mori",
         "email": "fighter-f23@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1690,7 +1778,7 @@
         "name": "Suki Brown",
         "email": "fighter-f34@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -1704,7 +1792,7 @@
         "name": "Taro Mori",
         "email": "fighter-f13@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1718,7 +1806,7 @@
         "name": "Theo Khan",
         "email": "fighter-f27@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1732,7 +1820,7 @@
         "name": "Tobi Khan",
         "email": "fighter-f37@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "source": "independent",
         "status": "active",
@@ -1746,7 +1834,7 @@
         "name": "Tom Nakamura (Fighter)",
         "email": "fighter-04@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1760,7 +1848,7 @@
         "name": "Tom Rossi (Fighter)",
         "email": "fighter-28@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "source": "club_invite",
         "status": "active",
@@ -1774,7 +1862,7 @@
         "name": "Yui Brown",
         "email": "fighter-f04@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "source": "independent",
         "status": "active",
@@ -1788,7 +1876,7 @@
         "name": "Yuki Cruz (Fighter)",
         "email": "fighter-25@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "source": "club_invite",
         "status": "active",
@@ -1802,7 +1890,7 @@
         "name": "Yuki Mori (Fighter)",
         "email": "fighter-01@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -1816,7 +1904,7 @@
         "name": "Zara Ahmed (Fighter)",
         "email": "fighter-15@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "source": "independent",
         "status": "active",
@@ -1830,7 +1918,7 @@
         "name": "Zara Davis",
         "email": "fighter-f18@okami.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "source": "independent",
         "status": "active",
@@ -1844,7 +1932,7 @@
         "name": "Zara Novak (Fighter)",
         "email": "fighter-39@demo.j3",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "source": "club_invite",
         "status": "active",
@@ -1867,6 +1955,1294 @@
         ]
       }
     ]
+  },
+  "/api/v1/demo/credentials": {
+    "accounts": [
+      {
+        "id": "u-owner",
+        "name": "J3 Owner (Admin)",
+        "email": "owner@demo.j3",
+        "role": "admin",
+        "roleLabel": "Admin / owner",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-runner",
+        "name": "Aiko Tanaka (Runner)",
+        "email": "runner@demo.j3",
+        "role": "tournament_runner",
+        "roleLabel": "Tournament runner / organiser",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-runner-2",
+        "name": "Marcus Bell (Runner)",
+        "email": "runner2@demo.j3",
+        "role": "tournament_runner",
+        "roleLabel": "Tournament runner / organiser",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-tony",
+        "name": "Tony Jamieson",
+        "email": "tony@okami.j3",
+        "role": "tournament_runner",
+        "roleLabel": "Tournament runner / organiser",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official-3",
+        "name": "Diego Alvarez (Official)",
+        "email": "official3@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official-5",
+        "name": "Grace Okafor (Official)",
+        "email": "official5@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-judge-1",
+        "name": "Judge 1",
+        "email": "judge1@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-judge-2",
+        "name": "Judge 2",
+        "email": "judge2@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-judge-3",
+        "name": "Judge 3",
+        "email": "judge3@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-judge-4",
+        "name": "Judge 4",
+        "email": "judge4@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-judge-5",
+        "name": "Judge 5",
+        "email": "judge5@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-judge-6",
+        "name": "Judge 6",
+        "email": "judge6@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official",
+        "name": "Kenji Sato (Official)",
+        "email": "official1@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official-7",
+        "name": "Mei Lin (Official)",
+        "email": "official7@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official-2",
+        "name": "Nina Sutherland (Official)",
+        "email": "official2@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official-8",
+        "name": "Owen Bradley (Official)",
+        "email": "official8@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-keeper-1",
+        "name": "Scorekeeper Mat 1",
+        "email": "keeper1@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-keeper-2",
+        "name": "Scorekeeper Mat 2",
+        "email": "keeper2@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official-4",
+        "name": "Shihan H. Yamamoto (Official)",
+        "email": "official4@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official-6",
+        "name": "Tobias Reinhardt (Official)",
+        "email": "official6@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-volunteer-1",
+        "name": "Volunteer 1 · Finding participants",
+        "email": "volunteer1@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-volunteer-2",
+        "name": "Volunteer 2 · Belt tying",
+        "email": "volunteer2@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-volunteer-3",
+        "name": "Volunteer 3 · Directing attendees",
+        "email": "volunteer3@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-volunteer-4",
+        "name": "Volunteer 4 · Awarding medals",
+        "email": "volunteer4@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-volunteer-5",
+        "name": "Volunteer 5 · Mat assistant",
+        "email": "volunteer5@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-volunteer-6",
+        "name": "Volunteer 6 · Course assistant",
+        "email": "volunteer6@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-volunteer-7",
+        "name": "Volunteer 7 · Weigh-in helper",
+        "email": "volunteer7@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-volunteer-8",
+        "name": "Volunteer 8 · General duties",
+        "email": "volunteer8@okami.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-leader-1",
+        "name": "Laura Mills (Riverside Jiu Jitsu)",
+        "email": "leader1@demo.j3",
+        "role": "club_leader",
+        "roleLabel": "Club owner / leader",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-leader",
+        "name": "Laura Mills (Riverside)",
+        "email": "leader@demo.j3",
+        "role": "club_leader",
+        "roleLabel": "Club owner / leader",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-leader-2",
+        "name": "Marcus Reed (Hilltop Dojo)",
+        "email": "leader2@demo.j3",
+        "role": "club_leader",
+        "roleLabel": "Club owner / leader",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-leader-3",
+        "name": "Priya Shah (City Warriors)",
+        "email": "leader3@demo.j3",
+        "role": "club_leader",
+        "roleLabel": "Club owner / leader",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-leader-4",
+        "name": "Yoshi Tanaka (Sakura Jiu Jitsu Academy)",
+        "email": "leader4@demo.j3",
+        "role": "club_leader",
+        "roleLabel": "Club owner / leader",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f33",
+        "name": "Adam Mori",
+        "email": "fighter-f33@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f03",
+        "name": "Aiden Mori",
+        "email": "fighter-f03@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-41",
+        "name": "Aiko Farouk (Fighter)",
+        "email": "fighter-41@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f10",
+        "name": "Aiko Moore",
+        "email": "fighter-f10@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-17",
+        "name": "Aiko Tanaka (Fighter)",
+        "email": "fighter-17@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-03",
+        "name": "Aisha Khan (Fighter)",
+        "email": "fighter-03@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-27",
+        "name": "Aisha Nakamura (Fighter)",
+        "email": "fighter-27@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f25",
+        "name": "Ali Sato",
+        "email": "fighter-f25@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f14",
+        "name": "Amara Brown",
+        "email": "fighter-f14@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-38",
+        "name": "Carlos Ahmed (Fighter)",
+        "email": "fighter-38@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-14",
+        "name": "Carlos Silva (Fighter)",
+        "email": "fighter-14@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-02",
+        "name": "Daniel Cruz (Fighter)",
+        "email": "fighter-02@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-26",
+        "name": "Daniel Khan (Fighter)",
+        "email": "fighter-26@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-43",
+        "name": "Elena Kim (Fighter)",
+        "email": "fighter-43@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-19",
+        "name": "Elena Petrov (Fighter)",
+        "email": "fighter-19@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f06",
+        "name": "Ella Wilson",
+        "email": "fighter-f06@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f22",
+        "name": "Emma Smith",
+        "email": "fighter-f22@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-33",
+        "name": "Emma Watanabe (Fighter)",
+        "email": "fighter-33@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-09",
+        "name": "Emma Wilson (Fighter)",
+        "email": "fighter-09@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f39",
+        "name": "Ethan Ito",
+        "email": "fighter-f39@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f31",
+        "name": "Finlay Tanaka",
+        "email": "fighter-f31@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f36",
+        "name": "Freya Wilson",
+        "email": "fighter-f36@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f24",
+        "name": "Grace Brown",
+        "email": "fighter-f24@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-13",
+        "name": "Hana Ito (Fighter)",
+        "email": "fighter-13@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-37",
+        "name": "Hana Silva (Fighter)",
+        "email": "fighter-37@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f26",
+        "name": "Hana Wilson",
+        "email": "fighter-f26@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-30",
+        "name": "Haruto Brown (Fighter)",
+        "email": "fighter-30@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-06",
+        "name": "Haruto Sato (Fighter)",
+        "email": "fighter-06@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f01",
+        "name": "Haruto Tanaka",
+        "email": "fighter-f01@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f19",
+        "name": "Hiro Ito",
+        "email": "fighter-f19@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f28",
+        "name": "Isla Davis",
+        "email": "fighter-f28@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f38",
+        "name": "Ivy Davis",
+        "email": "fighter-f38@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f17",
+        "name": "JUnit Khan",
+        "email": "fighter-f17@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-20",
+        "name": "Jun Kim (Fighter)",
+        "email": "fighter-20@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-44",
+        "name": "Jun Okafor (Fighter)",
+        "email": "fighter-44@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-24",
+        "name": "Kai Chen (Fighter)",
+        "email": "fighter-24@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-48",
+        "name": "Kai Mori (Fighter)",
+        "email": "fighter-48@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f05",
+        "name": "Kai Sato",
+        "email": "fighter-f05@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f29",
+        "name": "Ken Ito",
+        "email": "fighter-f29@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-34",
+        "name": "Kenji Haddad (Fighter)",
+        "email": "fighter-34@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-10",
+        "name": "Kenji Watanabe (Fighter)",
+        "email": "fighter-10@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-11",
+        "name": "Layla Haddad (Fighter)",
+        "email": "fighter-11@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-35",
+        "name": "Layla Meyer (Fighter)",
+        "email": "fighter-35@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f11",
+        "name": "Leo Tanaka",
+        "email": "fighter-f11@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-16",
+        "name": "Liam Novak (Fighter)",
+        "email": "fighter-16@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-40",
+        "name": "Liam Tanaka (Fighter)",
+        "email": "fighter-40@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f20",
+        "name": "Lily Moore",
+        "email": "fighter-f20@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-22",
+        "name": "Mateo Diaz (Fighter)",
+        "email": "fighter-22@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-46",
+        "name": "Mateo Yamamoto (Fighter)",
+        "email": "fighter-46@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f30",
+        "name": "Maya Moore",
+        "email": "fighter-f30@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f16",
+        "name": "Mei Wilson",
+        "email": "fighter-f16@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-07",
+        "name": "Mia Brown (Fighter)",
+        "email": "fighter-07@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-31",
+        "name": "Mia Patel (Fighter)",
+        "email": "fighter-31@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f02",
+        "name": "Mika Smith",
+        "email": "fighter-f02@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f35",
+        "name": "Milo Sato",
+        "email": "fighter-f35@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f40",
+        "name": "Nao Moore",
+        "email": "fighter-f40@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-45",
+        "name": "Nina Diaz (Fighter)",
+        "email": "fighter-45@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-21",
+        "name": "Nina Okafor (Fighter)",
+        "email": "fighter-21@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f12",
+        "name": "Nina Smith",
+        "email": "fighter-f12@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f09",
+        "name": "Noah Ito",
+        "email": "fighter-f09@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-36",
+        "name": "Noah Ito (Fighter)",
+        "email": "fighter-36@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-12",
+        "name": "Noah Meyer (Fighter)",
+        "email": "fighter-12@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-18",
+        "name": "Omar Farouk (Fighter)",
+        "email": "fighter-18@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-42",
+        "name": "Omar Petrov (Fighter)",
+        "email": "fighter-42@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Hilltop Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f15",
+        "name": "Owen Sato",
+        "email": "fighter-f15@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-08",
+        "name": "Ravi Patel (Fighter)",
+        "email": "fighter-08@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f21",
+        "name": "Ravi Tanaka",
+        "email": "fighter-f21@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-32",
+        "name": "Ravi Wilson (Fighter)",
+        "email": "fighter-32@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f07",
+        "name": "Riku Khan",
+        "email": "fighter-f07@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f32",
+        "name": "Rin Smith",
+        "email": "fighter-f32@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-47",
+        "name": "Sakura Chen (Fighter)",
+        "email": "fighter-47@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-23",
+        "name": "Sakura Yamamoto (Fighter)",
+        "email": "fighter-23@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f08",
+        "name": "Sofia Davis",
+        "email": "fighter-f08@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-05",
+        "name": "Sofia Rossi (Fighter)",
+        "email": "fighter-05@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-29",
+        "name": "Sofia Sato (Fighter)",
+        "email": "fighter-29@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f23",
+        "name": "Sota Mori",
+        "email": "fighter-f23@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f34",
+        "name": "Suki Brown",
+        "email": "fighter-f34@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f13",
+        "name": "Taro Mori",
+        "email": "fighter-f13@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f27",
+        "name": "Theo Khan",
+        "email": "fighter-f27@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Lincoln Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f37",
+        "name": "Tobi Khan",
+        "email": "fighter-f37@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-04",
+        "name": "Tom Nakamura (Fighter)",
+        "email": "fighter-04@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-28",
+        "name": "Tom Rossi (Fighter)",
+        "email": "fighter-28@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Sakura Jiu Jitsu Academy",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f04",
+        "name": "Yui Brown",
+        "email": "fighter-f04@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Coastal Martial Arts",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-25",
+        "name": "Yuki Cruz (Fighter)",
+        "email": "fighter-25@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-01",
+        "name": "Yuki Mori (Fighter)",
+        "email": "fighter-01@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-15",
+        "name": "Zara Ahmed (Fighter)",
+        "email": "fighter-15@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "ok-u-f18",
+        "name": "Zara Davis",
+        "email": "fighter-f18@okami.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "Skegness Dojo",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-39",
+        "name": "Zara Novak (Fighter)",
+        "email": "fighter-39@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "City Warriors",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-spectator",
+        "name": "Sam Viewer (Spectator)",
+        "email": "viewer@demo.j3",
+        "role": "spectator",
+        "roleLabel": "Spectator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      }
+    ],
+    "password": "demo",
+    "quickAccounts": [
+      {
+        "id": "u-owner",
+        "name": "J3 Owner (Admin)",
+        "email": "owner@demo.j3",
+        "role": "admin",
+        "roleLabel": "Admin / owner",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-tony",
+        "name": "Tony Jamieson",
+        "email": "tony@okami.j3",
+        "role": "tournament_runner",
+        "roleLabel": "Tournament runner / organiser",
+        "club": "Okami Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-official",
+        "name": "Kenji Sato (Official)",
+        "email": "official1@demo.j3",
+        "role": "official",
+        "roleLabel": "Official / moderator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-leader-1",
+        "name": "Laura Mills (Riverside Jiu Jitsu)",
+        "email": "leader1@demo.j3",
+        "role": "club_leader",
+        "roleLabel": "Club owner / leader",
+        "club": "Riverside Jiu Jitsu",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-fighter-01",
+        "name": "Yuki Mori (Fighter)",
+        "email": "fighter-01@demo.j3",
+        "role": "fighter",
+        "roleLabel": "Fighter / participant",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      },
+      {
+        "id": "u-spectator",
+        "name": "Sam Viewer (Spectator)",
+        "email": "viewer@demo.j3",
+        "role": "spectator",
+        "roleLabel": "Spectator",
+        "club": "",
+        "password": "demo",
+        "status": "active"
+      }
+    ],
+    "total": 122
   },
   "/api/v1/demo/attendance": {
     "attendance": [
@@ -4510,11 +5886,11 @@
   },
   "/api/v1/demo/identities": {
     "current": {
-      "id": "u-tony",
-      "name": "Tony Jamieson",
-      "role": "tournament_runner",
-      "roleLabel": "Tournament runner",
-      "clubName": "Okami Jiu Jitsu",
+      "id": "u-owner",
+      "name": "J3 Owner (Admin)",
+      "role": "admin",
+      "roleLabel": "Admin / owner",
+      "clubName": "",
       "actions": [
         "manage_tenant",
         "manage_event",
@@ -4529,10 +5905,28 @@
     },
     "identities": [
       {
+        "id": "u-owner",
+        "name": "J3 Owner (Admin)",
+        "role": "admin",
+        "roleLabel": "Admin / owner",
+        "clubName": "",
+        "actions": [
+          "manage_tenant",
+          "manage_event",
+          "manage_users",
+          "manage_club",
+          "invite_fighters",
+          "score_fight",
+          "register_self",
+          "view_private",
+          "view_public"
+        ]
+      },
+      {
         "id": "u-runner",
         "name": "Aiko Tanaka (Runner)",
         "role": "tournament_runner",
-        "roleLabel": "Tournament runner",
+        "roleLabel": "Tournament runner / organiser",
         "clubName": "",
         "actions": [
           "manage_tenant",
@@ -4550,7 +5944,7 @@
         "id": "u-runner-2",
         "name": "Marcus Bell (Runner)",
         "role": "tournament_runner",
-        "roleLabel": "Tournament runner",
+        "roleLabel": "Tournament runner / organiser",
         "clubName": "",
         "actions": [
           "manage_tenant",
@@ -4568,7 +5962,7 @@
         "id": "u-tony",
         "name": "Tony Jamieson",
         "role": "tournament_runner",
-        "roleLabel": "Tournament runner",
+        "roleLabel": "Tournament runner / organiser",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "manage_tenant",
@@ -4590,6 +5984,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4603,6 +5999,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4616,6 +6014,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4629,6 +6029,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4642,6 +6044,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4655,6 +6059,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4668,6 +6074,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4681,6 +6089,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4694,6 +6104,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4707,6 +6119,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4720,6 +6134,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4733,6 +6149,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4746,6 +6164,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4759,6 +6179,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4772,6 +6194,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4785,6 +6209,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4798,6 +6224,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4811,6 +6239,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4824,6 +6254,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4837,6 +6269,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4850,6 +6284,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4863,6 +6299,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4876,6 +6314,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4889,6 +6329,8 @@
         "clubName": "",
         "actions": [
           "score_fight",
+          "manage_users",
+          "invite_fighters",
           "register_self",
           "view_private",
           "view_public"
@@ -4898,7 +6340,7 @@
         "id": "u-leader-1",
         "name": "Laura Mills (Riverside Jiu Jitsu)",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "manage_club",
@@ -4912,7 +6354,7 @@
         "id": "u-leader",
         "name": "Laura Mills (Riverside)",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "manage_club",
@@ -4926,7 +6368,7 @@
         "id": "u-leader-2",
         "name": "Marcus Reed (Hilltop Dojo)",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "Hilltop Dojo",
         "actions": [
           "manage_club",
@@ -4940,7 +6382,7 @@
         "id": "u-leader-3",
         "name": "Priya Shah (City Warriors)",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "City Warriors",
         "actions": [
           "manage_club",
@@ -4954,7 +6396,7 @@
         "id": "u-leader-4",
         "name": "Yoshi Tanaka (Sakura Jiu Jitsu Academy)",
         "role": "club_leader",
-        "roleLabel": "Club leader",
+        "roleLabel": "Club owner / leader",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "manage_club",
@@ -4968,7 +6410,7 @@
         "id": "ok-u-f33",
         "name": "Adam Mori",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -4979,7 +6421,7 @@
         "id": "ok-u-f03",
         "name": "Aiden Mori",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -4990,7 +6432,7 @@
         "id": "u-fighter-41",
         "name": "Aiko Farouk (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5001,7 +6443,7 @@
         "id": "ok-u-f10",
         "name": "Aiko Moore",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5012,7 +6454,7 @@
         "id": "u-fighter-17",
         "name": "Aiko Tanaka (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5023,7 +6465,7 @@
         "id": "u-fighter-03",
         "name": "Aisha Khan (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5034,7 +6476,7 @@
         "id": "u-fighter-27",
         "name": "Aisha Nakamura (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5045,7 +6487,7 @@
         "id": "ok-u-f25",
         "name": "Ali Sato",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5056,7 +6498,7 @@
         "id": "ok-u-f14",
         "name": "Amara Brown",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5067,7 +6509,7 @@
         "id": "u-fighter-38",
         "name": "Carlos Ahmed (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5078,7 +6520,7 @@
         "id": "u-fighter-14",
         "name": "Carlos Silva (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5089,7 +6531,7 @@
         "id": "u-fighter-02",
         "name": "Daniel Cruz (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5100,7 +6542,7 @@
         "id": "u-fighter-26",
         "name": "Daniel Khan (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5111,7 +6553,7 @@
         "id": "u-fighter-43",
         "name": "Elena Kim (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "actions": [
           "register_self",
@@ -5122,7 +6564,7 @@
         "id": "u-fighter-19",
         "name": "Elena Petrov (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5133,7 +6575,7 @@
         "id": "ok-u-f06",
         "name": "Ella Wilson",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5144,7 +6586,7 @@
         "id": "ok-u-f22",
         "name": "Emma Smith",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5155,7 +6597,7 @@
         "id": "u-fighter-33",
         "name": "Emma Watanabe (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5166,7 +6608,7 @@
         "id": "u-fighter-09",
         "name": "Emma Wilson (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5177,7 +6619,7 @@
         "id": "ok-u-f39",
         "name": "Ethan Ito",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5188,7 +6630,7 @@
         "id": "ok-u-f31",
         "name": "Finlay Tanaka",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5199,7 +6641,7 @@
         "id": "ok-u-f36",
         "name": "Freya Wilson",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5210,7 +6652,7 @@
         "id": "ok-u-f24",
         "name": "Grace Brown",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5221,7 +6663,7 @@
         "id": "u-fighter-13",
         "name": "Hana Ito (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5232,7 +6674,7 @@
         "id": "u-fighter-37",
         "name": "Hana Silva (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5243,7 +6685,7 @@
         "id": "ok-u-f26",
         "name": "Hana Wilson",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5254,7 +6696,7 @@
         "id": "u-fighter-30",
         "name": "Haruto Brown (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5265,7 +6707,7 @@
         "id": "u-fighter-06",
         "name": "Haruto Sato (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5276,7 +6718,7 @@
         "id": "ok-u-f01",
         "name": "Haruto Tanaka",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5287,7 +6729,7 @@
         "id": "ok-u-f19",
         "name": "Hiro Ito",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5298,7 +6740,7 @@
         "id": "ok-u-f28",
         "name": "Isla Davis",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5309,7 +6751,7 @@
         "id": "ok-u-f38",
         "name": "Ivy Davis",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5320,7 +6762,7 @@
         "id": "ok-u-f17",
         "name": "JUnit Khan",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5331,7 +6773,7 @@
         "id": "u-fighter-20",
         "name": "Jun Kim (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5342,7 +6784,7 @@
         "id": "u-fighter-44",
         "name": "Jun Okafor (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5353,7 +6795,7 @@
         "id": "u-fighter-24",
         "name": "Kai Chen (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5364,7 +6806,7 @@
         "id": "u-fighter-48",
         "name": "Kai Mori (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5375,7 +6817,7 @@
         "id": "ok-u-f05",
         "name": "Kai Sato",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5386,7 +6828,7 @@
         "id": "ok-u-f29",
         "name": "Ken Ito",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5397,7 +6839,7 @@
         "id": "u-fighter-34",
         "name": "Kenji Haddad (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5408,7 +6850,7 @@
         "id": "u-fighter-10",
         "name": "Kenji Watanabe (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5419,7 +6861,7 @@
         "id": "u-fighter-11",
         "name": "Layla Haddad (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5430,7 +6872,7 @@
         "id": "u-fighter-35",
         "name": "Layla Meyer (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5441,7 +6883,7 @@
         "id": "ok-u-f11",
         "name": "Leo Tanaka",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5452,7 +6894,7 @@
         "id": "u-fighter-16",
         "name": "Liam Novak (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5463,7 +6905,7 @@
         "id": "u-fighter-40",
         "name": "Liam Tanaka (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5474,7 +6916,7 @@
         "id": "ok-u-f20",
         "name": "Lily Moore",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5485,7 +6927,7 @@
         "id": "u-fighter-22",
         "name": "Mateo Diaz (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "actions": [
           "register_self",
@@ -5496,7 +6938,7 @@
         "id": "u-fighter-46",
         "name": "Mateo Yamamoto (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5507,7 +6949,7 @@
         "id": "ok-u-f30",
         "name": "Maya Moore",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5518,7 +6960,7 @@
         "id": "ok-u-f16",
         "name": "Mei Wilson",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5529,7 +6971,7 @@
         "id": "u-fighter-07",
         "name": "Mia Brown (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5540,7 +6982,7 @@
         "id": "u-fighter-31",
         "name": "Mia Patel (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5551,7 +6993,7 @@
         "id": "ok-u-f02",
         "name": "Mika Smith",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5562,7 +7004,7 @@
         "id": "ok-u-f35",
         "name": "Milo Sato",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5573,7 +7015,7 @@
         "id": "ok-u-f40",
         "name": "Nao Moore",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5584,7 +7026,7 @@
         "id": "u-fighter-45",
         "name": "Nina Diaz (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5595,7 +7037,7 @@
         "id": "u-fighter-21",
         "name": "Nina Okafor (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5606,7 +7048,7 @@
         "id": "ok-u-f12",
         "name": "Nina Smith",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5617,7 +7059,7 @@
         "id": "ok-u-f09",
         "name": "Noah Ito",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5628,7 +7070,7 @@
         "id": "u-fighter-36",
         "name": "Noah Ito (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "actions": [
           "register_self",
@@ -5639,7 +7081,7 @@
         "id": "u-fighter-12",
         "name": "Noah Meyer (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5650,7 +7092,7 @@
         "id": "u-fighter-18",
         "name": "Omar Farouk (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5661,7 +7103,7 @@
         "id": "u-fighter-42",
         "name": "Omar Petrov (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Hilltop Dojo",
         "actions": [
           "register_self",
@@ -5672,7 +7114,7 @@
         "id": "ok-u-f15",
         "name": "Owen Sato",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5683,7 +7125,7 @@
         "id": "u-fighter-08",
         "name": "Ravi Patel (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "actions": [
           "register_self",
@@ -5694,7 +7136,7 @@
         "id": "ok-u-f21",
         "name": "Ravi Tanaka",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5705,7 +7147,7 @@
         "id": "u-fighter-32",
         "name": "Ravi Wilson (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5716,7 +7158,7 @@
         "id": "ok-u-f07",
         "name": "Riku Khan",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5727,7 +7169,7 @@
         "id": "ok-u-f32",
         "name": "Rin Smith",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5738,7 +7180,7 @@
         "id": "u-fighter-47",
         "name": "Sakura Chen (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5749,7 +7191,7 @@
         "id": "u-fighter-23",
         "name": "Sakura Yamamoto (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -5760,7 +7202,7 @@
         "id": "ok-u-f08",
         "name": "Sofia Davis",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5771,7 +7213,7 @@
         "id": "u-fighter-05",
         "name": "Sofia Rossi (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5782,7 +7224,7 @@
         "id": "u-fighter-29",
         "name": "Sofia Sato (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "actions": [
           "register_self",
@@ -5793,7 +7235,7 @@
         "id": "ok-u-f23",
         "name": "Sota Mori",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5804,7 +7246,7 @@
         "id": "ok-u-f34",
         "name": "Suki Brown",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5815,7 +7257,7 @@
         "id": "ok-u-f13",
         "name": "Taro Mori",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5826,7 +7268,7 @@
         "id": "ok-u-f27",
         "name": "Theo Khan",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Lincoln Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5837,7 +7279,7 @@
         "id": "ok-u-f37",
         "name": "Tobi Khan",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Okami Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5848,7 +7290,7 @@
         "id": "u-fighter-04",
         "name": "Tom Nakamura (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5859,7 +7301,7 @@
         "id": "u-fighter-28",
         "name": "Tom Rossi (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Sakura Jiu Jitsu Academy",
         "actions": [
           "register_self",
@@ -5870,7 +7312,7 @@
         "id": "ok-u-f04",
         "name": "Yui Brown",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Coastal Martial Arts",
         "actions": [
           "register_self",
@@ -5881,7 +7323,7 @@
         "id": "u-fighter-25",
         "name": "Yuki Cruz (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Riverside Jiu Jitsu",
         "actions": [
           "register_self",
@@ -5892,7 +7334,7 @@
         "id": "u-fighter-01",
         "name": "Yuki Mori (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "actions": [
           "register_self",
@@ -5903,7 +7345,7 @@
         "id": "u-fighter-15",
         "name": "Zara Ahmed (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "",
         "actions": [
           "register_self",
@@ -5914,7 +7356,7 @@
         "id": "ok-u-f18",
         "name": "Zara Davis",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "Skegness Dojo",
         "actions": [
           "register_self",
@@ -5925,7 +7367,7 @@
         "id": "u-fighter-39",
         "name": "Zara Novak (Fighter)",
         "role": "fighter",
-        "roleLabel": "Fighter",
+        "roleLabel": "Fighter / participant",
         "clubName": "City Warriors",
         "actions": [
           "register_self",
@@ -8115,7 +9557,7 @@
         ]
       }
     ],
-    "role": "tournament_runner"
+    "role": "admin"
   },
   "/api/v1/demo/announcements": {
     "announcements": []
@@ -12514,12 +13956,12 @@
       "view_public"
     ],
     "actor": {
-      "id": "u-tony",
-      "name": "Tony Jamieson",
-      "email": "tony@okami.j3",
-      "role": "tournament_runner",
-      "roleLabel": "Tournament runner",
-      "clubName": "Okami Jiu Jitsu",
+      "id": "u-owner",
+      "name": "J3 Owner (Admin)",
+      "email": "owner@demo.j3",
+      "role": "admin",
+      "roleLabel": "Admin / owner",
+      "clubName": "",
       "source": "independent",
       "status": "active",
       "actions": [
@@ -12545,7 +13987,7 @@
       "fights": 40,
       "mats": 6,
       "tenants": 1,
-      "users": 121
+      "users": 122
     }
   },
   "/api/v1/templates": {
@@ -12554,34 +13996,34 @@
         "ID": "tpl-okami",
         "Name": "Okami Challengers 2027 (full)",
         "ConfigJSON": "{\"name\":\"Okami Jiu Jitsu Challengers Tournament 2027\",\"disciplines\":[{\"name\":\"Open Hand Kata\"}],\"categories\":[{\"name\":\"Adults\",\"kind\":\"age\",\"min\":18,\"max\":99}],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T19:17:04.682Z"
+        "CreatedAt": "2026-11-22T22:01:05.965Z"
       },
       {
         "ID": "tpl-club",
         "Name": "Club open day (empty)",
         "ConfigJSON": "{\"name\":\"Club Open Day\",\"disciplines\":[],\"categories\":[],\"constraints\":{\"cap\":50,\"maxPools\":8},\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T19:17:04.682Z"
+        "CreatedAt": "2026-11-22T22:01:05.965Z"
       },
       {
         "ID": "tpl-kata",
         "Name": "Kata only (empty)",
         "ConfigJSON": "{\"name\":\"Kata Challenge\",\"disciplines\":[{\"name\":\"Open Hand Kata\"},{\"name\":\"Weapons Kata\"}],\"categories\":[],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T19:17:04.682Z"
+        "CreatedAt": "2026-11-22T22:01:05.965Z"
       },
       {
         "ID": "tpl-newhaza",
         "Name": "Newaza tournament (empty)",
         "ConfigJSON": "{\"name\":\"Newaza Tournament\",\"disciplines\":[{\"name\":\"Randori / Katamewaza\"},{\"name\":\"Ground Fighting\"}],\"categories\":[],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T19:17:04.682Z"
+        "CreatedAt": "2026-11-22T22:01:05.965Z"
       }
     ]
   },
   "session": {
     "token": "offline-demo",
-    "email": "demo@j3.local",
-    "role": "tournament_runner",
+    "email": "owner@demo.j3",
+    "role": "admin",
     "expiresAt": "2099-01-01T00:00:00Z",
-    "userId": "u-tony"
+    "userId": "u-owner"
   },
-  "generatedAt": "2026-11-22T19:17:06Z"
+  "generatedAt": "2026-11-22T22:01:08Z"
 }

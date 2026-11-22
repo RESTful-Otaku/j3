@@ -79,7 +79,7 @@ func TestDemoLoginBootstrapsEmptyVenueDatabase(t *testing.T) {
 	}
 }
 
-func TestDemoLoginUsesBaseSeedRunnerAndActiveEvent(t *testing.T) {
+func TestDemoLoginUsesBaseSeedAdminAndActiveEvent(t *testing.T) {
 	t.Setenv("J3_DEMO", "1")
 	store, err := db.Open(":memory:")
 	if err != nil {
@@ -94,8 +94,8 @@ func TestDemoLoginUsesBaseSeedRunnerAndActiveEvent(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("demo login status = %d, want 200: %s", rec.Code, rec.Body.String())
 	}
-	if session.UserID != "u-runner" {
-		t.Fatalf("userId = %q, want seeded u-runner", session.UserID)
+	if session.UserID != "u-owner" {
+		t.Fatalf("userId = %q, want seeded admin u-owner", session.UserID)
 	}
 	for _, path := range []string{
 		"/api/v1/demo/accounts", "/api/v1/demo/event", "/api/v1/demo/event-config",

@@ -201,6 +201,17 @@
   {
     "group": "Authentication",
     "method": "POST",
+    "path": "/api/v1/auth/password",
+    "operationId": "changeOwnPassword",
+    "title": "Replace the signed-in account's one-time or current password",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": "{\n  \"currentPassword\": \"text\",\n  \"newPassword\": \"text\"\n}"
+  },
+  {
+    "group": "Authentication",
+    "method": "POST",
     "path": "/api/v1/auth/reset",
     "operationId": "completeReset",
     "title": "Complete a password reset with a token and a new password",
@@ -336,6 +347,17 @@
         "value": "fight-01"
       }
     ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/credentials",
+    "operationId": "demoCredentials",
+    "title": "Seeded demo credentials and representative accounts (J3_DEMO=1)",
+    "description": "",
+    "auth": false,
+    "parameters": [],
     "body": ""
   },
   {
@@ -837,6 +859,58 @@
   {
     "group": "Events & displays",
     "method": "GET",
+    "path": "/api/v1/invites",
+    "operationId": "listInvites",
+    "title": "Invitations visible within the caller's authority",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Events & displays",
+    "method": "POST",
+    "path": "/api/v1/invites",
+    "operationId": "createInvite",
+    "title": "Invite a user within the caller's invite authority",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": "{\n  \"email\": \"fighter@example.com\",\n  \"name\": \"text\",\n  \"role\": \"text\",\n  \"clubId\": \"text\",\n  \"clubName\": \"text\",\n  \"phone\": \"text\",\n  \"eventId\": \"text\"\n}"
+  },
+  {
+    "group": "Events & displays",
+    "method": "POST",
+    "path": "/api/v1/invites/accept",
+    "operationId": "acceptInvite",
+    "title": "Activate an invited account using its one-time token",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": "{\n  \"token\": \"text\",\n  \"name\": \"text\",\n  \"password\": \"text\"\n}"
+  },
+  {
+    "group": "Events & displays",
+    "method": "POST",
+    "path": "/api/v1/invites/{id}/revoke",
+    "operationId": "revokeInvite",
+    "title": "Revoke a pending invitation",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Events & displays",
+    "method": "GET",
     "path": "/api/v1/roles",
     "operationId": "roles",
     "title": "RBAC roles and their capabilities",
@@ -1074,7 +1148,7 @@
     "description": "",
     "auth": true,
     "parameters": [],
-    "body": "{\n  \"name\": \"text\",\n  \"email\": \"fighter@example.com\",\n  \"password\": \"text\",\n  \"phone\": \"text\",\n  \"dateOfBirth\": \"2026-11-22\",\n  \"unitSystem\": \"metric\",\n  \"heightCm\": 0,\n  \"weightKg\": 0,\n  \"heightFt\": 0,\n  \"heightIn\": 0,\n  \"weightLb\": 0,\n  \"beltRankId\": \"text\",\n  \"customBeltLabel\": \"text\",\n  \"customBeltColour\": \"text\",\n  \"guardianName\": \"text\",\n  \"guardianContact\": \"text\",\n  \"guardianConsent\": false,\n  \"gender\": \"male\",\n  \"accountType\": \"tournament_runner\",\n  \"clubId\": \"text\",\n  \"categoryIds\": [\n    \"text\"\n  ],\n  \"consentMoveUp\": false\n}"
+    "body": "{\n  \"name\": \"text\",\n  \"email\": \"fighter@example.com\",\n  \"password\": \"text\",\n  \"phone\": \"text\",\n  \"dateOfBirth\": \"2026-11-22\",\n  \"unitSystem\": \"metric\",\n  \"heightCm\": 0,\n  \"weightKg\": 0,\n  \"heightFt\": 0,\n  \"heightIn\": 0,\n  \"weightLb\": 0,\n  \"beltRankId\": \"text\",\n  \"customBeltLabel\": \"text\",\n  \"customBeltColour\": \"text\",\n  \"guardianName\": \"text\",\n  \"guardianContact\": \"text\",\n  \"guardianConsent\": false,\n  \"gender\": \"male\",\n  \"accountType\": \"admin\",\n  \"clubId\": \"text\",\n  \"categoryIds\": [\n    \"text\"\n  ],\n  \"consentMoveUp\": false\n}"
   },
   {
     "group": "Registration",
@@ -1085,7 +1159,7 @@
     "description": "",
     "auth": true,
     "parameters": [],
-    "body": "{\n  \"name\": \"text\",\n  \"email\": \"fighter@example.com\",\n  \"password\": \"text\",\n  \"phone\": \"text\",\n  \"dateOfBirth\": \"2026-11-22\",\n  \"unitSystem\": \"metric\",\n  \"heightCm\": 0,\n  \"weightKg\": 0,\n  \"heightFt\": 0,\n  \"heightIn\": 0,\n  \"weightLb\": 0,\n  \"beltRankId\": \"text\",\n  \"customBeltLabel\": \"text\",\n  \"customBeltColour\": \"text\",\n  \"guardianName\": \"text\",\n  \"guardianContact\": \"text\",\n  \"guardianConsent\": false,\n  \"gender\": \"male\",\n  \"accountType\": \"tournament_runner\",\n  \"clubId\": \"text\",\n  \"categoryIds\": [\n    \"text\"\n  ],\n  \"consentMoveUp\": false\n}"
+    "body": "{\n  \"name\": \"text\",\n  \"email\": \"fighter@example.com\",\n  \"password\": \"text\",\n  \"phone\": \"text\",\n  \"dateOfBirth\": \"2026-11-22\",\n  \"unitSystem\": \"metric\",\n  \"heightCm\": 0,\n  \"weightKg\": 0,\n  \"heightFt\": 0,\n  \"heightIn\": 0,\n  \"weightLb\": 0,\n  \"beltRankId\": \"text\",\n  \"customBeltLabel\": \"text\",\n  \"customBeltColour\": \"text\",\n  \"guardianName\": \"text\",\n  \"guardianContact\": \"text\",\n  \"guardianConsent\": false,\n  \"gender\": \"male\",\n  \"accountType\": \"admin\",\n  \"clubId\": \"text\",\n  \"categoryIds\": [\n    \"text\"\n  ],\n  \"consentMoveUp\": false\n}"
   },
   {
     "group": "Service",

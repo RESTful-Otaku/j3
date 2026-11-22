@@ -109,6 +109,12 @@ export function guideForRole(role: Role): Guide {
   return GUIDES[role] ?? runner;
 }
 
+// Admins follow the runner walkthrough; keep their progress in the same bucket
+// so a demo login that becomes admin mid-tour cannot split the checklist state.
+function progressRole(role: Role): Role {
+  return String(role) === 'admin' ? 'runner' : role;
+}
+
 const PROGRESS_KEY = 'j3-guide-progress-v1';
 const LEGACY_KEY = 'j3-tour-progress';
 const LEGACY_SEEN_KEY = 'j3-tour-seen';
@@ -125,7 +131,7 @@ export function guideProgress(role: Role): GuideProgress {
   if (typeof localStorage === 'undefined') return emptyProgress();
   try {
     const all = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}') as Record<string, GuideProgress>;
-    const saved = all[role];
+    const saved = all[progressRole(role)];
     if (!saved || !Array.isArray(saved.completed)) return emptyProgress();
     return { completed: saved.completed, skipped: Boolean(saved.skipped), updatedAt: Number(saved.updatedAt) || 0 };
   } catch {
@@ -135,20 +141,21 @@ export function guideProgress(role: Role): GuideProgress {
 
 function saveProgress(role: Role, value: GuideProgress) {
   if (typeof localStorage === 'undefined') return;
+  const key = progressRole(role);
   try {
     const all = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}') as Record<string, GuideProgress>;
-    all[role] = { ...value, updatedAt: Date.now() };
+    all[key] = { ...value, updatedAt: Date.now() };
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(all));
   } catch {
-    localStorage.setItem(PROGRESS_KEY, JSON.stringify({ [role]: { ...value, updatedAt: Date.now() } }));
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify({ [key]: { ...value, updatedAt: Date.now() } }));
   }
   // Keep the old counter in sync so existing QA helpers still disable auto-start.
   try {
     const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || '{}') as Record<string, number>;
-    legacy[role] = Math.max(legacy[role] ?? 0, value.completed.length);
+    legacy[key] = Math.max(legacy[key] ?? 0, value.completed.length);
     localStorage.setItem(LEGACY_KEY, JSON.stringify(legacy));
   } catch {
-    localStorage.setItem(LEGACY_KEY, JSON.stringify({ [role]: value.completed.length }));
+    localStorage.setItem(LEGACY_KEY, JSON.stringify({ [key]: value.completed.length }));
   }
 }
 
@@ -176,12 +183,13 @@ export function setGuideSkipped(role: Role) {
 export function resetGuide(role?: Role) {
   if (typeof localStorage === 'undefined') return;
   if (role) {
+    const key = progressRole(role);
     try {
       const all = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}') as Record<string, GuideProgress>;
-      delete all[role];
+      delete all[key];
       localStorage.setItem(PROGRESS_KEY, JSON.stringify(all));
       const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || '{}') as Record<string, number>;
-      delete legacy[role];
+      delete legacy[key];
       localStorage.setItem(LEGACY_KEY, JSON.stringify(legacy));
     } catch { /* clearing is best-effort */ }
     return;

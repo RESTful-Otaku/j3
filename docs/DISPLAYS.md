@@ -1,42 +1,41 @@
 # Displays & multi-screen views
 
-Every view is a normal URL, so you can open as many as you need on separate TVs, projectors, tablets and phones. They all poll or stream committed server data and stay live.
+Every view has its own URL, so the control room, public dashboard and several full-screen boards can
+run on separate screens and stay live-synced.
 
 ## Core routes
 
-| Route | Use |
-|---|---|
-| `/public` | Spectator dashboard, clock, next-up and live results |
-| `/display` | Main full-screen scoreboard |
-| `/mat` | Scorekeeper and timekeeper console |
-| `/brackets` | Progression, results and history |
-| `/tables` | Standings, kata, medals and club points |
-| `/pools` | All matchups and current status |
-| `/control` | Assign dashboard templates to screens and trigger PA |
-| `/ceremony` | Guided medal podium sequence |
-
-Use fullscreen in the browser (`F11` or kiosk mode) for venue displays.
+`/public` dashboard, `/display` scoreboard, `/brackets`, `/tables`, `/pools`, `/control`,
+`/schedule`, `/medals`, `/ceremony`. In-app navigation stays client-side; use **↗ New tab** for a
+TV/projector board.
 
 ## What the scoreboard shows
 
-The board includes the event title, mat number, banner and logo, both fighters with large avatars, belt designation, height/weight, club logo, corner colours, active referee and judges, recent moves with points, penalties on the correct side, and the authoritative clock. W/L/D always show a glyph as well as colour.
+Event title, mat, banner/logo, fighter names/photos/belts/stats, club logos or independent mark,
+officials with roles, per-side moves and cards, authoritative clock and recent technique callouts.
+Winners animate with configurable celebrations.
 
 ## Responsive layouts
 
-Layouts adapt from a 6-inch phone to an ultrawide LED wall. On narrow screens, fighter cards stack vertically and the card slides into a bottom sheet. Ultrawide screens use the full available width rather than a centred column. Avatar areas stay large enough to read across a hall.
+Design range is 6" phone to 100" LED. Ultrawide screens use full width; phones get labelled cards,
+section tabs and explicit "show more" controls instead of horizontal or endless scrolling.
 
 ## Themes and branding
 
-Themes are CSS custom properties plus uploaded assets: logo, banner, colours and fonts. The Street Fighter theme adds lineups, matchups and announcer energy. Club colours extracted from uploaded logos appear on cards, tables and brackets.
+White-label tokens control colours, fonts, logos and banners. Corner colours and result glyphs are
+configurable; the Street Fighter theme adds lineups and announcer energy.
 
 ## PA and announcements
 
-Use **Display control** or the announce button on Event config to trigger timed toasts, flash the next competitor's card and speak text with browser TTS. Multilingual labels are available for eleven locales.
+PA toasts flash fighter cards and call competitors to a mat/podium. Browser TTS speaks announcements;
+timed toasts auto-dismiss.
 
 ## Custom views
 
-**View builder** lets an authorised user drag live widgets onto a canvas, resize them, save/clone/delete named layouts and open one as its own URL. Pull a widget's ⠿ handle to reorder, drag its right or bottom edge (or the corner grip) to resize horizontally, vertically or both, and watch a floating ghost with a snap indicator while you drag; the layout eases into place on release. Arrow keys on the same grips and the S/M/L and H1/H2/H3 buttons remain as accessible fallbacks. Combine clock, next-up, scoreboard, standings and medal widgets for a dedicated stat screen.
+The builder lets authorised users drag/resize live widgets, save, clone, load and delete named
+layouts, and open them as standalone `/view` screens.
 
 ## Broadcast
 
-`/overlay` provides a transparent HTML layer for OBS or vMix with a scorebug and lower thirds. Async network video replay remains a future enhancement.
+A transparent OBS/vMix overlay and public live page are available; VAR/camera replay needs external
+streaming integration.

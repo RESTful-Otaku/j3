@@ -46,8 +46,10 @@
 
     guard();
     const onResize = () => { sync(); guard(); };
+    const onPasswordRequired = () => { void goto('/login?password=1'); };
     window.addEventListener('resize', onResize);
     window.addEventListener('j3-session-changed', guard);
+    window.addEventListener('j3-password-change-required', onPasswordRequired);
     ready = true;
     const healthTimer = setInterval(async () => {
       try {
@@ -61,6 +63,7 @@
     return () => {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('j3-session-changed', guard);
+      window.removeEventListener('j3-password-change-required', onPasswordRequired);
       clearInterval(healthTimer);
       clearInterval(labelTimer);
     };

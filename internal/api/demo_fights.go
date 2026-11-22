@@ -166,7 +166,7 @@ func (s *Server) myContests(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
-	if identity.Role == auth.RoleTournamentRunner {
+	if identity.Role == auth.RoleAdmin || identity.Role == auth.RoleTournamentRunner {
 		writeJSON(w, http.StatusOK, map[string]any{"contests": fights, "role": identity.Role})
 		return
 	}
