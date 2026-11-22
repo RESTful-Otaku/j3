@@ -13,7 +13,8 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: write
+  contents: read
+  actions: read
 
 jobs:
   verify:

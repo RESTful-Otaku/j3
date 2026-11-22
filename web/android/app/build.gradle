@@ -1,5 +1,14 @@
 apply plugin: 'com.android.application'
 
+// CI supplies a proper keystore via secrets. Local/CI fallback is the standard
+// Android debug keystore so release builds are still signed and installable.
+def releaseKeystore = System.getenv("J3_ANDROID_KEYSTORE") ?: "${System.getProperty('user.home')}/.android/debug.keystore"
+def releaseStorePassword = System.getenv("J3_ANDROID_KEYSTORE_PASSWORD") ?: "android"
+def releaseKeyAlias = System.getenv("J3_ANDROID_KEY_ALIAS") ?: "androiddebugkey"
+def releaseKeyPassword = System.getenv("J3_ANDROID_KEY_PASSWORD") ?: "android"
+def versionCodeEnv = System.getenv("J3_VERSION_CODE")
+def versionNameEnv = System.getenv("J3_VERSION_NAME")
+
 android {
     namespace = "com.j3.tournaments"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +16,8 @@ android {
         applicationId "com.j3.tournaments"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode versionCodeEnv ? versionCodeEnv.toInteger() : 1
+        versionName versionNameEnv ?: "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,10 +25,19 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            storeFile file(releaseKeystore)
+            storePassword releaseStorePassword
+            keyAlias releaseKeyAlias
+            keyPassword releaseKeyPassword
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

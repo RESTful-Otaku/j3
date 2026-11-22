@@ -5,6 +5,7 @@
   import { LOCALES, translate } from '../../lib/i18n';
   import { notify, notifySuccess, notifyError } from '../../lib/toast';
   import { guideAction } from '../../lib/guide';
+  import { setTheme, themeChoice, type ThemeChoice } from '../../lib/theme';
 
   const KEY = 'j3-settings-v1';
   const locales = [
@@ -20,7 +21,7 @@
     unitSystem: 'metric' | 'imperial'; heightCm: number; weightKg: number;
     heightFt: number; heightIn: number; weightLb: number;
     beltRankId: string; customBeltLabel: string; customBeltColour: string;
-    clubId: string; locale: string; appearance: string;
+    clubId: string; locale: string; appearance: ThemeChoice;
     accountRole: string; clubColour: string; clubHighlight: string; photoPath: string;
   };
   const defaults: Settings = {
@@ -39,18 +40,19 @@
       const saved = localStorage.getItem(KEY);
       if (saved) settings = { ...defaults, ...JSON.parse(saved) };
     } catch { /* ignore */ }
-    applyTheme();
+    settings.appearance = $themeChoice;
+    applyLocale();
   });
 
-  function applyTheme() {
-    const choice = settings.appearance;
-    const resolved = choice === 'system'
-      ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
-      : choice;
-    document.documentElement.dataset.theme = resolved;
+  function applyLocale() {
     document.documentElement.lang = settings.locale;
     const localeInfo = LOCALES.find((item) => item.id === settings.locale);
     document.documentElement.dir = localeInfo?.dir ?? 'ltr';
+  }
+
+  function applyTheme() {
+    setTheme(settings.appearance);
+    applyLocale();
   }
   function save() {
     localStorage.setItem(KEY, JSON.stringify(settings));
@@ -165,7 +167,7 @@
       </select></label>
       <label class="field">Appearance<select bind:value={settings.appearance} on:change={applyTheme}>
         <option value="system">Follow system</option><option value="light">Light</option>
-        <option value="dark">Dark</option><option value="street">Street Fighter</option>
+        <option value="dark">Dark gray</option><option value="street">Street Fighter</option>
       </select></label>
     </div>
     <div class="capabilities" style="margin-top:12px;">

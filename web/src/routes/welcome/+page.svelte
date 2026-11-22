@@ -61,7 +61,7 @@
 
 <style>
   .landing { min-height:100vh; }
-  .brand-banner { height:clamp(120px,18vw,240px); background:url('/brand/banner.png') center/cover no-repeat; border-bottom:2px solid var(--orange); }
+  .brand-banner { height:clamp(120px,18vw,240px); background:var(--event-banner) center/cover no-repeat; border-bottom:2px solid var(--brand-accent); }
   .landing-nav { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px 36px; border-bottom:1px solid var(--brand-border); flex-wrap:wrap; }
   .brand { display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:800; font-size:1.2rem; }
   .brand-mark { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:linear-gradient(145deg,var(--brand-primary),var(--brand-accent)); color:#fff; }

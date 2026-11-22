@@ -20,6 +20,7 @@
   import { landingForRole, session, switchDemoUser, uiRole } from '../lib/auth';
   import { currentRole, HOME_ROUTE, itemsForRole, type Role as NavRole } from '../lib/nav';
   import { eventTitle } from '../lib/event-title';
+  import { cycleTheme, themeChoice } from '../lib/theme';
 
   let ready = false;
   let error = '';
@@ -33,7 +34,6 @@
   let roleFilter: Role | 'all' = 'all';
   let search = '';
   let selectedFightId = '';
-  let theme: 'dark' | 'light' | 'street' = 'dark';
   let navRole: NavRole = 'runner';
 
   function syncNavRole() {
@@ -248,7 +248,7 @@
   <meta name="description" content="White-label Japanese Jiu Jitsu tournament platform by J3" />
 </svelte:head>
 
-<div class="shell" data-theme={theme}>
+<div class="shell">
   <header class="topbar">
     <div class="brand">
       <a class="brand-mark" href={HOME_ROUTE} aria-label="J3 public dashboard">J3</a>
@@ -262,8 +262,8 @@
         <a class="btn" class:primary={item.href === '/setup'} href={item.href}>{item.icon} {item.label}</a>
       {/each}
       <span class="pill"><span class="dot" class:off={!!error}></span>{error ? 'Server offline' : 'Venue server running'}</span>
-      <button class="tab" on:click={() => (theme = theme === 'dark' ? 'light' : theme === 'light' ? 'street' : 'dark')}>
-        {theme === 'dark' ? '☀ Light' : theme === 'light' ? '⚡ Street' : '☾ Dark'}
+      <button class="tab" on:click={cycleTheme} aria-label="Cycle theme">
+        {$themeChoice === 'dark' ? '☀ Light' : $themeChoice === 'light' ? '⚡ Street' : '🌙 Dark gray'}
       </button>
     </div>
   </header>

@@ -11,7 +11,8 @@
   import { notifySuccess } from '../lib/toast';
   import { canAccessPath, currentRole, isPhoneWidth, phoneHome } from '../lib/nav';
   import { labelTableRows } from '../lib/responsive';
-  import { loadEventTitle } from '../lib/event-title';
+  import { loadEventBrand } from '../lib/event-brand';
+  import { initTheme } from '../lib/theme';
 
   let mobile = false;
   let phone = false;
@@ -53,7 +54,8 @@
     window.addEventListener('j3-session-changed', guard);
     window.addEventListener('j3-password-change-required', onPasswordRequired);
 
-    void loadEventTitle();
+    initTheme();
+    void loadEventBrand();
     // QA mobile builds start with seeded data and an admin identity. Hold the
     // first render until that is ready so nobody sees a transient logged-out
     // screen on a phone handed to a demo audience.

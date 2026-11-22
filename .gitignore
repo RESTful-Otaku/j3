@@ -25,6 +25,7 @@ dist/
 *.local
 .env
 .env.*
+!.env.example
 
 # Playwright artifacts
 web/test-results/

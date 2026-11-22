@@ -608,7 +608,7 @@
   {
     "title": "CI & releases \u00b7 Branches",
     "section": "Developers",
-    "text": "`main` is protected. PRs run verification; release tags build and publish installable QA apps plus production server/client artifacts.",
+    "text": "`main` is protected. PRs run verification; release tags build and publish versioned, installable mobile clients plus production server/client artifacts.",
     "url": "/docs/ci#branches"
   },
   {
@@ -626,7 +626,7 @@
   {
     "title": "CI & releases \u00b7 Releases (.github/workflows/release.yml)",
     "section": "Developers",
-    "text": "Release builds call CI and mobile (requiring the signed iOS QA app), then package final production binaries (`j3d` for Linux amd64/arm64, macOS arm64 and Windows), the optimised web client bundle, the OpenAPI reference, full guide/documentation site and `LICENSE`. Downloads are `j3-production-<sha>.tar.gz`; the deploy workflow consumes the companion `deploy-production-<sha>` artifact. Only the cur",
+    "text": "Release builds call CI and mobile, then package final production binaries (`j3d` for Linux amd64/arm64, macOS arm64 and Windows), the optimised web client bundle, the OpenAPI reference, full guide/documentation site and `LICENSE`. Downloads are `j3-production-<sha>.tar.gz`; the deploy workflow consumes the companion `deploy-production-<sha>` artifact. Only curated `j3-*` release assets are attache",
     "url": "/docs/ci#releases-github-workflows-release-yml"
   },
   {

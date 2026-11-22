@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
   verify:
@@ -19,9 +20,13 @@ jobs:
     needs: verify
     uses: ./.github/workflows/mobile.yml
     with:
-      # Unsigned simulator .app is always produced. Signed IPA is added when
-      # Apple secrets are configured. Tagged releases must not be blocked when
-      # an operator has not supplied device-signing credentials.
+      # Every tag publishes installable hosted clients plus QA apps. The public
+      # API URL comes from the J3_SERVER_URL repository variable (same-origin
+      # when blank). Signed IPA/keystore secrets add real-device builds when
+      # configured, but do not gate an otherwise valid release.
+      build_production: true
+      server_url: ${{ vars.J3_SERVER_URL }}
+      version: ${{ github.ref_name }}
       require_signed_ios: false
     secrets: inherit
 

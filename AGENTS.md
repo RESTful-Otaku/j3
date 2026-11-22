@@ -172,6 +172,7 @@ states. Offline write outbox remains a future enhancement.
 | D-036–D-048 | Direct pointer manipulation in builder; full catalogue; technical outcomes reuse fight vocabulary; Okami 2027 mid-event seed; branded LAN-baked APK; phones are participant screens; APK bundles SQLite + read-only snapshot. |
 | D-049–D-053 | Owner `j3@local` / `J3 Owner` overridable; env password or one-time generated + forced change; `admin` virtual role without role CHECK migration; privileged accounts only via token invites; demo credentials/identity switching work offline. |
 | D-054–D-058 | CI mobile builds produce installable Android QA APK, iOS simulator app and signed real-device IPA when Apple secrets exist; emulator/simulator runtime smoke is required; QA builds self-seed and auto-login as admin; white-label title comes from event config; PolyForm Noncommercial 1.0.0 with attribution; Oracle Always Free A1 recommended for free prod/staging. |
+| D-059–D-063 | One shared theme store; pure-white light, high-contrast dark gray and loud Street Fighter themes; organiser title/logo/banner/primary/secondary overrides applied from event tokens with computed readable ink; safe `.env.example` plus least-privilege workflows; `v*` tags publish versioned hosted APK/`.app` built with public `J3_SERVER_URL`, with signing secrets optional rather than release-blocking. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -188,6 +189,7 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-22 — Themes + versioned mobile releases**: pure-white light, high-contrast dark gray and Street Fighter themes; shared theme persistence; event token overrides for title/logo/banner/main/secondary colours with contrast-safe text; safe `.env.example` and environment/secrets guide; workflows fixed for Android SDK PATH/boot and iOS simulator parsing; tagged releases publish hosted APK/`.app` with backend URL baked in.
 - **2026-11-22 — CI/CD + licensing**: mobile workflows build installable QA apps, run emulator/simulator smoke, release production server/web/API/docs/mobile artifacts; QA builds self-seed and auto-login as admin; event-config title replaces `J Cubed`; PolyForm NC licence and free Oracle hosting plan documented; TUI has one-step build+deploy actions and hosted-APK build.
 - **2026-11-22 — Auth rollout**: real admin role, hosted owner bootstrap, authority matrix, token
   invites, demo credential sheet with real/offline identity switching, invite acceptance page, docs

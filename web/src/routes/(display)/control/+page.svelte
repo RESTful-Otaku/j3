@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { broadcastPA } from '../../../lib/api';
+  import { setTheme, themeChoice } from '../../../lib/theme';
 
   type Template = { name: string; widgets: string[] };
   const runToday = [
@@ -27,7 +28,7 @@
   ];
   const widgetOptions = ['scoreboard', 'upcoming', 'standings', 'brackets', 'medals', 'kata', 'announcements'];
 
-  let theme: 'dark' | 'light' | 'street' = 'dark';
+  const themes = ['dark', 'light', 'street'] as const;
   let templates: Template[] = [];
   let templateName = '';
   let selectedWidgets: string[] = ['scoreboard', 'upcoming', 'standings'];
@@ -36,16 +37,10 @@
   let paSeconds = 6;
 
   onMount(() => {
-    theme = (localStorage.getItem('j3-theme') as typeof theme) || 'dark';
-    document.documentElement.dataset.theme = theme;
     try { templates = JSON.parse(localStorage.getItem('j3-templates') || '[]'); } catch { templates = []; }
   });
 
-  function applyTheme(next: typeof theme) {
-    theme = next;
-    localStorage.setItem('j3-theme', next);
-    document.documentElement.dataset.theme = next;
-  }
+  function applyTheme(next: (typeof themes)[number]) { setTheme(next); }
   function saveTemplate() {
     if (!templateName.trim()) return;
     templates = [...templates.filter((t) => t.name !== templateName), { name: templateName, widgets: [...selectedWidgets] }];
@@ -73,8 +68,8 @@
   <header class="display-header" data-guide="control-header">
     <div><div class="event-mark"><span class="crest">J3</span>Display control</div><div class="meta">Open any view on any screen · everything stays live-synced</div></div>
     <div class="tabs">
-      {#each [['dark','🌙 Dark'],['light','☀ Light'],['street','⚡ Street Fighter']] as [id, label]}
-        <button class="tab" class:active={theme === id} on:click={() => applyTheme(id as typeof theme)}>{label}</button>
+      {#each [['dark','🌙 Dark gray'],['light','☀ Light'],['street','⚡ Street Fighter']] as [id, label]}
+        <button class="tab" class:active={$themeChoice === id} on:click={() => applyTheme(id as (typeof themes)[number])}>{label}</button>
       {/each}
     </div>
   </header>

@@ -1,14 +1,13 @@
 <script lang="ts">
   import ConfirmDialog from '../../lib/components/ConfirmDialog.svelte';
   import { notify, notifySuccess, notifyWarning, notifyError } from '../../lib/toast';
+  import { setTheme, themeChoice } from '../../lib/theme';
 
   let dialogOpen = false;
   let slider = 60;
   let toggle = true;
   let choice = 'one';
   let search = '';
-  let theme = 'dark';
-  function applyTheme() { document.documentElement.dataset.theme = theme; }
 </script>
 
 <svelte:head><title>J3 · Component gallery</title></svelte:head>
@@ -23,7 +22,7 @@
     <div class="eyebrow">Design tokens</div><h2>Theme & typography</h2>
     <div class="tabs" style="margin-top:12px;">
       {#each ['dark','light','street'] as option}
-        <button class="tab" class:active={theme === option} on:click={() => { theme = option; applyTheme(); }}>{option}</button>
+        <button class="tab" class:active={$themeChoice === option} on:click={() => setTheme(option as 'dark' | 'light' | 'street')}>{option}</button>
       {/each}
     </div>
     <p style="margin-top:14px;">Heading example — clean, high contrast, readable at distance.</p>

@@ -2,8 +2,8 @@
 
 ## Branches
 
-`main` is protected. PRs run verification; release tags build and publish installable QA apps plus
-production server/client artifacts.
+`main` is protected. PRs run verification; release tags build and publish versioned, installable
+mobile clients plus production server/client artifacts.
 
 ## Automated gates (`.github/workflows/ci.yml`)
 
@@ -21,22 +21,26 @@ Every run:
 4. boots an Android emulator and iOS simulator, launches each native client and uploads screenshots
    and logs as smoke evidence.
 
-Artifacts: `j3-android-qa-<sha>`, `j3-android-smoke-<sha>`, `j3-ios-simulator-<sha>`,
-`j3-ios-smoke-<sha>`. A real-device `j3-ios-qa-<sha>.ipa` is also produced when the Apple signing
-secrets are configured; release builds fail loudly if they are missing.
+QA artifacts: `j3-android-qa-<sha>`, `j3-android-smoke-<sha>`, `j3-ios-simulator-<sha>`,
+`j3-ios-smoke-<sha>`.
 
-Required iOS secrets: `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD`,
-`APPLE_PROVISIONING_PROFILE`, `APPLE_TEAM_ID`. Optional: `APPLE_PROVISIONING_PROFILE_NAME`,
-`APPLE_EXPORT_METHOD` (defaults to `ad-hoc`).
+Tagged releases also build **hosted production clients** with the public `J3_SERVER_URL` baked in:
+
+- `j3-android-<version>.apk` — signed release APK (stable key when Android secrets are set);
+- `j3-ios-<version>.app.zip` — unsigned simulator app for Xcode/simulator testing;
+- `j3-ios-<version>.ipa` — real-device ad-hoc/development IPA when Apple secrets are configured.
+
+Both production clients get their own emulator/simulator smoke run. Signing credentials are optional
+so a release without Apple/Android secrets still completes; see `docs/ENVIRONMENT.md`.
 
 ## Releases (`.github/workflows/release.yml`)
 
-Release builds call CI and mobile (requiring the signed iOS QA app), then package final production
-binaries (`j3d` for Linux amd64/arm64, macOS arm64 and Windows), the optimised web client bundle,
-the OpenAPI reference, full guide/documentation site and `LICENSE`. Downloads are
-`j3-production-<sha>.tar.gz`; the deploy workflow consumes the companion `deploy-production-<sha>`
-artifact. Only the curated `j3-*` release assets are attached to the GitHub release, avoiding
-GitHub's secondary rate limit from uploading every static file separately.
+Release builds call CI and mobile, then package final production binaries (`j3d` for Linux
+amd64/arm64, macOS arm64 and Windows), the optimised web client bundle, the OpenAPI reference, full
+guide/documentation site and `LICENSE`. Downloads are `j3-production-<sha>.tar.gz`; the deploy
+workflow consumes the companion `deploy-production-<sha>` artifact. Only curated `j3-*` release
+assets are attached to the GitHub release, avoiding GitHub's secondary rate limit from uploading
+every static file separately.
 
 ## Environments (`.github/workflows/deploy.yml`)
 

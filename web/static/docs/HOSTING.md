@@ -179,6 +179,13 @@ Put `j3-android-qa.apk` under `/srv/j3/downloads/android/` for sideloading. iOS 
 TestFlight; an ad-hoc `.ipa` needs registered device UDIDs and a distribution profile, and a raw
 IPA link will not install like an APK.
 
+For automatic versioned downloads, set the repository **variable** `J3_SERVER_URL` to the public API
+origin (e.g. `https://api.example.com`). Every `v*` tag then publishes `j3-android-<version>.apk`,
+`j3-ios-<version>.app.zip` and, when Apple secrets exist, `j3-ios-<version>.ipa` on the GitHub
+release. The APK is release-signed; stable upgrades need the Android keystore secrets from
+`docs/ENVIRONMENT.md`. Leave `J3_SERVER_URL` blank if the API is served from the same origin as the
+web client.
+
 ## SQLite backups
 
 ```bash
