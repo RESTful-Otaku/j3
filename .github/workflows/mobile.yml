@@ -60,7 +60,7 @@ on:
         required: false
 
 concurrency:
-  group: mobile-${{ github.ref }}
+  group: mobile-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
 
 permissions:
@@ -354,15 +354,23 @@ jobs:
           fi
           echo "Using simulator $SIM_ID"
           xcrun simctl boot "$SIM_ID" 2>/dev/null || true
+          BOOTED=no
           for _ in $(seq 1 150); do
-            if xcrun simctl list devices | grep "$SIM_ID" | grep -q 'Booted'; then break; fi
+            if xcrun simctl list devices | grep "$SIM_ID" | grep -q 'Booted'; then BOOTED=yes; break; fi
             sleep 2
           done
+          if [ "$BOOTED" != "yes" ]; then
+            echo "Simulator did not boot"
+            xcrun simctl list devices available
+            exit 1
+          fi
           smoke_app() {
             local app="$1" label="$2" bundle="com.j3.tournaments"
             xcrun simctl uninstall "$SIM_ID" "$bundle" 2>/dev/null || true
             xcrun simctl install "$SIM_ID" "$app"
-            xcrun simctl launch "$SIM_ID" "$bundle"
+            local launch_output
+            launch_output=$(xcrun simctl launch "$SIM_ID" "$bundle" 2>&1 || true)
+            echo "$launch_output"
             sleep 8
             xcrun simctl io "$SIM_ID" screenshot "artifacts/ios-smoke/${label}.png"
             test -s "artifacts/ios-smoke/${label}.png"
@@ -371,9 +379,6 @@ jobs:
           if [ -d artifacts/J3-production.app ]; then
             smoke_app artifacts/J3-production.app ios-production
           fi
-          xcrun simctl spawn "$SIM_ID" log show \
-            --predicate 'process == "App" OR process CONTAINS "J3"' \
-            --last 10m --style compact > artifacts/ios-smoke/ios-logcat.txt 2>&1 || true
           echo "Native clients launched on iOS simulator"
       - name: Upload iOS smoke evidence
         if: always()
