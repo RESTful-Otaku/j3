@@ -806,6 +806,10 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-22** — Fixed the CI-only production build failure that followed the docs site: SvelteKit's prerender
+  crawler could not discover `/docs/[slug]` because the docs cards load `manifest.json` after hydration, so a clean
+  GitHub runner failed with `prerender_unseen_routes`. `web/vite.config.ts` now seeds prerender entries from the docs
+  manifest (alongside `'*'`), and a clean local `bun run build` prerenders every guide successfully.
 - **2026-11-22** — Docs, guides and whole-app refinement pass. Added a real documentation site generated from
   `docs/*.md` plus OpenAPI-derived operations/search indexes: 13 rendered guides, live search, per-page anchors,
   sidebar/table-of-contents navigation, API explorer with “Try it”, `/apidocs` redirect, `bun run docs` and a
