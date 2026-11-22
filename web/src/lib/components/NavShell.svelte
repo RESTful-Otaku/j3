@@ -3,6 +3,7 @@
   import { afterNavigate, goto } from '$app/navigation';
   import { api, type DemoIdentity } from '../api';
   import { landingForRole, session, switchDemoUser, uiRole } from '../auth';
+  import { eventTitle } from '../event-title';
   import {
     canUseOnPhone, currentRole, HOME_ROUTE, isPhoneWidth, itemsForRole,
     MOBILE_PRIMARY_HREFS, NAV_GROUPS, phoneHome, type NavItem, type Role,
@@ -124,7 +125,7 @@
 {#if isMobile}
   <header class="mobile-bar">
     <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard" on:click={closeMobile}>J3</a>
-    <span class="mobile-title">J Cubed</span>
+    <span class="mobile-title">{$eventTitle}</span>
     <button class="hamburger" data-guide="nav-mobile-menu" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
   </header>
 
@@ -132,7 +133,7 @@
     <button class="scrim" aria-label="Close navigation" on:click={closeMobile}></button>
     <aside class="mobile-drawer" aria-label="Navigation">
       <div class="drawer-head">
-        <span class="brand-name">J Cubed</span>
+        <span class="brand-name">{$eventTitle}</span>
         <button class="hamburger" aria-label="Close navigation" on:click={closeMobile}>✕</button>
       </div>
       <nav aria-label="Main navigation">
@@ -194,7 +195,7 @@
   <aside class:collapsed={!expanded} class="nav-shell">
     <div class="nav-head">
       <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard">J3</a>
-      {#if expanded}<span class="brand-name">J Cubed</span>{/if}
+      {#if expanded}<span class="brand-name">{$eventTitle}</span>{/if}
       <button class="hamburger" aria-label={expanded ? 'Collapse navigation' : 'Expand navigation'} aria-expanded={expanded} on:click={toggle}>
         {expanded ? '✕' : '☰'}
       </button>

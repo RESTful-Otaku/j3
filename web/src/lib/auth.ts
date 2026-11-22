@@ -1,4 +1,4 @@
-import { api, demoSession, postJson, resetAuthCache } from './api';
+import { api, bootstrapQaSession, demoSession, postJson, resetAuthCache } from './api';
 import { setRole, type Role } from './nav';
 
 export type Session = {
@@ -45,6 +45,24 @@ export function landingForRole(role: string): string {
 }
 
 const KEY = 'j3-session';
+const QA_BOOTSTRAP_KEY = 'j3-qa-first-run-v1';
+
+// QA mobile builds ship their own seeded SQLite file and read-only API
+// snapshot. On first launch, establish the bundled admin identity so the app
+// opens straight into a fully populated tournament without a login ceremony.
+// Normal web and production builds never set VITE_QA_AUTOLOGIN.
+export async function ensureQaFirstRun(): Promise<Session | null> {
+  if (import.meta.env.VITE_QA_AUTOLOGIN !== '1') return null;
+  if (typeof window === 'undefined') return null;
+  if (localStorage.getItem(QA_BOOTSTRAP_KEY) === '1') return null;
+  localStorage.setItem(QA_BOOTSTRAP_KEY, '1');
+  if (session()) return null;
+  const next = await bootstrapQaSession();
+  if (!next) return null;
+  setRole(uiRole(next.role));
+  window.dispatchEvent(new CustomEvent('j3-session-changed', { detail: next }));
+  return next;
+}
 
 export function session(): Session | null {
   try {

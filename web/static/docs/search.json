@@ -608,38 +608,104 @@
   {
     "title": "CI & releases \u00b7 Branches",
     "section": "Developers",
-    "text": "`main` is protected. PRs run verification; release tags build artifacts.",
+    "text": "`main` is protected. PRs run verification; release tags build and publish installable QA apps plus production server/client artifacts.",
     "url": "/docs/ci#branches"
   },
   {
     "title": "CI & releases \u00b7 Automated gates (.github/workflows/ci.yml)",
     "section": "Developers",
-    "text": "Go vet/test/race/build; Bun check/test/build; generated-type parity; OpenAPI route parity; smoke suite; Playwright + axe E2E; workflow syntax checks. All must pass before merge.",
+    "text": "Go vet/test/race/build; Bun check/test/build; generated-type parity; smoke, load and Playwright + axe E2E; workflow syntax/TUI checks. All must pass before merge.",
     "url": "/docs/ci#automated-gates-github-workflows-ci-yml"
   },
   {
     "title": "CI & releases \u00b7 Mobile (.github/workflows/mobile.yml)",
     "section": "Developers",
-    "text": "Builds an Android APK and iOS simulator app. Mobile builds regenerate icons, seed a mid-event Okami 2027 database, capture a read-only API snapshot and set `VITE_OFFLINE_DEMO=1`. Artifacts are uploaded for QA.",
+    "text": "Every run:  1. regenerates the seeded Okami 2027 SQLite database and read-only API snapshot; 2. builds the web client with `VITE_OFFLINE_DEMO=1 VITE_QA_AUTOLOGIN=1` (first launch seeds the bundled data and signs in as the seeded admin); 3. produces an installable Android QA APK and an iOS simulator app; 4. boots an Android emulator and iOS simulator, launches each native client and uploads screens",
     "url": "/docs/ci#mobile-github-workflows-mobile-yml"
-  },
-  {
-    "title": "CI & releases \u00b7 Environments (.github/workflows/deploy.yml)",
-    "section": "Developers",
-    "text": "Staging/production deploys are environment-gated. Hosted owner credentials come from `J3_OWNER_*`; never commit passwords.",
-    "url": "/docs/ci#environments-github-workflows-deploy-yml"
   },
   {
     "title": "CI & releases \u00b7 Releases (.github/workflows/release.yml)",
     "section": "Developers",
-    "text": "Tag-driven release builds attach server binaries and mobile artifacts. Signed IPA needs Apple secrets.",
+    "text": "Release builds call CI and mobile (requiring the signed iOS QA app), then package final production binaries (`j3d` for Linux/macOS/Windows), the optimised web client bundle and `LICENSE` as `j3-production-<sha>`. All artifacts are attached to the GitHub release.",
     "url": "/docs/ci#releases-github-workflows-release-yml"
+  },
+  {
+    "title": "CI & releases \u00b7 Environments (.github/workflows/deploy.yml)",
+    "section": "Developers",
+    "text": "Staging/production deploys are environment-gated and consume the release bundle. Hosted owner credentials come from `J3_OWNER_*`; never commit passwords.",
+    "url": "/docs/ci#environments-github-workflows-deploy-yml"
   },
   {
     "title": "CI & releases \u00b7 Local rigour",
     "section": "Developers",
-    "text": "Run `bun run cicd` or `bun run test:tui` before pushing. `bun run docs` rebuilds the documentation site; `bun run sync:api-docs` keeps the contract/guides/search index in sync.",
+    "text": "Run `bun run cicd` or `bun run test:tui` before pushing. `bun run docs` rebuilds the documentation site; `bun run sync:api-docs` keeps the contract/guides/search index and shipped licence in sync.",
     "url": "/docs/ci#local-rigour"
+  },
+  {
+    "title": "Free hosting",
+    "section": "Developers",
+    "text": "Run production and staging on free Oracle ARM infrastructure with persistent SQLite.",
+    "url": "/docs/hosting"
+  },
+  {
+    "title": "Free hosting \u00b7 Free hosting",
+    "section": "Developers",
+    "text": "# Free production & staging hosting",
+    "url": "/docs/hosting#free-hosting"
+  },
+  {
+    "title": "Free hosting \u00b7 The short answer",
+    "section": "Developers",
+    "text": "Use an **Oracle Cloud Always Free Ampere A1 VM**. It is the only genuinely free-forever option that gives you a real always-on Linux server, a persistent disk for the SQLite file, a runnable Go binary, long-lived SSE and your own HTTPS domains. Render/Fly/Railway/Koyeb/Cloud Run either sleep, have ephemeral filesystems, cap free usage, or cannot run this Go binary without a rewrite. Cloudflare Pag",
+    "url": "/docs/hosting#the-short-answer"
+  },
+  {
+    "title": "Free hosting \u00b7 What to deploy",
+    "section": "Developers",
+    "text": "Release artifacts already include:  - `j3d-linux-arm64` \u2014 the headless Go server for the Oracle ARM VM (`j3d-linux-amd64` for x86). - `web/` \u2014 the production SvelteKit static client served by Caddy, including `web/openapi.yaml` (live API contract/reference) and `web/docs/` (organiser, runner, official, participant, CI, hosting and developer guides). - `j3-android-qa.apk`, `j3-ios-simulator.zip` (`",
+    "url": "/docs/hosting#what-to-deploy"
+  },
+  {
+    "title": "Free hosting \u00b7 Build and deploy from the TUI",
+    "section": "Developers",
+    "text": "`bun run dev` \u2192 **Build & deploy \u25b8** gives a near-one-click path:  1. **Build release (server + web + API + docs)** \u2014 regenerates the OpenAPI contract and docs index, builds the production web client (with the API reference and guide site), cross-compiles all server binaries and writes `dist/`. 2. **Deploy to staging** / **Deploy to production** \u2014 packages `dist/` and uploads it using `scripts/dep",
+    "url": "/docs/hosting#build-and-deploy-from-the-tui"
+  },
+  {
+    "title": "Free hosting \u00b7 One-time VM setup",
+    "section": "Developers",
+    "text": "```bash # Ubuntu 24.04 ARM64, shape VM.Standard.A1.Flex (2 OCPU / 12 GB) sudo apt update && sudo apt install -y caddy sqlite3 ufw sudo ufw allow 22/tcp && sudo ufw allow 80/tcp && sudo ufw allow 443/tcp && sudo ufw enable sudo useradd --system --home /var/lib/j3 --shell /usr/sbin/nologin j3 sudo mkdir -p /opt/j3/bin /srv/j3/{downloads,prod,staging} /var/lib/j3/{prod,staging} /var/backups/j3 sudo c",
+    "url": "/docs/hosting#one-time-vm-setup"
+  },
+  {
+    "title": "Free hosting \u00b7 systemd units",
+    "section": "Developers",
+    "text": "`/etc/systemd/system/j3d-prod.service` (copy to `j3d-staging.service`, changing the name, port, paths and env file):  ```ini [Unit] Description=J3 venue server (prod) After=network-online.target Wants=network-online.target  [Service] Type=simple User=j3 Group=j3 WorkingDirectory=/var/lib/j3/prod EnvironmentFile=/etc/j3/prod.env ExecStart=/opt/j3/bin/j3d -addr 127.0.0.1:8787 -db /var/lib/j3/prod/j3",
+    "url": "/docs/hosting#systemd-units"
+  },
+  {
+    "title": "Free hosting \u00b7 Caddy HTTPS + SSE",
+    "section": "Developers",
+    "text": "`/etc/caddy/Caddyfile` \u2014 `flush_interval -1` is essential for live scoring SSE.  ```caddyfile app.example.com { root * /srv/j3/prod encode zstd gzip file_server try_files {path} /index.html }  staging.example.com { root * /srv/j3/staging encode zstd gzip file_server try_files {path} /index.html }  api.example.com { encode zstd gzip reverse_proxy /api/* 127.0.0.1:8787 { flush_interval -1 } reverse_",
+    "url": "/docs/hosting#caddy-https-sse"
+  },
+  {
+    "title": "Free hosting \u00b7 Mobile client against the hosted server",
+    "section": "Developers",
+    "text": "Build an APK with the HTTPS API baked in:  ```bash J3_SERVER_URL=https://api.example.com bash scripts/mobile.sh build ```  The QA build still bundles the seeded SQLite database and read-only API snapshot, so it opens with data and signs in as admin on first launch. While online it reads/writes through `api.example.com`; if the service is unavailable it falls back to the bundled read-only snapshot.",
+    "url": "/docs/hosting#mobile-client-against-the-hosted-server"
+  },
+  {
+    "title": "Free hosting \u00b7 SQLite backups",
+    "section": "Developers",
+    "text": "```bash #!/usr/bin/env bash set -euo pipefail ts=$(date -u +%Y%m%dT%H%M%SZ) sqlite3 /var/lib/j3/prod/j3.db \".backup '/var/backups/j3/prod-$ts.db'\" sqlite3 /var/lib/j3/staging/j3.db \".backup '/var/backups/j3/staging-$ts.db'\" find /var/backups/j3 -name '*.db' -mtime +14 -delete ```  Run nightly with a systemd timer and copy encrypted backups to OCI Object Storage (20 GB free). Use SQLite `.backup`/`",
+    "url": "/docs/hosting#sqlite-backups"
+  },
+  {
+    "title": "Free hosting \u00b7 Caveats",
+    "section": "Developers",
+    "text": "- Oracle may reclaim Always Free compute that is idle for 7 days; real traffic avoids this. - Home region is fixed at signup. Choose carefully. - Single VM is a single point of failure; backups and monitoring are your responsibility. - Restrict SSH to your IP, keep `J3_OWNER_PASSWORD` out of source control, and use HTTPS everywhere.",
+    "url": "/docs/hosting#caveats"
   },
   {
     "title": "CLI & TUI",

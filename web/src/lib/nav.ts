@@ -44,6 +44,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/docs', label: 'Documentation', icon: '📚', roles: all, group: 'Learn' },
   { href: '/demo-accounts', label: 'Demo accounts', icon: '🔑', roles: all, group: 'Learn' },
   { href: '/settings', label: 'Settings', icon: '⚙️', roles: all, group: 'Learn' },
+  { href: '/license', label: 'Licence & attribution', icon: '⚖️', roles: all, group: 'Learn' },
 
   { href: '/simulate', label: 'Event simulator', icon: '🎬', roles: operators, group: 'QA tools' },
   { href: '/ui', label: 'Component gallery', icon: '🧩', roles: ['admin', 'runner'], group: 'QA tools' },
@@ -58,7 +59,7 @@ export const HOME_ROUTE = '/public';
 // A small, persistent phone nav keeps participant/spectator destinations
 // reachable without forcing everyone through the full drawer. Organiser tools
 // are deliberately excluded here: they belong on tablet/desktop/display screens.
-export const MOBILE_PRIMARY_HREFS = ['/public', '/brackets', '/tables', '/event', '/club', '/guides', '/notifications'];
+export const MOBILE_PRIMARY_HREFS = ['/public', '/brackets', '/tables', '/event', '/club', '/guides', '/license', '/notifications'];
 
 // Phone scope: public information and the things participants, club leaders,
 // spectators and guardians need. Operational scoring/setup/audit views stay on
@@ -66,7 +67,7 @@ export const MOBILE_PRIMARY_HREFS = ['/public', '/brackets', '/tables', '/event'
 const PHONE_ROUTES = new Set([
   '/', '/login', '/signup', '/welcome',
   '/public', '/brackets', '/tables', '/pools', '/ceremony', '/event', '/details',
-  '/club', '/notifications', '/settings', '/guides', '/docs', '/view', '/demo-accounts',
+  '/club', '/notifications', '/settings', '/guides', '/docs', '/view', '/demo-accounts', '/license',
 ]);
 
 export function isPhoneWidth(width = typeof window === 'undefined' ? 0 : window.innerWidth) {
@@ -104,7 +105,7 @@ export function itemsForRole(role: Role) {
 // Public, read-only or demo destinations that do not require a nav entry.
 export const OPEN_ROUTES = new Set([
   '/', '/login', '/signup', '/welcome', '/public', '/brackets', '/tables', '/pools',
-  '/event', '/details', '/simulate', '/view', '/ui', '/apidocs', '/overlay', '/demo-accounts',
+  '/event', '/details', '/simulate', '/view', '/ui', '/apidocs', '/overlay', '/demo-accounts', '/license',
 ]);
 
 export function canAccessPath(role: Role, path: string, phone = false) {

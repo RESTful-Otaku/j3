@@ -102,6 +102,12 @@
     </div>
   </div>
 
+  <div class="card" style="margin-bottom:18px;">
+    <div class="eyebrow">Attribution</div><h2>J3 licence</h2>
+    <p class="muted small">J3 is © 2026 Jonathan Harrison (RESTful_Otaku), licensed under PolyForm Noncommercial 1.0.0. Free for non-commercial use; not for sale.</p>
+    <a class="btn small" href="/license">View licence & attribution →</a>
+  </div>
+
 <div class="card" data-guide="settings-profile">
     <h2>Profile</h2>
     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top:14px;">

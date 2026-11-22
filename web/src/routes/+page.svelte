@@ -19,6 +19,7 @@
   } from '../lib/api';
   import { landingForRole, session, switchDemoUser, uiRole } from '../lib/auth';
   import { currentRole, HOME_ROUTE, itemsForRole, type Role as NavRole } from '../lib/nav';
+  import { eventTitle } from '../lib/event-title';
 
   let ready = false;
   let error = '';
@@ -243,8 +244,8 @@
 </script>
 
 <svelte:head>
-  <title>J3 · Local QA Demo</title>
-  <meta name="description" content="J3 local full-stack demo and QA dashboard" />
+  <title>{$eventTitle} · J3 QA dashboard</title>
+  <meta name="description" content="White-label Japanese Jiu Jitsu tournament platform by J3" />
 </svelte:head>
 
 <div class="shell" data-theme={theme}>
@@ -252,7 +253,7 @@
     <div class="brand">
       <a class="brand-mark" href={HOME_ROUTE} aria-label="J3 public dashboard">J3</a>
       <div>
-        <div class="brand-name">J Cubed</div>
+        <div class="brand-name">{$eventTitle}</div>
         <div class="brand-sub">Tournament creator · local QA demo</div>
       </div>
     </div>

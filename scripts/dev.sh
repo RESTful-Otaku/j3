@@ -172,7 +172,8 @@ docs_menu() {
     select_menu "Docs & developer guides" \
       "📚 Open documentation site" "🔌 API reference (try endpoints)" \
       "🏁 Organiser guide" "🧑‍💻 Developer guide" "🚦 CI & releases" \
-      "🎓 Hands-on guides" "🔄 Refresh generated API index" "← Back"
+      "☁️ Free hosting plan" "🎓 Hands-on guides" \
+      "🔄 Refresh generated API index" "← Back"
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
@@ -181,9 +182,10 @@ docs_menu() {
       2) tui_log docs-guide; open_docs /docs/guide ;;
       3) tui_log docs-development; open_docs /docs/development ;;
       4) tui_log docs-ci; open_docs /docs/ci ;;
-      5) tui_log docs-guides; open_docs /guides ;;
-      6) tui_log docs-refresh; spinner "Refreshing docs index" bun run sync:api-docs ;;
-      7) tui_log docs-back; return ;;
+      5) tui_log docs-hosting; open_docs /docs/hosting ;;
+      6) tui_log docs-guides; open_docs /guides ;;
+      7) tui_log docs-refresh; spinner "Refreshing docs index" bun run sync:api-docs ;;
+      8) tui_log docs-back; return ;;
     esac
     pause
   done
@@ -227,25 +229,44 @@ data_menu() {
   done
 }
 
+build_and_deploy() {
+  local environment="$1"
+  if test_stub "build-and-deploy-$environment"; then return; fi
+  spinner "Building $environment release (server + web + API + docs)" bash scripts/release.sh
+  spinner "Deploying $environment" bash scripts/deploy.sh "$environment" dist
+}
+
 build_menu() {
   while true; do
     select_menu "Build & deploy" \
-      "Build live executable + static UI" "Build release artifacts" \
+      "Build live executable + static UI" \
+      "Build release (server + web + API + docs)" \
       "Run full CI/CD suite" "Deploy to development" "Deploy to staging" \
-      "Deploy to production" "← Back"
+      "Deploy to production" "Build + deploy staging (one step)" \
+      "Build + deploy production (one step)" "← Back"
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
       0) tui_log build-exec; spinner "Building live executable" go build -o bin/j3d ./cmd/j3d; spinner "Building web app" bun run --cwd web build ;;
-      1) tui_log build-release; spinner "Building release artifacts" bash scripts/release.sh ;;
+      1) tui_log build-release; spinner "Building server, web, API and docs release" bash scripts/release.sh ;;
       2) tui_log build-cicd; spinner "Full CI/CD suite" bash scripts/cicd.sh ;;
       3) tui_log deploy-dev; spinner "Deploying development" bash scripts/deploy.sh development dist ;;
       4) tui_log deploy-staging; spinner "Deploying staging" bash scripts/deploy.sh staging dist ;;
       5) tui_log deploy-prod; spinner "Deploying production" bash scripts/deploy.sh production dist ;;
-      6) tui_log menu-back; return ;;
+      6) tui_log build-and-deploy-staging; build_and_deploy staging ;;
+      7) tui_log build-and-deploy-production; build_and_deploy production ;;
+      8) tui_log menu-back; return ;;
     esac
     pause
   done
+}
+
+build_hosted_apk() {
+  if test_stub "build-hosted-apk"; then return; fi
+  local url
+  read -r -p "  HTTPS API URL (e.g. https://api.example.com): " url
+  if [ -z "$url" ]; then echo "  ❌ No URL supplied"; return 1; fi
+  J3_SERVER_URL="$url" bash scripts/mobile.sh build
 }
 
 mobile_menu() {
@@ -253,7 +274,7 @@ mobile_menu() {
     select_menu "Mobile (Android / iOS)" \
       "Build demo APK" "Start Pixel 10 Pro emulator" "Install & launch APK" \
       "Build + install + launch" "Show phone server URL" "Run venue server for phone" \
-      "Build iOS .app" "Install Playwright Chromium" "← Back"
+      "Build iOS .app" "Build APK for hosted HTTPS server" "← Back"
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
@@ -264,7 +285,7 @@ mobile_menu() {
       4) tui_log mobile-url; echo "  📡 Phone URL: $(bash scripts/mobile.sh url)" ;;
       5) tui_log run-demo-phone; run_demo_phone ;;
       6) tui_log mobile-build-ios; if ! test_stub "build-ios"; then spinner "Building iOS app" bun run mobile:ios; fi ;;
-      7) tui_log mobile-chromium; spinner "Installing Chromium" bun run e2e:install ;;
+      7) tui_log mobile-build-hosted; build_hosted_apk ;;
       8) tui_log mobile-back; return ;;
 
     esac

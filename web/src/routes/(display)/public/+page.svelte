@@ -4,6 +4,7 @@
   import { session, uiRole } from '../../../lib/auth';
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
+  import { eventTitle } from '../../../lib/event-title';
 
   let event: EventDisplayInfo | null = null;
   let fights: DemoFight[] = [];
@@ -51,7 +52,7 @@
   }
 </script>
 
-<svelte:head><title>J3 · Public dashboard</title></svelte:head>
+<svelte:head><title>{$eventTitle} · Public dashboard</title></svelte:head>
 
 <div class="display-shell">
   <header class="display-header" data-guide="public-header">

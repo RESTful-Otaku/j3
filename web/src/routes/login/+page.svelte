@@ -8,6 +8,7 @@
   import { setRole } from '../../lib/nav';
   import { api, type DemoCredentialAccount, type DemoCredentialsSheet } from '../../lib/api';
   import { notifyError, notifySuccess } from '../../lib/toast';
+  import { eventTitle } from '../../lib/event-title';
 
   let email = 'tony@okami.j3';
   let password = 'demo';
@@ -118,7 +119,7 @@
 
 <div class="auth-shell">
   <div class="auth-card">
-    <div class="brand"><span class="brand-mark">J3</span><div><h1>J Cubed</h1><p class="muted small">Tournament creator & operator</p></div></div>
+    <div class="brand"><span class="brand-mark">J3</span><div><h1>{$eventTitle}</h1><p class="muted small">Tournament creator & operator</p></div></div>
     {#if forcedNotice}<p class="notice">Your account needs a new password before you can continue.</p>{/if}
 
     {#if step === 'password'}

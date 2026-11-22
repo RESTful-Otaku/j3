@@ -26,9 +26,9 @@ for menu in [3, 4, 5, 6, 7]:
     action(menu)
     if menu == 3:  count = 7      # QA options + back
     elif menu == 4: count = 5     # data
-    elif menu == 5: count = 7     # build
+    elif menu == 5: count = 9     # build
     elif menu == 6: count = 9     # mobile
-    else: count = 8              # docs & guides
+    else: count = 9              # docs & guides
     for i in range(1, count + 1):
         action(i)
     back()
@@ -40,10 +40,12 @@ J3_TUI_TEST=1 J3_TUI_LOG="$LOG" bash scripts/dev.sh < "$KEYS" > "$OUT" 2>&1
 
 expected="run-demo run-demo-full qa-menu qa-all qa-smoke qa-smoke-full qa-e2e qa-load qa-github qa-back \
 data-menu data-reset data-seed data-seed-full data-run-live menu-back \
-build-menu build-exec build-release build-cicd deploy-dev deploy-staging deploy-prod menu-back \
+build-menu build-exec build-release build-cicd deploy-dev deploy-staging deploy-prod \
+build-and-deploy-staging build-and-deploy-production menu-back \
 mobile-menu mobile-build-apk mobile-emulator mobile-install mobile-build-install mobile-url \
-run-demo-phone mobile-build-ios mobile-chromium mobile-back \
-docs-menu docs-home docs-api docs-guide docs-development docs-ci docs-guides docs-refresh docs-back \
+run-demo-phone mobile-build-ios mobile-build-hosted mobile-back \
+docs-menu docs-home docs-api docs-guide docs-development docs-ci docs-hosting docs-guides \
+docs-refresh docs-back \
 exit"
 
 missing=0

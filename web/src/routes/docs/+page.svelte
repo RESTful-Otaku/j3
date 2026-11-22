@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { docs, docHref } from '../../lib/docs';
   import type { DocEntry } from '../../lib/docs';
+  import { eventTitle } from '../../lib/event-title';
 
   let entries: DocEntry[] = [];
   let status = 'Checking local venue server…';
@@ -25,7 +26,7 @@
 <svelte:head><title>J3 · Documentation</title></svelte:head>
 
 <section class="hero">
-  <div class="eyebrow">J3 · J Cubed</div>
+  <div class="eyebrow">J3 · {$eventTitle}</div>
   <h1>Everything you need to run J3.</h1>
   <p>
     Plain-language guides for organisers, deep references for developers and a live API explorer —

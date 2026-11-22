@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$ROOT/web/static/docs"
 mkdir -p "$DEST"
 cp "$ROOT/api/openapi.yaml" "$ROOT/web/static/openapi.yaml"
+cp "$ROOT/LICENSE" "$ROOT/web/static/LICENSE"
 cp "$ROOT/docs/manifest.json" "$DEST/manifest.json"
 cp "$ROOT"/docs/*.md "$DEST"/
 python3 "$ROOT/scripts/build-docs-index.py" "$ROOT/api/openapi.yaml" "$DEST" "$ROOT/docs/manifest.json"

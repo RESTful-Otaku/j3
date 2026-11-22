@@ -5,10 +5,13 @@
   import NavShell from '../lib/components/NavShell.svelte';
   import TourOverlay from '../lib/components/TourOverlay.svelte';
   import { afterNavigate, goto } from '$app/navigation';
-  import { syncRoleFromSession } from '../lib/auth';
+  import { ensureQaFirstRun, syncRoleFromSession, uiRole } from '../lib/auth';
+  import { setRole } from '../lib/nav';
   import { apiUrl } from '../lib/api';
+  import { notifySuccess } from '../lib/toast';
   import { canAccessPath, currentRole, isPhoneWidth, phoneHome } from '../lib/nav';
   import { labelTableRows } from '../lib/responsive';
+  import { loadEventTitle } from '../lib/event-title';
 
   let mobile = false;
   let phone = false;
@@ -44,13 +47,27 @@
     sync();
     syncRoute();
 
-    guard();
     const onResize = () => { sync(); guard(); };
     const onPasswordRequired = () => { void goto('/login?password=1'); };
     window.addEventListener('resize', onResize);
     window.addEventListener('j3-session-changed', guard);
     window.addEventListener('j3-password-change-required', onPasswordRequired);
-    ready = true;
+
+    void loadEventTitle();
+    // QA mobile builds start with seeded data and an admin identity. Hold the
+    // first render until that is ready so nobody sees a transient logged-out
+    // screen on a phone handed to a demo audience.
+    void ensureQaFirstRun().then((qaSession) => {
+      if (qaSession) {
+        setRole(uiRole(qaSession.role));
+        notifySuccess('QA demo ready · signed in as Admin');
+      }
+      guard();
+      ready = true;
+    }).catch(() => {
+      guard();
+      ready = true;
+    });
     const healthTimer = setInterval(async () => {
       try {
         const response = await fetch(apiUrl('/healthz'), { cache: 'no-store' });

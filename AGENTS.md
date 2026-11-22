@@ -5,7 +5,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, phone-scoped UX. All local gates and both GitHub Actions workflows green (2026-11-22). |
+| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, phone-scoped UX, QA mobile apps in releases, PolyForm NC licence, free hosting plan. Local gates and GitHub Actions green (2026-11-22). |
 | Repo | `git@github.com:RESTful-Otaku/j3.git` (`main`) |
 | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
 | Created / updated | 2026-11-19 / 2026-11-22 |
@@ -171,6 +171,7 @@ states. Offline write outbox remains a future enhancement.
 | D-020–D-035 | Dedicated URL boards; dashboard templates; toasts/undo; auto bracket; local uploads; audit view; allow-listed query API; polish + production verification mandatory; capacity/disruption rules; rank/safety presentation; 11 locales; pointer-drag builder; server-resolved points; capability-scoped uploads. |
 | D-036–D-048 | Direct pointer manipulation in builder; full catalogue; technical outcomes reuse fight vocabulary; Okami 2027 mid-event seed; branded LAN-baked APK; phones are participant screens; APK bundles SQLite + read-only snapshot. |
 | D-049–D-053 | Owner `j3@local` / `J3 Owner` overridable; env password or one-time generated + forced change; `admin` virtual role without role CHECK migration; privileged accounts only via token invites; demo credentials/identity switching work offline. |
+| D-054–D-058 | CI mobile builds produce installable Android QA APK, iOS simulator app and signed real-device IPA when Apple secrets exist; emulator/simulator runtime smoke is required; QA builds self-seed and auto-login as admin; white-label title comes from event config; PolyForm Noncommercial 1.0.0 with attribution; Oracle Always Free A1 recommended for free prod/staging. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -187,6 +188,7 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-22 — CI/CD + licensing**: mobile workflows build installable QA apps, run emulator/simulator smoke, release production server/web/API/docs/mobile artifacts; QA builds self-seed and auto-login as admin; event-config title replaces `J Cubed`; PolyForm NC licence and free Oracle hosting plan documented; TUI has one-step build+deploy actions and hosted-APK build.
 - **2026-11-22 — Auth rollout**: real admin role, hosted owner bootstrap, authority matrix, token
   invites, demo credential sheet with real/offline identity switching, invite acceptance page, docs
   and full gate/CI/APK verification.
@@ -199,13 +201,15 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 14. Current state
 
-**Delivered**: complete app described above; local gates green; both GitHub Actions workflows green;
-APK verified on `j3-pixel-10-pro` with live and offline evidence in `docs/qa/`.
+**Delivered**: complete app described above; local gates green; CI/mobile/release/deploy workflows
+green; APK verified on `j3-pixel-10-pro` with live and offline evidence in `docs/qa/`. Release mobile
+artifacts are installable Android QA APK plus iOS simulator app and real-device IPA when Apple secrets
+are configured. See `docs/HOSTING.md` for free Oracle Always Free prod/staging hosting.
 
 **External-dependency remainder only**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: work only on the external-dependency remainder. For QA use `bun run dev`; for phones rebuild with
+**Next actions**: work only on the external-dependency remainder. For QA use `bun run dev`; for phones rebuild a standalone self-seeding offline APK with `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
 `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
 
 ---

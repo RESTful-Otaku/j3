@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { getJson, type DemoCounts } from '../../lib/api';
   import { session } from '../../lib/auth';
+  import { eventTitle } from '../../lib/event-title';
 
   let counts: DemoCounts | null = null;
   onMountLoad();
@@ -12,11 +13,11 @@
   }
 </script>
 
-<svelte:head><title>J3 · Okami Jiu Jitsu Challenger</title></svelte:head>
+<svelte:head><title>{$eventTitle} · Event portal</title></svelte:head>
 
 <div class="landing">
   <header class="landing-nav">
-    <span class="brand"><span class="brand-mark">J3</span> J Cubed</span>
+    <span class="brand"><span class="brand-mark">J3</span> {$eventTitle}</span>
     <nav>
       <a href="/event">Event details</a>
       <a href="/public">Live dashboard</a>

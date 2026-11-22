@@ -89,6 +89,14 @@
       "file": "CI.md"
     },
     {
+      "slug": "hosting",
+      "title": "Free hosting",
+      "description": "Run production and staging on free Oracle ARM infrastructure with persistent SQLite.",
+      "icon": "☁️",
+      "group": "Developers",
+      "file": "HOSTING.md"
+    },
+    {
       "slug": "cli",
       "title": "CLI & TUI",
       "description": "Menus, demo commands, QA gates and mobile builds.",

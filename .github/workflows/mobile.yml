@@ -7,6 +7,24 @@ on:
     branches: [main, develop]
   workflow_dispatch:
   workflow_call:
+    inputs:
+      require_signed_ios:
+        description: Fail the build when real-device iOS signing secrets are missing
+        type: boolean
+        default: false
+    secrets:
+      APPLE_CERTIFICATE_P12:
+        required: false
+      APPLE_CERTIFICATE_PASSWORD:
+        required: false
+      APPLE_PROVISIONING_PROFILE:
+        required: false
+      APPLE_PROVISIONING_PROFILE_NAME:
+        required: false
+      APPLE_TEAM_ID:
+        required: false
+      APPLE_EXPORT_METHOD:
+        required: false
 
 concurrency:
   group: mobile-${{ github.ref }}
@@ -17,14 +35,17 @@ permissions:
 
 jobs:
   android:
-    name: Android APK (QA artifact)
+    name: Android QA app + emulator smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.27'
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -34,8 +55,11 @@ jobs:
           export ANDROID_HOME=/usr/local/lib/android/sdk
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "emulator" "platform-tools" "platforms;android-36" \
+            "build-tools;36.0.0" "system-images;android-36;google_apis;x86_64"
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
       - name: Restore Gradle cache
         uses: actions/cache@v6
         with:
@@ -44,9 +68,12 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ hashFiles('web/android/gradle/wrapper/gradle-wrapper.properties') }}
       - run: bun install --cwd web --frozen-lockfile
+      - name: Generate bundled offline QA data
+        run: bash scripts/mobile-demo-data.sh
       - name: Build web app with bundled offline demo data
         env:
           VITE_OFFLINE_DEMO: '1'
+          VITE_QA_AUTOLOGIN: '1'
         run: bun run --cwd web build
       - run: bunx --cwd web cap sync android
       - name: Build debug APK
@@ -54,35 +81,85 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
-      - name: Upload APK
+      - name: Copy QA APK
+        run: |
+          mkdir -p artifacts
+          cp web/android/app/build/outputs/apk/debug/app-debug.apk artifacts/j3-android-qa.apk
+          ls -lh artifacts/j3-android-qa.apk
+      - name: Upload Android QA APK
         id: upload_apk
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
-          name: j3-android-apk-${{ github.sha }}
-          path: web/android/app/build/outputs/apk/debug/*.apk
+          name: j3-android-qa-${{ github.sha }}
+          path: artifacts/j3-android-qa.apk
           if-no-files-found: error
-      - name: Retry APK upload
+      - name: Retry Android QA APK upload
         if: steps.upload_apk.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
-          name: j3-android-apk-${{ github.sha }}
-          path: web/android/app/build/outputs/apk/debug/*.apk
+          name: j3-android-qa-${{ github.sha }}
+          path: artifacts/j3-android-qa.apk
           if-no-files-found: error
+      - name: Enable emulator acceleration
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+            echo "KVM acceleration enabled"
+          else
+            echo "::warning::/dev/kvm unavailable; emulator will use software rendering"
+          fi
+      - name: Create Android test AVD
+        run: |
+          echo no | avdmanager create avd -n j3-ci \
+            -k 'system-images;android-36;google_apis;x86_64' -d pixel --force
+      - name: Start Android emulator
+        run: |
+          nohup emulator -avd j3-ci -no-snapshot -no-audio -no-boot-anim \
+            -gpu swiftshader_indirect > /tmp/j3-emulator.log 2>&1 &
+          adb wait-for-device
+          for _ in $(seq 1 150); do
+            if adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' | grep -q 1; then
+              echo "Emulator booted"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/j3-emulator.log
+          echo "Emulator did not boot in time"
+          exit 1
+      - name: Install, launch and verify native client
+        env:
+          J3_APK: artifacts/j3-android-qa.apk
+          J3_MOBILE_SMOKE_OUT: artifacts/android-smoke
+        run: bash scripts/mobile-smoke.sh
+      - name: Upload Android smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: j3-android-smoke-${{ github.sha }}
+          path: artifacts/android-smoke
+          if-no-files-found: warn
 
   ios:
-    name: iOS .app (simulator QA artifact)
+    name: iOS QA app + simulator smoke
     runs-on: macos-15-intel
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.27'
       - run: bun install --cwd web --frozen-lockfile
+      - name: Generate bundled offline QA data
+        run: bash scripts/mobile-demo-data.sh
       - name: Build web app with bundled offline demo data
         env:
           VITE_OFFLINE_DEMO: '1'
+          VITE_QA_AUTOLOGIN: '1'
         run: bun run --cwd web build
       - run: bunx --cwd web cap sync ios
       - name: Build unsigned simulator app
@@ -91,37 +168,72 @@ jobs:
           xcodebuild -project App.xcodeproj -scheme App \
             -configuration Debug -sdk iphonesimulator \
             -derivedDataPath ../../../build/ios CODE_SIGNING_ALLOWED=NO build
-      - name: Package .app
+      - name: Package simulator app
         run: |
           mkdir -p artifacts
           cp -R build/ios/Build/Products/Debug-iphonesimulator/App.app artifacts/J3.app
-          cd artifacts && zip -r ../j3-ios-app.zip J3.app
-      - name: Upload iOS app
-        id: upload_ios
+          cd artifacts && zip -r ../j3-ios-simulator.zip J3.app
+      - name: Upload iOS simulator artifact
+        id: upload_ios_sim
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
-          name: j3-ios-app-${{ github.sha }}
-          path: j3-ios-app.zip
+          name: j3-ios-simulator-${{ github.sha }}
+          path: j3-ios-simulator.zip
           if-no-files-found: error
-      - name: Retry iOS upload
-        if: steps.upload_ios.outcome == 'failure'
+      - name: Retry iOS simulator upload
+        if: steps.upload_ios_sim.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
-          name: j3-ios-app-${{ github.sha }}
-          path: j3-ios-app.zip
+          name: j3-ios-simulator-${{ github.sha }}
+          path: j3-ios-simulator.zip
           if-no-files-found: error
-      - name: Build signed IPA when Apple credentials are configured
+      - name: Boot simulator, install and launch native client
+        run: |
+          mkdir -p artifacts/ios-smoke
+          SIM_ID=$(xcrun simctl list devices available | awk '/iPhone 16|iPhone 15/ && /\(Shutdown\)|\(Booted\)/ {gsub(/[()]/, "", $2); print $2; exit}')
+          if [ -z "$SIM_ID" ]; then
+            echo "No suitable iPhone simulator found"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Using simulator $SIM_ID"
+          xcrun simctl boot "$SIM_ID" 2>/dev/null || true
+          xcrun simctl bootstatus "$SIM_ID" -b
+          xcrun simctl install "$SIM_ID" \
+            build/ios/Build/Products/Debug-iphonesimulator/App.app
+          xcrun simctl launch "$SIM_ID" com.j3.tournaments
+          sleep 8
+          xcrun simctl io "$SIM_ID" screenshot artifacts/ios-smoke/ios-running.png
+          xcrun simctl spawn "$SIM_ID" log show \
+            --predicate 'process == "App" OR process CONTAINS "J3"' \
+            --last 5m --style compact > artifacts/ios-smoke/ios-logcat.txt 2>&1 || true
+          test -s artifacts/ios-smoke/ios-running.png
+          echo "Native client launched on iOS simulator"
+      - name: Upload iOS smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: j3-ios-smoke-${{ github.sha }}
+          path: artifacts/ios-smoke
+          if-no-files-found: warn
+      - name: Build signed iOS QA IPA for real devices
         if: github.event_name != 'pull_request'
         env:
           CERT_B64: ${{ secrets.APPLE_CERTIFICATE_P12 }}
           CERT_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           PROFILE_B64: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+          PROFILE_NAME_HINT: ${{ secrets.APPLE_PROVISIONING_PROFILE_NAME }}
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          PROFILE_NAME: ${{ secrets.APPLE_PROVISIONING_PROFILE_NAME }}
+          EXPORT_METHOD: ${{ secrets.APPLE_EXPORT_METHOD }}
+          REQUIRE_SIGNED: ${{ inputs.require_signed_ios == true }}
         run: |
           if [ -z "${CERT_B64:-}" ] || [ -z "${PROFILE_B64:-}" ] || [ -z "${TEAM_ID:-}" ]; then
-            echo "ℹ️ Apple signing secrets not configured — simulator .app artifact only"
+            if [ "${REQUIRE_SIGNED:-false}" = "true" ]; then
+              echo "::error::iOS QA IPA requires APPLE_CERTIFICATE_P12, APPLE_PROVISIONING_PROFILE and APPLE_TEAM_ID secrets"
+              exit 1
+            fi
+            echo "ℹ️ Apple signing secrets not configured — simulator app only"
             exit 0
           fi
           KEYCHAIN="$HOME/j3-build.keychain"
@@ -129,17 +241,21 @@ jobs:
           security default-keychain -s "$KEYCHAIN"
           security unlock-keychain -p j3ci "$KEYCHAIN"
           echo "$CERT_B64" | base64 --decode > /tmp/j3-cert.p12
-          security import /tmp/j3-cert.p12 -k "$KEYCHAIN" -P "$CERT_PASSWORD" -A
+          security import /tmp/j3-cert.p12 -k "$KEYCHAIN" -P "${CERT_PASSWORD:-}" -A
           security set-key-partition-list -S apple-tool:,apple: -s -k j3ci "$KEYCHAIN"
           echo "$PROFILE_B64" | base64 --decode > /tmp/j3.mobileprovision
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           cp /tmp/j3.mobileprovision "$HOME/Library/MobileDevice/Provisioning Profiles/j3.mobileprovision"
-          cat > /tmp/j3-export.plist <<'PLIST'
+          PROFILE_NAME="${PROFILE_NAME_HINT:-}"
+          if [ -z "$PROFILE_NAME" ]; then
+            PROFILE_NAME=$(security cms -D -i /tmp/j3.mobileprovision | plutil -extract Name raw -o - -)
+          fi
+          METHOD="${EXPORT_METHOD:-ad-hoc}"
+          cat > /tmp/j3-export.plist <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0"><dict><key>method</key><string>ad-hoc</string><key>teamID</key><string>TEAM_ID_PLACEHOLDER</string></dict></plist>
+          <plist version="1.0"><dict><key>method</key><string>${METHOD}</string><key>teamID</key><string>${TEAM_ID}</string></dict></plist>
           PLIST
-          sed -i "" "s/TEAM_ID_PLACEHOLDER/$TEAM_ID/" /tmp/j3-export.plist
           cd web/ios/App
           xcodebuild -project App.xcodeproj -scheme App -configuration Release \
             -archivePath ../../../build/App.xcarchive archive \
@@ -147,12 +263,33 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
           xcodebuild -exportArchive -archivePath ../../../build/App.xcarchive \
             -exportPath ../../../build/export -exportOptionsPlist /tmp/j3-export.plist
-          cd ../../..
-          cp build/export/*.ipa j3-signed.ipa
-      - name: Upload signed IPA
-        if: hashFiles('j3-signed.ipa') != ''
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p artifacts
+          cp build/export/*.ipa artifacts/j3-ios-qa.ipa
+          ls -lh artifacts/j3-ios-qa.ipa
+      - name: Upload signed iOS QA IPA
+        if: hashFiles('artifacts/j3-ios-qa.ipa') != ''
         uses: actions/upload-artifact@v7
         with:
-          name: j3-ios-signed-${{ github.sha }}
-          path: j3-signed.ipa
+          name: j3-ios-qa-${{ github.sha }}
+          path: artifacts/j3-ios-qa.ipa
           if-no-files-found: error
+
+  required-checks:
+    name: Mobile checks passed
+    if: always()
+    needs: [android, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify mobile jobs succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
+              echo "❌ A required mobile check did not pass"
+              exit 1
+            fi
+          done
+          echo "✅ Mobile build, QA app and runtime smoke checks passed"

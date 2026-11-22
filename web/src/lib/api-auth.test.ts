@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getJson, resetAuthCache } from './api';
+import { bootstrapQaSession, getJson, resetAuthCache } from './api';
 import { switchDemoUser } from './auth';
 
 type Call = { url: string; auth: string | null };
@@ -106,5 +106,26 @@ describe('venue session handling', () => {
 
     await getJson('/api/v1/demo/standings');
     expect(calls.at(-1)?.auth).toBe('Bearer fighter-token');
+  });
+
+  it('QA bootstrap signs in as the bundled admin when the venue server is offline', async () => {
+    window.history.replaceState({}, '', '/?offline=1');
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/j3-demo-data.json')) {
+        return new Response(JSON.stringify({
+          session: {
+            token: 'offline-demo', email: 'owner@demo.j3', role: 'admin',
+            userId: 'u-owner', expiresAt: '2099-01-01T00:00:00Z',
+          },
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      throw new Error('offline');
+    }));
+
+    const next = await bootstrapQaSession();
+    expect(next?.role).toBe('admin');
+    expect(next?.userId).toBe('u-owner');
+    expect(localStorage.getItem('j3-session')).toContain('offline-demo');
   });
 });

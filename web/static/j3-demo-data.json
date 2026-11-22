@@ -13996,25 +13996,25 @@
         "ID": "tpl-okami",
         "Name": "Okami Challengers 2027 (full)",
         "ConfigJSON": "{\"name\":\"Okami Jiu Jitsu Challengers Tournament 2027\",\"disciplines\":[{\"name\":\"Open Hand Kata\"}],\"categories\":[{\"name\":\"Adults\",\"kind\":\"age\",\"min\":18,\"max\":99}],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T22:01:05.965Z"
+        "CreatedAt": "2026-11-22T22:34:10.302Z"
       },
       {
         "ID": "tpl-club",
         "Name": "Club open day (empty)",
         "ConfigJSON": "{\"name\":\"Club Open Day\",\"disciplines\":[],\"categories\":[],\"constraints\":{\"cap\":50,\"maxPools\":8},\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T22:01:05.965Z"
+        "CreatedAt": "2026-11-22T22:34:10.302Z"
       },
       {
         "ID": "tpl-kata",
         "Name": "Kata only (empty)",
         "ConfigJSON": "{\"name\":\"Kata Challenge\",\"disciplines\":[{\"name\":\"Open Hand Kata\"},{\"name\":\"Weapons Kata\"}],\"categories\":[],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T22:01:05.965Z"
+        "CreatedAt": "2026-11-22T22:34:10.302Z"
       },
       {
         "ID": "tpl-newhaza",
         "Name": "Newaza tournament (empty)",
         "ConfigJSON": "{\"name\":\"Newaza Tournament\",\"disciplines\":[{\"name\":\"Randori / Katamewaza\"},{\"name\":\"Ground Fighting\"}],\"categories\":[],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T22:01:05.965Z"
+        "CreatedAt": "2026-11-22T22:34:10.302Z"
       }
     ]
   },
@@ -14025,5 +14025,5 @@
     "expiresAt": "2099-01-01T00:00:00Z",
     "userId": "u-owner"
   },
-  "generatedAt": "2026-11-22T22:01:08Z"
+  "generatedAt": "2026-11-22T22:34:12Z"
 }

@@ -45,7 +45,7 @@ build_apk() {
   else
     echo "📦 Building standalone offline demo (no venue URL baked)"
   fi
-  VITE_API_BASE_URL="$server_url" VITE_OFFLINE_DEMO=1 bun run --cwd web build >/dev/null || return 1
+  VITE_API_BASE_URL="$server_url" VITE_OFFLINE_DEMO=1 VITE_QA_AUTOLOGIN=1 bun run --cwd web build >/dev/null || return 1
   (cd web && bunx cap sync android) >/dev/null || return 1
   (cd web/android && ./gradlew assembleDebug --no-daemon) || return 1
   mkdir -p artifacts

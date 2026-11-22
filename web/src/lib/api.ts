@@ -239,6 +239,20 @@ async function demoLogin(): Promise<boolean> {
   }
 }
 
+// First-run QA bootstrap: sign the bundled demo in as the seeded admin before
+// any screen renders. The bundled snapshot already contains the seeded
+// Okami 2027 data, so this only needs to establish the default identity.
+export async function bootstrapQaSession(): Promise<DemoSession | null> {
+  if (storedToken()) return null;
+  const ok = await demoLogin();
+  if (!ok) return null;
+  try {
+    return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null') as DemoSession | null;
+  } catch {
+    return null;
+  }
+}
+
 // Issues a real server-side session for a chosen QA account. Unlike the old
 // display-only actor switch, every subsequent API call carries this identity.
 export async function demoSession(userId: string): Promise<DemoSession> {
