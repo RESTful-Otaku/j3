@@ -61,7 +61,7 @@
       <p id="confirm-message">{message}</p>
       <div class="actions">
         <button class="btn" bind:this={cancelButton} on:click={() => close(true)}>Cancel</button>
-        <button class="btn" class:primary={!danger} class:danger={danger} on:click={() => { onConfirm(); close(false); }}>
+        <button class="btn" data-guide="confirm-action" class:primary={!danger} class:danger={danger} on:click={() => { onConfirm(); close(false); }}>
           {confirmLabel}
         </button>
       </div>

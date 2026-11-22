@@ -1,0 +1,1172 @@
+[
+  {
+    "title": "Organiser guide",
+    "section": "Start here",
+    "text": "Set up, run and finish a tournament without technical knowledge.",
+    "url": "/docs/guide"
+  },
+  {
+    "title": "Organiser guide \u00b7 Organiser guide",
+    "section": "Start here",
+    "text": "# Organiser guide  J3 runs a whole tournament from one place. This guide uses plain language and assumes no technical experience. Start with the demo: it is seeded with two clubs, officials, fighters, fights, kata scores and medals so you can click around before creating your own event.",
+    "url": "/docs/guide#organiser-guide"
+  },
+  {
+    "title": "Organiser guide \u00b7 Before you start",
+    "section": "Start here",
+    "text": "Have these ready:  - the event name, dates and venue; - your logo and banner images (PNG, JPG, WEBP or SVG); - the clubs you expect and a rough number of fighters; - the age, weight, height and belt ranges you want to offer; - which disciplines you are running (fighting, ground, randori, kata and so on).  You do not need to know rules or point values from memory. J3 offers sensible defaults for ev",
+    "url": "/docs/guide#before-you-start"
+  },
+  {
+    "title": "Organiser guide \u00b7 Open the demo",
+    "section": "Start here",
+    "text": "From the developer console choose **Run full local demo**, then open [http://localhost:5173](http://localhost:5173). The demo signs you in as a tournament runner automatically. Use the account switcher in the navigation to see exactly what an official, club leader, fighter or spectator sees.",
+    "url": "/docs/guide#open-the-demo"
+  },
+  {
+    "title": "Organiser guide \u00b7 Create your event in five steps",
+    "section": "Start here",
+    "text": "The setup wizard is at **Setup wizard** in the navigation. Your answers are saved as you go, so you can leave and come back without losing work.  1. **Event & identity** \u2014 name, dates, venue, logo, banner and colours. Choose a template if one looks similar to your event; everything in it can be changed. 2. **Disciplines & rules** \u2014 pick the contests you will run. Each one has match length, point v",
+    "url": "/docs/guide#create-your-event-in-five-steps"
+  },
+  {
+    "title": "Organiser guide \u00b7 Invite clubs and register fighters",
+    "section": "Start here",
+    "text": "A club leader can register fighters under their club, upload a club logo and see only their own people. A fighter can register independently or accept a club invitation. Registration collects name, contact details, date of birth, height, weight, belt/grade and emergency information.  Enter metric or imperial measurements \u2014 whichever is easier. J3 stores the metric values and keeps what you typed f",
+    "url": "/docs/guide#invite-clubs-and-register-fighters"
+  },
+  {
+    "title": "Organiser guide \u00b7 Let J3 build the draw",
+    "section": "Start here",
+    "text": "**Auto-run** in the readiness checklist creates balanced pools, seeds fighters by rank, spreads same-club fighters across different pools, adds BYEs where needed and assigns officials to mats. You can always drag a fighter to a different slot: J3 keeps a copy at every round so the full history remains visible.  If a pool is too small for elimination, J3 suggests round robin instead. For third plac",
+    "url": "/docs/guide#let-j3-build-the-draw"
+  },
+  {
+    "title": "Organiser guide \u00b7 Score a contest",
+    "section": "Start here",
+    "text": "Open the **Official console** on a tablet or laptop:  1. Select the contest and confirm you are assigned to it. Unassigned officials cannot score. 2. Start the clock. The referee can stop it; the scorekeeper resumes it on command. 3. Add techniques and penalties to the correct side. Moves appear on the scoreboard immediately and every change is attributed to you. 4. A submission or tap is an insta",
+    "url": "/docs/guide#score-a-contest"
+  },
+  {
+    "title": "Organiser guide \u00b7 Kata and training",
+    "section": "Start here",
+    "text": "Kata competitions use a judge panel on phones or tablets. J3 drops the highest and lowest scores, averages the middle scores and applies the tie-break chain you configured. Rounds can be compulsory or chosen, include bunkai, and advance the top performers automatically. Weapon kata and training sessions are supported as well.",
+    "url": "/docs/guide#kata-and-training"
+  },
+  {
+    "title": "Organiser guide \u00b7 Screens and displays",
+    "section": "Start here",
+    "text": "Every view has its own URL, so open each one in its own browser tab and drag it onto the projector, TV or LED wall:  | View | Use | |---|---| | `/public` | Public dashboard: next up, live results and event status | | `/display` | Full-screen scoreboard with fighter photos, clubs, officials and timers | | `/brackets` | Elimination and round-robin progression | | `/tables` | Standings, rankings, med",
+    "url": "/docs/guide#screens-and-displays"
+  },
+  {
+    "title": "Organiser guide \u00b7 Keep the event on track",
+    "section": "Start here",
+    "text": "The public clock and dashboard timeline show projected start and end times. If the day runs early or late, adjust the drift once and every projection updates. Rest warnings remind you when a fighter has another bout too soon, and the on-deck list shows who is next.",
+    "url": "/docs/guide#keep-the-event-on-track"
+  },
+  {
+    "title": "Organiser guide \u00b7 Dealing with changes on the day",
+    "section": "Start here",
+    "text": "- **Withdrawal or no-show** \u2014 mark a forfeit with a reason; the pool rebalances and promotions adjust without deleting the original result. - **Injury** \u2014 record it as a technical outcome so ranking points stay consistent. - **Voluntary move up** \u2014 with the fighter's consent, place them in a heavier or older category. - **Too few entrants** \u2014 switch the affected category to round robin from the br",
+    "url": "/docs/guide#dealing-with-changes-on-the-day"
+  },
+  {
+    "title": "Organiser guide \u00b7 Audit and exports",
+    "section": "Start here",
+    "text": "Every material action records who did it, when, what it affected and the before/after values. Runners and officials can filter the **Audit trail** to resolve disputes. **Data explorer** and the CSV buttons in **Check-in & import** export fights, entrants and standings. The full machine API is documented in the [API reference](/docs/api).",
+    "url": "/docs/guide#audit-and-exports"
+  },
+  {
+    "title": "Organiser guide \u00b7 Need help?",
+    "section": "Start here",
+    "text": "- [Developer guide](/docs/development) explains commands, architecture and troubleshooting. - [CI & releases](/docs/ci) explains the automated checks. - The TUI menu **Docs & guides** opens this site and refreshes the generated API reference.",
+    "url": "/docs/guide#need-help"
+  },
+  {
+    "title": "Runner guide",
+    "section": "Start here",
+    "text": "The full event path: create, check in, score, publish and audit.",
+    "url": "/docs/runner"
+  },
+  {
+    "title": "Runner guide \u00b7 Runner guide",
+    "section": "Start here",
+    "text": "# Tournament runner guide  This is the complete path from an empty venue to published medals. Use the hands-on guide in the app if you want each step checked for you: **Guides & progress \u2192 Runner**.",
+    "url": "/docs/runner#runner-guide"
+  },
+  {
+    "title": "Runner guide \u00b7 Before you start",
+    "section": "Start here",
+    "text": "Have the event name, dates, venue, a logo or banner, a rough participant count and the names of your officials ready. You do not need to know federation rule numbers: J3 stores rules as reusable configuration.",
+    "url": "/docs/runner#before-you-start"
+  },
+  {
+    "title": "Runner guide \u00b7 1. Create the event",
+    "section": "Start here",
+    "text": "Open **Setup wizard** and work through the five steps:  1. **Event** \u2014 name, display title, venue, dates and theme. 2. **Disciplines** \u2014 one row per discipline, with match length, rounds, scoring and kit requirements. 3. **Categories** \u2014 age, weight, height, grade and gender ranges. Set a participant cap. 4. **People** \u2014 paste invitations as `email, phone, role, club`. 5. **Review** \u2014 fix any red ",
+    "url": "/docs/runner#1-create-the-event"
+  },
+  {
+    "title": "Runner guide \u00b7 2. Check the draw",
+    "section": "Start here",
+    "text": "Open **Fight pools** and **Brackets**. Confirm that:  - pools are balanced and same-club fighters are spread; - BYEs are allocated to seeds where your format policy says so; - the third-place plan respects the \"have they already met?\" rule; - every category has enough entrants to be valid.  Use **Regenerate balanced pools** if the seed produced a poor spread. Manual drag/shuffle is available on th",
+    "url": "/docs/runner#2-check-the-draw"
+  },
+  {
+    "title": "Runner guide \u00b7 3. Brief your team",
+    "section": "Start here",
+    "text": "Open **Event config** and share it with officials and competitors. It lists required kit, match times, course attendance, venue information and the public schedule. Open **Display control** to assign dashboard templates to screens.",
+    "url": "/docs/runner#3-brief-your-team"
+  },
+  {
+    "title": "Runner guide \u00b7 4. Check-in and weigh-in",
+    "section": "Start here",
+    "text": "On **Check-in & import**, enter the official weight for each arrival. J3 flags anyone outside their declared class. Use **Add fighter** for late entries, and the CSV buttons to export start lists. Forfeits, no-shows and injuries are recorded from the same area so the draw can be rebalanced.",
+    "url": "/docs/runner#4-check-in-and-weigh-in"
+  },
+  {
+    "title": "Runner guide \u00b7 5. Run the mats",
+    "section": "Start here",
+    "text": "On each **Mat control** console:  1. select a contest; 2. start the authoritative clock; 3. pause when the referee stops the bout; 4. log holds, penalties and techniques from **Official console**; 5. confirm the result, which locks the bout and publishes it everywhere.  Every confirmation asks for approval and writes an audit entry with actor, role, time and before/after values. See [live scoring ",
+    "url": "/docs/runner#5-run-the-mats"
+  },
+  {
+    "title": "Runner guide \u00b7 6. Publish and celebrate",
+    "section": "Start here",
+    "text": "Open **Public board** on spectator screens, **Brackets** on the main wall and **Medal ceremony** for podium callouts. Use the PA controls to flash the next competitors and speak their names. **Tables & rankings** shows live club points and medals.",
+    "url": "/docs/runner#6-publish-and-celebrate"
+  },
+  {
+    "title": "Runner guide \u00b7 After the event",
+    "section": "Start here",
+    "text": "Use **Audit trail** to resolve disputes, **Data explorer** to query the allow-listed tables, and **Account admin** to remove or change access. Save the event as a template before the next tournament so categories, rules and branding are reused exactly.",
+    "url": "/docs/runner#after-the-event"
+  },
+  {
+    "title": "Official guide",
+    "section": "Start here",
+    "text": "Assignments, corner scoring, penalties, clock and kata panels.",
+    "url": "/docs/official"
+  },
+  {
+    "title": "Official guide \u00b7 Official guide",
+    "section": "Start here",
+    "text": "# Official & moderator guide  Your console is designed for one tap per action and confirmation before anything is committed. Use **Guides & progress \u2192 Officials** for a checked, hands-on run-through.",
+    "url": "/docs/official#official-guide"
+  },
+  {
+    "title": "Official guide \u00b7 Get assigned",
+    "section": "Start here",
+    "text": "A runner assigns officials to mats and contests. Sign in with your official account and open **Official console**. If you cannot see a contest, you are not assigned to it \u2014 ask the runner rather than trying to score from another account.",
+    "url": "/docs/official#get-assigned"
+  },
+  {
+    "title": "Official guide \u00b7 Select the contest and corner",
+    "section": "Start here",
+    "text": "1. Choose the contest in **Select contest**. 2. Tap **RED** or **BLUE** to choose the active corner. The button shows the fighter's name. 3. Search the technique palette by English name or romaji.  Points, penalties and submissions always apply to the active corner. Check the name before every entry.",
+    "url": "/docs/official#select-the-contest-and-corner"
+  },
+  {
+    "title": "Official guide \u00b7 Log a technique",
+    "section": "Start here",
+    "text": "Tap a technique card, review the confirmation dialogue (technique, romaji and point value), then press **Confirm & log**. The score appears on the live scoreboard immediately. If you tapped the wrong corner or technique, use **Undo last entry** \u2014 the correction is audited.",
+    "url": "/docs/official#log-a-technique"
+  },
+  {
+    "title": "Official guide \u00b7 Penalties and cards",
+    "section": "Start here",
+    "text": "Penalty cards are in the same palette. A yellow card records a light foul; repeated fouls escalate according to the event's rule set. Red cards and disqualifications follow the configured penalty ladder. Never award a card without the confirmation step.",
+    "url": "/docs/official#penalties-and-cards"
+  },
+  {
+    "title": "Official guide \u00b7 Control the clock",
+    "section": "Start here",
+    "text": "The scorekeeper's **Mat control** is authoritative. Start the bout, pause for referee stoppages and resume on instruction. The public board mirrors this clock. Do not run a separate stopwatch as the source of truth.",
+    "url": "/docs/official#control-the-clock"
+  },
+  {
+    "title": "Official guide \u00b7 Submissions and instant wins",
+    "section": "Start here",
+    "text": "A submission overrides accumulated points. Use **Red submits** or **Blue submits** for an instant win; J3 records the tap and asks you to confirm the final result. See [scoring rules](/docs/scoring) for holds, golden score and tie-breaks.",
+    "url": "/docs/official#submissions-and-instant-wins"
+  },
+  {
+    "title": "Official guide \u00b7 Kata panel judging",
+    "section": "Start here",
+    "text": "Switch to the **Kata panel** tab. Each performance has sections such as etiquette, demonstration and application, scored by each judge from 0\u201310. J3 drops the highest and lowest marks where the rule set requires it and publishes the authoritative total. Change a score and confirm; totals update on **Tables & rankings**.",
+    "url": "/docs/official#kata-panel-judging"
+  },
+  {
+    "title": "Official guide \u00b7 Finish the bout",
+    "section": "Start here",
+    "text": "Use **Red wins**, **Blue wins** or **Draw** in the Finish & override panel, then confirm. The result is locked, pushed to every display and written to the audit trail. If you need to correct it, ask a runner to use the recorded undo path.",
+    "url": "/docs/official#finish-the-bout"
+  },
+  {
+    "title": "Official guide \u00b7 Handover",
+    "section": "Start here",
+    "text": "At the end of your assignment, check **Audit trail** for your actions and tell the runner about any incidents. Do not share your account with another official \u2014 assignments and audit entries must stay attributable.",
+    "url": "/docs/official#handover"
+  },
+  {
+    "title": "Participant guide",
+    "section": "Start here",
+    "text": "Registration, profile, check-in and following your contests.",
+    "url": "/docs/participant"
+  },
+  {
+    "title": "Participant guide \u00b7 Participant guide",
+    "section": "Start here",
+    "text": "# Participant & spectator guide  Whether you are fighting, coaching or watching, J3 gives you a public view that never exposes private scoring drafts. Use **Guides & progress \u2192 Participants** for a checked tour of the main views.",
+    "url": "/docs/participant#participant-guide"
+  },
+  {
+    "title": "Participant guide \u00b7 Create your profile",
+    "section": "Start here",
+    "text": "On **Settings**, add your name, contact details, date of birth, height, weight, rank/grade and club. Enter metric or imperial units \u2014 the server converts and stores metric values as canonical. Belt colour is chosen from a colour block with a custom option for tenant-specific grades.",
+    "url": "/docs/participant#create-your-profile"
+  },
+  {
+    "title": "Participant guide \u00b7 Register for the right division",
+    "section": "Start here",
+    "text": "Open the public sign-up page. J3 only offers categories you are compatible with based on age, weight, height and grade. Heavier or older divisions appear only if you explicitly consent to move up. Full categories are greyed out so you do not waste time applying.  Minors need guardian consent before registration is accepted.",
+    "url": "/docs/participant#register-for-the-right-division"
+  },
+  {
+    "title": "Participant guide \u00b7 Before the day",
+    "section": "Start here",
+    "text": "Read **Event config** for required kit, match length, venue, schedule, amenities and rest rules. Check the **Public board** for your next-up callout. Arrive in time for weigh-in; officials record your official weight and flag any out-of-class issue.",
+    "url": "/docs/participant#before-the-day"
+  },
+  {
+    "title": "Participant guide \u00b7 At the venue",
+    "section": "Start here",
+    "text": "- **Public board** \u2014 live contests, venue clock and \"next up\". - **Fight pools** \u2014 your group and scheduled opponents. - **Brackets** \u2014 progression through each round, including bronze decisions. - **Live scoreboard** \u2014 your contest with belt, club logo, moves and penalties. - **Tables & rankings** \u2014 standings, club points and medals.  If you are called to a mat, the announcer's toast flashes your",
+    "url": "/docs/participant#at-the-venue"
+  },
+  {
+    "title": "Participant guide \u00b7 Results and appeals",
+    "section": "Start here",
+    "text": "Once a bout is confirmed, the result is locked. W/L/D always show a letter as well as a colour. If you believe a result is wrong, speak to the runner \u2014 corrections are made through a recorded audit path, not by editing the board directly.",
+    "url": "/docs/participant#results-and-appeals"
+  },
+  {
+    "title": "Participant guide \u00b7 Spectators",
+    "section": "Start here",
+    "text": "You do not need an account to watch public views. Open `/public`, `/brackets`, `/tables` and `/pools` in separate tabs or screens. Every view is URL-addressable and updates live.",
+    "url": "/docs/participant#spectators"
+  },
+  {
+    "title": "Frequently asked questions",
+    "section": "Start here",
+    "text": "Offline use, categories, scoring, displays and recovery.",
+    "url": "/docs/faq"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 Frequently asked questions",
+    "section": "Start here",
+    "text": "# Frequently asked questions",
+    "url": "/docs/faq#frequently-asked-questions"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 Can I use J3 with no internet at the venue?",
+    "section": "Start here",
+    "text": "Yes. The venue server, database and web app all run on a local machine or LAN box. Phones and displays connect to it over Wi-Fi. Nothing in the normal scoring flow needs the cloud. A single SQLite file is the backup.",
+    "url": "/docs/faq#can-i-use-j3-with-no-internet-at-the-venue"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 Do I need to know federation rules?",
+    "section": "Start here",
+    "text": "No. Pick a template or accept the defaults. Every value \u2014 points, match length, penalties, categories, tie-break order, display layout \u2014 is editable in plain language before the event. Nothing is hard-coded per federation.",
+    "url": "/docs/faq#do-i-need-to-know-federation-rules"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 Can one fighter enter more than one category?",
+    "section": "Start here",
+    "text": "That depends on your rule set. Some federations allow more than one age division, others allow one age and one weight. The compatibility policy is configured in the event, not fixed in the code.",
+    "url": "/docs/faq#can-one-fighter-enter-more-than-one-category"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 What happens if a category has only two entrants?",
+    "section": "Start here",
+    "text": "J3 selects an appropriate format from your policy. Two entrants can use best of three, three use a round robin, and small or uneven pools fall back to round robin rather than producing a broken bracket.",
+    "url": "/docs/faq#what-happens-if-a-category-has-only-two-entrants"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 How are same-club meetings avoided?",
+    "section": "Start here",
+    "text": "Seeding uses controlled randomisation with a same-club separation constraint. You can override a placement by dragging a fighter; the move is recorded in the audit trail.",
+    "url": "/docs/faq#how-are-same-club-meetings-avoided"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 Who can change a score?",
+    "section": "Start here",
+    "text": "Only an official assigned to that contest, with a role that has the `fights` capability. The scorekeeper controls the board, the referee controls the clock, and a runner can override a locked result. Every change records the actor, timestamp and before/after values.",
+    "url": "/docs/faq#who-can-change-a-score"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 How do I put different views on different screens?",
+    "section": "Start here",
+    "text": "Each view has its own URL. Open it in a new tab, then drag that tab onto the second monitor or full-screen it. Use **View builder** to compose a saved layout from live widgets, then assign that template to a screen in **Display control**.",
+    "url": "/docs/faq#how-do-i-put-different-views-on-different-screens"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 Which languages are supported?",
+    "section": "Start here",
+    "text": "The shared label dictionary includes English, French, German, Spanish, Portuguese, Hindi, Punjabi, Arabic, Japanese, Korean and Mandarin. Appearance follows the system by default and can be overridden per user.",
+    "url": "/docs/faq#which-languages-are-supported"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 Can I restore a tournament after a crash?",
+    "section": "Start here",
+    "text": "Yes. SQLite runs in WAL mode and the venue file can be backed up or restored mid-event. Results are committed as they are confirmed, so a restart continues from the last committed state.",
+    "url": "/docs/faq#can-i-restore-a-tournament-after-a-crash"
+  },
+  {
+    "title": "Frequently asked questions \u00b7 Where do I find the raw API contract?",
+    "section": "Start here",
+    "text": "Use the [API reference](/docs/api), the raw [OpenAPI file](/openapi.yaml) or the [API guide](/docs/api-guide).",
+    "url": "/docs/faq#where-do-i-find-the-raw-api-contract"
+  },
+  {
+    "title": "Formats & promotion",
+    "section": "Running an event",
+    "text": "Pools, BYEs, eliminations, bronze rules and history.",
+    "url": "/docs/formats"
+  },
+  {
+    "title": "Formats & promotion \u00b7 Formats & promotion",
+    "section": "Running an event",
+    "text": "# Formats, pools & promotion  Format choice is a policy, not a hard-coded rule. J3 selects a format from the actual number of entrants and the event's constraints, then lets a moderator override it.",
+    "url": "/docs/formats#formats-promotion"
+  },
+  {
+    "title": "Formats & promotion \u00b7 Selecting a format",
+    "section": "Running an event",
+    "text": "| Entrants | Common J3 policy | |---|---| | 1 | No contest; single winner with its own ranking points | | 2 | Best of three, stop at 2\u20130 | | 3 | Round robin | | 4 | Round robin or single elimination with third-place match | | 5 | Round robin pool of five | | 6 | Two pools of three, top two cross to semis | | 7+ | Double elimination, repechage or multi-stage | | 9+/17+ | Single elimination until la",
+    "url": "/docs/formats#selecting-a-format"
+  },
+  {
+    "title": "Formats & promotion \u00b7 Round robin",
+    "section": "Running an event",
+    "text": "The circle method generates every pairing once. Odd fields receive a BYE without duplicating fixtures. Standings use the configured tie-break chain, not just wins.",
+    "url": "/docs/formats#round-robin"
+  },
+  {
+    "title": "Formats & promotion \u00b7 Pools",
+    "section": "Running an event",
+    "text": "Automated pool generation balances pool sizes, seeds by rank and stats, and uses controlled randomisation to spread clubs. Organisers set the target pool size, maximum pools and separation rules. **Regenerate balanced pools** gives a different controlled seed; moderators can drag fighters between slots.",
+    "url": "/docs/formats#pools"
+  },
+  {
+    "title": "Formats & promotion \u00b7 Elimination brackets",
+    "section": "Running an event",
+    "text": "J3 supports single elimination, true double elimination (lower winner can win gold via a reset) and consolation double (lower winner can only win bronze). The distinction is stored in the format policy so it is never ambiguous.  BYEs are allocated by seed or title. First-round club or country separation avoids early same-club meetings where the policy allows it.",
+    "url": "/docs/formats#elimination-brackets"
+  },
+  {
+    "title": "Formats & promotion \u00b7 Third place and bronze",
+    "section": "Running an event",
+    "text": "If the two losing semi-finalists have already met, J3 awards two bronze medals instead of scheduling a repeat. If they have not met, a third-place match is generated. This rule is configurable per discipline.",
+    "url": "/docs/formats#third-place-and-bronze"
+  },
+  {
+    "title": "Formats & promotion \u00b7 Promotion and history",
+    "section": "Running an event",
+    "text": "Winners, losers and draws advance according to the rule set. Each round keeps a copy of the fighter card, so the bracket shows the full path. Rematches are avoided where configured. Forfeits and no-shows rebalance the affected pool and promotion path.",
+    "url": "/docs/formats#promotion-and-history"
+  },
+  {
+    "title": "Formats & promotion \u00b7 See also",
+    "section": "Running an event",
+    "text": "- [Live scoring rules](/docs/scoring) - [Runner guide](/docs/runner) - [Tournament formats in the organiser guide](/docs/guide)",
+    "url": "/docs/formats#see-also"
+  },
+  {
+    "title": "Live scoring rules",
+    "section": "Running an event",
+    "text": "Points, holds, submissions, penalties and tie-breaks.",
+    "url": "/docs/scoring"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Live scoring rules",
+    "section": "Running an event",
+    "text": "# Live scoring rules  J3 does not hard-code one federation's rules. The values below are the defaults shipped in the generic rule set; a runner can change every one in the setup wizard.",
+    "url": "/docs/scoring#live-scoring-rules"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Score events",
+    "section": "Running an event",
+    "text": "A score event has an actor, timestamp, corner, technique, point value and audit entry. Confirmed events are committed to SQLite immediately; every visualisation reads that committed data.  Common scoring families:  | Family | Typical values | |---|---| | Ippon / Waza-ari | Ippon 3, Waza-ari 1, Shido penalty; Ippon ends the contest | | BJJ points | takedown 2, sweep 2, guard pass 3, mount/back 4, a",
+    "url": "/docs/scoring#score-events"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Holds and submissions",
+    "section": "Running an event",
+    "text": "A hold timer counts down live on the scoreboard. Reaching the configured threshold awards the configured score. A tap or verbal submission is an instant win that negates prior points and triggers promotion. Both paths require confirmation.",
+    "url": "/docs/scoring#holds-and-submissions"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Penalties",
+    "section": "Running an event",
+    "text": "Penalties use a configurable ladder:  - **yellow card** \u2014 light foul, may award an opponent point; - **red card** \u2014 serious foul or two light fouls; - **shido** \u2014 three accumulate to hansoku-make (disqualification); - **forfeit / injury / no-show** \u2014 recorded with a reason and consistent advancement rules.  Penalty badges appear on the offending fighter's side of the scoreboard, never only as a co",
+    "url": "/docs/scoring#penalties"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Clock and stoppages",
+    "section": "Running an event",
+    "text": "The venue server owns the clock. The scorekeeper starts, pauses, resumes and submits results. Paused time is visually distinct so spectators can see a referee stoppage. Golden score or overtime is a separate configured phase with its own first-point rule.",
+    "url": "/docs/scoring#clock-and-stoppages"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Best-of-N and multi-round bouts",
+    "section": "Running an event",
+    "text": "A bout can be a single contest, best of three or best of five. J3 tracks each round separately, then applies the configured series rule. The bracket keeps a copy of every fighter at each round so the full history remains visible.",
+    "url": "/docs/scoring#best-of-n-and-multi-round-bouts"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Tie-breakers",
+    "section": "Running an event",
+    "text": "Runners choose an ordered chain, for example: wins \u2192 submissions \u2192 points in winning bouts \u2192 head-to-head \u2192 fewest points conceded \u2192 fastest submission \u2192 positive play majority. The first rule that separates fighters decides the rank.",
+    "url": "/docs/scoring#tie-breakers"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Result codes",
+    "section": "Running an event",
+    "text": "Configurable outcome icons include WP/LP/DP (points), WS/LS (submission), WT/LT (technical/forfeit/DQ) plus yellow/red card badges. A result icon is always paired with text.",
+    "url": "/docs/scoring#result-codes"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Confirmation and undo",
+    "section": "Running an event",
+    "text": "No score, card or result becomes authoritative until confirmed. Undo is available per entry, attributed to the actor and visible in the audit trail. Results are locked after confirmation; corrections need an explicit, recorded path.",
+    "url": "/docs/scoring#confirmation-and-undo"
+  },
+  {
+    "title": "Displays & screens",
+    "section": "Running an event",
+    "text": "Multi-screen routes, themes, PA and custom views.",
+    "url": "/docs/displays"
+  },
+  {
+    "title": "Displays & screens \u00b7 Displays & screens",
+    "section": "Running an event",
+    "text": "# Displays & multi-screen views  Every view is a normal URL, so you can open as many as you need on separate TVs, projectors, tablets and phones. They all poll or stream committed server data and stay live.",
+    "url": "/docs/displays#displays-screens"
+  },
+  {
+    "title": "Displays & screens \u00b7 Core routes",
+    "section": "Running an event",
+    "text": "| Route | Use | |---|---| | `/public` | Spectator dashboard, clock, next-up and live results | | `/display` | Main full-screen scoreboard | | `/mat` | Scorekeeper and timekeeper console | | `/brackets` | Progression, results and history | | `/tables` | Standings, kata, medals and club points | | `/pools` | All matchups and current status | | `/control` | Assign dashboard templates to screens and t",
+    "url": "/docs/displays#core-routes"
+  },
+  {
+    "title": "Displays & screens \u00b7 What the scoreboard shows",
+    "section": "Running an event",
+    "text": "The board includes the event title, mat number, banner and logo, both fighters with large avatars, belt designation, height/weight, club logo, corner colours, active referee and judges, recent moves with points, penalties on the correct side, and the authoritative clock. W/L/D always show a glyph as well as colour.",
+    "url": "/docs/displays#what-the-scoreboard-shows"
+  },
+  {
+    "title": "Displays & screens \u00b7 Responsive layouts",
+    "section": "Running an event",
+    "text": "Layouts adapt from a 6-inch phone to an ultrawide LED wall. On narrow screens, fighter cards stack vertically and the card slides into a bottom sheet. Ultrawide screens use the full available width rather than a centred column. Avatar areas stay large enough to read across a hall.",
+    "url": "/docs/displays#responsive-layouts"
+  },
+  {
+    "title": "Displays & screens \u00b7 Themes and branding",
+    "section": "Running an event",
+    "text": "Themes are CSS custom properties plus uploaded assets: logo, banner, colours and fonts. The Street Fighter theme adds lineups, matchups and announcer energy. Club colours extracted from uploaded logos appear on cards, tables and brackets.",
+    "url": "/docs/displays#themes-and-branding"
+  },
+  {
+    "title": "Displays & screens \u00b7 PA and announcements",
+    "section": "Running an event",
+    "text": "Use **Display control** or the announce button on Event config to trigger timed toasts, flash the next competitor's card and speak text with browser TTS. Multilingual labels are available for eleven locales.",
+    "url": "/docs/displays#pa-and-announcements"
+  },
+  {
+    "title": "Displays & screens \u00b7 Custom views",
+    "section": "Running an event",
+    "text": "**View builder** lets an authorised user drag live widgets onto a canvas, resize them, save/clone/delete named layouts and open one as its own URL. Combine clock, next-up, scoreboard, standings and medal widgets for a dedicated stat screen.",
+    "url": "/docs/displays#custom-views"
+  },
+  {
+    "title": "Displays & screens \u00b7 Broadcast",
+    "section": "Running an event",
+    "text": "`/overlay` provides a transparent HTML layer for OBS or vMix with a scorebug and lower thirds. Async network video replay remains a future enhancement.",
+    "url": "/docs/displays#broadcast"
+  },
+  {
+    "title": "Developer guide",
+    "section": "Developers",
+    "text": "Architecture, commands, contracts and troubleshooting.",
+    "url": "/docs/development"
+  },
+  {
+    "title": "Developer guide \u00b7 Developer guide",
+    "section": "Developers",
+    "text": "# Developer guide  J3 is one Go binary (the venue server) plus one SvelteKit app (every screen). The binary owns SQLite and all authoritative state; the web app is a set of URL-addressable views that read and write through the API. No separate state is kept in displays.",
+    "url": "/docs/development#developer-guide"
+  },
+  {
+    "title": "Developer guide \u00b7 Stack",
+    "section": "Developers",
+    "text": "| Layer | Choice | Why | |---|---|---| | Server | Go 1.27, `modernc.org/sqlite` | Single portable binary, no CGO, one-file backup | | API | REST + SSE, OpenAPI 3.1 in `api/openapi.yaml` | Shared contract and generated TypeScript types | | Web | SvelteKit + TypeScript + Bun | One app, many display modes | | Mobile | Capacitor (Android/iOS) + PWA | Judge phones and tablets use the same UI | | Tests ",
+    "url": "/docs/development#stack"
+  },
+  {
+    "title": "Developer guide \u00b7 First run",
+    "section": "Developers",
+    "text": "```bash bun run dev          # interactive TUI: demo, QA, builds, mobile, docs bun run demo         # non-interactive: seeded venue server + UI at :5173 bun run demo:full    # same, with a complete tournament (pools, fights, kata, medals) ```  Prefer `bun run dev` for exploration. The TUI has nested menus: arrow keys move, Enter selects, `q`/Esc goes back, and number keys jump directly to an item.",
+    "url": "/docs/development#first-run"
+  },
+  {
+    "title": "Developer guide \u00b7 Project layout",
+    "section": "Developers",
+    "text": "```text api/openapi.yaml          Single source of truth for the HTTP contract cmd/j3d                   Venue server entry point internal/api              Routes, middleware, RBAC guards, SSE hub internal/auth             Sessions, bcrypt/MFA, rate limits internal/config           Tenant config snapshots and themes internal/db               SQLite migrations and queries internal/rules            ",
+    "url": "/docs/development#project-layout"
+  },
+  {
+    "title": "Developer guide \u00b7 API and generated types",
+    "section": "Developers",
+    "text": "Change the contract in `api/openapi.yaml`, then run:  ```bash bun run generate:types ```  This writes `web/src/lib/api-types.d.ts`, which is committed. CI regenerates it and fails if the checked-in file is stale. A Go test also checks that every registered route appears in the spec.  The docs site reads a generated index at `web/static/docs/operations.json`. Regenerate the reference, search index ",
+    "url": "/docs/development#api-and-generated-types"
+  },
+  {
+    "title": "Developer guide \u00b7 Adding a screen",
+    "section": "Developers",
+    "text": "1. Create `web/src/routes/<name>/+page.svelte`. Use existing `app.css` tokens rather than raw colours so white-label themes still work. 2. If the screen is role-restricted, add it to `NAV_ITEMS` in `web/src/lib/nav.ts`. Public and docs routes are allow-listed in the root layout guard. 3. Read data through `web/src/lib/api.ts`, never from a separate store. Displays must reflect the committed databa",
+    "url": "/docs/development#adding-a-screen"
+  },
+  {
+    "title": "Developer guide \u00b7 Live scoring rules",
+    "section": "Developers",
+    "text": "The server owns the clock and assigns a global order to committed events. Judge devices send idempotent mutations; a scorer must be assigned to the contest and hold the right role. Results lock after confirmation, undo is recorded, and SSE fans state out to every display. Do not add a client-side score buffer \u2014 it would break the audit trail.",
+    "url": "/docs/development#live-scoring-rules"
+  },
+  {
+    "title": "Developer guide \u00b7 Verification",
+    "section": "Developers",
+    "text": "```bash go vet ./... go test ./... -count=1 go test -race ./... bun run check                  # svelte-check bun run test                   # Vitest bun run smoke:full             # 70 API/UI assertions bun run load                   # 200 concurrent requests bun run e2e                    # Playwright + axe (run bun run e2e:install once) bun run build                  # Go build + docs sync + st",
+    "url": "/docs/development#verification"
+  },
+  {
+    "title": "Developer guide \u00b7 Troubleshooting",
+    "section": "Developers",
+    "text": "| Symptom | Check | |---|---| | Docs site shows API JSON | Vite proxy key must be `^/api/`, not `/api`; restart Vite after editing `vite.config.ts` | | `401` from a protected page | Refresh the demo session; demo identity switching mints a real bearer token | | `500` from an upload or invite | Check `kind` on categories (defaults to `combined`) and upload capability scopes | | Empty tables after a",
+    "url": "/docs/development#troubleshooting"
+  },
+  {
+    "title": "CI & releases",
+    "section": "Developers",
+    "text": "Quality gates, workflows and release process.",
+    "url": "/docs/ci"
+  },
+  {
+    "title": "CI & releases \u00b7 CI & releases",
+    "section": "Developers",
+    "text": "# CI/CD & release process",
+    "url": "/docs/ci#ci-releases"
+  },
+  {
+    "title": "CI & releases \u00b7 Branches",
+    "section": "Developers",
+    "text": "`main` is protected: all changes arrive through a pull request. Use a prefixed branch:  | Prefix | Purpose | |---|---| | `feature/` | new capability | | `bug/` | defect | | `fix/` | correction | | `chore/` | maintenance | | `perf/` | performance work | | `improv/` | UI/UX refinement | | `release/` | release preparation | | `hotfix/` | urgent production fix |  `develop` is optional integration bran",
+    "url": "/docs/ci#branches"
+  },
+  {
+    "title": "CI & releases \u00b7 Automated gates (.github/workflows/ci.yml)",
+    "section": "Developers",
+    "text": "Every push/PR runs: - **Go**: `go vet`, tests (unit/property/simulation), race detector, binary build. - **Web (Bun)**: type check, Vitest, production build. - **Smoke**: boots the real venue server and verifies 52 API/workflow/UI assertions. - **Load**: 200 concurrent requests against a running venue server. - **E2E**: Playwright journeys across every route plus axe-core WCAG A/AA scans. - **requ",
+    "url": "/docs/ci#automated-gates-github-workflows-ci-yml"
+  },
+  {
+    "title": "CI & releases \u00b7 Mobile (.github/workflows/mobile.yml)",
+    "section": "Developers",
+    "text": "- **Android**: syncs Capacitor, builds a debug APK, uploads it as a workflow artifact. - **iOS**: builds an unsigned simulator `.app` on macOS and uploads a zip artifact. A device-installable IPA is produced automatically when the `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_PROVISIONING_PROFILE`, `APPLE_TEAM_ID` and `APPLE_PROVISIONING_PROFILE_NAME` secrets are configured; otherw",
+    "url": "/docs/ci#mobile-github-workflows-mobile-yml"
+  },
+  {
+    "title": "CI & releases \u00b7 Environments (.github/workflows/deploy.yml)",
+    "section": "Developers",
+    "text": "Manual `workflow_dispatch` deploys to `development`, `staging` and `production` in order, each behind a GitHub **environment** (configure required reviewers in repository settings). Set `DEPLOY_HOST*`, `DEPLOY_USER` and `DEPLOY_PATH*` secrets to enable rsync deployment; without a host the workflow validates the bundle locally.",
+    "url": "/docs/ci#environments-github-workflows-deploy-yml"
+  },
+  {
+    "title": "CI & releases \u00b7 Releases (.github/workflows/release.yml)",
+    "section": "Developers",
+    "text": "Triggered by pushing a `v*` tag (or manual dispatch). It re-runs CI, builds mobile artifacts, packages the Go binaries (Linux, macOS, Windows), copies the static web build, and publishes everything as a GitHub release with generated notes.",
+    "url": "/docs/ci#releases-github-workflows-release-yml"
+  },
+  {
+    "title": "CI & releases \u00b7 Local rigour",
+    "section": "Developers",
+    "text": "```sh git config core.hooksPath .githooks   # enable pre-push checks bun run test                          # Go + web unit tests bun run check                         # types bun run build                         # production build bun run smoke                         # full-stack verification bun run demo                          # manual QA ```  The pre-push hook rejects badly named branches an",
+    "url": "/docs/ci#local-rigour"
+  },
+  {
+    "title": "CLI & TUI",
+    "section": "Developers",
+    "text": "Menus, demo commands, QA gates and mobile builds.",
+    "url": "/docs/cli"
+  },
+  {
+    "title": "CLI & TUI \u00b7 CLI & TUI",
+    "section": "Developers",
+    "text": "# CLI & TUI reference  `./scripts/dev.sh` is the main operator menu. It uses plain-language choices, emoji and arrow-key navigation. Press `q` or `Esc` to step back to the parent menu.",
+    "url": "/docs/cli#cli-tui"
+  },
+  {
+    "title": "CLI & TUI \u00b7 Start here",
+    "section": "Developers",
+    "text": "| Menu action | What it does | |---|---| | Run local demo | Boots the venue server and web UI with the seeded Okami tournament | | Run live executable | Builds and starts the single Go binary with full seed data | | Open docs & guides | Starts the local services if needed and opens `/docs` | | Open API explorer | Opens the live OpenAPI explorer at `/docs/api` |  You can also run `bun run docs` fro",
+    "url": "/docs/cli#start-here"
+  },
+  {
+    "title": "CLI & TUI \u00b7 QA and verification",
+    "section": "Developers",
+    "text": "| Menu action | Command | Purpose | |---|---|---| | Smoke tests | `bun run smoke` / `smoke:full` | API and UI assertion sweeps | | Browser tests | `bun run e2e` | Playwright journeys and axe accessibility scans | | Load test | `bun run load` | 200 concurrent requests | | Go tests | `go test -race ./...` | Backend unit, property and race checks | | Check workflows | `bun run check:workflows` | CI Y",
+    "url": "/docs/cli#qa-and-verification"
+  },
+  {
+    "title": "CLI & TUI \u00b7 Build and deploy",
+    "section": "Developers",
+    "text": "The **Build** menu creates a release binary and can locally verify the CI/CD script. Deployment is environment-gated: staging and production require the matching environment variables and credentials. Release artifacts include the venue binary and mobile builds.",
+    "url": "/docs/cli#build-and-deploy"
+  },
+  {
+    "title": "CLI & TUI \u00b7 Mobile",
+    "section": "Developers",
+    "text": "The **Mobile** menu prepares Capacitor projects, builds an Android APK and launches an Android Studio emulator. On this host the reliable emulator command uses `~/Android/Sdk`, the `j3-pixel-10-pro` AVD and `-gpu auto`. iOS builds require macOS and Xcode.",
+    "url": "/docs/cli#mobile"
+  },
+  {
+    "title": "CLI & TUI \u00b7 Data and reset",
+    "section": "Developers",
+    "text": "Use **Reset demo data** to restore the seeded tournament. The full seed includes 40 fighters, four clubs, kata scores, medals, pools, brackets and an audit trail. A single SQLite file is the portable backup.",
+    "url": "/docs/cli#data-and-reset"
+  },
+  {
+    "title": "CLI & TUI \u00b7 Troubleshooting",
+    "section": "Developers",
+    "text": "If the docs site shows a proxy error, confirm the API is listening on `127.0.0.1:8787` and that the Vite proxy regex forwards `^/api/`. If a page shows stale data after a reset, reload once \u2014 the client automatically retries with a fresh demo session after a 401.",
+    "url": "/docs/cli#troubleshooting"
+  },
+  {
+    "title": "API guide",
+    "section": "Reference",
+    "text": "Authentication, boundaries and worked examples.",
+    "url": "/docs/api-guide"
+  },
+  {
+    "title": "API guide \u00b7 API guide",
+    "section": "Reference",
+    "text": "# J3 API  The machine-readable contract is `api/openapi.yaml` (72 paths). Generated TypeScript types live in `web/src/lib/api-types.d.ts` and are regenerated with `bun run generate:types`. A CI test asserts that every registered route in `internal/api/server.go` appears in the spec.",
+    "url": "/docs/api-guide#api-guide"
+  },
+  {
+    "title": "API guide \u00b7 Authentication",
+    "section": "Reference",
+    "text": "By default the server requires a bearer token for every route except health checks, the public boards and registration. Tokens are server-side sessions stored in `sessions`.  ```bash # 1. Begin sign-in (password is verified against a bcrypt hash) curl -X POST http://127.0.0.1:8787/api/v1/auth/login \\ -H 'Content-Type: application/json' \\ -d '{\"email\":\"tony@okami.j3\",\"password\":\"demo\",\"provider\":\"p",
+    "url": "/docs/api-guide#authentication"
+  },
+  {
+    "title": "API guide \u00b7 Boundary model",
+    "section": "Reference",
+    "text": "- **Public**: event details, public dashboard data, belt catalogue, kata catalogue, schedules, results, medal tables, technique palette and simulation. - **Authenticated**: data explorer, account admin, permissions, check-in, imports, announcements, bracket generation and uploads. - **Per-contest**: fight mutations additionally require the caller to be assigned to that contest and to hold a role w",
+    "url": "/docs/api-guide#boundary-model"
+  },
+  {
+    "title": "API guide \u00b7 Worked examples",
+    "section": "Reference",
+    "text": "### Create a tournament  ```bash curl -X POST http://127.0.0.1:8787/api/v1/tournaments \\ -H \"Authorization: Bearer $TOKEN\" -H 'Content-Type: application/json' \\ -d '{\"name\":\"Autumn Open\",\"disciplines\":[{\"name\":\"Continuous Fighting\",\"points\":[{\"label\":\"Takedown\",\"value\":5}]}],\"categories\":[{\"name\":\"Adults\",\"kind\":\"age\",\"min\":18,\"max\":99,\"ranges\":[{\"kind\":\"weight\",\"min\":60,\"max\":90}]}],\"saveTemplate",
+    "url": "/docs/api-guide#worked-examples"
+  },
+  {
+    "title": "API guide \u00b7 Errors",
+    "section": "Reference",
+    "text": "`400` validation, `401` unauthenticated, `403` forbidden, `404` not found, `409` conflict, `500` generic with the details logged against the request ID. Raw database errors are never returned to clients.",
+    "url": "/docs/api-guide#errors"
+  },
+  {
+    "title": "API reference",
+    "section": "Reference",
+    "text": "Browse and try every endpoint from the OpenAPI contract.",
+    "url": "/docs/api"
+  },
+  {
+    "title": "GET /api/v1/demo/admin/users",
+    "section": "API reference",
+    "text": "List accounts for the runner admin panel",
+    "url": "/docs/api?path=/api/v1/demo/admin/users&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/admin/users/{id}/reset",
+    "section": "API reference",
+    "text": "Initiate a password reset for a user",
+    "url": "/docs/api?path=/api/v1/demo/admin/users/{id}/reset&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/admin/users/{id}/status",
+    "section": "API reference",
+    "text": "Lock, suspend or unlock an account",
+    "url": "/docs/api?path=/api/v1/demo/admin/users/{id}/status&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/audit",
+    "section": "API reference",
+    "text": "Accountability trail for runners and officials",
+    "url": "/docs/api?path=/api/v1/demo/audit&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/export",
+    "section": "API reference",
+    "text": "Export fights, entrants or standings as CSV",
+    "url": "/docs/api?path=/api/v1/demo/export&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/permissions",
+    "section": "API reference",
+    "text": "Per-role CRUD permissions",
+    "url": "/docs/api?path=/api/v1/demo/permissions&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/permissions",
+    "section": "API reference",
+    "text": "Set one CRUD permission for a role and resource",
+    "url": "/docs/api?path=/api/v1/demo/permissions&method=POST"
+  },
+  {
+    "title": "GET /api/v1/query",
+    "section": "API reference",
+    "text": "Allow-listed search/sort/filter/pagination over public data",
+    "url": "/docs/api?path=/api/v1/query&method=GET"
+  },
+  {
+    "title": "POST /api/v1/auth/demo",
+    "section": "API reference",
+    "text": "QA-only session for the runner or a chosen seeded user (J3_DEMO=1)",
+    "url": "/docs/api?path=/api/v1/auth/demo&method=POST"
+  },
+  {
+    "title": "POST /api/v1/auth/login",
+    "section": "API reference",
+    "text": "Begin sign-in (password, google, apple or passkey) and issue an MFA challenge",
+    "url": "/docs/api?path=/api/v1/auth/login&method=POST"
+  },
+  {
+    "title": "POST /api/v1/auth/reset",
+    "section": "API reference",
+    "text": "Complete a password reset with a token and a new password",
+    "url": "/docs/api?path=/api/v1/auth/reset&method=POST"
+  },
+  {
+    "title": "POST /api/v1/auth/reset/request",
+    "section": "API reference",
+    "text": "Request a password reset link (always returns success to avoid enumeration)",
+    "url": "/docs/api?path=/api/v1/auth/reset/request&method=POST"
+  },
+  {
+    "title": "POST /api/v1/auth/verify",
+    "section": "API reference",
+    "text": "Verify the six-digit MFA code and create a server-side session",
+    "url": "/docs/api?path=/api/v1/auth/verify&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/accounts",
+    "section": "API reference",
+    "text": "Dummy accounts for every RBAC level (QA only)",
+    "url": "/docs/api?path=/api/v1/demo/accounts&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/announcements",
+    "section": "API reference",
+    "text": "Broadcast history",
+    "url": "/docs/api?path=/api/v1/demo/announcements&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/announcements",
+    "section": "API reference",
+    "text": "Send a push/email/SMS announcement to an audience",
+    "url": "/docs/api?path=/api/v1/demo/announcements&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/attendance",
+    "section": "API reference",
+    "text": "Morning-course attendance and exclusion flags",
+    "url": "/docs/api?path=/api/v1/demo/attendance&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/auto-run",
+    "section": "API reference",
+    "text": "Generate pools, brackets and official assignments in one step",
+    "url": "/docs/api?path=/api/v1/demo/auto-run&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/belts",
+    "section": "API reference",
+    "text": "Full JJJ grade spectrum with colours for the belt picker",
+    "url": "/docs/api?path=/api/v1/demo/belts&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/brackets",
+    "section": "API reference",
+    "text": "List persisted bracket stages and slots",
+    "url": "/docs/api?path=/api/v1/demo/brackets&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/brackets/build",
+    "section": "API reference",
+    "text": "Generate pool and knockout stages from the entrants",
+    "url": "/docs/api?path=/api/v1/demo/brackets/build&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/brackets/slots/{id}/promote",
+    "section": "API reference",
+    "text": "Record a result, retain the round's history and promote the winner",
+    "url": "/docs/api?path=/api/v1/demo/brackets/slots/{id}/promote&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/entrants/{id}/checkin",
+    "section": "API reference",
+    "text": "Record weigh-in and flag out-of-class athletes",
+    "url": "/docs/api?path=/api/v1/demo/entrants/{id}/checkin&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/entrants/{id}/status",
+    "section": "API reference",
+    "text": "Record a dropout, no-show or injury",
+    "url": "/docs/api?path=/api/v1/demo/entrants/{id}/status&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/event",
+    "section": "API reference",
+    "text": "Event title, banner, logo, theme tokens and mats",
+    "url": "/docs/api?path=/api/v1/demo/event&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/event-config",
+    "section": "API reference",
+    "text": "Full organiser configuration: costs, venue, kit, rules, staff, formats",
+    "url": "/docs/api?path=/api/v1/demo/event-config&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/fights",
+    "section": "API reference",
+    "text": "Fights with fighters, clubs and scoring events (QA only)",
+    "url": "/docs/api?path=/api/v1/demo/fights&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/identities",
+    "section": "API reference",
+    "text": "QA-only non-sensitive account directory and verified session identity",
+    "url": "/docs/api?path=/api/v1/demo/identities&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/import",
+    "section": "API reference",
+    "text": "Bulk-import clubs and fighters",
+    "url": "/docs/api?path=/api/v1/demo/import&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/kata",
+    "section": "API reference",
+    "text": "Kata performances and panel scores",
+    "url": "/docs/api?path=/api/v1/demo/kata&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/kata/advance",
+    "section": "API reference",
+    "text": "Promote the top performers to the next round",
+    "url": "/docs/api?path=/api/v1/demo/kata/advance&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/kata/catalogue",
+    "section": "API reference",
+    "text": "Approved kata catalogue including weapon forms",
+    "url": "/docs/api?path=/api/v1/demo/kata/catalogue&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/kata/performances",
+    "section": "API reference",
+    "text": "Create an individual kata performance",
+    "url": "/docs/api?path=/api/v1/demo/kata/performances&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/kata/{id}/scores",
+    "section": "API reference",
+    "text": "Submit one judge's section score (0\u201310)",
+    "url": "/docs/api?path=/api/v1/demo/kata/{id}/scores&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/medals",
+    "section": "API reference",
+    "text": "Public medal table",
+    "url": "/docs/api?path=/api/v1/demo/medals&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/medals/award",
+    "section": "API reference",
+    "text": "Award gold, silver and one or two bronzes",
+    "url": "/docs/api?path=/api/v1/demo/medals/award&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/officials",
+    "section": "API reference",
+    "text": "Referees, judges and scorekeepers shown on scoreboards",
+    "url": "/docs/api?path=/api/v1/demo/officials&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/pools",
+    "section": "API reference",
+    "text": "Fight pools and members",
+    "url": "/docs/api?path=/api/v1/demo/pools&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/pools/generate",
+    "section": "API reference",
+    "text": "Generate balanced pools with club separation",
+    "url": "/docs/api?path=/api/v1/demo/pools/generate&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/readiness",
+    "section": "API reference",
+    "text": "Divisions ready for bracket generation",
+    "url": "/docs/api?path=/api/v1/demo/readiness&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/role-requests",
+    "section": "API reference",
+    "text": "Pending privileged-role requests (QA only)",
+    "url": "/docs/api?path=/api/v1/demo/role-requests&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/role-requests/{id}/approve",
+    "section": "API reference",
+    "text": "Approve a role request (QA only; runner-gated in production)",
+    "url": "/docs/api?path=/api/v1/demo/role-requests/{id}/approve&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/rotation",
+    "section": "API reference",
+    "text": "Generate a fair round-robin sparring rotation",
+    "url": "/docs/api?path=/api/v1/demo/rotation&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/schedule",
+    "section": "API reference",
+    "text": "Authoritative event timeline",
+    "url": "/docs/api?path=/api/v1/demo/schedule&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/schedule/drift",
+    "section": "API reference",
+    "text": "Shift projected times when the event runs early or late",
+    "url": "/docs/api?path=/api/v1/demo/schedule/drift&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/schedule/{id}/complete",
+    "section": "API reference",
+    "text": "Mark a schedule item complete",
+    "url": "/docs/api?path=/api/v1/demo/schedule/{id}/complete&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/simulate",
+    "section": "API reference",
+    "text": "Deterministic full-tournament simulation for QA",
+    "url": "/docs/api?path=/api/v1/demo/simulate&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/standings",
+    "section": "API reference",
+    "text": "Overall and category standings with points",
+    "url": "/docs/api?path=/api/v1/demo/standings&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/stats",
+    "section": "API reference",
+    "text": "Top moves, club medals and standings",
+    "url": "/docs/api?path=/api/v1/demo/stats&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/suggestions",
+    "section": "API reference",
+    "text": "Automatic category and format suggestions from participant data",
+    "url": "/docs/api?path=/api/v1/demo/suggestions&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/team-rankings",
+    "section": "API reference",
+    "text": "Club medal table (gold 3, silver 2, bronze 1)",
+    "url": "/docs/api?path=/api/v1/demo/team-rankings&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/techniques",
+    "section": "API reference",
+    "text": "Bilingual technique palette (English and romaji) with point values",
+    "url": "/docs/api?path=/api/v1/demo/techniques&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo/training",
+    "section": "API reference",
+    "text": "Course and sparring sessions",
+    "url": "/docs/api?path=/api/v1/demo/training&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/training",
+    "section": "API reference",
+    "text": "Add a training or sparring session",
+    "url": "/docs/api?path=/api/v1/demo/training&method=POST"
+  },
+  {
+    "title": "GET /api/v1/demo/view",
+    "section": "API reference",
+    "text": "Resolve the acting account and its capabilities (QA only)",
+    "url": "/docs/api?path=/api/v1/demo/view&method=GET"
+  },
+  {
+    "title": "GET /api/v1/demo",
+    "section": "API reference",
+    "text": "Seeded data counts for local QA",
+    "url": "/docs/api?path=/api/v1/demo&method=GET"
+  },
+  {
+    "title": "GET /api/v1/events/stream",
+    "section": "API reference",
+    "text": "Server-sent events for live scores, clocks and announcements",
+    "url": "/docs/api?path=/api/v1/events/stream&method=GET"
+  },
+  {
+    "title": "GET /api/v1/roles",
+    "section": "API reference",
+    "text": "RBAC roles and their capabilities",
+    "url": "/docs/api?path=/api/v1/roles&method=GET"
+  },
+  {
+    "title": "POST /api/v1/demo/fights/{id}/forfeit",
+    "section": "API reference",
+    "text": "Record an injury, technical forfeit or disqualification",
+    "url": "/docs/api?path=/api/v1/demo/fights/{id}/forfeit&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/fights/{id}/officials",
+    "section": "API reference",
+    "text": "Assign a referee, judge or scorekeeper to a contest",
+    "url": "/docs/api?path=/api/v1/demo/fights/{id}/officials&method=POST"
+  },
+  {
+    "title": "POST /api/v1/fights/{id}/event",
+    "section": "API reference",
+    "text": "Log a score, technique, hold or penalty (requires official assignment)",
+    "url": "/docs/api?path=/api/v1/fights/{id}/event&method=POST"
+  },
+  {
+    "title": "POST /api/v1/fights/{id}/hold",
+    "section": "API reference",
+    "text": "Start a hold/pin countdown",
+    "url": "/docs/api?path=/api/v1/fights/{id}/hold&method=POST"
+  },
+  {
+    "title": "POST /api/v1/fights/{id}/pause",
+    "section": "API reference",
+    "text": "Pause the timer (referee stoppage)",
+    "url": "/docs/api?path=/api/v1/fights/{id}/pause&method=POST"
+  },
+  {
+    "title": "POST /api/v1/fights/{id}/resume",
+    "section": "API reference",
+    "text": "Resume the timer",
+    "url": "/docs/api?path=/api/v1/fights/{id}/resume&method=POST"
+  },
+  {
+    "title": "POST /api/v1/fights/{id}/start",
+    "section": "API reference",
+    "text": "Start the authoritative timer and set a fight live",
+    "url": "/docs/api?path=/api/v1/fights/{id}/start&method=POST"
+  },
+  {
+    "title": "GET /api/v1/fights/{id}/state",
+    "section": "API reference",
+    "text": "Authoritative fight state and scored events",
+    "url": "/docs/api?path=/api/v1/fights/{id}/state&method=GET"
+  },
+  {
+    "title": "POST /api/v1/fights/{id}/submit",
+    "section": "API reference",
+    "text": "Confirm and lock the final result",
+    "url": "/docs/api?path=/api/v1/fights/{id}/submit&method=POST"
+  },
+  {
+    "title": "POST /api/v1/fights/{id}/undo",
+    "section": "API reference",
+    "text": "Undo the most recent scoring event",
+    "url": "/docs/api?path=/api/v1/fights/{id}/undo&method=POST"
+  },
+  {
+    "title": "POST /api/v1/uploads",
+    "section": "API reference",
+    "text": "Upload an avatar, logo or banner (PNG/JPG/WEBP, 5MB limit)",
+    "url": "/docs/api?path=/api/v1/uploads&method=POST"
+  },
+  {
+    "title": "POST /api/v1/signup",
+    "section": "API reference",
+    "text": "Self-service sign-up (privileged roles become pending approval)",
+    "url": "/docs/api?path=/api/v1/signup&method=POST"
+  },
+  {
+    "title": "POST /api/v1/signup/preview",
+    "section": "API reference",
+    "text": "Convert stats to metric and list compatible categories",
+    "url": "/docs/api?path=/api/v1/signup/preview&method=POST"
+  },
+  {
+    "title": "GET /",
+    "section": "API reference",
+    "text": "API index and health links",
+    "url": "/docs/api?path=/&method=GET"
+  },
+  {
+    "title": "GET /api/v1/version",
+    "section": "API reference",
+    "text": "version",
+    "url": "/docs/api?path=/api/v1/version&method=GET"
+  },
+  {
+    "title": "GET /healthz",
+    "section": "API reference",
+    "text": "Liveness probe",
+    "url": "/docs/api?path=/healthz&method=GET"
+  },
+  {
+    "title": "GET /readyz",
+    "section": "API reference",
+    "text": "Readiness probe including database",
+    "url": "/docs/api?path=/readyz&method=GET"
+  },
+  {
+    "title": "GET /api/v1/templates",
+    "section": "API reference",
+    "text": "Saved tournament setup templates",
+    "url": "/docs/api?path=/api/v1/templates&method=GET"
+  },
+  {
+    "title": "POST /api/v1/templates/{id}/import",
+    "section": "API reference",
+    "text": "Recreate an event from a saved template",
+    "url": "/docs/api?path=/api/v1/templates/{id}/import&method=POST"
+  },
+  {
+    "title": "POST /api/v1/templates/{id}/import-people",
+    "section": "API reference",
+    "text": "Import only the clubs and fighters from a template",
+    "url": "/docs/api?path=/api/v1/templates/{id}/import-people&method=POST"
+  },
+  {
+    "title": "POST /api/v1/tournaments",
+    "section": "API reference",
+    "text": "Create a full tournament from the setup wizard payload",
+    "url": "/docs/api?path=/api/v1/tournaments&method=POST"
+  }
+]

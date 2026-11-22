@@ -105,7 +105,8 @@ run_demo() {
   spinner "Installing web dependencies" bun install --cwd web
   (
     trap 'kill %1 2>/dev/null || true' EXIT INT TERM
-    go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
+    J3_CORS_ORIGIN='http://localhost:5173,http://127.0.0.1:5173' \
+      go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
     for _ in $(seq 1 80); do
       curl -fsS http://127.0.0.1:8787/healthz >/dev/null 2>&1 && break
       sleep 0.25
@@ -124,7 +125,8 @@ run_demo_full() {
   spinner "Seeding complete tournament" go run ./cmd/j3d reset -okami -full -db ./data/j3-demo.db
   (
     trap 'kill %1 2>/dev/null || true' EXIT INT TERM
-    go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
+    J3_CORS_ORIGIN='http://localhost:5173,http://127.0.0.1:5173' \
+      go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
     for _ in $(seq 1 80); do
       curl -fsS http://127.0.0.1:8787/healthz >/dev/null 2>&1 && break
       sleep 0.25
@@ -155,15 +157,36 @@ run_demo_phone() {
   echo "  📡 Venue server for phone QA: $(bash scripts/mobile.sh url)"
   echo "  ✅ Binds all interfaces with demo auth and CORS enabled."
   echo ""
-  J3_DEMO=1 J3_ADDR=0.0.0.0:8787 J3_CORS_ORIGIN='*' \
+  J3_DEMO=1 J3_ADDR=0.0.0.0:8787 J3_CORS_ORIGIN='http://localhost,capacitor://localhost' \
     go run ./cmd/j3d -addr 0.0.0.0:8787 -db ./data/j3-demo.db -seed
 }
 
-open_api_docs() {
-  (cd "$ROOT" && bun run sync:api-docs)
-  local url="http://localhost:5173/apidocs"
-  echo "  🔌 API explorer: $url"
-  if command -v xdg-open >/dev/null 2>&1; then xdg-open "$url" >/dev/null 2>&1 & fi
+open_docs() {
+  local page="${1:-/docs}"
+  if test_stub "open-docs"; then return; fi
+  bash scripts/docs.sh "$page"
+}
+
+docs_menu() {
+  while true; do
+    select_menu "Docs & developer guides" \
+      "📚 Open documentation site" "🔌 API reference (try endpoints)" \
+      "🏁 Organiser guide" "🧑‍💻 Developer guide" "🚦 CI & releases" \
+      "🎓 Hands-on guides" "🔄 Refresh generated API index" "← Back"
+    choice=$?
+    [ "$choice" -eq 255 ] && return
+    case "$choice" in
+      0) tui_log docs-home; open_docs /docs ;;
+      1) tui_log docs-api; open_docs /docs/api ;;
+      2) tui_log docs-guide; open_docs /docs/guide ;;
+      3) tui_log docs-development; open_docs /docs/development ;;
+      4) tui_log docs-ci; open_docs /docs/ci ;;
+      5) tui_log docs-guides; open_docs /guides ;;
+      6) tui_log docs-refresh; spinner "Refreshing docs index" bun run sync:api-docs ;;
+      7) tui_log docs-back; return ;;
+    esac
+    pause
+  done
 }
 
 qa_menu() {
@@ -253,7 +276,7 @@ while true; do
   select_menu "J3 developer console" \
     "▶ Run full local demo" "🚀 Run fully seeded tournament" "🧪 QA & verification  ▸" \
     "💾 Demo data  ▸" "🏗 Build & deploy  ▸" "📱 Mobile  ▸" \
-    "🔌 API explorer" "❌ Exit"
+    "📚 Docs & guides  ▸" "❌ Exit"
   choice=$?
   case "$choice" in
     0) tui_log run-demo; run_demo ;;
@@ -262,7 +285,7 @@ while true; do
     3) tui_log data-menu; data_menu ;;
     4) tui_log build-menu; build_menu ;;
     5) tui_log mobile-menu; mobile_menu ;;
-    6) tui_log api-docs; open_api_docs ;;
+    6) tui_log docs-menu; docs_menu ;;
     7) tui_log exit; echo "  👋 Bye!"; exit 0 ;;
   esac
 done

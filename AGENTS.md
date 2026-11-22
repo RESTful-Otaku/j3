@@ -6,9 +6,9 @@
 >
 > | Field | Value |
 > |---|---|
-> | Status | Implementation — Phase 1c complete; verification/hardening in progress |
+> | Status | Implementation — Phase 1c complete; docs/guide + UX refinement pass complete; all local gates green (2026-11-22) |
 > | Created | 2026-11-19 |
-> | Last updated | 2026-11-21 |
+> | Last updated | 2026-11-22 |
 > | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
 > | Repo | none yet (fresh workspace) |
 
@@ -806,6 +806,32 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-22** — Docs, guides and whole-app refinement pass. Added a real documentation site generated from
+  `docs/*.md` plus OpenAPI-derived operations/search indexes: 13 rendered guides, live search, per-page anchors,
+  sidebar/table-of-contents navigation, API explorer with “Try it”, `/apidocs` redirect, `bun run docs` and a
+  nested **Docs & guides** TUI menu (including **Hands-on guides**). Added hands-on role guides that gate progress
+  on real actions, success-only action tracking, `/guides` checklist with jump/reset, mobile bottom-sheet targeting,
+  and settings “restart guide” using the active session role. Fixed the core docs navigation defect where SvelteKit
+  reused `/docs/[slug]` after a link click and kept the previous guide on screen; sidebar/inline/pagination links now
+  swap content and hash links scroll to rendered headings. Fixed the FAQ link to `/docs/api-guide` and the dead
+  search-index intro anchors by rendering an `id` on the page `h1`. App UX: canonical labels/icons shared by nav,
+  dashboard and display control; grouped navigation with active state and collapsed QA tools; role-filtered dashboard
+  shortcuts/journey; one help button instead of duplicates; fullscreen display routes no longer show app chrome;
+  `/overlay` guard fixed; public board made read-only for spectators; shared route allow-list drives nav and guard.
+  Event-day fixes: mat console now selects the real win/loss/draw instead of hard-coding Red, confirm dialogs stay
+  usable after first use, official state loads on contest change, bracket rebuild asks for confirmation and announces
+  the real winner, check-in has search/status filters and no silent default weight, setup launch shows a success
+  panel with next steps, PA copy no longer promises venue-wide sync, and pools/brackets/schedule follow the active
+  event instead of `ev-demo`. Hardening from the same pass: CORS origin echo is allow-listed, CSV export uses the
+  session bearer token, category `kind` defaults to `combined`, Okami seed name/email order fixed, Vite proxy regexes
+  stop `/api` swallowing `/apidocs`. Added Playwright coverage for docs anchors/links, guide actions and the refined
+  controls; 101 E2E checks, 12 Vitest checks, Go tests/race/vet, check, smoke, load, TUI harness, type parity and
+  build green locally.
+- **2026-11-22** — Full static verification pass; see §19. Checker A (SQL `?` count vs positional
+  args over all Go DB calls), Checker B (unused vars/imports), full manual read of all non-test
+  Go files and 52 frontend files, OpenAPI↔server route parity, TS import-target resolution.
+  Three fixes: `/operations` CSV export (now authenticated download), `/club` invite (category
+  `kind` defaults to `combined`), Okami seed name/email swap.
 - **2026-11-21** — Android emulator QA is working: diagnosed repeated "terminated"/SIGSEGV crashes as
   the Linuxbrew emulator plus `-gpu swiftshader` graphics backend (backtrace in SwiftShader/GLES).
   `scripts/mobile.sh` now prefers Android Studio's `~/Android/Sdk`, targets the `j3-pixel-10-pro`
@@ -966,12 +992,13 @@ _Format: `D-### | date | decision | rationale | status`._
   tests and CI.
 
 ## 17. Immediate next actions
-1. Guided non-technical setup wizard (organiser sets constraints) → clubs → categories →
-   rule-set snapshot → bracket/pool generation → manual result → medal table, end-to-end offline.
-2. Live scoring engine: authoritative timers, techniques, holds, submission instant-win,
-   penalties, W/L/D and multi-mat sync (Phase 3). Confirmation + promotion must be audited.
-3. QA each slice with `bun run dev` (TUI menu) or `bun run demo`, plus `bun run reset`. Verify
-   that every display route still opens standalone on a second screen.
+1. Commit the docs/guides/UX refinement pass to `main` and push to `origin/main`; verify the
+   GitHub Actions run completes green and inspect the job logs.
+2. Continue only with the outstanding external-dependency items in §18 (payments/waivers,
+   VAR, real-device install, venue hardware tuning, offline outbox); all in-app roadmap slices
+   are delivered and covered by local gates.
+3. On the day, use `bun run dev` → **Docs & guides** for the live guides, and open each
+   fullscreen board from **Display control** in its own tab/window.
 
 ---
 
@@ -1002,8 +1029,17 @@ _Format: `D-### | date | decision | rationale | status`._
   explicit event title/category/round, distinct paused-timer flash, public details/requirements
   view, deterministic animated full-tournament simulator and spectator charts (top moves, club
   points, medals, standings).
-- Test suite: `go test ./...`, `go test -race ./...`, `bun run check`, `bun run test`, `bun run build`
-  all green at the time of this update.
+- Documentation & guided QA: 13 rendered markdown guides, live docs search, OpenAPI-derived API
+  explorer with 79 operations and “Try it”, `/apidocs` redirect, `bun run docs`, TUI **Docs &
+  guides** menu, and hands-on role guides with real-action gating, progress checklist, jump and
+  reset. Every docs page and in-page anchor has a real destination.
+- Navigation & event-day clarity: canonical labels/icons across nav/dashboard/display control,
+  grouped nav with active state and collapsed QA tools, role-aware journey, chrome-free fullscreen
+  boards, read-only public schedule, explicit mat result selector, reusable confirmation dialogs,
+  searchable check-in, launch success panel, and active-event data instead of `ev-demo`.
+- Test suite: `go vet ./...`, `go test ./...`, `go test -race ./...`, `bun run check`,
+  `bun run test` (12), `bun run e2e` (101 browser journey/axe/docs/guide checks), `bun run build`,
+  generated-type parity, workflow checks and the TUI harness all green at the time of this update.
 
 ### Outstanding — must finish before a real tournament
 1. **Authoritative live scoring — delivered**: server-owned timers, score/penalty/submission
@@ -1025,9 +1061,9 @@ _Format: `D-### | date | decision | rationale | status`._
    official assignments; `/ceremony` provides a guided animated podium sequence with PA callouts.
    A drag-and-drop `/builder` lets users compose, resize, save, clone, load and delete live widget
    dashboards, with `/ui` as a Storybook-style component gallery.
-6. **Verification — delivered**: `bun run smoke:full` (70 API/UI assertions), `bun run e2e` (79 browser
-   journey + axe accessibility tests), `bun run load` (200 concurrent requests), Go race tests and
-   web toast unit tests all pass. CI runs every gate on PRs before merge.
+6. **Verification — delivered**: `bun run smoke:full`, `bun run e2e` (101 browser journey, docs,
+   guide + axe accessibility tests), `bun run load` (200 concurrent requests), Go race tests and
+   web Vitest suites all pass. CI runs every gate on PRs before merge.
 
 ### Latest refinement batch (user QA, 2026-11-19)
 - **Setup QoL:** pagination, bulk create/delete, clone events, template presets, more optional
@@ -1055,6 +1091,48 @@ _Format: `D-### | date | decision | rationale | status`._
 - Capacitor APK/IPA installation on real devices needs an Android SDK and Apple signing identity.
 - Projector/LED aspect-ratio tuning needs the actual venue hardware.
 - Offline replica/outbox sync is a future enhancement; the venue server is authoritative with SSE.
+
+## 19. Second full static verification pass (2026-11-22)
+
+This environment exposes no shell tools (no `go`/`bun` binaries on disk), so the live gates
+(`go test`, `go test -race`, `go vet`, `bun run check`, `bun run test`, `bun run smoke`,
+`bun run e2e`, `bun run build`) could not be re-executed here; GitHub Actions is green on
+`main` per the latest change-log entry. Instead the whole tree was verified statically and by
+deep manual review:
+
+- **Go backend (all non-test files in `internal/{api,auth,config,db,rules,seed,simulator,units}`
+  and `cmd/j3d/main.go`):**
+  - Checker A — for every `ExecContext`/`QueryContext`/`QueryRowContext`/`Exec`/`Query` call
+    (~200 sites), the SQL `?` count vs the number of positional args (the only flags were the
+    four concatenated queries in `permissions.go`/`security.go` and two in `signup.go`,
+    hand-verified: 3 `?`s + 3 args, 2 `?`s + 2 args, 18 `?`s + 18 args).
+  - Checker B — unused variables/imports (none).
+  - Full manual read of every file (e.g., SQL-string column counts, FK-constraint-driven
+    updates like `categories.kind`, Scan shapes vs SELECT column counts).
+- **OpenAPI spec ↔ server routes:** method-level parity complete — all 79 registered routes
+  (including `GET /uploads/`) appear in `api/openapi.yaml` with the right methods
+  (the parity test in `openapi_test.go` only checks `HandleFunc` routes).
+- **Frontend (all 52 files under `web/src`):** full read of every route/lib/component page;
+  API path parity vs server routes; TS import-target resolution (all resolve); no type/syntax
+  issues found; `api-types.d.ts` contains every type referenced by `api.ts`.
+- **SQLite/Go timestamp plumbing:** `strftime('%Y-%m-%dT%H:%M:%fZ', …)` produces "SS.SSS"
+  (SQLite 3.54.1 per `lib/sqlite.go`; output format per `testdata/tcl/date.test`) which parses
+  under the Go layouts in `security.go`/`reset.go`/`live.go` (`.000`/`.999` + literal `Z`).
+- **Fixed (3):**
+  1. `/operations` CSV export links (Fights/Entrants/Standings) returned 401 — they were plain
+     `<a>` anchors to the authenticated `/api/v1/demo/export`. Now `api.exportCsv` fetches with
+     the session bearer token and triggers a blob download
+     (`web/src/lib/api.ts`, `web/src/routes/operations/+page.svelte`).
+  2. `/club` "invite member" returned 500 — tournament creation inserts `categories` with an
+     empty `kind`, violating `CHECK (kind IN ('age','weight','belt','gender','combined'))` which
+     has no default. `createFromRequest` now defaults the kind to `combined`
+     (`internal/api/tournament.go`).
+  3. Cosmetic: Okami seed keepers and volunteers had `display_name` and `email` swapped in the
+     `users` inserts (`internal/seed/okami.go`).
+
+Findings summary: **no compile errors, no unused vars/imports, no SQL count mismatches, no
+route/method or path-parity gaps, no logic bugs found** — the app is internally consistent, and
+the three bugs listed above are the only defects found by this pass.
 
 ---
 

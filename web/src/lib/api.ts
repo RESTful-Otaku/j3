@@ -29,6 +29,16 @@ export type DemoIdentitiesResponse = components['schemas']['DemoIdentitiesRespon
 
 const SESSION_KEY = 'j3-session';
 
+// On web this is empty, so relative URLs keep working. Native builds bake the
+// venue server URL into the bundle and load their UI from local Capacitor
+// assets, so every API path must be rewritten to that origin.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined || '').replace(/\/+$/, '');
+
+export function apiUrl(path: string): string {
+  if (!API_BASE || !path.startsWith('/')) return path;
+  return `${API_BASE}${path}`;
+}
+
 let authReady: Promise<void> | null = null;
 let authRecovery: Promise<boolean> | null = null;
 let lastAuthError = '';
@@ -57,7 +67,7 @@ async function fetchDemoSession(userId?: string): Promise<DemoSession> {
     init.headers = { 'Content-Type': 'application/json' };
     init.body = JSON.stringify({ userId });
   }
-  const response = await fetch('/api/v1/auth/demo', init);
+  const response = await fetch(apiUrl('/api/v1/auth/demo'), init);
   if (!response.ok) throw new Error(`demo sign-in failed (${response.status})`);
   return response.json() as Promise<DemoSession>;
 }
@@ -127,7 +137,7 @@ function isAuthEndpoint(url: string) {
 
 async function send(url: string, init: RequestInit | undefined, headers: Headers): Promise<Response> {
   try {
-    return await fetch(url, { ...init, headers });
+    return await fetch(apiUrl(url), { ...init, headers });
   } catch {
     throw new Error('Cannot reach the venue server — check that J3 is running');
   }
@@ -174,7 +184,7 @@ export const api = {
     getJson<{ requests: RoleRequest[] }>('/api/v1/demo/role-requests'),
   approveRoleRequest: (id: string) =>
     postJson<{ status: string }>(`/api/v1/demo/role-requests/${encodeURIComponent(id)}/approve`, {}),
-  pools: () => getJson<PoolsResponse>('/api/v1/demo/pools?eventId=ev-demo'),
+  pools: () => getJson<PoolsResponse>('/api/v1/demo/pools'),
   generatePools: (body: GeneratePoolsRequest) =>
     postJson<PoolsResponse>('/api/v1/demo/pools/generate', body),
   medals: () => getJson<{ medals: { id: string; fighterId: string; name: string; club: string; clubColour: string; kind: string }[] }>('/api/v1/demo/medals'),
@@ -189,13 +199,15 @@ export const api = {
     postJson<{ performances: KataPerformance[] }>(`/api/v1/demo/kata/${encodeURIComponent(id)}/scores`, body),
   advanceKata: (advanceCount = 8) =>
     postJson<{ advanced: number; round: number; performances: KataPerformance[] }>('/api/v1/demo/kata/advance', { advanceCount }),
-  schedule: () => getJson<{ items: ScheduleItem[] }>('/api/v1/demo/schedule?eventId=ev-demo'),
+  schedule: () => getJson<{ items: ScheduleItem[] }>('/api/v1/demo/schedule'),
   setDrift: (minutes: number) =>
     postJson<{ items: ScheduleItem[] }>('/api/v1/demo/schedule/drift', { minutes }),
   completeScheduleItem: (id: string) =>
     postJson<{ items: ScheduleItem[] }>(`/api/v1/demo/schedule/${encodeURIComponent(id)}/complete`, {}),
-  bracketStages: (eventId = 'ev-demo') =>
-    getJson<{ stages: BracketStage[] }>(`/api/v1/demo/brackets?eventId=${encodeURIComponent(eventId)}`),
+  bracketStages: (eventId?: string) =>
+    getJson<{ stages: BracketStage[] }>(
+      eventId ? `/api/v1/demo/brackets?eventId=${encodeURIComponent(eventId)}` : '/api/v1/demo/brackets',
+    ),
   buildBracket: (body: Record<string, unknown>) =>
     postJson<{ format: string; stages: BracketStage[] }>('/api/v1/demo/brackets/build', body),
   promoteSlot: (id: string, body: Record<string, unknown>) =>
@@ -213,7 +225,7 @@ export const api = {
   submitFight: (id: string, outcome: string) =>
     postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/submit`, { outcome }),
   eventStream: (onEvent: (event: { type: string; fightId?: string; payload?: FightState }) => void) => {
-    const source = new EventSource('/api/v1/events/stream');
+    const source = new EventSource(apiUrl('/api/v1/events/stream'));
     source.onmessage = (message) => {
       try { onEvent(JSON.parse(message.data)); } catch { /* ignore malformed frames */ }
     };
@@ -224,7 +236,7 @@ export const api = {
   teamRankings: () => getJson<{ teams: { club: string; gold: number; silver: number; bronze: number; points: number }[] }>('/api/v1/demo/team-rankings'),
   importEntries: (rows: Record<string, unknown>[]) =>
     postJson<{ imported: number }>('/api/v1/demo/import', { rows }),
-  exportUrl: (type: string) => `/api/v1/demo/export?type=${encodeURIComponent(type)}`,
+  exportUrl: (type: string) => apiUrl(`/api/v1/demo/export?type=${encodeURIComponent(type)}`),
   readiness: () => getJson<{ categories: { id: string; name: string; entrants: number; ready: boolean; poolCount: number }[] }>('/api/v1/demo/readiness'),
   autoRun: () => postJson<{ pools: number; stages: number; officials: number }>('/api/v1/demo/auto-run', {}),
   simulate: (seed = 42, fighters = 50) =>
@@ -253,6 +265,23 @@ export const api = {
     );
   },
   templates: () => getJson<{ templates: Template[] }>('/api/v1/templates'),
+  exportCsv: async (type: string): Promise<{ ok: boolean; error?: string }> => {
+    try {
+      const headers = await authorisedHeaders();
+      const response = await fetch(apiUrl(`/api/v1/demo/export?type=${encodeURIComponent(type)}`), { headers });
+      if (!response.ok) return { ok: false, error: `HTTP ${response.status}` };
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `j3-export-${type}-${Date.now()}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  },
   createTournament: (body: CreateTournamentRequest) =>
     postJson<CreateTournamentResponse>('/api/v1/tournaments', body),
   upload: async (file: File, kind: string, _role?: string): Promise<{ url: string; colour: string; highlight: string }> => {

@@ -15,6 +15,8 @@
   let serverStages: BracketStage[] = [];
   let pendingPromotion: DemoFight | null = null;
   let confirmOpen = false;
+  let buildConfirmOpen = false;
+  let directBuild = false;
   let dragging: { round: number; node: number; corner: 'a' | 'b' } | null = null;
   let bracketContainer: HTMLDivElement;
   let connectorPaths: string[] = [];
@@ -72,7 +74,7 @@
   async function buildOfficial(direct = false) {
     try {
       const result = await api.buildBracket({
-        eventId: 'ev-demo', format: direct ? 'Single elimination' : 'Double elimination',
+        eventId: '', format: direct ? 'Single elimination' : 'Double elimination',
         targetPoolSize: 4, maxPools: 12, seed: 42, thirdPlace: true, direct,
       });
       serverStages = result.stages;
@@ -80,6 +82,10 @@
     } catch (error) {
       notifyError(error instanceof Error ? error.message : 'Could not build bracket');
     }
+  }
+  function askBuild(direct: boolean) {
+    directBuild = direct;
+    buildConfirmOpen = true;
   }
   async function promoteOfficial(id: string, icon: string) {
     try {
@@ -168,9 +174,14 @@
     pendingPromotion = fight;
     confirmOpen = true;
   }
+  function winnerOf(fight: DemoFight) {
+    if (fight.outcome === 'draw' || !fight.outcome) return null;
+    return fight.outcome === 'win_blue' ? fight.blue : fight.red;
+  }
   function confirmPromotion() {
-    if (pendingPromotion) {
-      broadcastPA(`${pendingPromotion.red.name} advances from ${pendingPromotion.round}`, pendingPromotion.red.id, 5);
+    const winner = pendingPromotion ? winnerOf(pendingPromotion) : null;
+    if (pendingPromotion && winner) {
+      broadcastPA(`${winner.name} advances from ${pendingPromotion.round}`, winner.id, 5);
     }
   }
 
@@ -181,7 +192,7 @@
 <svelte:head><title>J3 · Brackets</title></svelte:head>
 
 <div class="display-shell">
-  <header class="display-header">
+  <header class="display-header" data-guide="brackets-header">
     <div><div class="event-mark"><span class="crest">J3</span>Brackets</div><div class="meta">Progression, results and history · live</div></div>
     <div class="tabs">
       <button class="tab" class:active={mode === 'official'} on:click={() => (mode = 'official')}>Official bracket</button>
@@ -193,8 +204,8 @@
   {#if mode === 'official'}
     <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
       <p class="muted small">Server-generated stages · results and promotion retained in every round</p>
-      <button class="btn" on:click={() => buildOfficial(true)}>⚡ Direct elimination (BYEs)</button>
-      <button class="btn primary" on:click={() => buildOfficial()}>⚙ Build official bracket</button>
+      <button class="btn" on:click={() => askBuild(true)}>⚡ Direct elimination (BYEs)</button>
+      <button class="btn primary" on:click={() => askBuild(false)}>⚙ Build official bracket</button>
     </div>
     <div class="bracket-wrap" bind:this={bracketContainer}>
       <svg class="bracket-lines" aria-hidden="true">
@@ -284,11 +295,20 @@
 </div>
 
 <ConfirmDialog
-  open={confirmOpen}
+  bind:open={confirmOpen}
   title="Announce winner?"
   message="This calls the winner to the next area. Use the Official bracket tab to record a result and promote a fighter."
   confirmLabel="Announce"
   onConfirm={confirmPromotion}
+/>
+
+<ConfirmDialog
+  bind:open={buildConfirmOpen}
+  title="Rebuild the official bracket?"
+  message="Existing stage slots and promotion history are replaced. Confirmed fight results stay in the audit trail."
+  confirmLabel="Rebuild bracket"
+  danger={true}
+  onConfirm={() => void buildOfficial(directBuild)}
 />
 
 <style>

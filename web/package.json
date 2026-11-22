@@ -14,7 +14,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
     "e2e": "playwright test",
-    "generate:types": "openapi-typescript ../api/openapi.yaml -o src/lib/api-types.d.ts"
+    "generate:types": "openapi-typescript ../api/openapi.yaml -o src/lib/api-types.d.ts",
+    "icons": "bash ../scripts/icons.sh"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

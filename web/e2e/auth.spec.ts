@@ -40,8 +40,10 @@ test('stale demo session is replaced automatically after a data reset', async ({
   await page.reload();
 
   await expect(page.getByText('Tournament journey', { exact: true })).toBeVisible();
+  await expect
+    .poll(async () => JSON.parse(await page.evaluate(() => localStorage.getItem('j3-session') || '{}')).token)
+    .not.toBe('stale-after-reset');
   const refreshed = JSON.parse(await page.evaluate(() => localStorage.getItem('j3-session') || '{}'));
-  expect(refreshed.token).not.toBe('stale-after-reset');
   // In-flight requests can each see one 401 with the stale token. Recovery is
   // shared, and no request made after it should be unauthorized.
   expect(unauthorized.length).toBeGreaterThan(0);

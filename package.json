@@ -11,6 +11,7 @@
     "seed": "go run ./cmd/j3d seed -db ./data/j3-demo.db",
     "reset": "go run ./cmd/j3d reset -db ./data/j3-demo.db",
     "generate:types": "bun run --cwd web generate:types",
+    "docs": "bash scripts/docs.sh",
     "test": "go test ./... && bun run --cwd web test",
     "smoke": "bash scripts/smoke.sh",
     "smoke:full": "SMOKE_FULL=1 bash scripts/smoke.sh",

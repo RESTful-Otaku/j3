@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { initials } from '../../../lib/format';
+  import { session, uiRole } from '../../../lib/auth';
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
 
   let event: EventDisplayInfo | null = null;
@@ -8,14 +9,25 @@
   let standings: StandingRow[] = [];
   let schedule: ScheduleItem[] = [];
   let now = new Date();
+  let canControlSchedule = false;
+
+  function syncRole() {
+    const active = session();
+    canControlSchedule = !!active && ['runner', 'official'].includes(uiRole(active.role));
+  }
 
   onMount(() => {
+    syncRole();
+    window.addEventListener('j3-session-changed', syncRole);
     const stopEvent = livePoll(api.event, 10000, (data) => (event = data));
     const stopFights = livePoll(api.fights, 2000, (data) => (fights = data.fights));
     const stopStandings = livePoll(api.standings, 5000, (data) => (standings = data.standings));
     const stopSchedule = livePoll(api.schedule, 5000, (data) => (schedule = data.items));
     const clock = setInterval(() => (now = new Date()), 1000);
-    return () => { stopEvent(); stopFights(); stopStandings(); stopSchedule(); clearInterval(clock); };
+    return () => {
+      stopEvent(); stopFights(); stopStandings(); stopSchedule(); clearInterval(clock);
+      window.removeEventListener('j3-session-changed', syncRole);
+    };
   });
 
   $: nextUp = schedule.find((item) => item.status === 'upcoming');
@@ -40,7 +52,7 @@
 <svelte:head><title>J3 · Public dashboard</title></svelte:head>
 
 <div class="display-shell">
-  <header class="display-header">
+  <header class="display-header" data-guide="public-header">
     <div class="event-mark"><span class="crest">J3</span><span>{event?.name ?? 'Tournament'}</span></div>
     <div class="meta">Live now · {live.length} contest{live.length === 1 ? '' : 's'} · {fights.length} total · updates automatically</div>
   </header>
@@ -60,11 +72,15 @@
     </div>
     <div style="display:grid; gap:8px;">
       <span class="pill">{offset === 0 ? 'On schedule' : `${offset > 0 ? '+' : ''}${offset} min drift`}</span>
-      <div style="display:flex; gap:6px;">
-        <button class="btn" on:click={() => drift(Math.max(-480, offset - 5))}>−5 min</button>
-        <button class="btn" on:click={() => drift(0)}>Reset</button>
-        <button class="btn" on:click={() => drift(Math.min(480, offset + 5))}>+5 min</button>
-      </div>
+      {#if canControlSchedule}
+        <div style="display:flex; gap:6px;">
+          <button class="btn" on:click={() => drift(Math.max(-480, offset - 5))}>−5 min</button>
+          <button class="btn" on:click={() => drift(0)}>Reset</button>
+          <button class="btn" on:click={() => drift(Math.min(480, offset + 5))}>+5 min</button>
+        </div>
+      {:else}
+        <span class="muted small">Projected times update automatically</span>
+      {/if}
     </div>
   </div>
 
@@ -78,7 +94,7 @@
             <td style="padding:8px; font-weight:700;">{formatTime(item.projectedStart)}–{formatTime(item.projectedEnd)}</td>
             <td>{item.name}</td><td>{item.area}</td>
             <td><span class="badge {item.status === 'complete' ? 'spectator' : 'fighter'}">{item.status}</span></td>
-            <td>{#if item.status !== 'complete'}<button class="tab" on:click={() => complete(item.id)}>Mark done</button>{/if}</td>
+            <td>{#if canControlSchedule && item.status !== 'complete'}<button class="tab" on:click={() => complete(item.id)}>Mark done</button>{/if}</td>
           </tr>
         {/each}
       </tbody>

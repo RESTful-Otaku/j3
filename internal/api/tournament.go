@@ -208,10 +208,17 @@ func (s *Server) createFromRequest(w http.ResponseWriter, r *http.Request, req c
 		}
 	}
 	for i, category := range req.Categories {
+		kind := category.Kind
+		if kind == "" {
+			// The categories.kind column is CHECK-constrained; a caller that
+			// omits it (e.g. a quick "invite my club member" flow) gets the
+			// permissive open-division default rather than a 500.
+			kind = "combined"
+		}
 		exec(`INSERT INTO categories
 			(id, event_id, name, kind, min_value, max_value, belt_rank_id, gender, sort_order)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			newID("cat"), eventID, category.Name, category.Kind, category.Min, category.Max,
+			newID("cat"), eventID, category.Name, kind, category.Min, category.Max,
 			nullIfEmpty(category.BeltRankID), category.Gender, i)
 		if err != nil {
 			writeError(w, err)

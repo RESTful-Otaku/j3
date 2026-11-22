@@ -10,10 +10,12 @@ export default defineConfig({
     watch: {
       ignored: ['**/android/**', '**/ios/**', '**/build/**', '**/.svelte-kit/**'],
     },
+    // `^` makes these regex matches. A plain '/api' prefix would also swallow
+    // the docs routes (/apidocs, /docs/api) and proxy them to the venue server.
     proxy: {
-      '/api': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
-      '/healthz': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
-      '/readyz': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
+      '^/api/': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
+      '^/healthz': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
+      '^/readyz': process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8787',
     },
   },
   test: {

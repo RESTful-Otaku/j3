@@ -13,7 +13,8 @@ else
   go run ./cmd/j3d reset -okami -db ./data/j3-demo.db
 fi
 trap 'kill %1 2>/dev/null || true' EXIT INT TERM
-go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
+J3_CORS_ORIGIN='http://localhost:5173,http://127.0.0.1:5173' \
+  go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed &
 for _ in $(seq 1 80); do
   curl -fsS http://127.0.0.1:8787/healthz >/dev/null 2>&1 && break
   sleep 0.25

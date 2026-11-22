@@ -91,13 +91,13 @@ func EnsureOkami(store *db.DB) error {
 	for i := 1; i <= 2; i++ {
 		add(`INSERT OR IGNORE INTO users (id, tenant_id, role, display_name, email, status)
 		     VALUES (?, 'demo-tenant','official',?,?,'active')`,
-			fmt.Sprintf("u-keeper-%d", i), fmt.Sprintf("keeper%d@okami.j3", i), fmt.Sprintf("Scorekeeper Mat %d", i))
+			fmt.Sprintf("u-keeper-%d", i), fmt.Sprintf("Scorekeeper Mat %d", i), fmt.Sprintf("keeper%d@okami.j3", i))
 	}
 	volunteerRoles := []string{"Finding participants", "Belt tying", "Directing attendees", "Awarding medals", "Mat assistant", "Course assistant", "Weigh-in helper", "General duties"}
 	for i, duty := range volunteerRoles {
 		add(`INSERT OR IGNORE INTO users (id, tenant_id, role, display_name, email, status)
 		     VALUES (?, 'demo-tenant','official',?,?,'active')`,
-			fmt.Sprintf("u-volunteer-%d", i+1), fmt.Sprintf("volunteer%d@okami.j3", i+1), fmt.Sprintf("Volunteer %d · %s", i+1, duty))
+			fmt.Sprintf("u-volunteer-%d", i+1), fmt.Sprintf("Volunteer %d · %s", i+1, duty), fmt.Sprintf("volunteer%d@okami.j3", i+1))
 	}
 
 	// 40 fighters across four clubs and four age bands, with believable belts.

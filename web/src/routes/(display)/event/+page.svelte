@@ -35,7 +35,7 @@
 <svelte:head><title>J3 · {config?.event.name ?? 'Event configuration'}</title></svelte:head>
 
 <div class="display-shell">
-  <header class="display-header">
+  <header class="display-header" data-guide="event-header">
     <div>
       <div class="event-mark"><span class="crest">J3</span>{config?.event.name ?? 'Tournament configuration'}</div>
       <div class="meta">Organiser: {config?.event.organiser ?? '—'} · {config?.event.venue ?? '—'}</div>

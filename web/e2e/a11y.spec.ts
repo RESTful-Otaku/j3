@@ -7,8 +7,9 @@ import AxeBuilder from '@axe-core/playwright';
 const routes = [
   '/', '/welcome', '/login', '/signup', '/setup', '/public', '/display', '/mat',
   '/official', '/brackets', '/tables', '/pools', '/control', '/data', '/audit',
-  '/settings', '/details', '/simulate', '/ceremony', '/builder', '/ui', '/view',
+  '/settings', '/guides', '/details', '/simulate', '/ceremony', '/builder', '/ui', '/view',
   '/operations', '/overlay', '/event', '/notifications', '/admin', '/club', '/permissions',
+  '/docs', '/docs/guide', '/docs/faq', '/docs/development', '/docs/ci', '/docs/api', '/docs/api-guide',
 ];
 
 for (const route of routes) {

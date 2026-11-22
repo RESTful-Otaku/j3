@@ -22,16 +22,16 @@ def back():
 
 # Main: run demo, full demo, then three submenus.
 action(1); action(2)
-for menu in [3, 4, 5, 6]:
+for menu in [3, 4, 5, 6, 7]:
     action(menu)
     if menu == 3:  count = 7      # QA options + back
     elif menu == 4: count = 5     # data
     elif menu == 5: count = 7     # build
-    else: count = 9              # mobile
+    elif menu == 6: count = 9     # mobile
+    else: count = 8              # docs & guides
     for i in range(1, count + 1):
         action(i)
     back()
-action(7)                         # API explorer
 action(8)                         # Exit
 open(sys.argv[1], 'w').write(seq)
 PY
@@ -43,7 +43,8 @@ data-menu data-reset data-seed data-seed-full data-run-live menu-back \
 build-menu build-exec build-release build-cicd deploy-dev deploy-staging deploy-prod menu-back \
 mobile-menu mobile-build-apk mobile-emulator mobile-install mobile-build-install mobile-url \
 run-demo-phone mobile-build-ios mobile-chromium mobile-back \
-api-docs exit"
+docs-menu docs-home docs-api docs-guide docs-development docs-ci docs-guides docs-refresh docs-back \
+exit"
 
 missing=0
 for id in $expected; do

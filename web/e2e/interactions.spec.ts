@@ -40,7 +40,7 @@ test.describe('Interactive controls', () => {
   test('pools: regenerate from a confirmation dialog', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('/pools');
-    await page.getByRole('button', { name: /Regenerate balanced pools/ }).click();
+    await page.getByRole('button', { name: /Regenerate pools/ }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Regenerate' }).click();
     await expect(page.locator('.card').first()).toBeVisible();
     expect(errors).toEqual([]);
@@ -166,7 +166,7 @@ test.describe('Interactive controls', () => {
     await page.goto('/');
     await expect(page.getByText('Tournament journey')).toBeVisible();
     await expect(page.locator('.journey a').first()).toBeVisible();
-    await expect(page.getByRole('link', { name: /Arena/ })).toBeVisible();
+    await expect(page.locator('.journey').getByRole('link', { name: /Live scoreboard/ })).toBeVisible();
   });
 
   test('operations: check-in and add a fighter', async ({ page }) => {
@@ -176,7 +176,7 @@ test.describe('Interactive controls', () => {
     await page.locator('input[aria-label^="Weight for"]').first().fill('74');
     await page.locator('input[aria-label^="Weight for"]').first().dispatchEvent('change');
     await expect(page.getByText(/checked in|out of class/).first()).toBeVisible();
-    await page.getByLabel('Name').fill('E2E Added Fighter');
+    await page.getByRole('textbox', { name: 'Name', exact: true }).fill('E2E Added Fighter');
     await page.getByRole('button', { name: 'Add fighter' }).click();
     await expect(page.getByText(/E2E Added Fighter added/).first()).toBeVisible();
     expect(errors).toEqual([]);

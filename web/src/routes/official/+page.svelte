@@ -5,6 +5,7 @@
   } from '../../lib/api';
   import { notifySuccess, notifyError } from '../../lib/toast';
   import ConfirmDialog from '../../lib/components/ConfirmDialog.svelte';
+  import { guideAction } from '../../lib/guide';
 
   type Technique = { id: string; english: string; romaji: string; points: number; kind: string };
   let fights: DemoFight[] = [];
@@ -35,15 +36,25 @@
   });
 
   $: selectedFight = fights.find((fight) => fight.id === selected);
+  let loadedFor = '';
+  $: if (selected && selected !== loadedFor) {
+    loadedFor = selected;
+    state = null;
+    void api.fightState(selected).then((next) => (state = next)).catch(() => {});
+  }
   $: filtered = techniques.filter((technique) =>
     `${technique.english} ${technique.romaji}`.toLowerCase().includes(search.toLowerCase()));
 
   function ask(item: Pending) { pending = item; confirmOpen = true; }
   async function run() {
     if (!pending) return;
+    const kind = pending.kind;
     try {
       await pending.action();
       notifySuccess(`Confirmed: ${pending.label}`);
+      if (kind === 'event') guideAction('official-entry');
+      if (kind === 'result' || kind === 'submission') guideAction('official-result');
+      if (kind === 'kata') guideAction('kata-score');
     } catch (error) {
       notifyError(error instanceof Error ? error.message : 'Could not record action');
     }
@@ -59,7 +70,8 @@
     } });
   }
   function submitResult(outcome: string) {
-    ask({ kind: 'result', label: `Result: ${outcome.replaceAll('_', ' ')}`, action: async () => {
+    const label = outcome === 'win_red' ? 'Red wins' : outcome === 'win_blue' ? 'Blue wins' : 'Draw';
+    ask({ kind: 'result', label: `Result: ${label}`, action: async () => {
       state = await api.submitFight(selected, outcome);
     } });
   }
@@ -84,7 +96,7 @@
     <div class="brand"><a class="brand-mark" href="/" aria-label="Dashboard">J3</a><div><div class="brand-name">Official console</div><div class="brand-sub">One tap to log · confirm before it counts</div></div></div>
     <div class="tabs">
       <button class="tab" class:active={tab === 'fight'} on:click={() => (tab = 'fight')}>🥊 Fight</button>
-      <button class="tab" class:active={tab === 'kata'} on:click={() => (tab = 'kata')}>🥋 Kata panel</button>
+      <button class="tab" data-guide="official-tab-kata" class:active={tab === 'kata'} on:click={() => (tab = 'kata')}>🥋 Kata panel</button>
     </div>
   </header>
 
@@ -93,7 +105,7 @@
       <div class="card">
         <div class="eyebrow">1 · Select contest</div>
         <h2>{selectedFight?.mat ?? 'Mat'} · {selectedFight?.round ?? ''}</h2>
-        <select class="tab" style="width:100%; color:var(--brand-ink);" bind:value={selected} aria-label="Select contest">
+        <select class="tab" data-guide="official-contest-select" style="width:100%; color:var(--brand-ink);" bind:value={selected} aria-label="Select contest" on:change={() => guideAction('official-contest-selected')}>
           {#each fights as fight (fight.id)}<option value={fight.id}>{fight.mat} · {fight.red.name} vs {fight.blue.name}</option>{/each}
         </select>
         {#if selectedFight}
@@ -114,13 +126,13 @@
         <div class="eyebrow">2 · Whose point?</div>
         <h2>Active corner</h2>
         <div class="corner-picker">
-          <button class="corner-btn red" class:active={corner === 'red'} on:click={() => (corner = 'red')}>🔴 RED<br />{selectedFight?.red.name ?? ''}</button>
-          <button class="corner-btn blue" class:active={corner === 'blue'} on:click={() => (corner = 'blue')}>🔵 BLUE<br />{selectedFight?.blue.name ?? ''}</button>
+          <button class="corner-btn red" data-guide="official-corner-red" class:active={corner === 'red'} on:click={() => { corner = 'red'; guideAction('official-corner'); }}>🔴 RED<br />{selectedFight?.red.name ?? ''}</button>
+          <button class="corner-btn blue" class:active={corner === 'blue'} on:click={() => { corner = 'blue'; guideAction('official-corner'); }}>🔵 BLUE<br />{selectedFight?.blue.name ?? ''}</button>
         </div>
         <input class="tab" style="width:100%; color:var(--brand-ink); margin-top:12px;" placeholder="Search technique / romaji…" bind:value={search} />
         <div class="tech-grid">
-          {#each filtered as technique (technique.id)}
-            <button class="tech" class:penalty={technique.kind === 'penalty'} on:click={() => logTechnique(technique)}>
+          {#each filtered as technique, techniqueIndex (technique.id)}
+            <button class="tech" data-guide={techniqueIndex === 0 ? 'official-tech-button' : undefined} class:penalty={technique.kind === 'penalty'} on:click={() => logTechnique(technique)}>
               <strong>{technique.english}</strong><span class="muted">{technique.romaji}</span>
               <span class="points">{technique.kind === 'submission' ? 'WIN' : technique.kind === 'penalty' ? 'CARD' : `+${technique.points}`}</span>
             </button>
@@ -132,7 +144,7 @@
         <div class="eyebrow">3 · Finish & override</div>
         <h2>Confirm outcome</h2>
         <div class="action-row">
-          <button class="btn" on:click={() => submitResult('win_red')}>Red wins</button>
+          <button class="btn" data-guide="official-result-win-red" on:click={() => submitResult('win_red')}>Red wins</button>
           <button class="btn" on:click={() => submitResult('win_blue')}>Blue wins</button>
           <button class="btn" on:click={() => submitResult('draw')}>Draw</button>
         </div>
@@ -174,7 +186,7 @@
 </div>
 
 <ConfirmDialog
-  open={confirmOpen}
+  bind:open={confirmOpen}
   title="Confirm this entry?"
   message={pending?.label ?? ''}
   confirmLabel="Confirm & log"

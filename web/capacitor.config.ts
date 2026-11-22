@@ -1,18 +1,15 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-// J3_SERVER_URL is baked into the native app at sync time. Set it to the LAN
-// address of the machine running `bun run demo:phone` (for example
-// http://192.168.1.10:8787). When unset the app uses the bundled static UI and
-// talks to relative API paths, which is only useful for UI-only QA.
-const serverURL = process.env.J3_SERVER_URL || '';
-
+// The native WebView always loads the bundled Svelte app. The venue server URL
+// is baked into the JS bundle as VITE_API_BASE_URL at build time (see
+// scripts/mobile.sh), so API calls reach the LAN server without making the
+// WebView navigate away from local assets.
 const config: CapacitorConfig = {
   appId: 'com.j3.tournaments',
   appName: 'J3',
   webDir: 'build',
   server: {
     androidScheme: 'http',
-    ...(serverURL ? { url: serverURL, cleartext: true, allowNavigation: ['*'] } : {}),
   },
 };
 

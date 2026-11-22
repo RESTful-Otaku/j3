@@ -41,7 +41,7 @@ build_apk() {
   if [ -n "$server_url" ]; then
     echo "📡 Baking venue URL: $server_url"
   fi
-  J3_SERVER_URL="$server_url" bun run --cwd web build >/dev/null || return 1
+  VITE_API_BASE_URL="$server_url" bun run --cwd web build >/dev/null || return 1
   (cd web && bunx cap sync android) >/dev/null || return 1
   (cd web/android && ./gradlew assembleDebug --no-daemon) || return 1
   mkdir -p artifacts

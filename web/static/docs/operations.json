@@ -1,0 +1,1135 @@
+[
+  {
+    "group": "Administration",
+    "method": "GET",
+    "path": "/api/v1/demo/admin/users",
+    "operationId": "adminUsers",
+    "title": "List accounts for the runner admin panel",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Administration",
+    "method": "POST",
+    "path": "/api/v1/demo/admin/users/{id}/reset",
+    "operationId": "resetPassword",
+    "title": "Initiate a password reset for a user",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Administration",
+    "method": "POST",
+    "path": "/api/v1/demo/admin/users/{id}/status",
+    "operationId": "setUserStatus",
+    "title": "Lock, suspend or unlock an account",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Administration",
+    "method": "GET",
+    "path": "/api/v1/demo/audit",
+    "operationId": "auditLog",
+    "title": "Accountability trail for runners and officials",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "actor",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "text"
+      },
+      {
+        "name": "action",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "text"
+      },
+      {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": 0
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Administration",
+    "method": "GET",
+    "path": "/api/v1/demo/export",
+    "operationId": "exportCSV",
+    "title": "Export fights, entrants or standings as CSV",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "type",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "fights"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Administration",
+    "method": "GET",
+    "path": "/api/v1/demo/permissions",
+    "operationId": "permissions",
+    "title": "Per-role CRUD permissions",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Administration",
+    "method": "POST",
+    "path": "/api/v1/demo/permissions",
+    "operationId": "updatePermission",
+    "title": "Set one CRUD permission for a role and resource",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Administration",
+    "method": "GET",
+    "path": "/api/v1/query",
+    "operationId": "query",
+    "title": "Allow-listed search/sort/filter/pagination over public data",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "table",
+        "in": "query",
+        "required": true,
+        "description": "",
+        "value": "fighters"
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "text"
+      },
+      {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "text"
+      },
+      {
+        "name": "order",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "asc"
+      },
+      {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": 0
+      },
+      {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": 0
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Authentication",
+    "method": "POST",
+    "path": "/api/v1/auth/demo",
+    "operationId": "demoLogin",
+    "title": "QA-only session for the runner or a chosen seeded user (J3_DEMO=1)",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": "{\n  \"userId\": \"text\"\n}"
+  },
+  {
+    "group": "Authentication",
+    "method": "POST",
+    "path": "/api/v1/auth/login",
+    "operationId": "login",
+    "title": "Begin sign-in (password, google, apple or passkey) and issue an MFA challenge",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": "{\n  \"email\": \"fighter@example.com\",\n  \"password\": \"text\",\n  \"provider\": \"password\"\n}"
+  },
+  {
+    "group": "Authentication",
+    "method": "POST",
+    "path": "/api/v1/auth/reset",
+    "operationId": "completeReset",
+    "title": "Complete a password reset with a token and a new password",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Authentication",
+    "method": "POST",
+    "path": "/api/v1/auth/reset/request",
+    "operationId": "requestReset",
+    "title": "Request a password reset link (always returns success to avoid enumeration)",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Authentication",
+    "method": "POST",
+    "path": "/api/v1/auth/verify",
+    "operationId": "verifyLogin",
+    "title": "Verify the six-digit MFA code and create a server-side session",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": "{\n  \"email\": \"text\",\n  \"code\": \"text\"\n}"
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/accounts",
+    "operationId": "demoAccounts",
+    "title": "Dummy accounts for every RBAC level (QA only)",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/announcements",
+    "operationId": "listAnnouncements",
+    "title": "Broadcast history",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/announcements",
+    "operationId": "sendAnnouncement",
+    "title": "Send a push/email/SMS announcement to an audience",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/attendance",
+    "operationId": "attendance",
+    "title": "Morning-course attendance and exclusion flags",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/auto-run",
+    "operationId": "autoRun",
+    "title": "Generate pools, brackets and official assignments in one step",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/belts",
+    "operationId": "belts",
+    "title": "Full JJJ grade spectrum with colours for the belt picker",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/brackets",
+    "operationId": "listBrackets",
+    "title": "List persisted bracket stages and slots",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/brackets/build",
+    "operationId": "buildBracket",
+    "title": "Generate pool and knockout stages from the entrants",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/brackets/slots/{id}/promote",
+    "operationId": "promoteSlot",
+    "title": "Record a result, retain the round's history and promote the winner",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/entrants/{id}/checkin",
+    "operationId": "checkIn",
+    "title": "Record weigh-in and flag out-of-class athletes",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/entrants/{id}/status",
+    "operationId": "entrantStatus",
+    "title": "Record a dropout, no-show or injury",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/event",
+    "operationId": "eventDisplay",
+    "title": "Event title, banner, logo, theme tokens and mats",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/event-config",
+    "operationId": "eventConfig",
+    "title": "Full organiser configuration: costs, venue, kit, rules, staff, formats",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/fights",
+    "operationId": "demoFights",
+    "title": "Fights with fighters, clubs and scoring events (QA only)",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/identities",
+    "operationId": "demoIdentities",
+    "title": "QA-only non-sensitive account directory and verified session identity",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/import",
+    "operationId": "importEntries",
+    "title": "Bulk-import clubs and fighters",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/kata",
+    "operationId": "listKata",
+    "title": "Kata performances and panel scores",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/kata/advance",
+    "operationId": "advanceKata",
+    "title": "Promote the top performers to the next round",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/kata/catalogue",
+    "operationId": "kataCatalogue",
+    "title": "Approved kata catalogue including weapon forms",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/kata/performances",
+    "operationId": "createKataPerformance",
+    "title": "Create an individual kata performance",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/kata/{id}/scores",
+    "operationId": "submitKataScore",
+    "title": "Submit one judge's section score (0\u201310)",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/medals",
+    "operationId": "listMedals",
+    "title": "Public medal table",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/medals/award",
+    "operationId": "awardMedals",
+    "title": "Award gold, silver and one or two bronzes",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/officials",
+    "operationId": "displayOfficials",
+    "title": "Referees, judges and scorekeepers shown on scoreboards",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "fightId",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/pools",
+    "operationId": "listPools",
+    "title": "Fight pools and members",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/pools/generate",
+    "operationId": "generatePools",
+    "title": "Generate balanced pools with club separation",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/readiness",
+    "operationId": "readiness",
+    "title": "Divisions ready for bracket generation",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/role-requests",
+    "operationId": "roleRequests",
+    "title": "Pending privileged-role requests (QA only)",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/role-requests/{id}/approve",
+    "operationId": "approveRoleRequest",
+    "title": "Approve a role request (QA only; runner-gated in production)",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/rotation",
+    "operationId": "buildRotation",
+    "title": "Generate a fair round-robin sparring rotation",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/schedule",
+    "operationId": "listSchedule",
+    "title": "Authoritative event timeline",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/schedule/drift",
+    "operationId": "setDrift",
+    "title": "Shift projected times when the event runs early or late",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/schedule/{id}/complete",
+    "operationId": "completeScheduleItem",
+    "title": "Mark a schedule item complete",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/simulate",
+    "operationId": "simulate",
+    "title": "Deterministic full-tournament simulation for QA",
+    "description": "",
+    "auth": false,
+    "parameters": [
+      {
+        "name": "seed",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": 0
+      },
+      {
+        "name": "fighters",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": 0
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/standings",
+    "operationId": "standings",
+    "title": "Overall and category standings with points",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/stats",
+    "operationId": "stats",
+    "title": "Top moves, club medals and standings",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/suggestions",
+    "operationId": "suggestions",
+    "title": "Automatic category and format suggestions from participant data",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/team-rankings",
+    "operationId": "teamRankings",
+    "title": "Club medal table (gold 3, silver 2, bronze 1)",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/techniques",
+    "operationId": "techniques",
+    "title": "Bilingual technique palette (English and romaji) with point values",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/training",
+    "operationId": "listTraining",
+    "title": "Course and sparring sessions",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/training",
+    "operationId": "createTraining",
+    "title": "Add a training or sparring session",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
+    "path": "/api/v1/demo/view",
+    "operationId": "demoView",
+    "title": "Resolve the acting account and its capabilities (QA only)",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "actor",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "text"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Events & displays",
+    "method": "GET",
+    "path": "/api/v1/demo",
+    "operationId": "demo",
+    "title": "Seeded data counts for local QA",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Events & displays",
+    "method": "GET",
+    "path": "/api/v1/events/stream",
+    "operationId": "eventStream",
+    "title": "Server-sent events for live scores, clocks and announcements",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Events & displays",
+    "method": "GET",
+    "path": "/api/v1/roles",
+    "operationId": "roles",
+    "title": "RBAC roles and their capabilities",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/demo/fights/{id}/forfeit",
+    "operationId": "forfeitFight",
+    "title": "Record an injury, technical forfeit or disqualification",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/demo/fights/{id}/officials",
+    "operationId": "assignOfficial",
+    "title": "Assign a referee, judge or scorekeeper to a contest",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/fights/{id}/event",
+    "operationId": "addFightEvent",
+    "title": "Log a score, technique, hold or penalty (requires official assignment)",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": "{\n  \"corner\": \"red\",\n  \"kind\": \"score\",\n  \"points\": 0,\n  \"technique\": \"text\",\n  \"card\": \"yellow\"\n}"
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/fights/{id}/hold",
+    "operationId": "startHold",
+    "title": "Start a hold/pin countdown",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/fights/{id}/pause",
+    "operationId": "pauseFight",
+    "title": "Pause the timer (referee stoppage)",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/fights/{id}/resume",
+    "operationId": "resumeFight",
+    "title": "Resume the timer",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/fights/{id}/start",
+    "operationId": "startFight",
+    "title": "Start the authoritative timer and set a fight live",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "GET",
+    "path": "/api/v1/fights/{id}/state",
+    "operationId": "fightState",
+    "title": "Authoritative fight state and scored events",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/fights/{id}/submit",
+    "operationId": "submitFight",
+    "title": "Confirm and lock the final result",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/fights/{id}/undo",
+    "operationId": "undoFightEvent",
+    "title": "Undo the most recent scoring event",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Media uploads",
+    "method": "POST",
+    "path": "/api/v1/uploads",
+    "operationId": "upload",
+    "title": "Upload an avatar, logo or banner (PNG/JPG/WEBP, 5MB limit)",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Registration",
+    "method": "POST",
+    "path": "/api/v1/signup",
+    "operationId": "signup",
+    "title": "Self-service sign-up (privileged roles become pending approval)",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": "{\n  \"name\": \"text\",\n  \"email\": \"fighter@example.com\",\n  \"password\": \"text\",\n  \"phone\": \"text\",\n  \"dateOfBirth\": \"2026-11-22\",\n  \"unitSystem\": \"metric\",\n  \"heightCm\": 0,\n  \"weightKg\": 0,\n  \"heightFt\": 0,\n  \"heightIn\": 0,\n  \"weightLb\": 0,\n  \"beltRankId\": \"text\",\n  \"customBeltLabel\": \"text\",\n  \"customBeltColour\": \"text\",\n  \"guardianName\": \"text\",\n  \"guardianContact\": \"text\",\n  \"guardianConsent\": false,\n  \"gender\": \"male\",\n  \"accountType\": \"tournament_runner\",\n  \"clubId\": \"text\",\n  \"categoryIds\": [\n    \"text\"\n  ],\n  \"consentMoveUp\": false\n}"
+  },
+  {
+    "group": "Registration",
+    "method": "POST",
+    "path": "/api/v1/signup/preview",
+    "operationId": "signupPreview",
+    "title": "Convert stats to metric and list compatible categories",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": "{\n  \"name\": \"text\",\n  \"email\": \"fighter@example.com\",\n  \"password\": \"text\",\n  \"phone\": \"text\",\n  \"dateOfBirth\": \"2026-11-22\",\n  \"unitSystem\": \"metric\",\n  \"heightCm\": 0,\n  \"weightKg\": 0,\n  \"heightFt\": 0,\n  \"heightIn\": 0,\n  \"weightLb\": 0,\n  \"beltRankId\": \"text\",\n  \"customBeltLabel\": \"text\",\n  \"customBeltColour\": \"text\",\n  \"guardianName\": \"text\",\n  \"guardianContact\": \"text\",\n  \"guardianConsent\": false,\n  \"gender\": \"male\",\n  \"accountType\": \"tournament_runner\",\n  \"clubId\": \"text\",\n  \"categoryIds\": [\n    \"text\"\n  ],\n  \"consentMoveUp\": false\n}"
+  },
+  {
+    "group": "Service",
+    "method": "GET",
+    "path": "/",
+    "operationId": "root",
+    "title": "API index and health links",
+    "description": "",
+    "auth": false,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Service",
+    "method": "GET",
+    "path": "/api/v1/version",
+    "operationId": "version",
+    "title": "version",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Service",
+    "method": "GET",
+    "path": "/healthz",
+    "operationId": "healthz",
+    "title": "Liveness probe",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Service",
+    "method": "GET",
+    "path": "/readyz",
+    "operationId": "readyz",
+    "title": "Readiness probe including database",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Setup & templates",
+    "method": "GET",
+    "path": "/api/v1/templates",
+    "operationId": "templates",
+    "title": "Saved tournament setup templates",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Setup & templates",
+    "method": "POST",
+    "path": "/api/v1/templates/{id}/import",
+    "operationId": "importTemplate",
+    "title": "Recreate an event from a saved template",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Setup & templates",
+    "method": "POST",
+    "path": "/api/v1/templates/{id}/import-people",
+    "operationId": "importPeople",
+    "title": "Import only the clubs and fighters from a template",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Setup & templates",
+    "method": "POST",
+    "path": "/api/v1/tournaments",
+    "operationId": "createTournament",
+    "title": "Create a full tournament from the setup wizard payload",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": "{\n  \"name\": \"text\",\n  \"title\": \"text\",\n  \"venue\": \"text\",\n  \"startDate\": \"text\",\n  \"endDate\": \"text\",\n  \"theme\": \"text\",\n  \"templateName\": \"text\",\n  \"saveTemplate\": false,\n  \"logoPath\": \"text\",\n  \"bannerPath\": \"text\",\n  \"disciplines\": [\n    {\n      \"name\": null,\n      \"title\": null,\n      \"style\": null,\n      \"scoring\": null,\n      \"matchSeconds\": null,\n      \"rounds\": null,\n      \"requirements\": null,\n      \"points\": null\n    }\n  ],\n  \"categories\": [\n    {\n      \"name\": null,\n      \"kind\": null,\n      \"gender\": null,\n      \"min\": null,\n      \"max\": null,\n      \"beltRankId\": null,\n      \"ranges\": null\n    }\n  ],\n  \"constraints\": {\n    \"cap\": 0,\n    \"maxPools\": 0,\n    \"autoPlace\": false,\n    \"separateClubs\": false,\n    \"genderPolicy\": \"text\"\n  },\n  \"invites\": [\n    {\n      \"email\": null,\n      \"phone\": null,\n      \"role\": null,\n      \"clubName\": null\n    }\n  ],\n  \"clubs\": [\n    {\n      \"name\": \"text\",\n      \"colour\": \"text\"\n    }\n  ],\n  \"fighters\": [\n    {\n      \"name\": \"text\",\n      \"club\": \"text\",\n      \"beltRankId\": \"text\",\n      \"weightKg\": 0,\n      \"dob\": \"text\",\n      \"gender\": \"text\"\n    }\n  ]\n}"
+  }
+]

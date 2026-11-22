@@ -1,18 +1,23 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { afterNavigate } from '$app/navigation';
   import { api, type DemoIdentity } from '../api';
   import { landingForRole, session, switchDemoUser, uiRole } from '../auth';
-  import { currentRole, itemsForRole, type Role } from '../nav';
+  import { currentRole, itemsForRole, NAV_GROUPS, type NavItem, type Role } from '../nav';
 
   let expanded = false;
   let mobileOpen = false;
   let role: Role = 'runner';
-  let items: ReturnType<typeof itemsForRole> = [];
+  let items: NavItem[] = [];
   let isMobile = false;
   let identities: DemoIdentity[] = [];
   let identityId = '';
   let switching = false;
   let switchError = '';
+  let qaOpen = false;
+  let activePath = '';
+
+  afterNavigate(() => { activePath = window.location.pathname; });
 
   function syncViewport() {
     isMobile = window.innerWidth <= 820;
@@ -37,6 +42,8 @@
 
   onMount(() => {
     expanded = localStorage.getItem('j3-nav-expanded') === '1';
+    qaOpen = localStorage.getItem('j3-nav-qa') === '1';
+    activePath = window.location.pathname;
     syncViewport();
     syncSession();
     void loadIdentities();
@@ -56,7 +63,20 @@
       localStorage.setItem('j3-nav-expanded', expanded ? '1' : '0');
     }
   }
-  function closeMobile() { mobileOpen = false; }
+  function closeMobile() {
+    mobileOpen = false;
+  }
+  function isActive(href: string) {
+    const path = activePath || window.location.pathname;
+    return href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
+  }
+  function groupItems(group: string) {
+    return items.filter((item) => item.group === group);
+  }
+  function toggleQa() {
+    qaOpen = !qaOpen;
+    localStorage.setItem('j3-nav-qa', qaOpen ? '1' : '0');
+  }
   function startTour() {
     mobileOpen = false;
     window.dispatchEvent(new CustomEvent('j3-start-tour', { detail: { role } }));
@@ -84,7 +104,7 @@
   <header class="mobile-bar">
     <a class="brand-mark" href="/" aria-label="Dashboard" on:click={closeMobile}>J3</a>
     <span class="mobile-title">J Cubed</span>
-    <button class="hamburger" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
+    <button class="hamburger" data-guide="nav-mobile-menu" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
   </header>
 
   {#if mobileOpen}
@@ -94,14 +114,29 @@
         <span class="brand-name">J Cubed</span>
         <button class="hamburger" aria-label="Close navigation" on:click={closeMobile}>✕</button>
       </div>
-      <nav>
-        {#each items as item (item.href)}
-          <a class="nav-item" href={item.href} on:click={closeMobile}><span class="icon">{item.icon}</span><span>{item.label}</span></a>
+      <nav aria-label="Main navigation">
+        {#each NAV_GROUPS as group}
+          {@const groupItemsForRole = groupItems(group)}
+          {#if groupItemsForRole.length}
+            {#if group === 'QA tools'}
+              <button class="group-toggle" aria-expanded={qaOpen} on:click={toggleQa}>{qaOpen ? '▾' : '▸'} {group}</button>
+            {:else}
+              <div class="group-label">{group}</div>
+            {/if}
+            {#if group !== 'QA tools' || qaOpen}
+              {#each groupItemsForRole as item (item.href)}
+                <a class="nav-item" class:active={isActive(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}
+                  href={item.href} on:click={closeMobile}>
+                  <span class="icon">{item.icon}</span><span>{item.label}</span>
+                </a>
+              {/each}
+            {/if}
+          {/if}
         {/each}
       </nav>
-      <button class="help-btn" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
+      <button class="help-btn" data-guide="nav-help-full" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
       <div class="role-picker">
-        <span class="muted small">QA demo · sign in as</span>
+        <span class="muted small">Demo identity · sign in as</span>
         <select
           value={identityId}
           disabled={switching || identities.length === 0}
@@ -129,21 +164,42 @@
         {expanded ? '✕' : '☰'}
       </button>
     </div>
-    <button class="help-btn" aria-label="Start guided tour" title="Guided tour" on:click={startTour}>❓{#if expanded}<span>Help & tour</span>{/if}</button>
+    <button class="help-btn" data-guide="nav-help-compact" aria-label="Start guided tour" title="Guided tour" on:click={startTour}>
+      ❓{#if expanded}<span>Help & guided tour</span>{/if}
+    </button>
 
     <nav aria-label="Main navigation">
-      {#each items as item (item.href)}
-        <a class="nav-item" class:icon-only={!expanded} href={item.href} title={item.label} aria-label={item.label}>
-          <span class="icon">{item.icon}</span>
-          {#if expanded}<span class="label">{item.label}</span>{/if}
-        </a>
+      {#each NAV_GROUPS as group}
+        {@const groupItemsForRole = groupItems(group)}
+        {#if groupItemsForRole.length}
+          {#if expanded}
+            {#if group === 'QA tools'}
+              <button class="group-toggle" aria-expanded={qaOpen} on:click={toggleQa}>{qaOpen ? '▾' : '▸'} {group}</button>
+            {:else}
+              <div class="group-label">{group}</div>
+            {/if}
+          {:else}
+            <div class="group-divider" aria-hidden="true"></div>
+          {/if}
+          {#if expanded && group === 'QA tools' && !qaOpen}
+            <!-- collapsed by default: QA tools stay out of the event-day way -->
+          {:else}
+            {#each groupItemsForRole as item (item.href)}
+              <a class="nav-item" class:icon-only={!expanded} class:active={isActive(item.href)}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+                href={item.href} title={item.label} aria-label={item.label}>
+                <span class="icon">{item.icon}</span>
+                {#if expanded}<span class="label">{item.label}</span>{/if}
+              </a>
+            {/each}
+          {/if}
+        {/if}
       {/each}
     </nav>
 
     {#if expanded}
-      <button class="help-btn" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
       <div class="role-picker">
-        <span class="muted small">QA demo · sign in as</span>
+        <span class="muted small">Demo identity · sign in as</span>
         <select
           value={identityId}
           disabled={switching || identities.length === 0}
@@ -169,22 +225,28 @@
 
 <style>
   .nav-shell {
-    position:fixed; top:0; left:0; bottom:0; z-index:800; width:228px;
+    position:fixed; top:0; left:0; bottom:0; z-index:800; width:244px;
     background:var(--brand-surface-2); border-right:1px solid var(--brand-border);
-    display:flex; flex-direction:column; padding:18px 12px; gap:14px;
+    display:flex; flex-direction:column; padding:18px 12px; gap:10px;
     box-shadow:8px 0 30px rgba(0,0,0,.25); transition:width .2s ease;
   }
   .nav-shell.collapsed { width:76px; padding:18px 10px; align-items:center; }
-  .nav-head { display:flex; align-items:center; gap:10px; min-height:46px; padding:2px 4px 14px; }
-  .nav-shell.collapsed .nav-head { flex-direction:column; gap:8px; width:100%; padding:2px 0 14px; }
+  .nav-head { display:flex; align-items:center; gap:10px; min-height:46px; padding:2px 4px 12px; }
+  .nav-shell.collapsed .nav-head { flex-direction:column; gap:8px; width:100%; padding:2px 0 10px; }
   .brand-name { font-family:var(--font-display); font-weight:800; white-space:nowrap; font-size:1.05rem; }
   .hamburger { background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-ink); border-radius:9px; padding:8px 10px; cursor:pointer; line-height:1; font-size:1rem; min-width:38px; }
   .nav-shell.collapsed .hamburger { margin:0 auto; }
-  nav { display:grid; gap:4px; overflow-y:auto; flex:1; width:100%; scrollbar-width:thin; }
-  .nav-item { display:flex; gap:12px; align-items:center; min-height:44px; padding:10px 12px; border-radius:11px; color:var(--brand-muted); text-decoration:none; font-size:.88rem; white-space:nowrap; }
-  .nav-item .icon { font-size:1.15rem; width:24px; text-align:center; flex:none; }
+  nav { display:grid; gap:2px; overflow-y:auto; flex:1; width:100%; scrollbar-width:thin; }
+  .group-label, .group-toggle { margin:12px 8px 4px; font-size:.65rem; letter-spacing:.14em; text-transform:uppercase; color:var(--brand-muted); font-weight:900; }
+  .group-toggle { width:calc(100% - 16px); text-align:left; background:none; border:0; cursor:pointer; padding:4px 0; }
+  .group-toggle:hover { color:var(--brand-ink); }
+  .group-divider { height:1px; background:var(--brand-border); margin:8px 10px 5px; }
+  .nav-item { display:flex; gap:12px; align-items:center; min-height:42px; padding:10px 12px; border-radius:11px; color:var(--brand-muted); text-decoration:none; font-size:.86rem; white-space:nowrap; border-left:3px solid transparent; }
+  .nav-item .icon { font-size:1.1rem; width:24px; text-align:center; flex:none; }
   .nav-item:hover, .nav-item:focus-visible { background:var(--brand-surface-3); color:var(--brand-ink); text-decoration:none; }
+  .nav-item.active { background:var(--brand-surface-3); color:var(--brand-ink); border-left-color:var(--brand-primary); font-weight:800; }
   .nav-item.icon-only { justify-content:center; padding:12px 0; }
+  .nav-shell.collapsed .nav-item { padding-left:9px; }
   .help-btn { display:flex; gap:10px; align-items:center; width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-ink); cursor:pointer; font-size:.86rem; }
   .nav-shell.collapsed .help-btn { justify-content:center; padding:11px 0; }
   .role-picker { display:grid; gap:7px; padding:14px 8px 4px; border-top:1px solid var(--brand-border); }
@@ -194,9 +256,10 @@
   .mobile-title { font-family:var(--font-display); font-weight:800; }
   .mobile-bar .hamburger { margin-left:auto; }
   .scrim { position:fixed; inset:0; z-index:820; background:rgba(2,6,23,.65); border:0; cursor:pointer; }
-  .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(86vw, 340px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:18px; display:flex; flex-direction:column; gap:14px; box-shadow:-16px 0 44px rgba(0,0,0,.45); animation:slide .22s ease-out; }
+  .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(86vw, 340px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:18px; display:flex; flex-direction:column; gap:12px; box-shadow:-16px 0 44px rgba(0,0,0,.45); animation:slide .22s ease-out; }
   .drawer-head { display:flex; align-items:center; justify-content:space-between; }
-  .mobile-drawer nav { display:grid; gap:4px; overflow-y:auto; flex:1; }
-  .mobile-drawer .nav-item { min-height:48px; }
+  .mobile-drawer nav { display:grid; gap:3px; overflow-y:auto; flex:1; }
+  .mobile-drawer .nav-item { min-height:46px; }
+  .mobile-drawer .group-label, .mobile-drawer .group-toggle { margin-top:10px; }
   @keyframes slide { from { transform:translateX(100%); } to { transform:none; } }
 </style>

@@ -3,6 +3,7 @@
   import { api, type CreateTournamentRequest } from '../../lib/api';
   import { notify, notifySuccess, notifyError, notifyWarning } from '../../lib/toast';
   import HelpTip from '../../lib/components/HelpTip.svelte';
+  import { guideAction } from '../../lib/guide';
 
   type ScoreValue = { id: string; label: string; value: number };
   type Discipline = {
@@ -60,6 +61,7 @@
   type Readiness = { id: string; name: string; entrants: number; ready: boolean; poolCount: number };
   let readiness: Readiness[] = [];
   let autoRunResult = '';
+  let launched: { eventId: string; name: string; pools: number; stages: number; officials: number } | null = null;
 
   onMount(() => {
     try {
@@ -104,6 +106,7 @@
       points: [{ id: uid(), label: 'Ippon', value: 3 }],
     }];
     touch();
+    guideAction('setup-discipline-added');
   }
   function removeDiscipline(index: number) {
     const removed = wizard.disciplines[index];
@@ -151,6 +154,7 @@
     bulkInvites = '';
     touch();
     notifySuccess(`${added.length} invitation${added.length === 1 ? '' : 's'} added`);
+    guideAction('setup-invites-added');
   }
   function toggleInvite(id: string) {
     selectedInvites = selectedInvites.includes(id)
@@ -215,8 +219,11 @@
       const result = await api.autoRun();
       autoRunResult = `Auto-generated ${result.pools} pools, ${result.stages} rounds and ${result.officials} official assignments`;
       notifySuccess(autoRunResult);
+      guideAction('auto-run');
+      return result;
     } catch (error) {
       notifyError(error instanceof Error ? error.message : 'Auto-generation failed');
+      return null;
     }
   }
 
@@ -247,8 +254,16 @@
     };
     try {
       const result = await api.createTournament(payload);
-      await autoRun();
+      const generated = await autoRun();
+      guideAction('tournament-created', { eventId: result.eventId });
       notifySuccess(`Tournament created · ${result.disciplineCount} disciplines · ${result.categoryCount} categories · ${result.inviteCount} invites`);
+      launched = {
+        eventId: result.eventId,
+        name: wizard.title || wizard.name,
+        pools: generated?.pools ?? 0,
+        stages: generated?.stages ?? 0,
+        officials: generated?.officials ?? 0,
+      };
       localStorage.removeItem(STORAGE_KEY);
       wizard = defaults();
       ready = false;
@@ -268,7 +283,24 @@
     <a class="btn" href="/control" target="_blank" rel="noreferrer">🖥️ Displays ↗</a>
   </header>
 
-  <div class="stepper">
+  {#if launched}
+    <div class="card launch-success" role="status">
+      <div class="eyebrow">Tournament launched</div>
+      <h2>{launched.name} is ready</h2>
+      <p class="muted small">
+        {launched.pools} pools · {launched.stages} bracket stages · {launched.officials} official assignments created.
+        The draw is live and every screen can now be opened separately.
+      </p>
+      <div class="action-row" style="margin-top:14px;">
+        <a class="btn primary" href="/control">🖥️ Open display control</a>
+        <a class="btn" href="/event">📋 Review event config</a>
+        <a class="btn" href="/pools">🧩 Review the draw</a>
+        <a class="btn" href="/operations">📥 Start check-in</a>
+      </div>
+    </div>
+  {/if}
+
+  <div class="stepper" data-guide="setup-stepper">
     {#each steps as label, index}
       <button class="step" class:active={wizard.step === index} class:done={wizard.step > index} on:click={() => go(index)}>
         <span class="num">{wizard.step > index ? '✓' : index + 1}</span><span>{label}</span>
@@ -281,16 +313,16 @@
       <div class="eyebrow">Step 1 of 5</div><h2>Event & identity <HelpTip text="Name your event and choose a theme. You can upload a logo and banner here; everything can be changed later." /></h2>
       <p class="muted small">Give the event a name and look. Pick a theme or upload your own branding.</p>
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top:18px;">
-        <label class="field">Tournament name<input bind:value={wizard.name} placeholder="Autumn Challenge 2026" /></label>
+        <label class="field" data-guide="setup-name">Tournament name<input bind:value={wizard.name} placeholder="Autumn Challenge 2026" /></label>
         <label class="field">Display title<input bind:value={wizard.title} placeholder="Main Hall · Mats 1–4" /></label>
         <label class="field">Venue<input bind:value={wizard.venue} placeholder="Riverside Sports Centre" /></label>
         <label class="field">Start date<input type="date" bind:value={wizard.startDate} /></label>
         <label class="field">End date<input type="date" bind:value={wizard.endDate} /></label>
       </div>
       <h3 style="margin-top:22px;">Theme</h3>
-      <div class="tabs" style="margin-top:10px;">
+      <div class="tabs" data-guide="setup-theme" style="margin-top:10px;">
         {#each themePresets as theme}
-          <button class="tab" class:active={wizard.theme === theme} on:click={() => { wizard.theme = theme; touch(); }}>
+          <button class="tab" class:active={wizard.theme === theme} on:click={() => { wizard.theme = theme; touch(); guideAction('setup-theme-picked'); }}>
             {theme === 'classic' ? '🔵 Classic' : theme === 'ocean' ? '🌊 Ocean' : '⚡ Street Fighter'}
           </button>
         {/each}
@@ -302,7 +334,7 @@
     {:else if wizard.step === 1}
       <div class="eyebrow">Step 2 of 5</div><h2>Disciplines & rules</h2>
       <p class="muted small">Each discipline has its own scoring, timers, rounds and requirements. Drag cards to reorder.</p>
-      <div style="display:grid; gap:12px; margin-top:18px;">
+      <div data-guide="setup-disciplines" style="display:grid; gap:12px; margin-top:18px;">
         {#each wizard.disciplines as discipline, i (discipline.id)}
           <div class="rule-card" role="listitem" aria-label="Discipline {i + 1}" on:dragover={(e) => e.preventDefault()} on:drop={(e) => drop(i, e)}>
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -389,7 +421,7 @@
     {:else if wizard.step === 3}
       <div class="eyebrow">Step 4 of 5</div><h2>People & invitations</h2>
       <p class="muted small">Invite runners, officials, club leaders and participants in bulk. Fighters can also sign up themselves.</p>
-      <label class="field" style="margin-top:18px;">Bulk invites — one per line: <code>email, phone, role, club</code>
+      <label class="field" data-guide="setup-invites" style="margin-top:18px;">Bulk invites — one per line: <code>email, phone, role, club</code>
         <textarea rows="6" bind:value={bulkInvites} placeholder="judge@club.com, +447700900001, official, Riverside&#10;fighter@club.com, , fighter, Hilltop"></textarea>
       </label>
       <button class="btn primary" style="margin-top:12px;" on:click={parseBulkInvites}>Add invitations</button>
@@ -445,7 +477,7 @@
         {#if autoRunResult}<div class="stat small" style="margin-bottom:10px; border-color:var(--win);">{autoRunResult}</div>{/if}
         <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
           <div><h3>Readiness check</h3><p class="muted small">Divisions need at least two entrants before a bracket is valid.</p></div>
-          <button class="btn primary" on:click={autoRun}>⚡ Auto-generate pools, brackets & officials</button>
+          <button class="btn" data-guide="setup-autorun" on:click={autoRun}>⚡ Auto-generate pools, brackets & officials</button>
         </div>
         <div style="display:grid; gap:8px; margin-top:12px;">
           {#each readiness as item (item.id)}
@@ -485,13 +517,14 @@
       {#if wizard.step < 4}
         <button class="btn primary" on:click={() => go(wizard.step + 1)}>Continue →</button>
       {:else}
-        <button class="btn primary" on:click={launch}>🚀 Launch tournament</button>
+        <button class="btn primary" data-guide="setup-launch" on:click={launch}>🚀 Launch tournament</button>
       {/if}
     </div>
   </div>
 </div>
 
 <style>
+  .launch-success { margin-bottom:18px; border-color:var(--win); box-shadow:0 0 0 1px var(--win) inset; }
   .stepper { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
   .step { display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:999px; border:1px solid var(--brand-border); background:var(--brand-surface-2); color:var(--brand-muted); cursor:pointer; }
   .step .num { width:22px; height:22px; border-radius:50%; display:grid; place-items:center; background:var(--brand-surface-3); font-size:.75rem; font-weight:800; }

@@ -4,33 +4,39 @@
   import ToastHost from '../lib/components/ToastHost.svelte';
   import NavShell from '../lib/components/NavShell.svelte';
   import TourOverlay from '../lib/components/TourOverlay.svelte';
-  import { goto } from '$app/navigation';
+  import { afterNavigate, goto } from '$app/navigation';
   import { syncRoleFromSession } from '../lib/auth';
-  import { currentRole, itemsForRole } from '../lib/nav';
+  import { apiUrl } from '../lib/api';
+  import { canAccessPath, currentRole, FULLSCREEN_ROUTES } from '../lib/nav';
 
   let mobile = false;
   let ready = false;
   let online = true;
+  let docsRoute = false;
+  let displayRoute = false;
+
+  function syncRoute() {
+    const path = window.location.pathname;
+    docsRoute = path.startsWith('/docs') || path === '/apidocs';
+    displayRoute = FULLSCREEN_ROUTES.has(path);
+  }
+  afterNavigate(syncRoute);
   onMount(() => {
     const sync = () => (mobile = window.innerWidth <= 820);
     sync();
-    window.addEventListener('resize', sync);
+    syncRoute();
 
     const guard = () => {
       syncRoleFromSession();
-      const path = window.location.pathname;
-      const open = new Set(['/', '/login', '/signup', '/welcome', '/public', '/event', '/brackets', '/tables', '/pools', '/details', '/simulate', '/view', '/ui']);
-      if (!open.has(path)) {
-        const allowed = itemsForRole(currentRole()).some((item) => item.href === path);
-        if (!allowed) void goto('/');
-      }
+      if (!canAccessPath(currentRole(), window.location.pathname)) void goto('/');
     };
     guard();
+    window.addEventListener('resize', sync);
     window.addEventListener('j3-session-changed', guard);
     ready = true;
     const healthTimer = setInterval(async () => {
       try {
-        const response = await fetch('/healthz', { cache: 'no-store' });
+        const response = await fetch(apiUrl('/healthz'), { cache: 'no-store' });
         online = response.ok;
       } catch {
         online = false;
@@ -44,17 +50,18 @@
   });
 </script>
 
-<NavShell />
-<div class="link-status" aria-live="polite"><span class:down={!online}></span>{online ? 'Live link' : 'Offline'}</div>
+{#if !docsRoute && !displayRoute}<NavShell />{/if}
+{#if !displayRoute}<div class="link-status" aria-live="polite"><span class:down={!online}></span>{online ? 'Live link' : 'Offline'}</div>{/if}
 <ToastHost />
-<TourOverlay />
-<div class:mobile class="app-content">
+{#if !docsRoute && !displayRoute}<TourOverlay />{/if}
+<div class:mobile class:docs={docsRoute} class:display={displayRoute} class="app-content">
   {#if ready}<slot />{/if}
 </div>
 
 <style>
-  .app-content { margin-left:228px; transition:margin-left .2s ease; min-height:100vh; }
-  .app-content.mobile { margin-left:0; padding-top:60px; }
+  .app-content { margin-left:244px; transition:margin-left .2s ease; min-height:100vh; }
+  .app-content.mobile, .app-content.docs, .app-content.display { margin-left:0; }
+  .app-content.mobile { padding-top:60px; }
   .link-status { position:fixed; right:12px; bottom:12px; z-index:700; display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:var(--brand-surface-2); border:1px solid var(--brand-border); color:var(--brand-muted); font-size:.72rem; }
   .link-status span { width:8px; height:8px; border-radius:50%; background:var(--win); }
   .link-status span.down { background:var(--loss); }

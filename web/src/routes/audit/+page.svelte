@@ -25,7 +25,7 @@
 
 <div class="shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-mark">J3</div><div><div class="brand-name">Audit trail</div><div class="brand-sub">Who · when · what · how — for runners and officials</div></div></div>
+    <div class="brand" data-guide="audit-header"><div class="brand-mark">J3</div><div><div class="brand-name">Audit trail</div><div class="brand-sub">Who · when · what · how — for runners and officials</div></div></div>
     <a class="btn" href="/control" target="_blank" rel="noreferrer">🖥️ Displays ↗</a>
   </header>
 

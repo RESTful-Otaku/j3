@@ -47,7 +47,7 @@
 
 <div class="display-shell">
   {#if loadError}<div class="card" style="margin-bottom:14px; border-color:var(--loss);">{loadError}</div>{/if}
-  <header class="display-header">
+  <header class="display-header" data-guide="tables-header">
     <div><div class="event-mark"><span class="crest">J3</span>Tables & rankings</div><div class="meta">Overall · category · medals · kata · live</div></div>
     <div class="tabs">
       {#each [['overall','Overall'],['category','Category'],['medals','Medals'],['kata','Kata panel']] as [id, label]}

@@ -1,0 +1,108 @@
+{
+  "docs": [
+    {
+      "slug": "guide",
+      "title": "Organiser guide",
+      "description": "Set up, run and finish a tournament without technical knowledge.",
+      "icon": "🏁",
+      "group": "Start here",
+      "file": "USER_GUIDE.md"
+    },
+    {
+      "slug": "runner",
+      "title": "Runner guide",
+      "description": "The full event path: create, check in, score, publish and audit.",
+      "icon": "👑",
+      "group": "Start here",
+      "file": "RUNNER_GUIDE.md"
+    },
+    {
+      "slug": "official",
+      "title": "Official guide",
+      "description": "Assignments, corner scoring, penalties, clock and kata panels.",
+      "icon": "🎯",
+      "group": "Start here",
+      "file": "OFFICIAL_GUIDE.md"
+    },
+    {
+      "slug": "participant",
+      "title": "Participant guide",
+      "description": "Registration, profile, check-in and following your contests.",
+      "icon": "🥋",
+      "group": "Start here",
+      "file": "PARTICIPANT_GUIDE.md"
+    },
+    {
+      "slug": "faq",
+      "title": "Frequently asked questions",
+      "description": "Offline use, categories, scoring, displays and recovery.",
+      "icon": "❓",
+      "group": "Start here",
+      "file": "FAQ.md"
+    },
+    {
+      "slug": "formats",
+      "title": "Formats & promotion",
+      "description": "Pools, BYEs, eliminations, bronze rules and history.",
+      "icon": "🧩",
+      "group": "Running an event",
+      "file": "FORMATS.md"
+    },
+    {
+      "slug": "scoring",
+      "title": "Live scoring rules",
+      "description": "Points, holds, submissions, penalties and tie-breaks.",
+      "icon": "🥊",
+      "group": "Running an event",
+      "file": "SCORING.md"
+    },
+    {
+      "slug": "displays",
+      "title": "Displays & screens",
+      "description": "Multi-screen routes, themes, PA and custom views.",
+      "icon": "📺",
+      "group": "Running an event",
+      "file": "DISPLAYS.md"
+    },
+    {
+      "slug": "development",
+      "title": "Developer guide",
+      "description": "Architecture, commands, contracts and troubleshooting.",
+      "icon": "🧑‍💻",
+      "group": "Developers",
+      "file": "DEVELOPMENT.md"
+    },
+    {
+      "slug": "ci",
+      "title": "CI & releases",
+      "description": "Quality gates, workflows and release process.",
+      "icon": "🚦",
+      "group": "Developers",
+      "file": "CI.md"
+    },
+    {
+      "slug": "cli",
+      "title": "CLI & TUI",
+      "description": "Menus, demo commands, QA gates and mobile builds.",
+      "icon": "⌨️",
+      "group": "Developers",
+      "file": "CLI.md"
+    },
+    {
+      "slug": "api-guide",
+      "title": "API guide",
+      "description": "Authentication, boundaries and worked examples.",
+      "icon": "📄",
+      "group": "Reference",
+      "file": "API.md"
+    },
+    {
+      "slug": "api",
+      "title": "API reference",
+      "description": "Browse and try every endpoint from the OpenAPI contract.",
+      "icon": "🔌",
+      "group": "Reference",
+      "path": "/docs/api"
+    }
+  ]
+}

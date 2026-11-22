@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { getJson, postJson } from '../../lib/api';
   import { notifySuccess, notifyError } from '../../lib/toast';
+  import { guideAction } from '../../lib/guide';
 
   type Member = { id: string; name: string; clubName: string; role: string; status: string };
   let members: Member[] = [];
@@ -21,6 +22,7 @@
     try {
       await postJson('/api/v1/tournaments', { name: `${name} entry`, disciplines: [{ name: 'club entry' }], categories: [{ name: 'club' }], invites: [{ email, role: 'fighter' }] });
       notifySuccess(`${name} invited under your club`);
+      guideAction('club-invite');
       name = ''; email = '';
     } catch (error) { notifyError(error instanceof Error ? error.message : 'Could not invite member'); }
   }
@@ -33,7 +35,7 @@
     <a class="btn" href="/public">📺 Public board</a></header>
 
   <div class="grid" style="grid-template-columns:1fr .8fr;">
-    <div class="card"><h2>Club members</h2>
+    <div class="card" data-guide="club-members"><h2>Club members</h2>
       <div style="display:grid; gap:8px; margin-top:12px; max-height:520px; overflow:auto;">
         {#each members.slice(0, 30) as member (member.id)}
           <div class="row"><strong>{member.name}</strong><span class="muted small">{member.clubName || 'Independent'} · {member.status}</span></div>
@@ -43,7 +45,7 @@
     <div class="card"><h2>Invite a member</h2>
       <label class="field">Name<input bind:value={name} /></label>
       <label class="field" style="margin-top:10px;">Email<input type="email" bind:value={email} /></label>
-      <button class="btn primary" style="margin-top:14px;" on:click={addMember}>Send club invite</button>
+      <button class="btn primary" data-guide="club-invite-submit" style="margin-top:14px;" on:click={addMember}>Send club invite</button>
       <a class="btn" style="margin-top:10px;" href="/operations">📥 Check-in & import</a>
     </div>
   </div>

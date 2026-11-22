@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api, type BeltOption } from '../../lib/api';
+  import { session, uiRole } from '../../lib/auth';
   import { LOCALES, translate } from '../../lib/i18n';
   import { notify, notifySuccess, notifyError } from '../../lib/toast';
+  import { guideAction } from '../../lib/guide';
 
   const KEY = 'j3-settings-v1';
   const locales = [
@@ -54,6 +56,7 @@
     localStorage.setItem(KEY, JSON.stringify(settings));
     applyTheme();
     notifySuccess('Account settings saved');
+    guideAction('settings-saved');
   }
 
   const mediaOptions: Record<string, string[]> = {
@@ -91,12 +94,15 @@
   </header>
 
   <div class="card" style="margin-bottom:18px;">
-    <div class="eyebrow">Getting started</div><h2>Guided walkthrough</h2>
-    <p class="muted small">Repeat the short guided tour for your account type at any time.</p>
-    <button class="btn" style="margin-top:10px;" on:click={() => window.dispatchEvent(new CustomEvent('j3-start-tour', { detail: { role: settings.accountRole === 'tournament_runner' ? 'runner' : settings.accountRole === 'official' ? 'official' : settings.accountRole === 'club_leader' ? 'club_leader' : 'fighter' } }))}>▶ Restart guided tour</button>
+    <div class="eyebrow">Getting started</div><h2>Hands-on guides</h2>
+    <p class="muted small">Learn by doing: create a small tournament, run a mat, score a contest or follow your own fights. Track progress, jump to a step or reset it all.</p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+      <a class="btn primary" href="/guides">📊 View progress & checklist</a>
+      <button class="btn" on:click={() => window.dispatchEvent(new CustomEvent('j3-start-tour', { detail: { role: uiRole(session()?.role ?? settings.accountRole) } }))}>▶ Restart guide</button>
+    </div>
   </div>
 
-<div class="card">
+<div class="card" data-guide="settings-profile">
     <h2>Profile</h2>
     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top:14px;">
       <label class="field">Full name<input bind:value={settings.name} /></label>

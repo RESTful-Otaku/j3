@@ -16,7 +16,8 @@
     type PoolView,
     type SignupRequest,
   } from '../lib/api';
-  import { landingForRole, session, switchDemoUser } from '../lib/auth';
+  import { landingForRole, session, switchDemoUser, uiRole } from '../lib/auth';
+  import { currentRole, itemsForRole, type Role as NavRole } from '../lib/nav';
 
   let ready = false;
   let error = '';
@@ -31,6 +32,14 @@
   let search = '';
   let selectedFightId = '';
   let theme: 'dark' | 'light' | 'street' = 'dark';
+  let navRole: NavRole = 'runner';
+
+  function syncNavRole() {
+    const active = session();
+    navRole = active ? uiRole(active.role) : currentRole();
+  }
+  $: shortcuts = itemsForRole(navRole).filter((item) => ['/setup', '/data', '/audit'].includes(item.href));
+  $: journey = itemsForRole(navRole).filter((item) => ['/public', '/display', '/brackets', '/control'].includes(item.href));
 
   let signupForm: SignupRequest = {
     name: '',
@@ -108,6 +117,8 @@
   }
 
   onMount(async () => {
+    syncNavRole();
+    window.addEventListener('j3-session-changed', syncNavRole);
     try {
       const [demo, identitiesResponse, fs, eventInfo, beltInfo, clubInfo] = await Promise.all([
         api.demo(),
@@ -245,9 +256,9 @@
       </div>
     </div>
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-      <a class="btn primary" href="/setup">✨ Create tournament</a>
-      <a class="btn" href="/data">🔎 Data</a>
-      <a class="btn" href="/audit">📜 Audit</a>
+      {#each shortcuts as item (item.href)}
+        <a class="btn" class:primary={item.href === '/setup'} href={item.href}>{item.icon} {item.label}</a>
+      {/each}
       <span class="pill"><span class="dot" class:off={!!error}></span>{error ? 'Server offline' : 'Venue server running'}</span>
       <button class="tab" on:click={() => (theme = theme === 'dark' ? 'light' : theme === 'light' ? 'street' : 'dark')}>
         {theme === 'dark' ? '☀ Light' : theme === 'light' ? '⚡ Street' : '☾ Dark'}
@@ -257,11 +268,10 @@
 
   <div class="journey">
     <span class="muted small">Tournament journey</span>
-    <a href="/">🏠 Home</a><span>›</span>
-    <a href="/public" target="_blank" rel="noreferrer">📺 Dashboard</a><span>›</span>
-    <a href="/display" target="_blank" rel="noreferrer">🥊 Arena</a><span>›</span>
-    <a href="/brackets" target="_blank" rel="noreferrer">🏆 Brackets</a><span>›</span>
-    <a href="/control" target="_blank" rel="noreferrer">🎛️ Control</a>
+    <a href="/">🏠 Home</a>
+    {#each journey as item (item.href)}
+      <span>›</span><a href={item.href} target="_blank" rel="noreferrer">{item.icon} {item.label}</a>
+    {/each}
   </div>
 
   <div class="notice">

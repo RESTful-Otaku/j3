@@ -234,7 +234,7 @@
 {/if}
 
 <ConfirmDialog
-  open={confirmOpen}
+  bind:open={confirmOpen}
   title="Confirm this result?"
   message="The winner, points and promotion will be committed to the tournament record and shown on all displays."
   confirmLabel="Confirm result"

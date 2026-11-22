@@ -2,14 +2,21 @@
   import { onMount } from 'svelte';
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type FightState } from '../../../lib/api';
   import { notifySuccess, notifyError } from '../../../lib/toast';
+  import { guideAction } from '../../../lib/guide';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
 
   let event: EventDisplayInfo | null = null;
   let fights: DemoFight[] = [];
   let selectedMat = 'Mat 1';
   let state: FightState | null = null;
+  type Outcome = 'win_red' | 'win_blue' | 'draw';
   let confirmOpen = false;
-  let outcome = 'win_red';
+  let outcome: Outcome = 'win_red';
+  const outcomeLabels: Record<Outcome, string> = {
+    win_red: 'Red wins',
+    win_blue: 'Blue wins',
+    draw: 'Draw',
+  };
 
   async function loadState(id: string) {
     try { state = await api.fightState(id); } catch { state = null; }
@@ -31,13 +38,19 @@
   $: selectedFight = fights.find((fight) => fight.id === selected);
   $: if (selected && !state) { void loadState(selected); }
 
-  async function act(fn: () => Promise<FightState>, label: string) {
-    try { state = await fn(); notifySuccess(label); }
-    catch (error) { notifyError(error instanceof Error ? error.message : label); }
+  async function act(fn: () => Promise<FightState>, label: string, guideKey?: string) {
+    try {
+      state = await fn();
+      notifySuccess(label);
+      if (guideKey) guideAction(guideKey);
+    } catch (error) { notifyError(error instanceof Error ? error.message : label); }
   }
   async function score(corner: 'red' | 'blue', points: number) {
     if (!selected) return;
-    await act(() => api.fightEvent(selected, { corner, points, kind: 'score', technique: 'Score' }), `+${points} ${corner}`);
+    await act(
+      () => api.fightEvent(selected, { corner, points, kind: 'score', technique: 'Score' }),
+      `+${points} ${corner}`, 'score-added',
+    );
   }
   async function penalty(corner: 'red' | 'blue') {
     if (!selected) return;
@@ -49,7 +62,7 @@
   }
   async function submit() {
     if (!selected) return;
-    await act(() => api.submitFight(selected, outcome), 'Result submitted');
+    await act(() => api.submitFight(selected, outcome), 'Result submitted', 'result-submitted');
     confirmOpen = false;
   }
 </script>
@@ -96,10 +109,18 @@
       </div>
 
       <div class="control-grid">
-        <button class="btn primary" on:click={() => act(() => api.startFight(selected), 'Fight started')}>▶ Start</button>
-        <button class="btn" on:click={() => act(() => api.pauseFight(selected), 'Timer paused')}>⏸ Pause</button>
-        <button class="btn" on:click={() => act(() => api.resumeFight(selected), 'Timer resumed')}>▶ Resume</button>
-        <button class="btn warn" on:click={() => (confirmOpen = true)}>✓ Submit result</button>
+        <button class="btn primary" data-guide="mat-start" on:click={() => act(() => api.startFight(selected), 'Fight started', 'fight-started')}>▶ Start</button>
+        <button class="btn" data-guide="mat-pause" on:click={() => act(() => api.pauseFight(selected), 'Timer paused', 'timer-paused')}>⏸ Pause</button>
+        <button class="btn" on:click={() => act(() => api.resumeFight(selected), 'Timer resumed', 'timer-resumed')}>▶ Resume</button>
+        <label class="outcome-picker" data-guide="mat-outcome">
+          <span>Result</span>
+          <select bind:value={outcome} aria-label="Final result">
+            {#each Object.entries(outcomeLabels) as [value, label]}
+              <option {value}>{label}</option>
+            {/each}
+          </select>
+        </label>
+        <button class="btn warn" data-guide="mat-submit" on:click={() => (confirmOpen = true)}>✓ Submit result</button>
       </div>
       <div class="control-grid">
         {#each [1, 2, 3, 4] as points}
@@ -123,9 +144,9 @@
 </div>
 
 <ConfirmDialog
-  open={confirmOpen}
+  bind:open={confirmOpen}
   title="Submit final result?"
-  message="This locks the contest, publishes it to every display and records the decision in the audit trail."
+  message={`Result: ${outcomeLabels[outcome]}. This locks the contest, publishes it to every display and records the decision in the audit trail.`}
   confirmLabel="Submit result"
   onConfirm={submit}
 />
@@ -139,5 +160,7 @@
   .clock.paused { color:var(--draw); animation:pulse 1s infinite alternate; }
   .hold-badge { color:#fff; background:var(--brand-accent); border-radius:10px; padding:6px 10px; font-weight:800; }
   .control-grid { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .outcome-picker { display:flex; align-items:center; gap:8px; padding:0 10px; border-radius:10px; background:var(--brand-surface-3); border:1px solid var(--brand-border); font-size:.82rem; font-weight:800; }
+  .outcome-picker select { background:transparent; color:var(--brand-ink); border:0; padding:9px 4px; font:inherit; cursor:pointer; }
   @keyframes pulse { from { opacity:1; } to { opacity:.5; } }
 </style>

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
+	"strings"
 
 	"github.com/restful-otaku/j3/internal/auth"
 	"github.com/restful-otaku/j3/internal/db"
@@ -114,8 +115,24 @@ func New(store *db.DB, version string) *Server {
 // Handler returns the root handler, suitable for http.Server or httptest.
 func (s *Server) Handler() http.Handler { return s.handler }
 
+// allowedCORSOrigin echoes a configured origin (or a comma-separated list)
+// only when the request actually comes from one of them. `*` keeps the old
+// demo behaviour of reflecting any single origin.
+func allowedCORSOrigin(r *http.Request) string {
+	requestOrigin := r.Header.Get("Origin")
+	if requestOrigin == "" {
+		return ""
+	}
+	for _, configured := range strings.Split(os.Getenv("J3_CORS_ORIGIN"), ",") {
+		configured = strings.TrimSpace(configured)
+		if configured == "*" || configured == requestOrigin {
+			return requestOrigin
+		}
+	}
+	return ""
+}
+
 func (s *Server) middleware(next http.Handler) http.Handler {
-	origin := os.Getenv("J3_CORS_ORIGIN")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// A handler bug must never take down a live venue or leak a stack trace
 		// to a display. Log it and return a predictable JSON error instead.
@@ -127,7 +144,7 @@ func (s *Server) middleware(next http.Handler) http.Handler {
 		}()
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'")
-		if origin != "" {
+		if origin := allowedCORSOrigin(r); origin != "" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")

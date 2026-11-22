@@ -33,7 +33,7 @@
       <span class="spark">📣</span>
       <div>
         <strong>{toast.message}</strong>
-        {#if toast.fighterId}<small>Fighter {toast.fighterId} — report to your mat</small>{/if}
+        {#if toast.fighterId}<small>{toast.fighterId} — report to your mat</small>{/if}
       </div>
     </div>
   {/each}

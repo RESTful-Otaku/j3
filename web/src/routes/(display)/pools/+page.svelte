@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { initials } from '../../../lib/format';
   import { api, livePoll, type PoolView, type DemoFight } from '../../../lib/api';
+  import { notifySuccess, notifyError } from '../../../lib/toast';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
 
   let pools: PoolView[] = [];
@@ -19,10 +20,13 @@
     generating = true;
     try {
       const result = await api.generatePools({
-        eventId: 'ev-demo', categoryId: '', targetPoolSize: 4, maxPools: 12,
+        eventId: '', categoryId: '', targetPoolSize: 4, maxPools: 12,
         sameClubSeparation: true, seed: 42,
       });
       pools = result.pools;
+      notifySuccess(`${result.pools.length} balanced pools generated`);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : 'Pool generation failed');
     } finally { generating = false; }
   }
   function resultCode(fight: DemoFight) {
@@ -38,9 +42,9 @@
 <svelte:head><title>J3 · Fight pools</title></svelte:head>
 
 <div class="display-shell">
-  <header class="display-header">
-    <div><div class="event-mark"><span class="crest">J3</span>Fight pools</div><div class="meta">All matchups · {pools.length} pools · {fights.length} contests</div></div>
-    <button class="btn primary" on:click={() => (confirmOpen = true)} disabled={generating}>{generating ? 'Generating…' : 'Regenerate balanced pools'}</button>
+  <header class="display-header" data-guide="pools-header">
+    <div><div class="event-mark"><span class="crest">J3</span>Fight pools</div><div class="meta">Draw review · {pools.length} pools · {fights.length} contests</div></div>
+    <button class="btn" on:click={() => (confirmOpen = true)} disabled={generating}>{generating ? 'Generating…' : '↻ Regenerate pools'}</button>
   </header>
 
   <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%,300px), 1fr));">
@@ -83,7 +87,7 @@
 </div>
 
 <ConfirmDialog
-  open={confirmOpen}
+  bind:open={confirmOpen}
   title="Regenerate pools?"
   message="Existing pool assignments will be replaced. Fighters and results remain untouched."
   confirmLabel="Regenerate"
