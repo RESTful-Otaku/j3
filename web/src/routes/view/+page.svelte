@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import ViewWidget from '../../lib/components/ViewWidget.svelte';
   import { loadViews, type SavedView } from '../../lib/view-types';
+  import '../../lib/display.css';
 
   let view: SavedView | null = null;
   let message = '';
@@ -20,7 +21,7 @@
   <header class="display-header">
     <div><div class="event-mark"><span class="crest">J3</span>{view?.name ?? 'Custom view'}</div>
       <div class="meta">Live custom dashboard · {view?.widgets.length ?? 0} widgets</div></div>
-    <a class="btn" href="/builder" target="_blank" rel="noreferrer">✏️ Edit view ↗</a>
+    <a class="btn" href="/builder">✏️ Edit view</a>
   </header>
 
   {#if view}

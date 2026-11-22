@@ -24,6 +24,9 @@
   });
   $: selected = cards.find((card) => card.role === selectedRole) ?? cards[0];
   $: currentStats = guideStats(role);
+  $: startLabel = currentStats.progress.skipped
+    ? '↻ Restart guide'
+    : currentStats.done ? '↻ Repeat guide' : '▶ Resume guide';
 
   onMount(() => {
     const active = session();
@@ -86,7 +89,7 @@
       </div>
       <div class="hero-actions">
         <button class="btn primary" data-guide="guides-start" on:click={() => start(role)}>
-          {currentStats.done ? '↻ Repeat guide' : '▶ Resume guide'}
+          {startLabel}
         </button>
         <button class="btn" on:click={() => reset(role, guideForRole(role).label)}>Reset progress</button>
       </div>

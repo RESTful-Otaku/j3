@@ -32,6 +32,14 @@ test('hands-on guide gates progress until the real action is done', async ({ pag
 
   await dialog.locator('[data-guide="tour-skip"]').click();
   await expect(dialog).toHaveCount(0);
+
+  // Skipping means "completed, do not show again" until the user restarts it.
+  await page.reload();
+  await expect(page.getByRole('dialog', { name: 'Guided walkthrough' })).toHaveCount(0);
+  await page.goto('/guides');
+  await expect(page.locator('[data-guide="guides-hero"]')).toContainText('Guide skipped');
+  await expect(page.locator('[data-guide="guides-hero"]')).toContainText('100%');
+  await expect(page.getByRole('button', { name: /Restart guide/ })).toBeVisible();
 });
 
 test('guide progress page shows a checklist, jump and reset', async ({ page }) => {

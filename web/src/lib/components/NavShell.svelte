@@ -1,9 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { afterNavigate } from '$app/navigation';
+  import { afterNavigate, goto } from '$app/navigation';
   import { api, type DemoIdentity } from '../api';
   import { landingForRole, session, switchDemoUser, uiRole } from '../auth';
-  import { currentRole, itemsForRole, NAV_GROUPS, type NavItem, type Role } from '../nav';
+  import {
+    currentRole, HOME_ROUTE, itemsForRole, MOBILE_PRIMARY_HREFS,
+    NAV_GROUPS, type NavItem, type Role,
+  } from '../nav';
 
   let expanded = false;
   let mobileOpen = false;
@@ -22,6 +25,18 @@
   function syncViewport() {
     isMobile = window.innerWidth <= 820;
   }
+
+  function syncNavWidth() {
+    document.documentElement.dataset.nav = expanded ? 'wide' : 'compact';
+  }
+
+  $: mobileItems = (() => {
+    const primary = MOBILE_PRIMARY_HREFS
+      .map((href) => items.find((item) => item.href === href))
+      .filter((item): item is NavItem => Boolean(item));
+    const extras = items.filter((item) => item.group !== 'QA tools' && !primary.includes(item));
+    return [...primary, ...extras].slice(0, 5);
+  })();
 
   function syncSession() {
     const active = session();
@@ -45,6 +60,7 @@
     qaOpen = localStorage.getItem('j3-nav-qa') === '1';
     activePath = window.location.pathname;
     syncViewport();
+    syncNavWidth();
     syncSession();
     void loadIdentities();
     window.addEventListener('resize', syncViewport);
@@ -61,6 +77,7 @@
     } else {
       expanded = !expanded;
       localStorage.setItem('j3-nav-expanded', expanded ? '1' : '0');
+      syncNavWidth();
     }
   }
   function closeMobile() {
@@ -69,9 +86,6 @@
   function isActive(href: string) {
     const path = activePath || window.location.pathname;
     return href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
-  }
-  function groupItems(group: string) {
-    return items.filter((item) => item.group === group);
   }
   function toggleQa() {
     qaOpen = !qaOpen;
@@ -89,7 +103,7 @@
       const next = await switchDemoUser(value);
       role = uiRole(next.role);
       items = itemsForRole(role);
-      window.location.assign(landingForRole(next.role));
+      await goto(landingForRole(next.role));
     } catch (e) {
       switchError = e instanceof Error ? e.message : String(e);
     } finally {
@@ -102,7 +116,7 @@
 
 {#if isMobile}
   <header class="mobile-bar">
-    <a class="brand-mark" href="/" aria-label="Dashboard" on:click={closeMobile}>J3</a>
+    <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard" on:click={closeMobile}>J3</a>
     <span class="mobile-title">J Cubed</span>
     <button class="hamburger" data-guide="nav-mobile-menu" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
   </header>
@@ -116,7 +130,7 @@
       </div>
       <nav aria-label="Main navigation">
         {#each NAV_GROUPS as group}
-          {@const groupItemsForRole = groupItems(group)}
+          {@const groupItemsForRole = items.filter((item) => item.group === group)}
           {#if groupItemsForRole.length}
             {#if group === 'QA tools'}
               <button class="group-toggle" aria-expanded={qaOpen} on:click={toggleQa}>{qaOpen ? '▾' : '▸'} {group}</button>
@@ -155,10 +169,21 @@
       </div>
     </aside>
   {/if}
+  <nav class="mobile-bottom" aria-label="Quick navigation">
+    {#each mobileItems as item (item.href)}
+      <a class="quick-item" class:active={isActive(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}
+        href={item.href} title={item.label}>
+        <span class="icon">{item.icon}</span><span class="quick-label">{item.label}</span>
+      </a>
+    {/each}
+    <button class="quick-item" data-guide="nav-mobile-more" aria-label="More navigation" aria-expanded={mobileOpen} on:click={toggle}>
+      <span class="icon">☰</span><span class="quick-label">More</span>
+    </button>
+  </nav>
 {:else}
   <aside class:collapsed={!expanded} class="nav-shell">
     <div class="nav-head">
-      <a class="brand-mark" href="/" aria-label="Dashboard">J3</a>
+      <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard">J3</a>
       {#if expanded}<span class="brand-name">J Cubed</span>{/if}
       <button class="hamburger" aria-label={expanded ? 'Collapse navigation' : 'Expand navigation'} aria-expanded={expanded} on:click={toggle}>
         {expanded ? '✕' : '☰'}
@@ -170,7 +195,7 @@
 
     <nav aria-label="Main navigation">
       {#each NAV_GROUPS as group}
-        {@const groupItemsForRole = groupItems(group)}
+        {@const groupItemsForRole = items.filter((item) => item.group === group)}
         {#if groupItemsForRole.length}
           {#if expanded}
             {#if group === 'QA tools'}
@@ -255,6 +280,22 @@
   .mobile-bar { position:fixed; top:0; left:0; right:0; height:60px; z-index:810; display:flex; align-items:center; gap:12px; padding:0 14px; background:var(--brand-surface-2); border-bottom:1px solid var(--brand-border); }
   .mobile-title { font-family:var(--font-display); font-weight:800; }
   .mobile-bar .hamburger { margin-left:auto; }
+  .mobile-bottom {
+    position:fixed; left:0; right:0; bottom:0; z-index:815;
+    display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:2px;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    background:var(--brand-surface-2); border-top:1px solid var(--brand-border);
+    box-shadow:0 -8px 24px rgba(0,0,0,.28);
+  }
+  .quick-item {
+    display:grid; place-items:center; gap:2px; min-width:0; padding:5px 2px;
+    border:0; border-radius:10px; background:transparent; color:var(--brand-muted);
+    text-decoration:none; font-size:.62rem; font-weight:700; cursor:pointer;
+  }
+  .quick-item .icon { font-size:1.05rem; line-height:1; }
+  .quick-label { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .quick-item.active { color:var(--brand-ink); background:var(--brand-surface-3); box-shadow:inset 0 -2px 0 var(--brand-primary); }
+  .quick-item:hover, .quick-item:focus-visible { color:var(--brand-ink); text-decoration:none; }
   .scrim { position:fixed; inset:0; z-index:820; background:rgba(2,6,23,.65); border:0; cursor:pointer; }
   .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(86vw, 340px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:18px; display:flex; flex-direction:column; gap:12px; box-shadow:-16px 0 44px rgba(0,0,0,.45); animation:slide .22s ease-out; }
   .drawer-head { display:flex; align-items:center; justify-content:space-between; }

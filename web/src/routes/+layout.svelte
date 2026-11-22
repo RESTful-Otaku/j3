@@ -7,18 +7,16 @@
   import { afterNavigate, goto } from '$app/navigation';
   import { syncRoleFromSession } from '../lib/auth';
   import { apiUrl } from '../lib/api';
-  import { canAccessPath, currentRole, FULLSCREEN_ROUTES } from '../lib/nav';
+  import { canAccessPath, currentRole } from '../lib/nav';
 
   let mobile = false;
   let ready = false;
   let online = true;
   let docsRoute = false;
-  let displayRoute = false;
 
   function syncRoute() {
     const path = window.location.pathname;
     docsRoute = path.startsWith('/docs') || path === '/apidocs';
-    displayRoute = FULLSCREEN_ROUTES.has(path);
   }
   afterNavigate(syncRoute);
   onMount(() => {
@@ -50,18 +48,18 @@
   });
 </script>
 
-{#if !docsRoute && !displayRoute}<NavShell />{/if}
-{#if !displayRoute}<div class="link-status" aria-live="polite"><span class:down={!online}></span>{online ? 'Live link' : 'Offline'}</div>{/if}
+{#if !docsRoute}<NavShell />{/if}
+<div class="link-status" aria-live="polite"><span class:down={!online}></span>{online ? 'Live link' : 'Offline'}</div>
 <ToastHost />
-{#if !docsRoute && !displayRoute}<TourOverlay />{/if}
-<div class:mobile class:docs={docsRoute} class:display={displayRoute} class="app-content">
+{#if !docsRoute}<TourOverlay />{/if}
+<div class:mobile class:docs={docsRoute} class="app-content">
   {#if ready}<slot />{/if}
 </div>
 
 <style>
-  .app-content { margin-left:244px; transition:margin-left .2s ease; min-height:100vh; }
-  .app-content.mobile, .app-content.docs, .app-content.display { margin-left:0; }
-  .app-content.mobile { padding-top:60px; }
+  .app-content { margin-left:var(--nav-width, 244px); transition:margin-left .2s ease; min-height:100vh; }
+  .app-content.docs { margin-left:0; }
+  .app-content.mobile { padding-top:60px; padding-bottom:72px; }
   .link-status { position:fixed; right:12px; bottom:12px; z-index:700; display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:var(--brand-surface-2); border:1px solid var(--brand-border); color:var(--brand-muted); font-size:.72rem; }
   .link-status span { width:8px; height:8px; border-radius:50%; background:var(--win); }
   .link-status span.down { background:var(--loss); }

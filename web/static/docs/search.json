@@ -488,7 +488,7 @@
   {
     "title": "Displays & screens \u00b7 Custom views",
     "section": "Running an event",
-    "text": "**View builder** lets an authorised user drag live widgets onto a canvas, resize them, save/clone/delete named layouts and open one as its own URL. Combine clock, next-up, scoreboard, standings and medal widgets for a dedicated stat screen.",
+    "text": "**View builder** lets an authorised user drag live widgets onto a canvas, resize them, save/clone/delete named layouts and open one as its own URL. Pull a widget's \u283f handle to reorder, drag its right or bottom edge (or the corner grip) to resize horizontally, vertically or both, and watch a floating ghost with a snap indicator while you drag; the layout eases into place on release. Arrow keys on t",
     "url": "/docs/displays#custom-views"
   },
   {

@@ -49,6 +49,14 @@ export const NAV_ITEMS: NavItem[] = [
 
 export const NAV_GROUPS: NavGroup[] = ['Run today', 'Plan & setup', 'Manage', 'Learn', 'QA tools'];
 
+// The public board is the always-available home for every role: the J3 icon in
+// the top-left takes users here so they can never get stranded in a deep view.
+export const HOME_ROUTE = '/public';
+
+// A small, persistent mobile nav keeps the main destinations reachable without
+// forcing everyone through the full drawer.
+export const MOBILE_PRIMARY_HREFS = ['/public', '/mat', '/brackets', '/tables', '/guides'];
+
 const KEY = 'j3-role';
 
 export function currentRole(): Role {
@@ -68,12 +76,6 @@ export function itemsForRole(role: Role) {
 export const OPEN_ROUTES = new Set([
   '/', '/login', '/signup', '/welcome', '/public', '/brackets', '/tables', '/pools',
   '/event', '/details', '/simulate', '/view', '/ui', '/apidocs', '/overlay',
-]);
-
-// Screens intended for TVs, projectors and judge devices: no app chrome or tour.
-export const FULLSCREEN_ROUTES = new Set([
-  '/public', '/display', '/mat', '/brackets', '/tables', '/pools',
-  '/ceremony', '/event', '/details', '/overlay',
 ]);
 
 export function canAccessPath(role: Role, path: string) {

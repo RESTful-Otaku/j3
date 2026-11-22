@@ -87,7 +87,7 @@
     </div>
     <div class="tabs">
       {#each matFights as fight (fight.id)}
-        <button class="tab" class:active={selected === fight.id} on:click={() => { selected = fight.id; void loadState(fight.id); }}>
+        <button class="tab" data-guide="mat-contest-select" class:active={selected === fight.id} on:click={() => { selected = fight.id; guideAction('fight-selected'); void loadState(fight.id); }}>
           {fight.red.name} vs {fight.blue.name} · {fight.state}
         </button>
       {/each}
@@ -122,7 +122,7 @@
         </label>
         <button class="btn warn" data-guide="mat-submit" on:click={() => (confirmOpen = true)}>✓ Submit result</button>
       </div>
-      <div class="control-grid">
+      <div class="control-grid" data-guide="mat-scores">
         {#each [1, 2, 3, 4] as points}
           <button class="btn" on:click={() => score('red', points)}>Red +{points}</button>
         {/each}

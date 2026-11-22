@@ -54,7 +54,7 @@
   $: clubRows = stats ? Object.entries(stats.clubMedals).sort((a, b) => b[1] - a[1]).slice(0, 4) : [];
 </script>
 
-<section class="widget" class:wide={span === 2} class:extra={span === 3}>
+<section class="widget" data-widget-type={type} class:wide={span === 2} class:extra={span === 3}>
   <div class="eyebrow">{heading}</div>
 
   {#if type === 'clock'}
@@ -92,7 +92,7 @@
   {:else if type === 'details'}
     <strong>{eventName || 'Tournament'}</strong>
     <div class="muted small">Rules, requirements and venue details are published on the details screen.</div>
-    <a class="btn" href="/details" target="_blank" rel="noreferrer">Open details ↗</a>
+    <a class="btn" href="/details">Open details</a>
   {:else if type === 'audit'}
     {#each audit.slice(0, 5) as entry (entry.id)}<div class="row"><span class="muted small">{entry.action}</span><span class="muted small">{entry.actorRole}</span></div>{/each}
   {/if}

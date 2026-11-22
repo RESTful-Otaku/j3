@@ -34,7 +34,7 @@
 <svelte:head><title>J3 · Notifications</title></svelte:head>
 
 <div class="shell">
-  <header class="topbar"><div class="brand"><a class="brand-mark" href="/" aria-label="Dashboard">J3</a><div><div class="brand-name">Notifications & suggestions</div><div class="brand-sub">Push, email, SMS and automatic setup ideas</div></div></div></header>
+  <header class="topbar"><div class="brand"><a class="brand-mark" href="/public" aria-label="Public dashboard">J3</a><div><div class="brand-name">Notifications & suggestions</div><div class="brand-sub">Push, email, SMS and automatic setup ideas</div></div></div></header>
 
   <div class="grid" style="grid-template-columns:1fr .9fr;">
     <div class="card">

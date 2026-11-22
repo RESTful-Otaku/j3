@@ -15,8 +15,8 @@
 
 <div class="shell">
   <header class="topbar">
-    <div class="brand"><a class="brand-mark" href="/" aria-label="Dashboard">J3</a><div><div class="brand-name">Component gallery</div><div class="brand-sub">Storybook-style QA for every UI primitive</div></div></div>
-    <a class="btn" href="/control" target="_blank" rel="noreferrer">🖥️ Display control ↗</a>
+    <div class="brand"><a class="brand-mark" href="/public" aria-label="Public dashboard">J3</a><div><div class="brand-name">Component gallery</div><div class="brand-sub">Storybook-style QA for every UI primitive</div></div></div>
+    <a class="btn" href="/control">🖥️ Display control</a>
   </header>
 
   <div class="card">

@@ -35,7 +35,7 @@ Use **Display control** or the announce button on Event config to trigger timed 
 
 ## Custom views
 
-**View builder** lets an authorised user drag live widgets onto a canvas, resize them, save/clone/delete named layouts and open one as its own URL. Combine clock, next-up, scoreboard, standings and medal widgets for a dedicated stat screen.
+**View builder** lets an authorised user drag live widgets onto a canvas, resize them, save/clone/delete named layouts and open one as its own URL. Pull a widget's ⠿ handle to reorder, drag its right or bottom edge (or the corner grip) to resize horizontally, vertically or both, and watch a floating ghost with a snap indicator while you drag; the layout eases into place on release. Arrow keys on the same grips and the S/M/L and H1/H2/H3 buttons remain as accessible fallbacks. Combine clock, next-up, scoreboard, standings and medal widgets for a dedicated stat screen.
 
 ## Broadcast
 

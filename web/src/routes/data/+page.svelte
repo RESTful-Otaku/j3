@@ -49,7 +49,7 @@
 <div class="shell">
   <header class="topbar">
     <div class="brand"><div class="brand-mark">J3</div><div><div class="brand-name">Data explorer</div><div class="brand-sub">Sort, filter and search every dataset</div></div></div>
-    <a class="btn" href="/control" target="_blank" rel="noreferrer">🖥️ Displays ↗</a>
+    <a class="btn" href="/control">🖥️ Displays</a>
   </header>
 
   <div class="card">

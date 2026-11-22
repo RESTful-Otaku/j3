@@ -37,7 +37,7 @@
 
 <div class="shell">
   <header class="topbar">
-    <div class="brand"><a class="brand-mark" href="/" aria-label="Dashboard">J3</a><div><div class="brand-name">Account administration</div><div class="brand-sub">{users.length} accounts · all actions audited</div></div></div>
+    <div class="brand"><a class="brand-mark" href="/public" aria-label="Public dashboard">J3</a><div><div class="brand-name">Account administration</div><div class="brand-sub">{users.length} accounts · all actions audited</div></div></div>
     <a class="btn" href="/permissions">🔐 Permissions</a>
   </header>
 

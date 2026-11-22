@@ -71,8 +71,8 @@
 
 <div class="shell">
   <header class="topbar">
-    <div class="brand"><a class="brand-mark" href="/" aria-label="Dashboard">J3</a><div><div class="brand-name">Check-in & weigh-in</div><div class="brand-sub">Arrivals, official weights, club rankings and data exchange</div></div></div>
-    <a class="btn" href="/control" target="_blank" rel="noreferrer">🖥️ Displays ↗</a>
+    <div class="brand"><a class="brand-mark" href="/public" aria-label="Public dashboard">J3</a><div><div class="brand-name">Check-in & weigh-in</div><div class="brand-sub">Arrivals, official weights, club rankings and data exchange</div></div></div>
+    <a class="btn" href="/control">🖥️ Displays</a>
   </header>
 
   <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px,1fr));">

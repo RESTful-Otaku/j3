@@ -125,7 +125,7 @@
         <span class="dot" class:off={!selected || selected.state !== 'live'}></span>{selected?.state ?? 'connecting…'}
       </span>
       <button class="btn" on:click={fullscreen}>⛶ Fullscreen</button>
-      <a class="btn" href="/mat" target="_blank" rel="noreferrer">🎛️ Operator console ↗</a>
+      <a class="btn" href="/mat">🎛️ Operator console</a>
     </div>
   </header>
 

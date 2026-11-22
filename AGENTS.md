@@ -6,7 +6,7 @@
 >
 > | Field | Value |
 > |---|---|
-> | Status | Implementation — Phase 1c complete; docs/guide + UX refinement pass complete; all local gates green (2026-11-22) |
+> | Status | Implementation — Phase 1c complete; guides, persistent nav and view-builder refinement pass complete; all local gates green (2026-11-22) |
 > | Created | 2026-11-19 |
 > | Last updated | 2026-11-22 |
 > | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
@@ -791,6 +791,20 @@ _Format: `D-### | date | decision | rationale | status`._
 - **D-035 | 2026-11-19 | Capability-scoped uploads with auto-generated colours**
   — photos for fighters/officials, logo+banner for clubs and runners; PNG/JPG/WEBP/SVG, size
   limit; backend extracts main/highlight colours with manual override. Status: accepted.
+- **D-040 | 2026-11-22 | Skipping a hands-on guide marks it complete and dismissed**
+  — user QA: "when skipping it should set guide to completed and not come up again unless the
+  user wants to". `setGuideSkipped` now completes every step and stores the skipped flag;
+  auto-start honours it. Help, /guides → Reset and the start button remain explicit ways to
+  see it again. Status: accepted.
+- **D-041 | 2026-11-22 | Persistent app shell; J3 icon is always the public-board home**
+  — nav stays visible on every normal route (including display routes) and mobile has a
+  persistent bottom nav; in-app navigation stays client-side, while multi-screen board launches
+  remain explicit "↗ New tab" actions. Fixed the latent Svelte issue where grouped nav items
+  were never re-rendered after `onMount`, leaving the rail empty. Status: accepted.
+- **D-042 | 2026-11-22 | Direct pointer manipulation in the view builder**
+  — widgets reorder and resize by dragging handles with a floating ghost, drop indicator and
+  eased snap animation; S/M/L, H1/H2/H3 and arrow keys remain accessible fallbacks. Status:
+  accepted.
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)
@@ -806,6 +820,7 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-22** — Guide, shell-navigation and view-builder refinement pass. Hands-on guide steps now open the wizard tab (`wizardStep`) or require a contest selection before spotlighting controls; added real `mat-contest-select` and `mat-scores` targets, fixed the old `mat-outcome` misuse, and added an official mat-clock step. Skipping a guide now marks every step complete, persists the skipped state and suppresses auto-start until the user restarts it; /guides shows "Guide skipped · 100%" with a Restart action. The app shell is now persistent: nav renders on every normal route including display boards, mobile has a bottom quick-nav plus the top-bar icon, the J3 icon always goes to `/public`, and display routes size to the content area instead of fighting the nav. Fixed a latent Svelte reactivity bug where `groupItems(group)` hid all nav links because the template never referenced `items` directly. Dashboard, control and display links now switch views in place; explicit "↗ New tab" buttons remain for TVs/projectors. View builder gained pointer drag-to-reorder and drag-to-resize (right, bottom and corner grips) with a ghost, drop indicator and eased FLIP snap, while keeping button/keyboard sizing, save/clone/load/delete and standalone `/view` layouts. Added `view-types` helpers/tests, nav persistence E2E, skip-completion coverage and pointer-gesture builder coverage. Verified: `go vet`, `go test`, `go test -race`, `bun run check`, `bun run test` (17), `bun run e2e` (103), `bun run build`, smoke 70/70, load 200/200 and docs sync all green.
 - **2026-11-22** — Fixed the CI-only production build failure that followed the docs site: SvelteKit's prerender
   crawler could not discover `/docs/[slug]` because the docs cards load `manifest.json` after hydration, so a clean
   GitHub runner failed with `prerender_unseen_routes`. `web/vite.config.ts` now seeds prerender entries from the docs
@@ -996,13 +1011,13 @@ _Format: `D-### | date | decision | rationale | status`._
   tests and CI.
 
 ## 17. Immediate next actions
-1. Commit the docs/guides/UX refinement pass to `main` and push to `origin/main`; verify the
+1. Commit the guide/nav/builder refinement pass to `main` and push to `origin/main`; verify the
    GitHub Actions run completes green and inspect the job logs.
 2. Continue only with the outstanding external-dependency items in §18 (payments/waivers,
    VAR, real-device install, venue hardware tuning, offline outbox); all in-app roadmap slices
    are delivered and covered by local gates.
-3. On the day, use `bun run dev` → **Docs & guides** for the live guides, and open each
-   fullscreen board from **Display control** in its own tab/window.
+3. On the day, use `bun run dev` → **Docs & guides** for the live guides. The nav stays visible;
+   use **Display control** → "↗ New tab" only when a board needs its own TV/projector screen.
 
 ---
 
@@ -1036,14 +1051,22 @@ _Format: `D-### | date | decision | rationale | status`._
 - Documentation & guided QA: 13 rendered markdown guides, live docs search, OpenAPI-derived API
   explorer with 79 operations and “Try it”, `/apidocs` redirect, `bun run docs`, TUI **Docs &
   guides** menu, and hands-on role guides with real-action gating, progress checklist, jump and
-  reset. Every docs page and in-page anchor has a real destination.
+  reset. Guide steps open the wizard tab or require a contest selection before highlighting its
+  control; skipping marks the guide complete/dismissed until explicitly restarted. Every docs page
+  and in-page anchor has a real destination.
 - Navigation & event-day clarity: canonical labels/icons across nav/dashboard/display control,
-  grouped nav with active state and collapsed QA tools, role-aware journey, chrome-free fullscreen
-  boards, read-only public schedule, explicit mat result selector, reusable confirmation dialogs,
-  searchable check-in, launch success panel, and active-event data instead of `ev-demo`.
+  grouped nav with active state and collapsed QA tools, role-aware journey, persistent desktop and
+  mobile shell (the J3 icon always returns to `/public`), in-place view switching with explicit
+  “↗ New tab” launches for TVs/projectors, display routes sized to the content area, read-only
+  public schedule, explicit mat result selector, reusable confirmation dialogs, searchable
+  check-in, launch success panel, and active-event data instead of `ev-demo`.
+- View builder: direct pointer drag-to-reorder and drag-to-resize (right/bottom/corner) with a
+  floating ghost, drop indicator and eased snap animation; S/M/L, H1/H2/H3 and arrow keys remain
+  accessible fallbacks. Saved layouts, standalone `/view` screens and live widgets are unchanged.
 - Test suite: `go vet ./...`, `go test ./...`, `go test -race ./...`, `bun run check`,
-  `bun run test` (12), `bun run e2e` (101 browser journey/axe/docs/guide checks), `bun run build`,
-  generated-type parity, workflow checks and the TUI harness all green at the time of this update.
+  `bun run test` (17), `bun run e2e` (103 browser journey/axe/docs/guide/nav/builder checks),
+  `bun run build`, smoke 70/70, load 200/200, generated-type parity, workflow checks and the TUI
+  harness all green at the time of this update.
 
 ### Outstanding — must finish before a real tournament
 1. **Authoritative live scoring — delivered**: server-owned timers, score/penalty/submission

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
   import { broadcastPA } from '../../../lib/api';
 
   type Template = { name: string; widgets: string[] };
@@ -63,6 +64,7 @@
     paFighter = '';
   }
   function openView(path: string) { window.open(path, '_blank', 'noopener,noreferrer'); }
+  function showView(path: string) { void goto(path); }
 </script>
 
 <svelte:head><title>J3 · Display control</title></svelte:head>
@@ -77,15 +79,18 @@
     </div>
   </header>
 
-  <div class="section-title"><h2>Run today</h2><span class="muted small">Each opens in its own tab — drag it to a TV or projector</span></div>
+  <div class="section-title"><h2>Run today</h2><span class="muted small">Switch views here, or use ↗ to put a board on its own screen</span></div>
   <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%,260px), 1fr));">
     {#each runToday as view (view.path)}
-      <button class="card slide-in" style="text-align:left; cursor:pointer; color:var(--brand-ink);" on:click={() => openView(view.path)}>
+      <div class="card slide-in view-card">
         <div style="font-size:2rem;">{view.icon}</div>
         <h3 style="margin-top:8px;">{view.name}</h3>
         <p class="muted small" style="margin-top:4px;">{view.note}</p>
-        <div class="eyebrow" style="margin-top:14px;">Open in new tab ↗</div>
-      </button>
+        <div class="view-actions">
+          <button class="btn primary" on:click={() => showView(view.path)}>Open view</button>
+          <button class="btn" aria-label="Open {view.name} in a new tab" on:click={() => openView(view.path)}>↗ New tab</button>
+        </div>
+      </div>
     {/each}
   </div>
 
@@ -93,12 +98,15 @@
     <summary>Setup & QA tools <span class="muted small">({setupTools.length} views)</span></summary>
     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%,260px), 1fr)); margin-top:14px;">
       {#each setupTools as view (view.path)}
-        <button class="card" style="text-align:left; cursor:pointer; color:var(--brand-ink);" on:click={() => openView(view.path)}>
+        <div class="card view-card">
           <div style="font-size:1.6rem;">{view.icon}</div>
           <h3 style="margin-top:6px;">{view.name}</h3>
           <p class="muted small" style="margin-top:4px;">{view.note}</p>
-          <div class="eyebrow" style="margin-top:12px;">Open in new tab ↗</div>
-        </button>
+          <div class="view-actions">
+            <button class="btn primary" on:click={() => showView(view.path)}>Open view</button>
+            <button class="btn" aria-label="Open {view.name} in a new tab" on:click={() => openView(view.path)}>↗ New tab</button>
+          </div>
+        </div>
       {/each}
     </div>
   </details>
@@ -147,6 +155,9 @@
 </div>
 
 <style>
+  .view-card { display:flex; flex-direction:column; align-items:flex-start; gap:4px; }
+  .view-card .view-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:auto; padding-top:14px; }
+  .view-card .btn { font-size:.78rem; padding:7px 11px; }
   .setup-tools { margin-top:24px; border-top:1px solid var(--brand-border); padding-top:16px; }
   .setup-tools summary { cursor:pointer; color:var(--brand-muted); font-weight:800; font-size:.85rem; }
   .setup-tools summary:hover { color:var(--brand-ink); }

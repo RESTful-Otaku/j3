@@ -34,7 +34,7 @@
   <header class="display-header">
     <div><div class="event-mark"><span class="crest">{event?.logoPath ? '🏅' : 'J3'}</span>{event?.name ?? 'Tournament'}</div>
       <div class="meta">Official details · rules · requirements · venue</div></div>
-    <a class="btn" href="/public" target="_blank" rel="noreferrer">📺 Live dashboard ↗</a>
+    <a class="btn" href="/public">📺 Live dashboard</a>
   </header>
 
   <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));">

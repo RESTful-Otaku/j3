@@ -93,7 +93,7 @@
 
 <div class="shell">
   <header class="topbar">
-    <div class="brand"><a class="brand-mark" href="/" aria-label="Dashboard">J3</a><div><div class="brand-name">Official console</div><div class="brand-sub">One tap to log · confirm before it counts</div></div></div>
+    <div class="brand"><a class="brand-mark" href="/public" aria-label="Public dashboard">J3</a><div><div class="brand-name">Official console</div><div class="brand-sub">One tap to log · confirm before it counts</div></div></div>
     <div class="tabs">
       <button class="tab" class:active={tab === 'fight'} on:click={() => (tab = 'fight')}>🥊 Fight</button>
       <button class="tab" data-guide="official-tab-kata" class:active={tab === 'kata'} on:click={() => (tab = 'kata')}>🥋 Kata panel</button>

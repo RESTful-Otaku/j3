@@ -182,15 +182,52 @@ test.describe('Interactive controls', () => {
     expect(errors).toEqual([]);
   });
 
-  test('view builder: add, resize, save, clone and delete a view', async ({ page }) => {
+  test('view builder: drag-resize, reorder, save, clone and delete a view', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('/builder');
-    await page.getByRole('button', { name: 'Drag Live scoreboard' }).click();
-    await page.getByRole('button', { name: 'Drag Clock' }).click();
+    await page.getByRole('button', { name: 'Add Live scoreboard' }).click();
+    await page.getByRole('button', { name: 'Add Clock' }).click();
     await expect(page.locator('.canvas-item')).toHaveCount(2);
-    await page.locator('.canvas-item').first().getByRole('button', { name: 'M' }).click();
-    await page.locator('.canvas-item').first().getByRole('button', { name: 'H2' }).click();
-    await expect(page.locator('.canvas-item.tall')).toHaveCount(1);
+
+    const first = page.locator('.canvas-item').first();
+    const widthHandle = first.locator('[data-resize-axis="x"]');
+    const widthBox = await widthHandle.boundingBox();
+    expect(widthBox).toBeTruthy();
+    await page.mouse.move(widthBox!.x + widthBox!.width / 2, widthBox!.y + widthBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(widthBox!.x + 300, widthBox!.y + widthBox!.height / 2, { steps: 8 });
+    await expect(page.locator('.drag-ghost')).toBeVisible();
+    await page.mouse.up();
+    await expect(first).toHaveAttribute('data-span', '2');
+
+    const heightHandle = first.locator('[data-resize-axis="y"]');
+    const heightBox = await heightHandle.boundingBox();
+    expect(heightBox).toBeTruthy();
+    await page.mouse.move(heightBox!.x + heightBox!.width / 2, heightBox!.y + heightBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(heightBox!.x + heightBox!.width / 2, heightBox!.y + 180, { steps: 8 });
+    await expect(page.locator('.drag-ghost')).toContainText('row');
+    await page.mouse.up();
+    await expect(first).toHaveAttribute('data-rows', '2');
+    await expect(first).toHaveClass(/tall/);
+
+    // Button sizing remains available as an accessible fallback.
+    await page.locator('.canvas-item').nth(1).getByRole('button', { name: 'M' }).click();
+    await expect(page.locator('.canvas-item').nth(1)).toHaveAttribute('data-span', '2');
+
+    const reorderHandle = first.locator('.drag-handle');
+    const target = page.locator('.canvas-item').nth(1);
+    const fromBox = await reorderHandle.boundingBox();
+    const toBox = await target.boundingBox();
+    expect(fromBox).toBeTruthy();
+    expect(toBox).toBeTruthy();
+    await page.mouse.move(fromBox!.x + fromBox!.width / 2, fromBox!.y + fromBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(toBox!.x + toBox!.width / 2, toBox!.y + toBox!.height / 2, { steps: 10 });
+    await expect(page.locator('.drag-ghost')).toContainText('Drop at position');
+    await page.mouse.up();
+    await expect(page.locator('.canvas-item').first()).toHaveAttribute('data-widget-type', 'clock');
+
     await page.getByPlaceholder('View name…').fill(`QA View ${Date.now()}`);
     await page.getByRole('button', { name: /Save view/ }).click();
     await expect(page.locator('.saved').first()).toBeVisible();

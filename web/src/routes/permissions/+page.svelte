@@ -30,7 +30,7 @@
 
 <div class="shell">
   <header class="topbar">
-    <div class="brand"><a class="brand-mark" href="/" aria-label="Dashboard">J3</a><div><div class="brand-name">Access control</div><div class="brand-sub">Runner-only · who can view, create, edit and delete</div></div></div>
+    <div class="brand"><a class="brand-mark" href="/public" aria-label="Public dashboard">J3</a><div><div class="brand-name">Access control</div><div class="brand-sub">Runner-only · who can view, create, edit and delete</div></div></div>
     <a class="btn" href="/login">🔐 Sign in / out</a>
   </header>
 

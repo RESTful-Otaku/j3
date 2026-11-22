@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
+  import { onMount, tick } from 'svelte';
+  import { afterNavigate, goto } from '$app/navigation';
   import { session, uiRole } from '../auth';
   import { GUIDE_ACTION_EVENT } from '../guide';
   import {
-    guideForRole, guideStats, hasSeenTour, isTourDone, markStepDone,
-    setGuideSkipped, stepIsComplete, type Role,
+    guideForRole, guideStats, isGuideDismissed, markStepDone,
+    setGuideSkipped, stepIsComplete, type GuideStep, type Role,
   } from '../tour';
 
   let active = false;
@@ -33,6 +33,14 @@
       ? `top:${Math.max(12, preferredTop)}px; left:${cardLeft}px;`
       : `bottom:12px; left:${cardLeft}px;`;
 
+  // Manual navigation or a guide jump can change the target without a resize.
+  afterNavigate(() => {
+    if (active) {
+      locate();
+      void verify();
+    }
+  });
+
   function syncViewport() {
     vw = window.innerWidth;
     vh = window.innerHeight;
@@ -52,10 +60,25 @@
     void verify();
   }
 
+  async function prepareStep(current: GuideStep) {
+    // Several steps live inside collapsed wizard tabs or behind a selected
+    // contest. Open the right tab before trying to spotlight the control.
+    if (typeof current.wizardStep !== 'number') return;
+    const tab = document.querySelector(
+      `[data-guide="setup-stepper"] [data-step="${current.wizardStep}"]`,
+    ) as HTMLButtonElement | null;
+    if (tab && !tab.classList.contains('active')) {
+      tab.click();
+      await tick();
+    }
+  }
+
   async function navigateToStep() {
     const current = guideForRole(role).steps[index];
     if (!current) return;
     if (window.location.pathname !== current.href) await goto(current.href);
+    await tick();
+    await prepareStep(current);
     setTimeout(() => { locate(true); void verify(); }, 220);
   }
 
@@ -156,7 +179,7 @@
     window.addEventListener('keydown', onKeydown);
 
     const docsRoute = window.location.pathname.startsWith('/docs') || window.location.pathname === '/apidocs';
-    if (!docsRoute && !isTourDone(role) && !hasSeenTour()) {
+    if (!docsRoute && !isGuideDismissed(role)) {
       setTimeout(() => { void start(); }, 600);
     }
 

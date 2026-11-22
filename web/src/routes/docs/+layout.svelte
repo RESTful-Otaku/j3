@@ -42,7 +42,7 @@
 <div class="docs-shell">
   <aside class:open={menuOpen} class="sidebar">
     <div class="side-head">
-      <a class="logo" href="/docs" aria-label="J3 documentation home">J3 <span>/ docs</span></a>
+      <a class="logo" href="/public" aria-label="J3 public dashboard">J3 <span>/ docs</span></a>
       <button class="icon-btn mobile-only" aria-label="Close menu" on:click={() => (menuOpen = false)}>✕</button>
     </div>
     <label class="search">
@@ -99,7 +99,7 @@
     {/if}
 
     <div class="side-foot">
-      <a href="/">← Back to J3</a>
+      <a href="/public">← Public dashboard</a>
       <span>v0.1 · local venue</span>
     </div>
   </aside>

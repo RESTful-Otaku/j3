@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
   import { initials } from '../lib/format';
   import {
     api,
@@ -17,7 +18,7 @@
     type SignupRequest,
   } from '../lib/api';
   import { landingForRole, session, switchDemoUser, uiRole } from '../lib/auth';
-  import { currentRole, itemsForRole, type Role as NavRole } from '../lib/nav';
+  import { currentRole, HOME_ROUTE, itemsForRole, type Role as NavRole } from '../lib/nav';
 
   let ready = false;
   let error = '';
@@ -155,7 +156,7 @@
     try {
       const next = await switchDemoUser(id);
       actorId = next.userId ?? id;
-      window.location.assign(landingForRole(next.role));
+      await goto(landingForRole(next.role));
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     }
@@ -249,7 +250,7 @@
 <div class="shell" data-theme={theme}>
   <header class="topbar">
     <div class="brand">
-      <a class="brand-mark" href="/" aria-label="J3 dashboard">J3</a>
+      <a class="brand-mark" href={HOME_ROUTE} aria-label="J3 public dashboard">J3</a>
       <div>
         <div class="brand-name">J Cubed</div>
         <div class="brand-sub">Tournament creator · local QA demo</div>
@@ -268,9 +269,9 @@
 
   <div class="journey">
     <span class="muted small">Tournament journey</span>
-    <a href="/">🏠 Home</a>
+    <a href={HOME_ROUTE}>🏠 Public board</a>
     {#each journey as item (item.href)}
-      <span>›</span><a href={item.href} target="_blank" rel="noreferrer">{item.icon} {item.label}</a>
+      <span>›</span><a href={item.href}>{item.icon} {item.label}</a>
     {/each}
   </div>
 
@@ -301,8 +302,8 @@
         <div class="action-row">
           <button class="btn primary" on:click={() => (activeTab = 'accounts')}>Switch account</button>
           <button class="btn" on:click={() => (activeTab = 'scoreboard')}>Open live scoreboard</button>
-          <a class="btn" href="/control" target="_blank" rel="noreferrer">🖥️ Display control ↗</a>
-          <a class="btn" href="/display" target="_blank" rel="noreferrer">🥊 Full-screen board ↗</a>
+          <a class="btn" href="/control">🖥️ Display control</a>
+          <a class="btn" href="/display">🥊 Live scoreboard</a>
           <a class="btn" href="/api/v1/demo" target="_blank" rel="noreferrer">Inspect API ↗</a>
         </div>
       </div>
@@ -376,15 +377,16 @@
           <div class="eyebrow">04 · Every screen</div>
           <h3>Dedicated live views</h3>
           <p class="muted small" style="margin-top:8px;">
-            Open each in its own tab and place it on any TV: public dashboard, full-screen
-            scoreboard, brackets, tables/medals/kata, fight pools and display control.
+            Switch views here without losing the navigation. Use Display control when you want a
+            board on its own TV tab: public dashboard, scoreboard, brackets, tables/medals/kata
+            and fight pools.
           </p>
           <div class="action-row">
-            <a class="btn" href="/public" target="_blank" rel="noreferrer">Public ↗</a>
-            <a class="btn" href="/brackets" target="_blank" rel="noreferrer">Brackets ↗</a>
-            <a class="btn" href="/tables" target="_blank" rel="noreferrer">Tables ↗</a>
-            <a class="btn" href="/pools" target="_blank" rel="noreferrer">Pools ↗</a>
-            <a class="btn" href="/simulate" target="_blank" rel="noreferrer">Simulate ↗</a>
+            <a class="btn" href="/public">Public</a>
+            <a class="btn" href="/brackets">Brackets</a>
+            <a class="btn" href="/tables">Tables</a>
+            <a class="btn" href="/pools">Pools</a>
+            <a class="btn" href="/simulate">Simulate</a>
           </div>
         </div>
       </div>

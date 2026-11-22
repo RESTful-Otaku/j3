@@ -280,7 +280,7 @@
 <div class="shell">
   <header class="topbar">
     <div class="brand"><div class="brand-mark">J3</div><div><div class="brand-name">Create a tournament</div><div class="brand-sub">Five quick steps · everything saved as you go</div></div></div>
-    <a class="btn" href="/control" target="_blank" rel="noreferrer">🖥️ Displays ↗</a>
+    <a class="btn" href="/control">🖥️ Displays</a>
   </header>
 
   {#if launched}
@@ -302,7 +302,7 @@
 
   <div class="stepper" data-guide="setup-stepper">
     {#each steps as label, index}
-      <button class="step" class:active={wizard.step === index} class:done={wizard.step > index} on:click={() => go(index)}>
+      <button class="step" data-step={index} class:active={wizard.step === index} class:done={wizard.step > index} on:click={() => go(index)}>
         <span class="num">{wizard.step > index ? '✓' : index + 1}</span><span>{label}</span>
       </button>
     {/each}

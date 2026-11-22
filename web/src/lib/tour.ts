@@ -16,6 +16,8 @@ export type GuideStep = {
   href: string;
   target: string;
   mobileTarget?: string;
+  /** For the setup wizard: which wizard tab must be open before this step. */
+  wizardStep?: number;
   check: GuideCheck;
 };
 
@@ -33,15 +35,16 @@ const runner: Guide = {
   description: 'Create a small event, generate its draw, check in a fighter, score and publish a result.',
   steps: [
     { id: 'runner-welcome', title: 'Start at your dashboard', body: 'This is the control room. Every guide step below uses the real app — nothing is simulated.', hint: 'You are already in the right place. Read the cards, then press Next.', href: '/', target: '[data-guide="nav-help-compact"]', mobileTarget: '.mobile-bar', check: { kind: 'route', path: '/' } },
-    { id: 'runner-name', title: 'Name your tournament', body: 'Open the setup wizard and give your event a name of at least three characters. Use something simple like “Demo Challenge”.', hint: 'Type in the Tournament name field. Next unlocks when the name is saved.', href: '/setup', target: '[data-guide="setup-name"]', check: { kind: 'value', selector: '[data-guide="setup-name"] input', minLength: 3 } },
-    { id: 'runner-theme', title: 'Choose a look', body: 'Pick a theme for the boards and displays. You can change branding later, but choose one now.', hint: 'Tap Classic, Ocean or Street Fighter in the Theme row.', href: '/setup', target: '[data-guide="setup-theme"]', check: { kind: 'action', key: 'setup-theme-picked' } },
-    { id: 'runner-disciplines', title: 'Add a discipline', body: 'Add one discipline so the event has something to run. The defaults give you sensible timings and points.', hint: 'Press “Add discipline” in step 2, then fill in its name.', href: '/setup', target: '[data-guide="setup-disciplines"]', check: { kind: 'action', key: 'setup-discipline-added' } },
-    { id: 'runner-invites', title: 'Invite your people', body: 'Add at least one invitation in the People step. One line is enough: an email, role and club.', hint: 'Use the step buttons at the top to jump to People, then press “Add invitations”.', href: '/setup', target: '[data-guide="setup-invites"]', check: { kind: 'action', key: 'setup-invites-added' } },
-    { id: 'runner-launch', title: 'Review and launch', body: 'Jump to Review & launch. If the readiness check is green, launch the tournament. This creates the event and auto-generates the draw and officials.', hint: 'Fix any listed issues first — the guide will not let you skip them.', href: '/setup', target: '[data-guide="setup-launch"]', check: { kind: 'action', key: 'tournament-created' } },
+    { id: 'runner-name', title: 'Name your tournament', body: 'Open the setup wizard and give your event a name of at least three characters. Use something simple like “Demo Challenge”.', hint: 'Type in the Tournament name field. Next unlocks when the name is saved.', href: '/setup', target: '[data-guide="setup-name"]', wizardStep: 0, check: { kind: 'value', selector: '[data-guide="setup-name"] input', minLength: 3 } },
+    { id: 'runner-theme', title: 'Choose a look', body: 'Pick a theme for the boards and displays. You can change branding later, but choose one now.', hint: 'Tap Classic, Ocean or Street Fighter in the Theme row.', href: '/setup', target: '[data-guide="setup-theme"]', wizardStep: 0, check: { kind: 'action', key: 'setup-theme-picked' } },
+    { id: 'runner-disciplines', title: 'Add a discipline', body: 'Add one discipline so the event has something to run. The defaults give you sensible timings and points.', hint: 'Press “Add discipline” in step 2, then fill in its name.', href: '/setup', target: '[data-guide="setup-disciplines"]', wizardStep: 1, check: { kind: 'action', key: 'setup-discipline-added' } },
+    { id: 'runner-invites', title: 'Invite your people', body: 'Add at least one invitation in the People step. One line is enough: an email, role and club.', hint: 'Use the step buttons at the top to jump to People, then press “Add invitations”.', href: '/setup', target: '[data-guide="setup-invites"]', wizardStep: 3, check: { kind: 'action', key: 'setup-invites-added' } },
+    { id: 'runner-launch', title: 'Review and launch', body: 'Jump to Review & launch. If the readiness check is green, launch the tournament. This creates the event and auto-generates the draw and officials.', hint: 'Fix any listed issues first — the guide will not let you skip them.', href: '/setup', target: '[data-guide="setup-launch"]', wizardStep: 4, check: { kind: 'action', key: 'tournament-created' } },
     { id: 'runner-pools', title: 'Inspect the generated draw', body: 'Fight pools and brackets were generated for you. Check that competitors are spread fairly across pools.', hint: 'This step completes when the fight-pool board loads.', href: '/pools', target: '[data-guide="pools-header"]', check: { kind: 'visible', selector: '[data-guide="pools-header"]' } },
     { id: 'runner-checkin', title: 'Check in and weigh in a fighter', body: 'Enter an official weight for one competitor. Out-of-class athletes are flagged automatically.', hint: 'Change any weight field in Check-in & weigh-in.', href: '/operations', target: '[data-guide="operations-weigh-input"]', check: { kind: 'action', key: 'check-in' } },
-    { id: 'runner-mat', title: 'Run a mat', body: 'Choose a contest and start its authoritative clock. Pause when the referee stops the bout, then resume.', hint: 'Use Start, Pause and Resume on the mat console.', href: '/mat', target: '[data-guide="mat-start"]', check: { kind: 'action', key: 'fight-started' } },
-    { id: 'runner-score', title: 'Award points', body: 'Add a score to either corner. Every entry is committed immediately and appears on the scoreboard and audit trail.', hint: 'Use the Red +N or Blue +N buttons on the mat console.', href: '/mat', target: '[data-guide="mat-outcome"]', check: { kind: 'action', key: 'score-added' } },
+    { id: 'runner-mat-select', title: 'Pick a contest', body: 'The mat console only shows controls after a contest is selected. Choose a bout from the queue first.', hint: 'Tap any “Red vs Blue” contest button in the contest queue.', href: '/mat', target: '[data-guide="mat-contest-select"]', check: { kind: 'action', key: 'fight-selected' } },
+    { id: 'runner-mat', title: 'Run the clock', body: 'Start the authoritative clock. Pause when the referee stops the bout, then resume from the same console.', hint: 'Use Start, Pause and Resume on the mat console.', href: '/mat', target: '[data-guide="mat-start"]', check: { kind: 'action', key: 'fight-started' } },
+    { id: 'runner-score', title: 'Award points', body: 'Add a score to either corner. Every entry is committed immediately and appears on the scoreboard and audit trail.', hint: 'Use the Red +N or Blue +N buttons on the mat console.', href: '/mat', target: '[data-guide="mat-scores"]', check: { kind: 'action', key: 'score-added' } },
     { id: 'runner-submit', title: 'Submit the result', body: 'Choose the real winner or draw, then confirm. This locks the contest and publishes it everywhere.', hint: 'Pick the result in the Result dropdown, press Submit result and confirm.', href: '/mat', target: '[data-guide="mat-submit"]', check: { kind: 'action', key: 'result-submitted' } },
     { id: 'runner-control', title: 'Put screens where people need them', body: 'Display control opens every board in its own tab for TVs, projectors and judge tablets. Keep this page on the control-room machine.', hint: 'The step completes when Display control loads.', href: '/control', target: '[data-guide="control-header"]', check: { kind: 'route', path: '/control' } },
     { id: 'runner-public', title: 'Show the venue board', body: 'The public board is what spectators see: live contests, next-up callouts, clock and results.', hint: 'Open it here, then try it on a second screen.', href: '/public', target: '[data-guide="public-header"]', check: { kind: 'route', path: '/public' } },
@@ -56,7 +59,8 @@ const official: Guide = {
     { id: 'official-contest', title: 'Choose a contest', body: 'Select the bout you are officiating from the contest list.', hint: 'Change the “Select contest” dropdown.', href: '/official', target: '[data-guide="official-contest-select"]', check: { kind: 'action', key: 'official-contest-selected' } },
     { id: 'official-corner', title: 'Choose the active corner', body: 'Points and penalties always apply to the corner you select. Check the name on the button before scoring.', hint: 'Tap the RED or BLUE corner button.', href: '/official', target: '[data-guide="official-corner-red"]', check: { kind: 'action', key: 'official-corner' } },
     { id: 'official-technique', title: 'Log a technique', body: 'Tap a technique with the English/romaji name and its point value, then confirm. Nothing counts until you confirm.', hint: 'Choose any technique and press “Confirm & log”.', href: '/official', target: '[data-guide="official-tech-button"]', check: { kind: 'action', key: 'official-entry' } },
-    { id: 'official-clock', title: 'See the authoritative clock', body: 'The mat scorekeeper owns the clock. Watch it here so your entries line up with referee stoppages and the public board.', hint: 'On the mat console, start the bout and pause for a stoppage.', href: '/mat', target: '[data-guide="mat-pause"]', check: { kind: 'action', key: 'timer-paused' } },
+    { id: 'official-mat-open', title: 'Open the mat clock', body: 'The mat scorekeeper owns the clock. Select the same contest here so you can follow stoppages.', hint: 'Tap a contest in the mat queue.', href: '/mat', target: '[data-guide="mat-contest-select"]', check: { kind: 'action', key: 'fight-selected' } },
+    { id: 'official-clock', title: 'See the authoritative clock', body: 'Watch the clock here so your entries line up with referee stoppages and the public board.', hint: 'On the mat console, start the bout and pause for a stoppage.', href: '/mat', target: '[data-guide="mat-pause"]', check: { kind: 'action', key: 'timer-paused' } },
     { id: 'official-result', title: 'Publish an outcome', body: 'Finish the bout by recording a win, loss, draw or submission override. Confirmation is required.', hint: 'Use Red wins, Blue wins or Draw in “Finish & override”.', href: '/official', target: '[data-guide="official-result-win-red"]', check: { kind: 'action', key: 'official-result' } },
     { id: 'official-kata', title: 'Score a kata panel', body: 'Switch to the Kata tab and enter a panel score. The total is calculated from committed judge scores.', hint: 'Open Kata panel, then change any score field and confirm.', href: '/official', target: '[data-guide="official-tab-kata"]', check: { kind: 'action', key: 'kata-score' } },
     { id: 'official-tables', title: 'Check the published tables', body: 'Verify that your entries appear in the live standings and kata table.', hint: 'This step completes when the tables page loads.', href: '/tables', target: '[data-guide="tables-header"]', check: { kind: 'route', path: '/tables' } },
@@ -156,8 +160,15 @@ export function markStepDone(role: Role, stepId: string) {
 }
 
 export function setGuideSkipped(role: Role) {
-  const current = guideProgress(role);
-  saveProgress(role, { ...current, skipped: true });
+  const guide = guideForRole(role);
+  // Skipping is an explicit "I do not need this guide" decision: mark every
+  // step complete so it reads as dismissed rather than half-finished, and stop
+  // auto-starting it. The user can always relaunch it from Help or /guides.
+  saveProgress(role, {
+    completed: guide.steps.map((step) => step.id),
+    skipped: true,
+    updatedAt: Date.now(),
+  });
 }
 
 export function resetGuide(role?: Role) {
@@ -235,4 +246,9 @@ export function isTourDone(role: Role) {
 
 export function hasSeenTour() {
   return typeof localStorage !== 'undefined' && localStorage.getItem(LEGACY_SEEN_KEY) === '1';
+}
+
+/** True when a guide has been skipped, completed or suppressed by QA helpers. */
+export function isGuideDismissed(role: Role) {
+  return guideProgress(role).skipped || isTourDone(role) || hasSeenTour();
 }
