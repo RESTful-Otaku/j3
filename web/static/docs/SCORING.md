@@ -15,7 +15,7 @@ Common scoring families:
 | Fighting System | strike 2/1, throw 2/1, submission 2–3, hold 10s/15s/20s |
 | Kata panel | 0–10 in 0.1 or 0.2 steps, high/low drop, middle average |
 
-See the [API guide](/docs/api-guide) for the request shapes behind these actions.
+The official console searches a 400-entry, 24-group JJJ catalogue (English, romaji, Japanese script, style and movement tags) and shows a dropdown of point values read from the event's rule-set snapshot and discipline rules. When an official selects a catalogue technique, the server resolves its points, kind, card and display label; a client-supplied `points` or `technique` value is ignored. See the [API guide](/docs/api-guide) for the request shapes behind these actions.
 
 ## Holds and submissions
 

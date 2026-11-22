@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"sort"
+
+	"github.com/restful-otaku/j3/internal/auth"
 )
 
 type demoFighter struct {
@@ -36,9 +38,9 @@ type demoFight struct {
 	Events   []demoFightEvent `json:"events"`
 }
 
-// demoFights returns fights with fighter, club and scoring-event detail so the
-// QA scoreboard can exercise the same data path the real displays will use.
-func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
+// allDemoFights returns fights with fighter, club and scoring-event detail so
+// the QA scoreboard can exercise the same data path the real displays use.
+func (s *Server) allDemoFights(r *http.Request) ([]demoFight, error) {
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT f.id, COALESCE(c.name, ''), COALESCE(m.name, ''), f.round_label,
 		       f.state, f.outcome,
@@ -63,8 +65,7 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 		LEFT JOIN users ub      ON ub.id = fb.user_id
 		ORDER BY f.id`)
 	if err != nil {
-		writeError(w, err)
-		return
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -78,31 +79,27 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 			&f.Blue.ID, &f.Blue.Name, &f.Blue.Club, &f.Blue.ClubColour, &f.Blue.LogoPath,
 			&f.Blue.Belt, &f.Blue.BeltColour, &f.Blue.HeightCm, &f.Blue.WeightKg,
 		); err != nil {
-			writeError(w, err)
-			return
+			return nil, err
 		}
 		f.Events = []demoFightEvent{}
 		fights = append(fights, f)
 	}
 	if err := rows.Err(); err != nil {
-		writeError(w, err)
-		return
+		return nil, err
 	}
 	for i := range fights {
 		eventRows, err := s.Store.QueryContext(r.Context(), `
 			SELECT seq, kind, payload_json FROM fight_events
 			WHERE fight_id = ? ORDER BY seq`, fights[i].ID)
 		if err != nil {
-			writeError(w, err)
-			return
+			return nil, err
 		}
 		for eventRows.Next() {
 			var e demoFightEvent
 			var raw string
 			if err := eventRows.Scan(&e.Seq, &e.Kind, &raw); err != nil {
 				eventRows.Close()
-				writeError(w, err)
-				return
+				return nil, err
 			}
 			var payload any
 			_ = json.Unmarshal([]byte(raw), &payload)
@@ -111,8 +108,7 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 		}
 		eventRows.Close()
 		if err := eventRows.Err(); err != nil {
-			writeError(w, err)
-			return
+			return nil, err
 		}
 
 		// Scorekeeper events are authoritative; include them in the display feed.
@@ -120,8 +116,7 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 			SELECT seq, kind, corner, points, technique, card
 			FROM score_events WHERE fight_id = ? ORDER BY seq`, fights[i].ID)
 		if err != nil {
-			writeError(w, err)
-			return
+			return nil, err
 		}
 		for scoreRows.Next() {
 			var event demoFightEvent
@@ -129,8 +124,7 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 			var kind, corner, technique, card string
 			if err := scoreRows.Scan(&seq, &kind, &corner, &points, &technique, &card); err != nil {
 				scoreRows.Close()
-				writeError(w, err)
-				return
+				return nil, err
 			}
 			event.Seq = seq
 			event.Kind = kind
@@ -140,9 +134,62 @@ func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
 			fights[i].Events = append(fights[i].Events, event)
 		}
 		scoreRows.Close()
+		if err := scoreRows.Err(); err != nil {
+			return nil, err
+		}
 		sort.SliceStable(fights[i].Events, func(a, b int) bool {
 			return fights[i].Events[a].Seq < fights[i].Events[b].Seq
 		})
 	}
+	return fights, nil
+}
+
+func (s *Server) demoFights(w http.ResponseWriter, r *http.Request) {
+	fights, err := s.allDemoFights(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 	writeJSON(w, http.StatusOK, map[string]any{"fights": fights})
+}
+
+// myContests returns only the contests the signed-in official is assigned to.
+// Runners see every contest so they can override assignments during an event.
+func (s *Server) myContests(w http.ResponseWriter, r *http.Request) {
+	identity, ok := auth.FromContext(r.Context())
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "authentication required"})
+		return
+	}
+	fights, err := s.allDemoFights(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	if identity.Role == auth.RoleTournamentRunner {
+		writeJSON(w, http.StatusOK, map[string]any{"contests": fights, "role": identity.Role})
+		return
+	}
+	assigned := map[string]string{}
+	rows, err := s.Store.QueryContext(r.Context(),
+		`SELECT fight_id, role FROM fight_officials WHERE user_id = ?`, identity.UserID)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id, role string
+		if rows.Scan(&id, &role) == nil {
+			assigned[id] = role
+		}
+	}
+	mine := []demoFight{}
+	for _, fight := range fights {
+		if role, ok := assigned[fight.ID]; ok {
+			fight.Round = role + " · " + fight.Round
+			mine = append(mine, fight)
+		}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"contests": mine, "role": identity.Role})
 }

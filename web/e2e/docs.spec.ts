@@ -76,7 +76,9 @@ test('markdown guides render sections and a table of contents', async ({ page })
 
 test('API explorer lists every contract operation and can call a public endpoint', async ({ page }) => {
   await page.goto('/docs/api');
-  await expect(page.getByText(/79 operations/)).toBeVisible();
+  const contract = await page.request.get('/docs/operations.json');
+  const operations = (await contract.json()) as unknown[];
+  await expect(page.getByText(new RegExp(`${operations.length} operations`))).toBeVisible();
   await page.locator('.list button').filter({ hasText: 'Seeded data counts' }).first().click();
   await page.getByRole('button', { name: /Try it/ }).click();
   await expect(page.locator('.status')).toHaveText('200');

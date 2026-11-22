@@ -103,7 +103,7 @@ func seedCommand(args []string, reset bool) error {
 		if err := seed.EnsureOkami(store); err != nil {
 			return err
 		}
-		log.Printf("Okami Jiu Jitsu Challenger seeded")
+		log.Printf("Okami Jiu Jitsu Challengers Tournament 2027 seeded (mid-event)")
 	}
 	if *full {
 		if err := seed.EnsureFull(store); err != nil {

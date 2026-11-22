@@ -1,6 +1,6 @@
 # J3 API
 
-The machine-readable contract is `api/openapi.yaml` (72 paths). Generated TypeScript types live in
+The machine-readable contract is `api/openapi.yaml` (78 paths). Generated TypeScript types live in
 `web/src/lib/api-types.d.ts` and are regenerated with `bun run generate:types`. A CI test asserts
 that every registered route in `internal/api/server.go` appears in the spec.
 
@@ -63,6 +63,28 @@ curl -X POST http://127.0.0.1:8787/api/v1/fights/ok-fight-01/event \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   -d '{"corner":"red","kind":"score","points":5,"technique":"Taoshi (Takedown)"}'
 ```
+
+### Search techniques and configured points
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/demo/techniques?eventId=ev-okami&q=seoi&group=throws'
+# Response includes the catalogue match, resolvedPoints and the event's pointOptions.
+```
+
+Pass a catalogue `techniqueId` (and optionally `pointLabel`) when scoring. The server resolves the
+point value and display label from the event rules, so the values above are never trusted from the
+request body.
+
+### Call a technical result
+
+```bash
+curl -X POST http://127.0.0.1:8787/api/v1/fights/ok-fight-24/technical \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"winner":"blue","reason":"injury","detail":"shoulder injury"}'
+```
+
+The outcome is `win_blue` (or `dq_blue` for cheating/disqualification), the bout locks to
+`forfeit`, and an audited technical score event is published to the live displays.
 
 ### Safeguarding
 

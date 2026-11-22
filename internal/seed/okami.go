@@ -11,8 +11,18 @@ import (
 
 const okamiEvent = "ev-okami"
 
-// EnsureOkami creates the "Okami Jiu Jitsu Challenger" demo tournament with
-// all people, clubs, categories, rules, pools, schedule and display data.
+// EnsureOkami creates the "Okami Jiu Jitsu Challengers Tournament 2027" demo
+// tournament: a complete, mid-event fixture with live, paused, complete,
+// forfeit and upcoming contests so RBAC and public views can be QA'd quickly.
+// sqlOrNull keeps generated SQL expressions literal while leaving empty values
+// as real NULLs. All inputs are seed-owned strings, never user supplied.
+func sqlOrNull(value string) string {
+	if value == "" {
+		return "NULL"
+	}
+	return value
+}
+
 func EnsureOkami(store *db.DB) error {
 	tx, err := store.Begin()
 	if err != nil {
@@ -30,8 +40,8 @@ func EnsureOkami(store *db.DB) error {
 			[]any{`{"primary":"#b91c1c","accent":"#fbbf24","ink":"#f8fafc","style":"classic"}`}},
 		{`INSERT OR IGNORE INTO events
 		  (id, tenant_id, theme_id, name, starts_at, ends_at, status)
-		  VALUES (?, 'demo-tenant', 'okami-theme', ?, '2026-11-21T09:15:00Z','2026-11-21T21:00:00Z','published')`,
-			[]any{okamiEvent, "Okami Jiu Jitsu Challenger"}},
+		  VALUES (?, 'demo-tenant', 'okami-theme', ?, '2027-11-20T09:15:00Z','2027-11-20T21:00:00Z','published')`,
+			[]any{okamiEvent, "Okami Jiu Jitsu Challengers Tournament 2027"}},
 		{`INSERT OR IGNORE INTO event_info
 		  (event_id, organiser, venue, costs_json, refreshments, parking, hotel_json, evening_json, course_json, attendance_rule)
 		  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, []any{
@@ -132,7 +142,7 @@ func EnsureOkami(store *db.DB) error {
 		     (id, tenant_id, user_id, club_id, belt_rank_id, display_name, date_of_birth, weight_kg, gender)
 		     VALUES (?, 'demo-tenant', ?, ?, ?, ?, ?, ?, ?)`,
 			id, "ok-u"+id[2:], club, belt, name,
-			fmt.Sprintf("%d-05-01", 2026-age), weight, gender)
+			fmt.Sprintf("%d-05-01", 2027-age), weight, gender)
 		_ = band
 	}
 
@@ -240,53 +250,119 @@ func EnsureOkami(store *db.DB) error {
 			fmt.Sprintf("ok-section-%d", i+1), okamiEvent, section, i)
 	}
 
-	// Schedule from the organiser.
+	// The fixture is deliberately mid-event: opening items are complete, the
+	// afternoon fighting block is running and the evening social is upcoming.
 	for i, item := range []struct {
-		time, name, kind string
-		duration         int
+		time, name, kind, status string
+		duration                 int
 	}{
-		{"09:15", "Registration", "general", 900},
-		{"09:30", "Course (Drills and Training) — age 6+", "course", 9000},
-		{"12:00", "Break / Lunch", "break", 1800},
-		{"12:30", "Open Hand Kata — youngest to oldest, lowest to highest grade", "kata", 1800},
-		{"13:00", "Weapons Kata — green belt and above, age order", "kata", 1800},
-		{"13:30", "Junior Randori / Katamewaza (6-9) — round robin", "fight", 1800},
-		{"14:00", "Junior Ground Fighting (10-14) — round robin into elimination", "fight", 1800},
-		{"14:30", "Teens Ground Fighting & Continuous (10-15) — round robin into elimination", "fight", 1800},
-		{"15:00", "Teens Continuous Fighting (16-17) — round robin into elimination", "fight", 1800},
-		{"15:30", "Adults Continuous Fighting (18+) — round robin into elimination", "fight", 1800},
-		{"19:00", "Evening event — The Vine Hotel", "social", 7200},
+		{"09:15", "Registration", "general", "complete", 900},
+		{"09:30", "Course (Drills and Training) — age 6+", "course", "complete", 9000},
+		{"12:00", "Break / Lunch", "break", "complete", 1800},
+		{"12:30", "Open Hand Kata — youngest to oldest, lowest to highest grade", "kata", "complete", 1800},
+		{"13:00", "Weapons Kata — green belt and above, age order", "kata", "live", 1800},
+		{"13:30", "Junior Randori / Katamewaza (6-9) — round robin", "fight", "live", 1800},
+		{"14:00", "Junior Ground Fighting (10-14) — round robin into elimination", "fight", "upcoming", 1800},
+		{"14:30", "Teens Ground Fighting & Continuous (10-15) — round robin into elimination", "fight", "upcoming", 1800},
+		{"15:00", "Teens Continuous Fighting (16-17) — round robin into elimination", "fight", "upcoming", 1800},
+		{"15:30", "Adults Continuous Fighting (18+) — round robin into elimination", "fight", "upcoming", 1800},
+		{"19:00", "Evening event — The Vine Hotel", "social", "upcoming", 7200},
 	} {
 		add(`INSERT OR IGNORE INTO schedule_items
-			(id, event_id, name, area, starts_at, duration_seconds, sort_order)
-			VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			(id, event_id, name, area, starts_at, duration_seconds, sort_order, status)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 			fmt.Sprintf("ok-sched-%02d", i+1), okamiEvent, item.name, "Main hall",
-			fmt.Sprintf("2026-11-21T%s:00Z", item.time), item.duration, i)
+			fmt.Sprintf("2027-11-20T%s:00Z", item.time), item.duration, i, item.status)
 	}
+	add(`INSERT OR IGNORE INTO schedule_state (event_id, offset_minutes) VALUES (?, 7)`, okamiEvent)
 
-	// Fights with results, officials and scoring events.
-	for i := 0; i < 18; i++ {
+	// A deliberately mid-event fixture: completed bouts alongside live, paused,
+	// technical and upcoming contests so every role and public board has
+	// something realistic to QA.
+	type scoreRow struct {
+		kind, corner, technique, card string
+		points                        int
+	}
+	type fightFixture struct {
+		state, outcome string
+		seconds        int
+		running        bool
+		events         []scoreRow
+	}
+	fixtures := []fightFixture{
+		{state: "complete", outcome: "win_red", events: []scoreRow{{"score", "red", "Ippon · seoi nage", "", 3}, {"score", "blue", "Waza-ari · koshi guruma", "", 1}}},
+		{state: "complete", outcome: "win_blue", events: []scoreRow{{"score", "red", "Throw from kick", "", 2}, {"score", "blue", "Submission · cross armbar", "", 3}}},
+		{state: "complete", outcome: "draw", events: []scoreRow{{"score", "red", "Waza-ari · tomoe nage", "", 1}, {"score", "blue", "Waza-ari · osae-komi", "", 1}}},
+		{state: "complete", outcome: "win_red", events: []scoreRow{{"score", "red", "Hold down · kesa-gatame", "", 2}, {"penalty", "blue", "Shido · passivity", "shido", -1}}},
+		{state: "complete", outcome: "win_blue", events: []scoreRow{{"score", "blue", "Sweep · harai-goshi", "", 2}, {"score", "red", "Palm strike", "", 1}}},
+		{state: "complete", outcome: "win_red", events: []scoreRow{{"submission", "red", "Triangle choke", "", 0}}},
+		{state: "complete", outcome: "win_blue", events: []scoreRow{{"score", "blue", "Takedown · morote gari", "", 2}, {"penalty", "red", "Yellow card", "yellow", -1}}},
+		{state: "complete", outcome: "draw", events: []scoreRow{{"score", "red", "Knee strike", "", 1}, {"score", "blue", "Throw · haraigoshi", "", 1}}},
+		{state: "complete", outcome: "win_red", events: []scoreRow{{"score", "red", "Mount control", "", 2}, {"score", "blue", "Guard pass", "", 1}}},
+		{state: "complete", outcome: "win_blue", events: []scoreRow{{"score", "blue", "Ippon · ippon seoi nage", "", 3}, {"score", "red", "Waza-ari", "", 1}}},
+		{state: "live", outcome: "", seconds: 95, running: true, events: []scoreRow{{"score", "red", "Throw · seoi nage", "", 2}, {"score", "blue", "Palm strike", "", 1}}},
+		{state: "paused", outcome: "", seconds: 47, events: []scoreRow{{"score", "blue", "Hold · yoko-shiho-gatame", "", 2}, {"penalty", "red", "Shido", "shido", -1}}},
+		{state: "live", outcome: "", seconds: 142, running: true, events: []scoreRow{{"score", "red", "Reap · osoto-gari", "", 2}}},
+		{state: "forfeit", outcome: "win_blue", events: []scoreRow{{"forfeit", "blue", "Technical result · Injury", "", 0}}},
+		{state: "forfeit", outcome: "dq_red", events: []scoreRow{{"technical", "blue", "Technical result · Cheating / unsportsmanlike conduct", "red", 0}}},
+		{state: "complete", outcome: "draw", events: []scoreRow{{"score", "red", "Throw · koshi-guruma", "", 2}, {"score", "blue", "Sweep · tomoe-nage", "", 2}}},
+		{state: "pending", outcome: "", seconds: 180},
+		{state: "pending", outcome: "", seconds: 180},
+		{state: "pending", outcome: "", seconds: 180},
+		{state: "pending", outcome: "", seconds: 180},
+		{state: "complete", outcome: "win_blue", events: []scoreRow{{"submission", "blue", "Submission · rear naked choke", "", 0}}},
+		{state: "complete", outcome: "win_red", events: []scoreRow{{"score", "red", "Ippon · ura-nage", "", 3}}},
+		{state: "live", outcome: "", seconds: 61, running: true, events: []scoreRow{{"score", "red", "Kick · mawashi geri", "", 1}, {"score", "blue", "Takedown · kata-guruma", "", 2}}},
+		{state: "paused", outcome: "", seconds: 24, events: []scoreRow{{"penalty", "blue", "Yellow card", "yellow", -1}}},
+	}
+	for i, fixture := range fixtures {
 		fightID := fmt.Sprintf("ok-fight-%02d", i+1)
 		red, blue := fmt.Sprintf("ok-f%02d", i+1), fmt.Sprintf("ok-f%02d", (i+1)%40+1)
-		outcome := "win_red"
-		if i%3 == 2 {
-			outcome = "draw"
-		}
-		if i%4 == 3 {
-			outcome = "win_blue"
+		mat := fmt.Sprintf("ok-mat-%d", i%2+1)
+		completed := ""
+		if fixture.state == "complete" || fixture.state == "forfeit" {
+			completed = fmt.Sprintf("strftime('%%Y-%%m-%%dT%%H:%%M:%%fZ','now','-%d minutes')", len(fixtures)-i)
 		}
 		add(`INSERT OR IGNORE INTO fights
-			(id, event_id, mat_id, round_label, red_fighter_id, blue_fighter_id, state, outcome)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-			fightID, okamiEvent, fmt.Sprintf("ok-mat-%d", i%2+1),
+			(id, event_id, mat_id, category_id, round_label, red_fighter_id, blue_fighter_id, state, outcome, completed_at)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, `+sqlOrNull(completed)+`)`,
+			fightID, okamiEvent, mat, []string{"ok-age-minor", "ok-weight-light", "ok-age-adult", "ok-weight-mid"}[i%4],
 			[]string{"Randori", "Ground", "Continuous", "Sparring"}[i%4],
-			red, blue, "complete", outcome)
+			red, blue, fixture.state, fixture.outcome)
 		add(`INSERT OR IGNORE INTO fight_officials (fight_id, user_id, role) VALUES (?, ?, 'referee')`,
 			fightID, fmt.Sprintf("u-judge-%d", i%6+1))
-		add(`INSERT OR IGNORE INTO fight_events (fight_id, seq, kind, payload_json) VALUES (?,1,'score',?)`,
-			fightID, `{"corner":"red","points":5,"technique":"Hold down"}`)
-		add(`INSERT OR IGNORE INTO fight_events (fight_id, seq, kind, payload_json) VALUES (?,2,'score',?)`,
-			fightID, `{"corner":"blue","points":3,"technique":"Throw from kick"}`)
+		add(`INSERT OR IGNORE INTO fight_officials (fight_id, user_id, role) VALUES (?, ?, 'judge')`,
+			fightID, fmt.Sprintf("u-judge-%d", (i+2)%6+1))
+		add(`INSERT OR IGNORE INTO fight_officials (fight_id, user_id, role) VALUES (?, ?, 'scorekeeper')`,
+			fightID, fmt.Sprintf("u-keeper-%d", i%2+1))
+		if fixture.state != "pending" {
+			endsAt := "''"
+			if fixture.running {
+				endsAt = fmt.Sprintf("strftime('%%Y-%%m-%%dT%%H:%%M:%%fZ','now','+%d seconds')", fixture.seconds)
+			}
+			running := 0
+			if fixture.running {
+				running = 1
+			}
+			add(`INSERT OR IGNORE INTO fight_state
+				(fight_id, seconds_remaining, running, round, ends_at)
+				SELECT ?, ?, ?, ?, `+endsAt+`
+				WHERE NOT EXISTS (SELECT 1 FROM fight_state WHERE fight_id = ?)`,
+				fightID, fixture.seconds, running, 1+i%3, fightID)
+		}
+		for seq, event := range fixture.events {
+			add(`INSERT OR IGNORE INTO score_events
+				(fight_id, seq, kind, corner, points, technique, card, actor_user_id, payload_json)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				fightID, seq+1, event.kind, event.corner, event.points, event.technique, event.card,
+				fmt.Sprintf("u-keeper-%d", i%2+1), `{"source":"seeded-mid-event"}`)
+		}
+		if i < 10 {
+			add(`INSERT OR IGNORE INTO fight_events (fight_id, seq, kind, payload_json) VALUES (?,1,'score',?)`,
+				fightID, `{"corner":"red","points":3,"technique":"Ippon · seoi nage"}`)
+			add(`INSERT OR IGNORE INTO fight_events (fight_id, seq, kind, payload_json) VALUES (?,2,'score',?)`,
+				fightID, `{"corner":"blue","points":1,"technique":"Waza-ari · osae-komi"}`)
+		}
 	}
 
 	// Discipline participation: 20 kata, 40 continuous ground, 40 continuous,
@@ -318,17 +394,28 @@ func EnsureOkami(store *db.DB) error {
 		}
 	}
 
-	// Kata performances with three judges × three sections.
+	// Kata: first round complete, weapons round partly judged and the last
+	// competitors still waiting. Three judges score each of three sections.
 	for i := 0; i < 10; i++ {
 		performanceID := fmt.Sprintf("ok-kata-%02d", i+1)
+		status, round := "complete", 1
+		switch {
+		case i >= 8:
+			status, round = "pending", 2
+		case i >= 6:
+			status, round = "live", 2
+		}
 		add(`INSERT OR IGNORE INTO kata_performances
 			(id, event_id, fighter_id, kata_name, panel_size, round_number, kata_type, status, total)
-			VALUES (?, ?, ?, ?, 3, 1, ?, 'complete', ?)`,
+			VALUES (?, ?, ?, ?, 3, ?, ?, ?, ?)`,
 			performanceID, okamiEvent, fmt.Sprintf("ok-f%02d", i+1),
 			[]string{"Hekigan-ken", "Seiyunchin", "Gekusai-dai", "Pinan sono ichi", "Kanku-dai"}[i%5],
-			"tokuyi", float64(24+i%4))
+			round, "tokuyi", status, float64(24+i%4))
 		for judge := 1; judge <= 3; judge++ {
 			for section := 1; section <= 3; section++ {
+				if status == "pending" || (status == "live" && section > 1) {
+					continue
+				}
 				add(`INSERT OR IGNORE INTO kata_section_scores (performance_id, section_id, judge, score)
 				     VALUES (?, ?, ?, ?)`,
 					performanceID, fmt.Sprintf("ok-section-%d", section), judge, 7+float64((i+judge+section)%4))
@@ -362,25 +449,35 @@ func EnsureOkami(store *db.DB) error {
 			fmt.Sprintf("ok-ent-ok-disc-ground-%02d", i+1), attended, excluded)
 	}
 
-	// Medals and audit trail.
-	for _, award := range []struct{ id, kind string }{
+	// Medals already awarded in the completed blocks of the programme.
+	for i, award := range []struct{ id, kind string }{
 		{"ok-f01", "gold"}, {"ok-f02", "silver"}, {"ok-f03", "bronze"}, {"ok-f04", "bronze"},
+		{"ok-f06", "gold"}, {"ok-f07", "silver"}, {"ok-f08", "bronze"}, {"ok-f09", "bronze"},
+		{"ok-f21", "gold"}, {"ok-f22", "silver"}, {"ok-f16", "bronze"}, {"ok-f16", "bronze"},
 	} {
 		add(`INSERT OR IGNORE INTO medals (id, event_id, fighter_id, kind) VALUES (?, ?, ?, ?)`,
-			fmt.Sprintf("ok-medal-%s-%s", award.kind, award.id), okamiEvent, award.id, award.kind)
+			fmt.Sprintf("ok-medal-%02d-%s-%s", i+1, award.kind, award.id), okamiEvent, award.id, award.kind)
 	}
-	add(`INSERT INTO audit_log (tenant_id, actor_user_id, actor_role, action, target_type, target_id, after_json)
-	     VALUES ('demo-tenant','u-tony','tournament_runner','okami.seed','event',?,'{"seeded":true}')`, okamiEvent)
+	// Idempotent audit trail entries describing the mid-event state.
+	for _, entry := range []struct{ action, target, actor, role, after string }{
+		{"okami.seed", okamiEvent, "u-tony", "tournament_runner", `{"seeded":true,"year":2027}`},
+		{"fight.start", "ok-fight-11", "u-keeper-1", "official", `{"running":true,"mat":"Mat 1"}`},
+		{"fight.penalty", "ok-fight-12", "u-keeper-2", "official", `{"card":"shido","corner":"red"}`},
+		{"fight.technical", "ok-fight-14", "u-keeper-2", "official", `{"outcome":"win_blue","reason":"injury"}`},
+		{"fight.technical", "ok-fight-15", "u-keeper-1", "official", `{"outcome":"dq_red","reason":"cheating"}`},
+		{"schedule.drift", okamiEvent, "u-tony", "tournament_runner", `{"offsetMinutes":7}`},
+	} {
+		add(`INSERT INTO audit_log
+			(tenant_id, actor_user_id, actor_role, action, target_type, target_id, after_json)
+			SELECT 'demo-tenant', ?, ?, ?, 'fight', ?, ?
+			WHERE NOT EXISTS (SELECT 1 FROM audit_log WHERE target_id = ? AND action = ?)`,
+			entry.actor, entry.role, entry.action, entry.target, entry.after, entry.target, entry.action)
+	}
 
-	for _, statement := range stmts {
-		if _, err := tx.Exec(statement.query, statement.args...); err != nil {
-			return fmt.Errorf("okami seed %q: %w", statement.query, err)
-		}
-	}
 	// Ready-to-clone templates: a full example and three empty starting points.
 	for _, template := range []struct{ id, name, config string }{
-		{"tpl-okami", "Okami Challenger (full)",
-			`{"name":"Okami Jiu Jitsu Challenger","disciplines":[{"name":"Open Hand Kata"}],"categories":[{"name":"Adults","kind":"age","min":18,"max":99}],"saveTemplate":true}`},
+		{"tpl-okami", "Okami Challengers 2027 (full)",
+			`{"name":"Okami Jiu Jitsu Challengers Tournament 2027","disciplines":[{"name":"Open Hand Kata"}],"categories":[{"name":"Adults","kind":"age","min":18,"max":99}],"saveTemplate":true}`},
 		{"tpl-club", "Club open day (empty)",
 			`{"name":"Club Open Day","disciplines":[],"categories":[],"constraints":{"cap":50,"maxPools":8},"saveTemplate":true}`},
 		{"tpl-kata", "Kata only (empty)",
@@ -390,6 +487,12 @@ func EnsureOkami(store *db.DB) error {
 	} {
 		add(`INSERT OR IGNORE INTO tournament_templates (id, tenant_id, name, config_json) VALUES (?, 'demo-tenant', ?, ?)`,
 			template.id, template.name, template.config)
+	}
+
+	for _, statement := range stmts {
+		if _, err := tx.Exec(statement.query, statement.args...); err != nil {
+			return fmt.Errorf("okami seed %q: %w", statement.query, err)
+		}
 	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte("demo"), bcrypt.DefaultCost)

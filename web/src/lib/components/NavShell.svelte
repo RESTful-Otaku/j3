@@ -4,8 +4,8 @@
   import { api, type DemoIdentity } from '../api';
   import { landingForRole, session, switchDemoUser, uiRole } from '../auth';
   import {
-    currentRole, HOME_ROUTE, itemsForRole, MOBILE_PRIMARY_HREFS,
-    NAV_GROUPS, type NavItem, type Role,
+    canUseOnPhone, currentRole, HOME_ROUTE, isPhoneWidth, itemsForRole,
+    MOBILE_PRIMARY_HREFS, NAV_GROUPS, phoneHome, type NavItem, type Role,
   } from '../nav';
 
   let expanded = false;
@@ -13,6 +13,7 @@
   let role: Role = 'runner';
   let items: NavItem[] = [];
   let isMobile = false;
+  let isPhone = false;
   let identities: DemoIdentity[] = [];
   let identityId = '';
   let switching = false;
@@ -22,8 +23,14 @@
 
   afterNavigate(() => { activePath = window.location.pathname; });
 
+  function visibleItems() {
+    return itemsForRole(role).filter((item) => !isPhone || canUseOnPhone(item.href));
+  }
+
   function syncViewport() {
     isMobile = window.innerWidth <= 820;
+    isPhone = isPhoneWidth();
+    items = visibleItems();
   }
 
   function syncNavWidth() {
@@ -41,7 +48,7 @@
   function syncSession() {
     const active = session();
     role = active ? uiRole(active.role) : currentRole();
-    items = itemsForRole(role);
+    items = visibleItems();
     identityId = active?.userId ?? '';
   }
 
@@ -102,8 +109,8 @@
     try {
       const next = await switchDemoUser(value);
       role = uiRole(next.role);
-      items = itemsForRole(role);
-      await goto(landingForRole(next.role));
+      items = visibleItems();
+      await goto(isPhone ? phoneHome(role) : landingForRole(next.role));
     } catch (e) {
       switchError = e instanceof Error ? e.message : String(e);
     } finally {
@@ -148,6 +155,9 @@
           {/if}
         {/each}
       </nav>
+      {#if isPhone}
+        <p class="phone-note">Phone view shows public, participant, club and guardian screens. Scoring, setup and audit tools are available on tablet or desktop.</p>
+      {/if}
       <button class="help-btn" data-guide="nav-help-full" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
       <div class="role-picker">
         <span class="muted small">Demo identity · sign in as</span>
@@ -282,7 +292,7 @@
   .mobile-bar .hamburger { margin-left:auto; }
   .mobile-bottom {
     position:fixed; left:0; right:0; bottom:0; z-index:815;
-    display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:2px;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(0,1fr)); gap:2px;
     padding:6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
     background:var(--brand-surface-2); border-top:1px solid var(--brand-border);
     box-shadow:0 -8px 24px rgba(0,0,0,.28);
@@ -302,5 +312,6 @@
   .mobile-drawer nav { display:grid; gap:3px; overflow-y:auto; flex:1; }
   .mobile-drawer .nav-item { min-height:46px; }
   .mobile-drawer .group-label, .mobile-drawer .group-toggle { margin-top:10px; }
+  .phone-note { margin:0; padding:10px 12px; border-radius:9px; background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-muted); font-size:.74rem; line-height:1.4; }
   @keyframes slide { from { transform:translateX(100%); } to { transform:none; } }
 </style>

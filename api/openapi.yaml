@@ -149,6 +149,27 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/DemoFight'
+  /api/v1/demo/my-contests:
+    get:
+      operationId: myContests
+      summary: Contests assigned to the signed-in official (runners see all)
+      responses:
+        '200':
+          description: Assigned contests
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - contests
+                - role
+                properties:
+                  contests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DemoFight'
+                  role:
+                    type: string
   /api/v1/query:
     get:
       operationId: query
@@ -726,6 +747,51 @@ paths:
           description: Fight state
         '400':
           description: Invalid outcome
+  /api/v1/fights/{id}/technical:
+    post:
+      operationId: callTechnicalResult
+      summary: Call a technical win/loss for injury, forfeit, cheating or no-show
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - winner
+              - reason
+              properties:
+                winner:
+                  type: string
+                  enum:
+                  - red
+                  - blue
+                reason:
+                  type: string
+                  enum:
+                  - injury
+                  - forfeit
+                  - cheating
+                  - dq
+                  - no_show
+                  - withdrawal
+                  - referee
+                  - other
+                detail:
+                  type: string
+      responses:
+        '200':
+          description: Locked fight state
+        '400':
+          description: Invalid winner or reason
+        '403':
+          description: Not assigned to this contest
   /api/v1/demo/brackets:
     get:
       operationId: listBrackets
@@ -904,11 +970,55 @@ paths:
   /api/v1/demo/techniques:
     get:
       operationId: techniques
-      summary: Bilingual technique palette (English and romaji) with point values
+      summary: Searchable bilingual JJJ technique catalogue with configured point options
       security: []
+      parameters:
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Matches English, romaji, Japanese or tags
+      - name: group
+        in: query
+        schema:
+          type: string
+        description: Technique group id, e.g. throws or submissions
+      - name: limit
+        in: query
+        schema:
+          type: integer
+      - name: eventId
+        in: query
+        schema:
+          type: string
       responses:
         '200':
-          description: Techniques
+          description: Techniques, groups and configured point options
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - techniques
+                - groups
+                - pointOptions
+                properties:
+                  eventId:
+                    type: string
+                  count:
+                    type: integer
+                  techniques:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Technique'
+                  groups:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TechniqueGroup'
+                  pointOptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TechniquePointOption'
   /api/v1/demo/event-config:
     get:
       operationId: eventConfig
@@ -1895,6 +2005,79 @@ components:
           type: string
         payload:
           type: object
+    Technique:
+      type: object
+      required:
+      - id
+      - english
+      - romaji
+      - group
+      - pointKey
+      - kind
+      - points
+      - resolvedPoints
+      - tags
+      - instantWin
+      properties:
+        id:
+          type: string
+        english:
+          type: string
+        romaji:
+          type: string
+        japanese:
+          type: string
+        group:
+          type: string
+        pointKey:
+          type: string
+        kind:
+          type: string
+          enum:
+          - score
+          - penalty
+          - submission
+        card:
+          type: string
+        points:
+          type: integer
+        resolvedPoints:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        instantWin:
+          type: boolean
+    TechniqueGroup:
+      type: object
+      required:
+      - id
+      - label
+      - pointKey
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        pointKey:
+          type: string
+    TechniquePointOption:
+      type: object
+      required:
+      - key
+      - label
+      - value
+      - source
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        value:
+          type: integer
+        source:
+          type: string
     DemoFight:
       type: object
       required:

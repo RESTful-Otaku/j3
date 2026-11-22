@@ -44,7 +44,10 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ hashFiles('web/android/gradle/wrapper/gradle-wrapper.properties') }}
       - run: bun install --cwd web --frozen-lockfile
-      - run: bun run --cwd web build
+      - name: Build web app with bundled offline demo data
+        env:
+          VITE_OFFLINE_DEMO: '1'
+        run: bun run --cwd web build
       - run: bunx --cwd web cap sync android
       - name: Build debug APK
         working-directory: web/android
@@ -77,7 +80,10 @@ jobs:
         with:
           bun-version: 1.4.5
       - run: bun install --cwd web --frozen-lockfile
-      - run: bun run --cwd web build
+      - name: Build web app with bundled offline demo data
+        env:
+          VITE_OFFLINE_DEMO: '1'
+        run: bun run --cwd web build
       - run: bunx --cwd web cap sync ios
       - name: Build unsigned simulator app
         working-directory: web/ios/App

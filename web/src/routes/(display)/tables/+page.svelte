@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { initials } from '../../../lib/format';
+  import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import { api, type StandingRow, type KataPerformance } from '../../../lib/api';
 
   let standings: StandingRow[] = [];
@@ -76,7 +77,7 @@
         <p class="muted small">Scores are dropped high/low and averaged; totals are authoritative.</p>
         <button class="btn" on:click={advanceKata}>⏭ Advance top 8 to next round</button>
       </div>
-      <div style="display:grid; gap:12px; margin-top:14px;">
+      <div style="display:grid; gap:12px; margin-top:14px;" use:phoneLimit={4}>
         {#each kataPerformances as performance (performance.id)}
           <div class="rule-card" style="padding:12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3);">
             <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -97,7 +98,7 @@
         {:else}<span class="muted small">No kata performances recorded yet.</span>{/each}
       </div>
     </div>
-    <div class="card" style="overflow-x:auto;">
+    <div class="card">
       <h2>Kata judged competition</h2>
       <p class="muted small">Panel of seven judges · highest and lowest discarded · mean of middle five.</p>
       <table style="width:100%; border-collapse:collapse; margin-top:14px;">
@@ -105,7 +106,7 @@
           <th style="padding:8px;">Competitor</th><th>Approved kata</th>
           {#each Array(7) as _, i}<th>J{i + 1}</th>{/each}<th>Drop</th><th>Total</th><th>Rank</th>
         </tr></thead>
-        <tbody>
+        <tbody use:phoneRows={5}>
           {#each [...kataPerformances].sort((a, b) => b.total - a.total) as performance, i (performance.id)}
             <tr style="border-top:1px solid var(--brand-border);">
               <td style="padding:8px;"><strong>{performance.name}</strong></td>
@@ -124,7 +125,7 @@
       </table>
     </div>
   {:else if tab === 'medals'}
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%,300px), 1fr));">
+    <div class="grid" use:phoneLimit={6} style="grid-template-columns: repeat(auto-fit, minmax(min(100%,300px), 1fr));">
       {#each medalRows as row, i (row.fighterId)}
         <div class="stat slide-in" style="border-left:5px solid {i === 0 ? '#fbbf24' : i === 1 ? '#cbd5e1' : i === 2 ? '#d97706' : 'var(--brand-primary)'};">
           <div class="value">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</div>
@@ -134,11 +135,11 @@
       {/each}
     </div>
   {:else}
-    <div class="card" style="overflow-x:auto;">
+    <div class="card">
       <h2>{tab === 'overall' ? 'Overall standings' : 'Category standings'}</h2>
       <table style="width:100%; border-collapse:collapse; margin-top:14px; font-size:clamp(.9rem,1.2vw,1.3rem);">
         <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">#</th><th>Fighter</th><th>Category</th><th>Grade</th><th>Club</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead>
-        <tbody>
+        <tbody use:phoneRows={8}>
           {#each filtered as row, i (row.fighterId)}
             <tr style="border-top:1px solid var(--brand-border);">
               <td style="padding:8px;">{i + 1}</td>

@@ -37,11 +37,15 @@ check_env() {
 
 build_apk() {
   check_env || return 1
+  python3 scripts/mobile-icons.py || return 1
+  bash scripts/mobile-demo-data.sh || return 1
   local server_url="${J3_SERVER_URL:-}"
   if [ -n "$server_url" ]; then
-    echo "📡 Baking venue URL: $server_url"
+    echo "📡 Baking venue URL: $server_url (offline demo fallback bundled)"
+  else
+    echo "📦 Building standalone offline demo (no venue URL baked)"
   fi
-  VITE_API_BASE_URL="$server_url" bun run --cwd web build >/dev/null || return 1
+  VITE_API_BASE_URL="$server_url" VITE_OFFLINE_DEMO=1 bun run --cwd web build >/dev/null || return 1
   (cd web && bunx cap sync android) >/dev/null || return 1
   (cd web/android && ./gradlew assembleDebug --no-daemon) || return 1
   mkdir -p artifacts

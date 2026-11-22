@@ -17,13 +17,38 @@ test.describe('Mobile navigation & layouts', () => {
     await expect(drawer).toHaveCount(0);
   });
 
-  test('key views stay usable without endless scrolling', async ({ page }) => {
-    for (const route of ['/', '/setup', '/display', '/mat', '/public', '/brackets', '/tables', '/pools', '/control', '/data', '/audit', '/settings', '/details', '/simulate', '/ceremony', '/builder', '/ui', '/view', '/operations', '/overlay', '/event', '/official', '/login', '/permissions']) {
+  test('phone views fit the viewport without sideways scrolling', async ({ page }) => {
+    for (const route of ['/', '/login', '/signup', '/public', '/brackets', '/tables', '/pools', '/ceremony', '/event', '/details', '/notifications', '/settings', '/guides', '/docs', '/view']) {
       await page.goto(route);
       await expect(page.locator('body')).not.toBeEmpty();
-      const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
-      expect(scrollHeight, `${route} should fit reasonably on a phone`).toBeLessThan(8000);
+      const metrics = await page.evaluate(() => ({
+        width: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        scrollHeight: document.documentElement.scrollHeight,
+      }));
+      expect(metrics.scrollWidth, `${route} should not scroll sideways`).toBeLessThanOrEqual(metrics.width + 1);
+      expect(metrics.scrollHeight, `${route} should fit reasonably on a phone`).toBeLessThan(6000);
     }
+  });
+
+  test('operator screens stay on tablet and desktop', async ({ page }) => {
+    for (const route of ['/setup', '/display', '/mat', '/control', '/data', '/audit', '/builder', '/ui', '/operations', '/overlay', '/official', '/permissions', '/simulate']) {
+      await page.goto(route);
+      await expect(page).toHaveURL(/\/public$/);
+    }
+    await page.getByRole('button', { name: 'Open navigation' }).click();
+    const drawer = page.locator('.mobile-drawer');
+    await expect(drawer.getByRole('link', { name: /Official console/ })).toHaveCount(0);
+    await expect(drawer.getByRole('link', { name: /Create tournament/ })).toHaveCount(0);
+    await expect(drawer.getByText(/Scoring, setup and audit tools are available on tablet or desktop/)).toBeVisible();
+  });
+
+  test('bundled seeded data works with the venue server offline', async ({ page }) => {
+    await page.route('**/api/**', (route) => route.abort());
+    await page.route('**/healthz', (route) => route.abort());
+    await page.goto('/public?offline=1');
+    await expect(page.locator('body')).toContainText('Okami Jiu Jitsu Challengers Tournament 2027');
+    await expect(page.locator('body')).toContainText('On the mats now');
   });
 });
 

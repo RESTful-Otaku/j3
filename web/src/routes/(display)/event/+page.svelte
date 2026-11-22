@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { getJson } from '../../../lib/api';
   import { notifySuccess } from '../../../lib/toast';
+  import { phoneLimit, phoneRows } from '../../../lib/responsive';
 
   type Config = {
     event: {
@@ -68,10 +69,10 @@
     {:else if tab === 'rules'}
       <div class="card slide-in" style="margin-bottom:18px;">
         <div class="eyebrow">Progression & fairness</div><h2>Competition formats</h2>
-        <div style="overflow-x:auto;">
+        <div>
           <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:.86rem;">
             <thead><tr class="muted small" style="text-align:left;"><th>Discipline</th><th>Format</th><th>Next stage</th><th>Third place</th><th>Order</th></tr></thead>
-            <tbody>
+            <tbody use:phoneRows={5}>
               {#each config.formats ?? [] as format (format.Discipline)}
                 <tr style="border-top:1px solid var(--brand-border);">
                   <td>{format.Discipline}</td><td>{format.Format}</td><td>{format.Knockout}</td>
@@ -83,7 +84,7 @@
           </table>
         </div>
       </div>
-      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+      <div class="grid" use:phoneLimit={5} style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
         {#each config.rules as rule (rule.name)}
           <div class="card slide-in">
             <div class="eyebrow">{rule.kind} · {rule.ages}</div><h2>{rule.name}</h2>

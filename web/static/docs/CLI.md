@@ -31,9 +31,26 @@ The **Build** menu creates a release binary and can locally verify the CI/CD scr
 
 The **Mobile** menu prepares Capacitor projects, builds an Android APK and launches an Android Studio emulator. On this host the reliable emulator command uses `~/Android/Sdk`, the `j3-pixel-10-pro` AVD and `-gpu auto`. iOS builds require macOS and Xcode.
 
+For a locally testable seeded build:
+
+```bash
+bash scripts/mobile.sh build      # standalone, offline-capable APK
+bash scripts/mobile.sh install    # install on the connected emulator/device
+```
+
+Every mobile build regenerates the J3 launcher/splash icons from `web/static/brand/logo.png` via `scripts/mobile-icons.py`, then runs `scripts/mobile-demo-data.sh`. That script seeds a fresh mid-event Okami 2027 SQLite file (`web/static/j3-demo.db`) and a read-only API snapshot (`web/static/j3-demo-data.json`) from a temporary venue server. Both are bundled inside the APK. When the phone can reach the venue LAN, the app uses live data; when it cannot, public/participant/club/guardian screens fall back to the bundled seeded snapshot, so the tournament can be demonstrated anywhere.
+
+To bake a specific venue URL for live scoring QA, start the venue server from the TUI (**Run demo for phone QA**) and build with:
+
+```bash
+J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build
+```
+
+The local demo server allow-lists Capacitor's `http://localhost` and `capacitor://localhost` origins. Phones intentionally show only public, participant, club and guardian screens; scoring, setup, audit and control-room tools remain available on tablet/desktop/display screens. Verified emulator evidence is saved under `docs/qa/`: `pixel-10-pro-icon.png` (branded launcher icon), `pixel-10-pro-running.png`/`pixel-10-pro-logcat.txt` (live LAN build) and `pixel-10-pro-offline.png`/`pixel-10-pro-offline-logcat.txt` (venue server stopped, bundled snapshot in use).
+
 ## Data and reset
 
-Use **Reset demo data** to restore the seeded tournament. The full seed includes 40 fighters, four clubs, kata scores, medals, pools, brackets and an audit trail. A single SQLite file is the portable backup.
+Use **Reset demo data** to restore the seeded tournament. The default Okami Jiu Jitsu Challengers Tournament 2027 seed is deliberately **mid-event**: completed and drawn bouts, running and paused clocks, technical results, upcoming contests, partly judged kata, live schedule drift, medals and an audit trail. The full seed additionally includes a six-round bracket and deterministic 50-participant simulation data. It has 40 fighters, four clubs, kata scores, medals, pools and brackets. A single SQLite file is the portable backup.
 
 ## Troubleshooting
 

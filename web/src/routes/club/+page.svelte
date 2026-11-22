@@ -46,7 +46,7 @@
       <label class="field">Name<input bind:value={name} /></label>
       <label class="field" style="margin-top:10px;">Email<input type="email" bind:value={email} /></label>
       <button class="btn primary" data-guide="club-invite-submit" style="margin-top:14px;" on:click={addMember}>Send club invite</button>
-      <a class="btn" style="margin-top:10px;" href="/operations">📥 Check-in & import</a>
+      <a class="btn desktop-only" style="margin-top:10px;" href="/operations">📥 Check-in & import</a>
     </div>
   </div>
 </div>

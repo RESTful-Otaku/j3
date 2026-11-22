@@ -3,6 +3,7 @@
   import { initials } from '../../../lib/format';
   import { api, livePoll, type DemoFight, type PoolView, type BracketStage, broadcastPA } from '../../../lib/api';
   import { notifySuccess, notifyError } from '../../../lib/toast';
+  import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
 
   type Slot = { id: string; name: string; colour: string };
@@ -243,7 +244,7 @@
       {/each}
     </div>
   {:else if mode === 'elimination'}
-    <div style="display:flex; gap:clamp(14px,2vw,40px); overflow-x:auto; padding-bottom:20px; align-items:flex-start;">
+    <div class="bracket-rounds" style="display:flex; gap:clamp(14px,2vw,40px); padding-bottom:20px; align-items:flex-start;" use:phoneLimit={3}>
       {#each groups as [round, roundFights] (round)}
         <section style="min-width:clamp(280px,24vw,420px); flex:1;">
           <div class="eyebrow">{round}</div>
@@ -275,11 +276,11 @@
       {/each}
     </div>
   {:else}
-    <div class="card" style="overflow-x:auto;">
+    <div class="card">
       <h2>Round robin — every pairing and its result</h2>
       <table style="width:100%; border-collapse:collapse; margin-top:12px;">
         <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">Round</th><th>Mat</th><th>Red</th><th>Blue</th><th>Result</th><th>State</th></tr></thead>
-        <tbody>
+        <tbody use:phoneRows={10}>
           {#each fights as fight (fight.id)}
             <tr style="border-top:1px solid var(--brand-border);">
               <td style="padding:8px;">{fight.round}</td><td>{fight.mat}</td>
@@ -328,4 +329,12 @@
   .bracket-slot:hover .slot-actions, .bracket-slot:focus-within .slot-actions { opacity:1; }
   @media (hover: none) { .slot-actions { opacity:1; } }
   .slot-actions .tab { padding:4px 7px; font-size:.72rem; }
+  @media (max-width: 700px) {
+    .bracket-wrap { display:grid; grid-template-columns:1fr; min-width:0; overflow:visible; padding-bottom:8px; }
+    .bracket-column { min-width:0; width:100%; }
+    .bracket-lines { display:none; }
+    .bracket-matches { justify-content:flex-start; }
+    .bracket-rounds { display:grid !important; grid-template-columns:1fr; }
+    .bracket-rounds > section { min-width:0; width:100%; }
+  }
 </style>

@@ -18,7 +18,7 @@ mkdir -p data
 
 if ! curl -fsS http://127.0.0.1:8787/healthz >/dev/null 2>&1; then
   echo "▶ Starting local venue server…"
-  J3_DEMO=1 J3_CORS_ORIGIN='http://localhost:5173,http://127.0.0.1:5173' \
+  J3_DEMO=1 J3_CORS_ORIGIN='http://localhost:5173,http://127.0.0.1:5173,http://localhost,capacitor://localhost' \
     nohup go run ./cmd/j3d -addr 127.0.0.1:8787 -db ./data/j3-demo.db -seed \
     >/tmp/j3-docs-server.log 2>&1 &
 fi

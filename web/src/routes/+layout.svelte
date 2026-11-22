@@ -7,9 +7,11 @@
   import { afterNavigate, goto } from '$app/navigation';
   import { syncRoleFromSession } from '../lib/auth';
   import { apiUrl } from '../lib/api';
-  import { canAccessPath, currentRole } from '../lib/nav';
+  import { canAccessPath, currentRole, isPhoneWidth, phoneHome } from '../lib/nav';
+  import { labelTableRows } from '../lib/responsive';
 
   let mobile = false;
+  let phone = false;
   let ready = false;
   let online = true;
   let docsRoute = false;
@@ -18,18 +20,33 @@
     const path = window.location.pathname;
     docsRoute = path.startsWith('/docs') || path === '/apidocs';
   }
-  afterNavigate(syncRoute);
+
+  function guard() {
+    if (typeof window === 'undefined') return;
+    syncRoleFromSession();
+    const role = currentRole();
+    const path = window.location.pathname;
+    if (phone && path === '/') {
+      void goto(phoneHome(role));
+      return;
+    }
+    if (!canAccessPath(role, path, phone)) {
+      void goto(phone ? phoneHome(role) : '/');
+    }
+  }
+
+  afterNavigate(() => { syncRoute(); labelTableRows(); guard(); });
   onMount(() => {
-    const sync = () => (mobile = window.innerWidth <= 820);
+    const sync = () => {
+      mobile = window.innerWidth <= 820;
+      phone = isPhoneWidth(window.innerWidth);
+    };
     sync();
     syncRoute();
 
-    const guard = () => {
-      syncRoleFromSession();
-      if (!canAccessPath(currentRole(), window.location.pathname)) void goto('/');
-    };
     guard();
-    window.addEventListener('resize', sync);
+    const onResize = () => { sync(); guard(); };
+    window.addEventListener('resize', onResize);
     window.addEventListener('j3-session-changed', guard);
     ready = true;
     const healthTimer = setInterval(async () => {
@@ -40,10 +57,12 @@
         online = false;
       }
     }, 10000);
+    const labelTimer = setInterval(() => labelTableRows(), 1500);
     return () => {
-      window.removeEventListener('resize', sync);
+      window.removeEventListener('resize', onResize);
       window.removeEventListener('j3-session-changed', guard);
       clearInterval(healthTimer);
+      clearInterval(labelTimer);
     };
   });
 </script>

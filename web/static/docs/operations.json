@@ -519,6 +519,17 @@
   {
     "group": "Demo & operations",
     "method": "GET",
+    "path": "/api/v1/demo/my-contests",
+    "operationId": "myContests",
+    "title": "Contests assigned to the signed-in official (runners see all)",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
+    "method": "GET",
     "path": "/api/v1/demo/officials",
     "operationId": "displayOfficials",
     "title": "Referees, judges and scorekeepers shown on scoreboards",
@@ -725,10 +736,39 @@
     "method": "GET",
     "path": "/api/v1/demo/techniques",
     "operationId": "techniques",
-    "title": "Bilingual technique palette (English and romaji) with point values",
+    "title": "Searchable bilingual JJJ technique catalogue with configured point options",
     "description": "",
     "auth": false,
-    "parameters": [],
+    "parameters": [
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Matches English, romaji, Japanese or tags",
+        "value": "text"
+      },
+      {
+        "name": "group",
+        "in": "query",
+        "required": false,
+        "description": "Technique group id, e.g. throws or submissions",
+        "value": "text"
+      },
+      {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": 0
+      },
+      {
+        "name": "eventId",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "value": "ev-okami"
+      }
+    ],
     "body": ""
   },
   {
@@ -975,6 +1015,25 @@
       }
     ],
     "body": ""
+  },
+  {
+    "group": "Live scoring",
+    "method": "POST",
+    "path": "/api/v1/fights/{id}/technical",
+    "operationId": "callTechnicalResult",
+    "title": "Call a technical win/loss for injury, forfeit, cheating or no-show",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": "{\n  \"winner\": \"red\",\n  \"reason\": \"injury\",\n  \"detail\": \"text\"\n}"
   },
   {
     "group": "Live scoring",

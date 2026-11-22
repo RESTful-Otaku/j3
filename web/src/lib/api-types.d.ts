@@ -190,6 +190,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/my-contests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contests assigned to the signed-in official (runners see all) */
+        get: operations["myContests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/query": {
         parameters: {
             query?: never;
@@ -700,6 +717,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/fights/{id}/technical": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Call a technical win/loss for injury, forfeit, cheating or no-show */
+        post: operations["callTechnicalResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/demo/brackets": {
         parameters: {
             query?: never;
@@ -1031,7 +1065,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bilingual technique palette (English and romaji) with point values */
+        /** Searchable bilingual JJJ technique catalogue with configured point options */
         get: operations["techniques"];
         put?: never;
         post?: never;
@@ -1616,6 +1650,32 @@ export interface components {
             kind: string;
             payload: Record<string, never>;
         };
+        Technique: {
+            id: string;
+            english: string;
+            romaji: string;
+            japanese?: string;
+            group: string;
+            pointKey: string;
+            /** @enum {string} */
+            kind: "score" | "penalty" | "submission";
+            card?: string;
+            points: number;
+            resolvedPoints: number;
+            tags: string[];
+            instantWin: boolean;
+        };
+        TechniqueGroup: {
+            id: string;
+            label: string;
+            pointKey: string;
+        };
+        TechniquePointOption: {
+            key: string;
+            label: string;
+            value: number;
+            source: string;
+        };
         DemoFight: {
             id: string;
             category: string;
@@ -1958,6 +2018,29 @@ export interface operations {
                 content: {
                     "application/json": {
                         fights: components["schemas"]["DemoFight"][];
+                    };
+                };
+            };
+        };
+    };
+    myContests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Assigned contests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        contests: components["schemas"]["DemoFight"][];
+                        role: string;
                     };
                 };
             };
@@ -2689,6 +2772,50 @@ export interface operations {
             };
         };
     };
+    callTechnicalResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    winner: "red" | "blue";
+                    /** @enum {string} */
+                    reason: "injury" | "forfeit" | "cheating" | "dq" | "no_show" | "withdrawal" | "referee" | "other";
+                    detail?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Locked fight state */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid winner or reason */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not assigned to this contest */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     listBrackets: {
         parameters: {
             query?: never;
@@ -3060,19 +3187,34 @@ export interface operations {
     };
     techniques: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Matches English, romaji, Japanese or tags */
+                q?: string;
+                /** @description Technique group id, e.g. throws or submissions */
+                group?: string;
+                limit?: number;
+                eventId?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Techniques */
+            /** @description Techniques, groups and configured point options */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        eventId?: string;
+                        count?: number;
+                        techniques: components["schemas"]["Technique"][];
+                        groups: components["schemas"]["TechniqueGroup"][];
+                        pointOptions: components["schemas"]["TechniquePointOption"][];
+                    };
+                };
             };
         };
     };

@@ -158,37 +158,43 @@
   {
     "title": "Official guide \u00b7 Get assigned",
     "section": "Start here",
-    "text": "A runner assigns officials to mats and contests. Sign in with your official account and open **Official console**. If you cannot see a contest, you are not assigned to it \u2014 ask the runner rather than trying to score from another account.",
+    "text": "A runner assigns officials to mats and contests. Sign in with your official account and open **Official console**. The contest picker shows only contests assigned to you; runners see the whole event so they can override assignments. If you cannot see a contest, you are not assigned to it \u2014 ask the runner rather than trying to score from another account.",
     "url": "/docs/official#get-assigned"
   },
   {
     "title": "Official guide \u00b7 Select the contest and corner",
     "section": "Start here",
-    "text": "1. Choose the contest in **Select contest**. 2. Tap **RED** or **BLUE** to choose the active corner. The button shows the fighter's name. 3. Search the technique palette by English name or romaji.  Points, penalties and submissions always apply to the active corner. Check the name before every entry.",
+    "text": "1. Choose the contest in **Select contest**. Live contests are offered first. 2. Tap **RED** or **BLUE** to choose the active corner. The button shows the fighter's name. 3. Use the search box and group chips to find a technique by English name, romaji, Japanese script, style or movement type.  Points, penalties and submissions always apply to the active corner. Check the name before every entry.",
     "url": "/docs/official#select-the-contest-and-corner"
   },
   {
     "title": "Official guide \u00b7 Log a technique",
     "section": "Start here",
-    "text": "Tap a technique card, review the confirmation dialogue (technique, romaji and point value), then press **Confirm & log**. The score appears on the live scoreboard immediately. If you tapped the wrong corner or technique, use **Undo last entry** \u2014 the correction is audited.",
+    "text": "The catalogue covers the full JJJ vocabulary: punches, kicks, elbows, knees, palm and nerve strikes; throws, takedowns, sweeps, reaps and hooks including sacrifice and flying variants; ground controls, hold-downs and pins; submissions, chokes, locks and breaks. Search is client-side and instant; the **Points** dropdown on the selected card lists the values configured for this event's rules (for ex",
     "url": "/docs/official#log-a-technique"
   },
   {
     "title": "Official guide \u00b7 Penalties and cards",
     "section": "Start here",
-    "text": "Penalty cards are in the same palette. A yellow card records a light foul; repeated fouls escalate according to the event's rule set. Red cards and disqualifications follow the configured penalty ladder. Never award a card without the confirmation step.",
+    "text": "Use **Yellow / shido** or **Red / hansoku** to attribute a card to the active corner. The server applies the configured penalty ladder and records the card, actor and before/after points. Never award a card without the confirmation step.",
     "url": "/docs/official#penalties-and-cards"
   },
   {
     "title": "Official guide \u00b7 Control the clock",
     "section": "Start here",
-    "text": "The scorekeeper's **Mat control** is authoritative. Start the bout, pause for referee stoppages and resume on instruction. The public board mirrors this clock. Do not run a separate stopwatch as the source of truth.",
+    "text": "The authoritative clock is on the same console as your scoring tools. **Start**, **Pause** and **Resume** write to the venue server; the public board mirrors that state. Pause for a referee stoppage and resume only on the scorekeeper's instruction. Do not run a separate stopwatch as the source of truth.",
     "url": "/docs/official#control-the-clock"
+  },
+  {
+    "title": "Official guide \u00b7 Technical wins and losses",
+    "section": "Start here",
+    "text": "For injury, forfeit, no-show, withdrawal, referee decision, cheating or disqualification, choose the winner and reason under **Technical win / loss**, add an optional detail, then call the result. J3 locks the bout, records an audited technical score event and publishes the configured `win_red`, `win_blue`, `dq_red` or `dq_blue` outcome to every display.",
+    "url": "/docs/official#technical-wins-and-losses"
   },
   {
     "title": "Official guide \u00b7 Submissions and instant wins",
     "section": "Start here",
-    "text": "A submission overrides accumulated points. Use **Red submits** or **Blue submits** for an instant win; J3 records the tap and asks you to confirm the final result. See [scoring rules](/docs/scoring) for holds, golden score and tie-breaks.",
+    "text": "A submission overrides accumulated points. Search for a choke, lock or tap, select its card and use **Log for RED/BLUE \u00b7 INSTANT WIN**; J3 records the tap and asks you to confirm the final result. See [scoring rules](/docs/scoring) for holds, golden score and tie-breaks.",
     "url": "/docs/official#submissions-and-instant-wins"
   },
   {
@@ -200,7 +206,7 @@
   {
     "title": "Official guide \u00b7 Finish the bout",
     "section": "Start here",
-    "text": "Use **Red wins**, **Blue wins** or **Draw** in the Finish & override panel, then confirm. The result is locked, pushed to every display and written to the audit trail. If you need to correct it, ask a runner to use the recorded undo path.",
+    "text": "Use **Red wins**, **Blue wins** or **Draw** in the final decision panel, then confirm. When scores are level a hint reminds you to confirm the draw or call a technical decision. The result is locked, pushed to every display and written to the audit trail. If you need to correct it, ask a runner to use the recorded undo path.",
     "url": "/docs/official#finish-the-bout"
   },
   {
@@ -638,13 +644,13 @@
   {
     "title": "CLI & TUI \u00b7 Mobile",
     "section": "Developers",
-    "text": "The **Mobile** menu prepares Capacitor projects, builds an Android APK and launches an Android Studio emulator. On this host the reliable emulator command uses `~/Android/Sdk`, the `j3-pixel-10-pro` AVD and `-gpu auto`. iOS builds require macOS and Xcode.",
+    "text": "The **Mobile** menu prepares Capacitor projects, builds an Android APK and launches an Android Studio emulator. On this host the reliable emulator command uses `~/Android/Sdk`, the `j3-pixel-10-pro` AVD and `-gpu auto`. iOS builds require macOS and Xcode.  For a locally testable seeded build:  ```bash bash scripts/mobile.sh build      # standalone, offline-capable APK bash scripts/mobile.sh instal",
     "url": "/docs/cli#mobile"
   },
   {
     "title": "CLI & TUI \u00b7 Data and reset",
     "section": "Developers",
-    "text": "Use **Reset demo data** to restore the seeded tournament. The full seed includes 40 fighters, four clubs, kata scores, medals, pools, brackets and an audit trail. A single SQLite file is the portable backup.",
+    "text": "Use **Reset demo data** to restore the seeded tournament. The default Okami Jiu Jitsu Challengers Tournament 2027 seed is deliberately **mid-event**: completed and drawn bouts, running and paused clocks, technical results, upcoming contests, partly judged kata, live schedule drift, medals and an audit trail. The full seed additionally includes a six-round bracket and deterministic 50-participant s",
     "url": "/docs/cli#data-and-reset"
   },
   {
@@ -662,7 +668,7 @@
   {
     "title": "API guide \u00b7 API guide",
     "section": "Reference",
-    "text": "# J3 API  The machine-readable contract is `api/openapi.yaml` (72 paths). Generated TypeScript types live in `web/src/lib/api-types.d.ts` and are regenerated with `bun run generate:types`. A CI test asserts that every registered route in `internal/api/server.go` appears in the spec.",
+    "text": "# J3 API  The machine-readable contract is `api/openapi.yaml` (78 paths). Generated TypeScript types live in `web/src/lib/api-types.d.ts` and are regenerated with `bun run generate:types`. A CI test asserts that every registered route in `internal/api/server.go` appears in the spec.",
     "url": "/docs/api-guide#api-guide"
   },
   {
@@ -912,6 +918,12 @@
     "url": "/docs/api?path=/api/v1/demo/medals/award&method=POST"
   },
   {
+    "title": "GET /api/v1/demo/my-contests",
+    "section": "API reference",
+    "text": "Contests assigned to the signed-in official (runners see all)",
+    "url": "/docs/api?path=/api/v1/demo/my-contests&method=GET"
+  },
+  {
     "title": "GET /api/v1/demo/officials",
     "section": "API reference",
     "text": "Referees, judges and scorekeepers shown on scoreboards",
@@ -1004,7 +1016,7 @@
   {
     "title": "GET /api/v1/demo/techniques",
     "section": "API reference",
-    "text": "Bilingual technique palette (English and romaji) with point values",
+    "text": "Searchable bilingual JJJ technique catalogue with configured point options",
     "url": "/docs/api?path=/api/v1/demo/techniques&method=GET"
   },
   {
@@ -1096,6 +1108,12 @@
     "section": "API reference",
     "text": "Confirm and lock the final result",
     "url": "/docs/api?path=/api/v1/fights/{id}/submit&method=POST"
+  },
+  {
+    "title": "POST /api/v1/fights/{id}/technical",
+    "section": "API reference",
+    "text": "Call a technical win/loss for injury, forfeit, cheating or no-show",
+    "url": "/docs/api?path=/api/v1/fights/{id}/technical&method=POST"
   },
   {
     "title": "POST /api/v1/fights/{id}/undo",

@@ -26,6 +26,21 @@ export type RoleInfo = components['schemas']['RoleInfo'];
 export type DemoSession = components['schemas']['Session'];
 export type DemoIdentity = components['schemas']['DemoIdentity'];
 export type DemoIdentitiesResponse = components['schemas']['DemoIdentitiesResponse'];
+export type Technique = components['schemas']['Technique'];
+export type TechniqueGroup = components['schemas']['TechniqueGroup'];
+export type TechniquePointOption = components['schemas']['TechniquePointOption'];
+export type TechniqueCatalogue = {
+  eventId: string;
+  count: number;
+  techniques: Technique[];
+  groups: TechniqueGroup[];
+  pointOptions: TechniquePointOption[];
+};
+export type TechnicalResultRequest = {
+  winner: 'red' | 'blue';
+  reason: 'injury' | 'forfeit' | 'cheating' | 'dq' | 'no_show' | 'withdrawal' | 'referee' | 'other';
+  detail?: string;
+};
 
 const SESSION_KEY = 'j3-session';
 
@@ -33,6 +48,40 @@ const SESSION_KEY = 'j3-session';
 // venue server URL into the bundle and load their UI from local Capacitor
 // assets, so every API path must be rewritten to that origin.
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined || '').replace(/\/+$/, '');
+const OFFLINE_DEMO = import.meta.env.VITE_OFFLINE_DEMO === '1';
+
+// Native builds ship a seeded mid-event snapshot plus the SQLite file it came
+// from. If the venue LAN is unreachable, read-only phone screens fall back to
+// that snapshot so the app still opens with real data.
+type LocalSnapshot = Record<string, unknown> & { session?: DemoSession };
+let localSnapshot: Promise<LocalSnapshot | null> | null = null;
+
+function offlineDemoEnabled() {
+  if (OFFLINE_DEMO) return true;
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('offline') === '1';
+}
+
+function bundledSnapshot(): Promise<LocalSnapshot | null> {
+  if (!offlineDemoEnabled()) return Promise.resolve(null);
+  if (!localSnapshot) {
+    localSnapshot = fetch('/j3-demo-data.json', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() as Promise<LocalSnapshot> : null)
+      .catch(() => null);
+  }
+  return localSnapshot;
+}
+
+async function localResponse(url: string): Promise<Response | null> {
+  const snapshot = await bundledSnapshot();
+  if (!snapshot) return null;
+  const value = snapshot[url] ?? snapshot[url.split('?')[0]];
+  if (value === undefined) return null;
+  return new Response(JSON.stringify(value), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
 
 export function apiUrl(path: string): string {
   if (!API_BASE || !path.startsWith('/')) return path;
@@ -67,9 +116,15 @@ async function fetchDemoSession(userId?: string): Promise<DemoSession> {
     init.headers = { 'Content-Type': 'application/json' };
     init.body = JSON.stringify({ userId });
   }
-  const response = await fetch(apiUrl('/api/v1/auth/demo'), init);
-  if (!response.ok) throw new Error(`demo sign-in failed (${response.status})`);
-  return response.json() as Promise<DemoSession>;
+  try {
+    const response = await fetch(apiUrl('/api/v1/auth/demo'), init);
+    if (!response.ok) throw new Error(`demo sign-in failed (${response.status})`);
+    return await response.json() as DemoSession;
+  } catch (error) {
+    const snapshot = await bundledSnapshot();
+    if (snapshot?.session) return snapshot.session;
+    throw error;
+  }
 }
 
 async function demoLogin(): Promise<boolean> {
@@ -139,6 +194,8 @@ async function send(url: string, init: RequestInit | undefined, headers: Headers
   try {
     return await fetch(apiUrl(url), { ...init, headers });
   } catch {
+    const local = await localResponse(url);
+    if (local) return local;
     throw new Error('Cannot reach the venue server — check that J3 is running');
   }
 }
@@ -176,6 +233,15 @@ export const api = {
   identities: () => getJson<DemoIdentitiesResponse>('/api/v1/demo/identities'),
   accounts: () => getJson<{ accounts: DemoAccount[] }>('/api/v1/demo/accounts'),
   fights: () => getJson<{ fights: DemoFight[] }>('/api/v1/demo/fights'),
+  myContests: () => getJson<{ contests: DemoFight[]; role: string }>('/api/v1/demo/my-contests'),
+  techniques: (params: { q?: string; group?: string; limit?: number; eventId?: string } = {}) => {
+    const query = new URLSearchParams();
+    if (params.q) query.set('q', params.q);
+    if (params.group) query.set('group', params.group);
+    if (params.limit) query.set('limit', String(params.limit));
+    if (params.eventId) query.set('eventId', params.eventId);
+    return getJson<TechniqueCatalogue>(`/api/v1/demo/techniques?${query}`);
+  },
   view: () => getJson<{ actor: DemoAccount; actions: Action[]; counts: DemoCounts }>('/api/v1/demo/view'),
   signupPreview: (body: SignupRequest) =>
     postJson<SignupPreview>('/api/v1/signup/preview', body),
@@ -224,6 +290,8 @@ export const api = {
   undoFightEvent: (id: string) => postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/undo`, {}),
   submitFight: (id: string, outcome: string) =>
     postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/submit`, { outcome }),
+  technicalResult: (id: string, body: TechnicalResultRequest) =>
+    postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/technical`, body),
   eventStream: (onEvent: (event: { type: string; fightId?: string; payload?: FightState }) => void) => {
     const source = new EventSource(apiUrl('/api/v1/events/stream'));
     source.onmessage = (message) => {
@@ -323,6 +391,7 @@ export type FightState = {
   fightId: string; state: string; outcome: string; running: boolean;
   seconds: number; round: number; redScore: number; blueScore: number;
   redPenalty: number; bluePenalty: number;
+  redPenaltyPoints: number; bluePenaltyPoints: number;
   holdSeconds: number; holdCorner: string;
   events: { seq: number; kind: string; corner: string; points: number; technique: string; card: string; actor: string; createdAt: string }[];
 };

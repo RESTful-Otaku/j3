@@ -6,7 +6,7 @@
 >
 > | Field | Value |
 > |---|---|
-> | Status | Implementation — Phase 1c complete; guides, persistent nav and view-builder refinement pass complete; all local gates green (2026-11-22) |
+> | Status | Implementation — officials console, full JJJ catalogue, technical results, mid-event 2027 seed, branded standalone offline-capable Android APK and phone-scoped UX complete; all local gates green (2026-11-22) |
 > | Created | 2026-11-19 |
 > | Last updated | 2026-11-22 |
 > | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
@@ -805,6 +805,40 @@ _Format: `D-### | date | decision | rationale | status`._
   — widgets reorder and resize by dragging handles with a floating ghost, drop indicator and
   eased snap animation; S/M/L, H1/H2/H3 and arrow keys remain accessible fallbacks. Status:
   accepted.
+- **D-043 | 2026-11-22 | Full JJJ catalogue with server-resolved points**
+  — the officials console searches 400 catalogue entries across 24 groups by English, romaji,
+  Japanese script, style and movement tags. Clients send `techniqueId` plus an optional
+  `pointLabel`; the server resolves points, kind, card and display label from the event rule
+  snapshot, so a browser cannot award arbitrary values. Status: accepted.
+- **D-044 | 2026-11-22 | Technical outcomes reuse the fight outcome vocabulary**
+  — injury/forfeit/no-show/withdrawal call `win_red`/`win_blue`, while cheating/DQ call
+  `dq_red`/`dq_blue`; the bout locks to `forfeit`, writes an audited technical score event and
+  fans out over SSE. Assignment guards and runner override are unchanged. Status: accepted.
+- **D-045 | 2026-11-22 | Okami 2027 is a mid-event QA fixture**
+  — the default seed is "Okami Jiu Jitsu Challengers Tournament 2027" with live, paused,
+  complete, drawn, forfeit and upcoming contests, partly judged kata, drifted schedule and audit
+  events, so RBAC and public displays can be verified without running a fixture first. Status:
+  accepted.
+- **D-046 | 2026-11-22 | Branded, LAN-baked Android QA build**
+  — `scripts/mobile-icons.py` regenerates launcher and splash assets from `web/static/brand/logo.png`;
+  the APK bakes the detected venue URL and local demo CORS allows Capacitor's `http://localhost`
+  and `capacitor://localhost` origins. Verified on the Pixel 10 Pro AVD with screenshot/logcat
+  evidence under `docs/qa/`. Status: accepted.
+- **D-047 | 2026-11-22 | Phones are participant/spectator screens; operator tools stay on larger displays**
+  — phone-width (`<=700px`) route guarding and nav filtering restrict the app to public information,
+  schedules, brackets, tables, pools, club, notifications, settings, guides and docs. Scoring,
+  setup, control, audit, query, builder and simulator routes redirect to the appropriate phone home
+  and are absent from the phone drawer/bottom nav. Tables reflow into labelled cards instead of
+  scrolling sideways, long lists have explicit “show more” controls, and the public dashboard uses
+  phone-only section tabs so a single screen never becomes an endless scroll. Tablet and desktop
+  retain every role-appropriate operator tool. Status: accepted.
+- **D-048 | 2026-11-22 | Native builds bundle a seeded SQLite fixture plus a read-only API snapshot**
+  — `scripts/mobile-demo-data.sh` seeds a fresh mid-event Okami 2027 database and captures the
+  public/participant GET responses used by phone screens. Both files ship in the APK (`j3-demo.db`
+  and `j3-demo-data.json`). While the venue LAN is reachable the app uses live data; otherwise it
+  falls back to the bundled snapshot, so the APK can be installed and demoed anywhere. The client
+  still sends `techniqueId`/`pointLabel` for scoring and all privileged mutations require the live
+  server. Mobile CI builds set `VITE_OFFLINE_DEMO=1`. Status: accepted.
 
 ## 15. Open questions
 1. True double vs consolation double as the default? (Plan: make configurable either way.)
@@ -820,6 +854,8 @@ _Format: `D-### | date | decision | rationale | status`._
    eligible division / moving up a weight with consent)?
 
 ## 16. Change log
+- **2026-11-22** — Phone-scoped UX, standalone offline APK and final QA pass. Phones (`<=700px`) now show only public/participant/club/guardian screens: operator routes redirect to `/public` (or `/club` for club leaders) and disappear from the drawer/bottom nav, tables reflow into labelled cards with no horizontal scrolling, long lists use explicit “show more” controls, and the public dashboard has compact Live/Next/Table/Results tabs. Added `web/src/lib/responsive.ts`, phone no-overflow/nav/offline E2E coverage and fixed a parallel-run race in the officials console test by waiting for a selected contest. Every mobile build now regenerates the J3 launcher/splash icons from the supplied logo, seeds a fresh mid-event Okami 2027 database via `scripts/mobile-demo-data.sh`, captures a read-only API snapshot, bundles both as `j3-demo.db`/`j3-demo-data.json`, and sets `VITE_OFFLINE_DEMO=1`; mobile CI does the same. When the venue LAN is reachable the APK uses live data; with the venue server stopped, phone screens fall back to the bundled snapshot. Fixed the fixture script so its compiled binary (not just `go run`) is cleaned up, and fixed the stale docs API-explorer test to read the operation count from the generated contract. The final APK bakes `http://192.168.1.102:8787` and was verified on `j3-pixel-10-pro`: branded launcher icon, live Okami dashboard, offline fallback with server stopped, screenshot/logcat evidence under `docs/qa/`. Local gates green: `go vet`, `go test`, `go test -race`, `bun run check` (0 errors/warnings), `bun run test` (19), `bun run e2e` (110), `bun run build`, smoke 73/73, load 200/200, TUI 44/44, generated-type parity, workflow and shell syntax checks.
+- **2026-11-22** — Officials console, catalogue and mid-event QA pass. Added a deterministic 400-entry/24-group JJJ technique catalogue (English, romaji, Japanese script, style and movement tags) and a searchable endpoint that merges configured points from rule sets and discipline rules. The officials console now lists only assigned contests for officials (all for runners), searches the whole catalogue, shows a configured-point dropdown, attributes yellow/red cards and technical wins (injury, forfeit, cheating, DQ, no-show, withdrawal, referee, other), controls the authoritative mat clock and confirms Red/Blue/Draw results with a draw hint. Scoring payloads resolve `techniqueId`/`pointLabel` server-side so browsers cannot spoof points, technique labels, card values or instant wins; technical outcomes reuse `win_*`/`dq_*` and lock to `forfeit` with audit + SSE fan-out. The default seed is now "Okami Jiu Jitsu Challengers Tournament 2027", deliberately mid-event (live, paused, complete, drawn, forfeit and upcoming contests, partly judged kata, schedule drift and audit events) for RBAC/public QA. Added 24 API/seed/catalogue tests or assertions, Vitest client tests, five Playwright console/public checks, smoke checks and updated official/scoring/API/CLI guides. The bundled Android APK now regenerates J3 launcher/splash icons from the supplied logo via `scripts/mobile-icons.py`, bakes the detected LAN venue URL and allows Capacitor origins in local demo CORS. Verified on `j3-pixel-10-pro` with seeded server, screenshot and logcat in `docs/qa/`; no CORS or console errors. Local gates green: `go vet`, `go test`, `go test -race`, `bun run check` (0 errors/warnings), `bun run test` (19), `bun run e2e` (108), `bun run build`, smoke 73/73, load 200/200, generated-type parity and workflows.
 - **2026-11-22** — Guide, shell-navigation and view-builder refinement pass. Hands-on guide steps now open the wizard tab (`wizardStep`) or require a contest selection before spotlighting controls; added real `mat-contest-select` and `mat-scores` targets, fixed the old `mat-outcome` misuse, and added an official mat-clock step. Skipping a guide now marks every step complete, persists the skipped state and suppresses auto-start until the user restarts it; /guides shows "Guide skipped · 100%" with a Restart action. The app shell is now persistent: nav renders on every normal route including display boards, mobile has a bottom quick-nav plus the top-bar icon, the J3 icon always goes to `/public`, and display routes size to the content area instead of fighting the nav. Fixed a latent Svelte reactivity bug where `groupItems(group)` hid all nav links because the template never referenced `items` directly. Dashboard, control and display links now switch views in place; explicit "↗ New tab" buttons remain for TVs/projectors. View builder gained pointer drag-to-reorder and drag-to-resize (right, bottom and corner grips) with a ghost, drop indicator and eased FLIP snap, while keeping button/keyboard sizing, save/clone/load/delete and standalone `/view` layouts. Added `view-types` helpers/tests, nav persistence E2E, skip-completion coverage and pointer-gesture builder coverage. Verified: `go vet`, `go test`, `go test -race`, `bun run check`, `bun run test` (17), `bun run e2e` (103), `bun run build`, smoke 70/70, load 200/200 and docs sync all green. Pushed as `dffe0f3`; GitHub Actions CI run 45050614850 and Mobile builds run 45050614927 both completed green.
 - **2026-11-22** — Fixed the CI-only production build failure that followed the docs site: SvelteKit's prerender
   crawler could not discover `/docs/[slug]` because the docs cards load `manifest.json` after hydration, so a clean
@@ -1011,12 +1047,16 @@ _Format: `D-### | date | decision | rationale | status`._
   tests and CI.
 
 ## 17. Immediate next actions
-1. Commit the guide/nav/builder refinement pass to `main` and push to `origin/main`; verify the
-   GitHub Actions run completes green and inspect the job logs.
+1. Commit this officials-console/mid-event/mobile pass to `main`, push to `origin/main`, verify
+   both GitHub Actions workflows complete green and inspect their job logs.
 2. Continue only with the outstanding external-dependency items in §18 (payments/waivers,
-   VAR, real-device install, venue hardware tuning, offline outbox); all in-app roadmap slices
+   VAR, physical-device install, venue hardware tuning, offline outbox); all in-app roadmap slices
    are delivered and covered by local gates.
-3. On the day, use `bun run dev` → **Docs & guides** for the live guides. The nav stays visible;
+3. For mobile QA, run `bash scripts/mobile.sh build` for the standalone seeded APK, then
+   `bash scripts/mobile.sh install`. For live scoring QA over the LAN, start **Run demo for phone QA**
+   in `dev.sh` and rebuild with `J3_SERVER_URL="$(bash scripts/mobile.sh url)"`. Screenshot/logcat
+   evidence is in `docs/qa/`.
+4. On the day, use `bun run dev` → **Docs & guides** for the live guides. The nav stays visible;
    use **Display control** → "↗ New tab" only when a board needs its own TV/projector screen.
 
 ---
@@ -1025,7 +1065,8 @@ _Format: `D-### | date | decision | rationale | status`._
 
 ### Delivered and verified
 - Go venue server + pure-Go SQLite with migrations, RBAC role catalogue, seeded demo
-  (**2 runners, 8 officials, 5 club leaders, 48 fighters, 1 spectator, 4 clubs, 6 categories, 16 fights**).
+  (**2 runners, 8 officials, 5 club leaders, 48 fighters, 1 spectator, 4 clubs, 6 categories,
+  24 mid-event Okami 2027 fights** with live, paused, complete, drawn, forfeit and upcoming states).
 - Sign-up with imperial→metric conversion, compatibility (strict + consent move-up), capacity
   checks, role request/approval, forfeit/no-show/injury handling and audit logging.
 - Deterministic, property-tested algorithms: balanced pool generation with same-club separation,
@@ -1039,8 +1080,23 @@ _Format: `D-### | date | decision | rationale | status`._
 - Local demo/simulated runs auto-login as a runner; the dashboard and expanded nav both offer a
   real identity switcher that mints a server-side session for any seeded account, so QA sees the
   exact RBAC/public-private boundaries for that user.
-- Android QA: Android Studio SDK + Pixel 10 Pro AVD (`-gpu auto`) boots reliably; the LAN-baked APK
-  installs and launches in the foreground, with screenshot/logcat evidence in `docs/qa/`.
+- Android QA: Android Studio SDK + Pixel 10 Pro AVD (`-gpu auto`) boots reliably; the branded APK
+  with regenerated J3 launcher/splash icons installs and launches in the foreground. It bundles a
+  fresh mid-event Okami 2027 SQLite database and read-only API snapshot, so it works standalone;
+  when a venue LAN URL is baked in, the same APK uses live data instead. Screenshot/logcat evidence
+  is in `docs/qa/`. Local demo CORS allows Capacitor's `http://localhost` and `capacitor://localhost`
+  origins.
+- Phone scope: `<=700px` viewports show only public/participant/club/guardian screens. Operator
+  routes redirect to `/public` (or `/club` for club leaders) and disappear from the drawer and
+  bottom nav, tables reflow into labelled cards with no horizontal scroll, long lists expose
+  “show more” controls, and the public dashboard uses compact section tabs. Tablet/desktop layouts
+  retain all role-appropriate operator tools.
+- Officials console: assigned-contest feed for officials and full-event override for runners; a
+  400-entry/24-group JJJ catalogue searchable by English, romaji, Japanese script, style and
+  movement tags; configured-point dropdowns resolved from rule snapshots; attributed yellow/red
+  cards; technical wins for injury/forfeit/cheating/DQ/no-show/withdrawal/referee/other;
+  authoritative clock start/pause/resume and final Red/Blue/Draw confirmation with draw hint.
+  Every score payload is validated server-side; technical outcomes lock the bout and broadcast.
 - Refinement batch delivered: editable point values per technique with presets + custom actions,
   combined age/height/weight/rank category ranges, second-level round durations, invite
   pagination + bulk delete, clone setup, per-config template library, drag handles separated from
@@ -1049,7 +1105,7 @@ _Format: `D-### | date | decision | rationale | status`._
   view, deterministic animated full-tournament simulator and spectator charts (top moves, club
   points, medals, standings).
 - Documentation & guided QA: 13 rendered markdown guides, live docs search, OpenAPI-derived API
-  explorer with 79 operations and “Try it”, `/apidocs` redirect, `bun run docs`, TUI **Docs &
+  explorer with 81 operations and “Try it”, `/apidocs` redirect, `bun run docs`, TUI **Docs &
   guides** menu, and hands-on role guides with real-action gating, progress checklist, jump and
   reset. Guide steps open the wizard tab or require a contest selection before highlighting its
   control; skipping marks the guide complete/dismissed until explicitly restarted. Every docs page
@@ -1063,10 +1119,10 @@ _Format: `D-### | date | decision | rationale | status`._
 - View builder: direct pointer drag-to-reorder and drag-to-resize (right/bottom/corner) with a
   floating ghost, drop indicator and eased snap animation; S/M/L, H1/H2/H3 and arrow keys remain
   accessible fallbacks. Saved layouts, standalone `/view` screens and live widgets are unchanged.
-- Test suite: `go vet ./...`, `go test ./...`, `go test -race ./...`, `bun run check`,
-  `bun run test` (17), `bun run e2e` (103 browser journey/axe/docs/guide/nav/builder checks),
-  `bun run build`, smoke 70/70, load 200/200, generated-type parity, workflow checks and the TUI
-  harness all green at the time of this update.
+- Test suite: `go vet ./...`, `go test ./...`, `go test -race ./...`, `bun run check` (0 errors),
+  `bun run test` (19), `bun run e2e` (110 browser journey/axe/docs/guide/nav/builder/official/offline
+  checks), `bun run build`, smoke 73/73, load 200/200, generated-type parity and workflow checks
+  all green at the time of this update.
 
 ### Outstanding — must finish before a real tournament
 1. **Authoritative live scoring — delivered**: server-owned timers, score/penalty/submission
@@ -1115,9 +1171,12 @@ _Format: `D-### | date | decision | rationale | status`._
 - Payments and signed waivers require gateway credentials; the flows are not wired yet.
 - Full content translation beyond the shared label dictionary (11 locales supported for labels).
 - Video assistant replay (VAR) needs a camera/streaming integration.
-- Capacitor APK/IPA installation on real devices needs an Android SDK and Apple signing identity.
+- Capacitor APK/IPA installation on physical devices needs a handset and Apple signing identity;
+  the branded Android APK is already verified on the Pixel 10 Pro emulator.
 - Projector/LED aspect-ratio tuning needs the actual venue hardware.
-- Offline replica/outbox sync is a future enhancement; the venue server is authoritative with SSE.
+- Offline replica/outbox sync for **writes** is a future enhancement; the venue server remains
+  authoritative with SSE. The bundled APK currently ships a read-only seeded snapshot for offline
+  demos.
 
 ## 19. Second full static verification pass (2026-11-22)
 

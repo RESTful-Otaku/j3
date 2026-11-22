@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { initials } from '../../../lib/format';
   import { session, uiRole } from '../../../lib/auth';
+  import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
 
   let event: EventDisplayInfo | null = null;
@@ -10,6 +11,7 @@
   let schedule: ScheduleItem[] = [];
   let now = new Date();
   let canControlSchedule = false;
+  let phoneSection: 'live' | 'next' | 'table' | 'results' = 'live';
 
   function syncRole() {
     const active = session();
@@ -84,11 +86,18 @@
     </div>
   </div>
 
+  <div class="phone-sections" aria-label="Dashboard sections">
+    {#each [['live','Live'],['next','Next up'],['table','Table'],['results','Results']] as [id, label]}
+      <button class="tab" class:active={phoneSection === id} on:click={() => (phoneSection = id as typeof phoneSection)}>{label}</button>
+    {/each}
+  </div>
+
+  <section class="phone-section" class:active={phoneSection === 'live'}>
   <div class="section-title"><h2>Today's timeline</h2></div>
-  <div class="card" style="overflow-x:auto;">
+  <div class="card">
     <table style="width:100%; border-collapse:collapse; font-size:clamp(.9rem,1.2vw,1.3rem);">
       <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">Projected</th><th>Event</th><th>Area</th><th>Status</th><th></th></tr></thead>
-      <tbody>
+      <tbody use:phoneRows={5}>
         {#each schedule as item (item.id)}
           <tr style="border-top:1px solid var(--brand-border);" class:flash={item.id === nextUp?.id}>
             <td style="padding:8px; font-weight:700;">{formatTime(item.projectedStart)}–{formatTime(item.projectedEnd)}</td>
@@ -102,16 +111,16 @@
   </div>
 
   <div class="section-title"><h2>On the mats now</h2><span class="pill"><span class="dot"></span>Live</span></div>
-  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));">
+  <div class="grid" use:phoneLimit={3} style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));">
     {#each live as fight (fight.id)}
       <div class="card slide-in" style="border-color:var(--brand-primary);">
         <div class="meta">{fight.mat} · {fight.category} · {fight.round}</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:18px; margin-top:12px;">
+        <div class="live-duel" style="display:flex; justify-content:space-between; align-items:center; gap:18px; margin-top:12px;">
           <div style="display:flex; align-items:center; gap:12px;">
             <span class="portrait small-portrait" style="background:{fight.red.clubColour};">{initials(fight.red.name)}</span>
             <strong style="font-size:1.2rem;">{fight.red.name}</strong>
           </div>
-          <span style="font-family:var(--font-display); font-size:2rem;">vs</span>
+          <span class="vs" style="font-family:var(--font-display); font-size:2rem;">vs</span>
           <div style="display:flex; align-items:center; gap:12px;">
             <strong style="font-size:1.2rem;">{fight.blue.name}</strong>
             <span class="portrait small-portrait" style="background:{fight.blue.clubColour};">{initials(fight.blue.name)}</span>
@@ -123,8 +132,11 @@
     {/each}
   </div>
 
+  </section>
+
+  <section class="phone-section" class:active={phoneSection === 'next'}>
   <div class="section-title"><h2>Next up — report to your mat</h2><span class="muted small">{upcoming.length} upcoming</span></div>
-  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));">
+  <div class="grid" use:phoneLimit={4} style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));">
     {#each upcoming as fight (fight.id)}
       <div class="stat flash">
         <div class="eyebrow">{fight.mat} · {fight.category}</div>
@@ -136,11 +148,14 @@
     {/each}
   </div>
 
+  </section>
+
+  <section class="phone-section" class:active={phoneSection === 'table'}>
   <div class="section-title"><h2>Leaderboard</h2><span class="muted small">Points: 3 per win, 1 per draw</span></div>
-  <div class="card" style="overflow-x:auto;">
+  <div class="card">
     <table style="width:100%; border-collapse:collapse; font-size:clamp(.9rem,1.2vw,1.3rem);">
       <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">#</th><th>Fighter</th><th>Category</th><th>Club</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead>
-      <tbody>
+      <tbody use:phoneRows={5}>
         {#each leaders as row, i (row.fighterId)}
           <tr style="border-top:1px solid var(--brand-border);">
             <td style="padding:8px;">{i + 1}</td>
@@ -156,8 +171,11 @@
     </table>
   </div>
 
+  </section>
+
+  <section class="phone-section" class:active={phoneSection === 'results'}>
   <div class="section-title"><h2>Recent results</h2></div>
-  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));">
+  <div class="grid" use:phoneLimit={4} style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));">
     {#each finished.slice(-8) as fight (fight.id)}
       <div class="stat small">
         <div class="eyebrow">{fight.mat} · {fight.category}</div>
@@ -166,6 +184,7 @@
       </div>
     {/each}
   </div>
+  </section>
 </div>
 
 <style>
@@ -173,4 +192,14 @@
   .brand-banner { height:clamp(90px,10vw,160px); border-radius:16px; background:url('/brand/banner.png') center/cover no-repeat; border:1px solid var(--brand-border); margin-bottom:16px; }
   .clock-hero { display:flex; gap:clamp(14px,3vw,50px); align-items:center; flex-wrap:wrap; padding:clamp(16px,2vw,30px); border-radius:20px; border:1px solid var(--brand-primary); background:linear-gradient(135deg, rgba(59,130,246,.18), transparent), var(--brand-surface-2); box-shadow:var(--brand-shadow); }
   .big-clock { font-family:var(--font-display); font-size:clamp(3rem,8vw,8rem); font-weight:800; line-height:1; letter-spacing:.02em; color:var(--brand-accent); }
+  .phone-sections { display:none; }
+  @media (max-width: 700px) {
+    .phone-sections { display:flex; gap:8px; overflow-x:visible; position:sticky; top:60px; z-index:6; padding:8px 0; margin-bottom:8px; background:var(--brand-surface); }
+    .phone-sections .tab { flex:1; padding:8px 4px; text-align:center; }
+    .phone-section { display:none; }
+    .phone-section.active { display:block; animation:sectionIn .22s ease-out; }
+    .live-duel { flex-direction:column; gap:8px; }
+    .live-duel .vs { display:none; }
+    @keyframes sectionIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  }
 </style>

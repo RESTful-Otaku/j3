@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { initials } from '../../../lib/format';
+  import { phoneLimit } from '../../../lib/responsive';
   import { api, livePoll, type PoolView, type DemoFight } from '../../../lib/api';
   import { notifySuccess, notifyError } from '../../../lib/toast';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
@@ -47,7 +48,7 @@
     <button class="btn" on:click={() => (confirmOpen = true)} disabled={generating}>{generating ? 'Generating…' : '↻ Regenerate pools'}</button>
   </header>
 
-  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%,300px), 1fr));">
+  <div class="grid" use:phoneLimit={4} style="grid-template-columns: repeat(auto-fit, minmax(min(100%,300px), 1fr));">
     {#each pools as pool (pool.id)}
       <div class="card slide-in">
         <div style="display:flex; justify-content:space-between;"><h3>{pool.name}</h3><span class="pill">{pool.members.length} fighters</span></div>
@@ -67,7 +68,7 @@
   </div>
 
   <div class="section-title"><h2>Ongoing fights</h2><span class="pill"><span class="dot"></span>{live.length} live</span></div>
-  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%,320px), 1fr));">
+  <div class="grid" use:phoneLimit={3} style="grid-template-columns: repeat(auto-fit, minmax(min(100%,320px), 1fr));">
     {#each live as fight (fight.id)}
       <div class="card flash" style="border-color:var(--brand-primary);">
         <div class="eyebrow">{fight.mat} · {fight.category}</div>
@@ -78,10 +79,14 @@
 
   <div class="grid" style="grid-template-columns:1fr 1fr; margin-top:26px;">
     <div class="card"><h2>Finished</h2>
-      {#each finished as fight (fight.id)}<div class="stat small" style="margin-top:8px;">{fight.red.name} vs {fight.blue.name} · <strong>{resultCode(fight)}</strong></div>{/each}
+      <div use:phoneLimit={4}>
+        {#each finished as fight (fight.id)}<div class="stat small" style="margin-top:8px;">{fight.red.name} vs {fight.blue.name} · <strong>{resultCode(fight)}</strong></div>{/each}
+      </div>
     </div>
     <div class="card"><h2>Upcoming</h2>
-      {#each upcoming as fight (fight.id)}<div class="stat small" style="margin-top:8px;">{fight.mat} · {fight.red.name} vs {fight.blue.name}</div>{/each}
+      <div use:phoneLimit={4}>
+        {#each upcoming as fight (fight.id)}<div class="stat small" style="margin-top:8px;">{fight.mat} · {fight.red.name} vs {fight.blue.name}</div>{/each}
+      </div>
     </div>
   </div>
 </div>

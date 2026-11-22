@@ -53,9 +53,32 @@ export const NAV_GROUPS: NavGroup[] = ['Run today', 'Plan & setup', 'Manage', 'L
 // the top-left takes users here so they can never get stranded in a deep view.
 export const HOME_ROUTE = '/public';
 
-// A small, persistent mobile nav keeps the main destinations reachable without
-// forcing everyone through the full drawer.
-export const MOBILE_PRIMARY_HREFS = ['/public', '/mat', '/brackets', '/tables', '/guides'];
+// A small, persistent phone nav keeps participant/spectator destinations
+// reachable without forcing everyone through the full drawer. Organiser tools
+// are deliberately excluded here: they belong on tablet/desktop/display screens.
+export const MOBILE_PRIMARY_HREFS = ['/public', '/brackets', '/tables', '/event', '/club', '/guides', '/notifications'];
+
+// Phone scope: public information and the things participants, club leaders,
+// spectators and guardians need. Operational scoring/setup/audit views stay on
+// larger screens where they can be used properly.
+const PHONE_ROUTES = new Set([
+  '/', '/login', '/signup', '/welcome',
+  '/public', '/brackets', '/tables', '/pools', '/ceremony', '/event', '/details',
+  '/club', '/notifications', '/settings', '/guides', '/docs', '/view',
+]);
+
+export function isPhoneWidth(width = typeof window === 'undefined' ? 0 : window.innerWidth) {
+  return width <= 700;
+}
+
+export function canUseOnPhone(path: string) {
+  const pathname = path.split('?')[0];
+  return PHONE_ROUTES.has(pathname) || pathname.startsWith('/docs/');
+}
+
+export function phoneHome(role: Role) {
+  return role === 'club_leader' ? '/club' : '/public';
+}
 
 const KEY = 'j3-role';
 
@@ -78,7 +101,8 @@ export const OPEN_ROUTES = new Set([
   '/event', '/details', '/simulate', '/view', '/ui', '/apidocs', '/overlay',
 ]);
 
-export function canAccessPath(role: Role, path: string) {
+export function canAccessPath(role: Role, path: string, phone = false) {
+  if (phone && !canUseOnPhone(path)) return false;
   if (OPEN_ROUTES.has(path) || path.startsWith('/docs')) return true;
   return itemsForRole(role).some((item) => item.href === path);
 }

@@ -91,19 +91,21 @@ type scoreEventView struct {
 }
 
 type FightStateView struct {
-	FightID     string           `json:"fightId"`
-	State       string           `json:"state"`
-	Outcome     string           `json:"outcome"`
-	Running     bool             `json:"running"`
-	Seconds     int              `json:"seconds"`
-	Round       int              `json:"round"`
-	RedScore    int              `json:"redScore"`
-	BlueScore   int              `json:"blueScore"`
-	RedPenalty  int              `json:"redPenalty"`
-	BluePenalty int              `json:"bluePenalty"`
-	HoldSeconds int              `json:"holdSeconds"`
-	HoldCorner  string           `json:"holdCorner"`
-	Events      []scoreEventView `json:"events"`
+	FightID           string           `json:"fightId"`
+	State             string           `json:"state"`
+	Outcome           string           `json:"outcome"`
+	Running           bool             `json:"running"`
+	Seconds           int              `json:"seconds"`
+	Round             int              `json:"round"`
+	RedScore          int              `json:"redScore"`
+	BlueScore         int              `json:"blueScore"`
+	RedPenalty        int              `json:"redPenalty"`
+	BluePenalty       int              `json:"bluePenalty"`
+	RedPenaltyPoints  int              `json:"redPenaltyPoints"`
+	BluePenaltyPoints int              `json:"bluePenaltyPoints"`
+	HoldSeconds       int              `json:"holdSeconds"`
+	HoldCorner        string           `json:"holdCorner"`
+	Events            []scoreEventView `json:"events"`
 }
 
 func (s *Server) fightState(ctx context.Context, fightID string) (FightStateView, error) {
@@ -152,11 +154,15 @@ func (s *Server) fightState(ctx context.Context, fightID string) (FightStateView
 		if event.Kind == "score" && event.Corner == "blue" {
 			view.BlueScore += event.Points
 		}
-		if event.Kind == "penalty" && event.Corner == "red" {
-			view.RedPenalty++
-		}
-		if event.Kind == "penalty" && event.Corner == "blue" {
-			view.BluePenalty++
+		if event.Kind == "penalty" {
+			if event.Corner == "red" {
+				view.RedPenalty++
+				view.RedPenaltyPoints += event.Points
+			}
+			if event.Corner == "blue" {
+				view.BluePenalty++
+				view.BluePenaltyPoints += event.Points
+			}
 		}
 	}
 	return view, rows.Err()
@@ -275,12 +281,19 @@ func (s *Server) setRunning(w http.ResponseWriter, r *http.Request, value int, a
 	s.getFightState(w, r)
 }
 
+var allowedPenaltyCards = map[string]bool{
+	"": true, "yellow": true, "red": true, "shido": true,
+	"hansoku": true, "warning": true,
+}
+
 type scoreRequest struct {
-	Corner    string `json:"corner"`
-	Points    int    `json:"points"`
-	Technique string `json:"technique"`
-	Card      string `json:"card"`
-	Kind      string `json:"kind"`
+	Corner      string `json:"corner"`
+	Points      int    `json:"points"`
+	Technique   string `json:"technique"`
+	Card        string `json:"card"`
+	Kind        string `json:"kind"`
+	TechniqueID string `json:"techniqueId"`
+	PointLabel  string `json:"pointLabel"`
 }
 
 func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
@@ -305,6 +318,18 @@ func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, "unknown event kind")
 		return
 	}
+	// Resolve catalogue selections against the event's configured rule set.
+	// Legacy callers that send raw points/technique strings keep working.
+	body.Kind = kind
+	s.resolveScoringInput(r.Context(), id, &body)
+	if body.Points < -10 || body.Points > 100 {
+		writeBadRequest(w, "points must be between -10 and 100")
+		return
+	}
+	if body.Card != "" && !allowedPenaltyCards[body.Card] {
+		writeBadRequest(w, "unknown penalty card")
+		return
+	}
 	identity, _ := auth.FromContext(r.Context())
 	actor := identity.UserID
 	if actor == "" {
@@ -318,12 +343,12 @@ func (s *Server) addFightEvent(w http.ResponseWriter, r *http.Request) {
 		 (fight_id, seq, kind, corner, points, technique, card, actor_user_id, payload_json)
 		SELECT ?, COALESCE(MAX(seq),0)+1, ?, ?, ?, ?, ?, ?, ?
 		FROM score_events WHERE fight_id = ?`,
-		id, kind, body.Corner, body.Points, body.Technique, body.Card, actor, string(payload), id)
+		id, body.Kind, body.Corner, body.Points, body.Technique, body.Card, actor, string(payload), id)
 	if err != nil {
 		writeError(w, err)
 		return
 	}
-	s.audit(r, "fight."+kind, "fight", id, string(payload))
+	s.audit(r, "fight."+body.Kind, "fight", id, string(payload))
 	s.broadcastFight(r, id, "fight.event")
 	s.getFightState(w, r)
 }

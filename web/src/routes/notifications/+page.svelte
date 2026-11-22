@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { getJson, postJson } from '../../lib/api';
   import { notifySuccess, notifyError } from '../../lib/toast';
+  import { phoneLimit } from '../../lib/responsive';
 
   type Announcement = { id: string; title: string; body: string; channels: string; audience: string; createdAt: string };
   type Suggestion = { Kind: string; Title: string; Reason: string };
@@ -37,7 +38,7 @@
   <header class="topbar"><div class="brand"><a class="brand-mark" href="/public" aria-label="Public dashboard">J3</a><div><div class="brand-name">Notifications & suggestions</div><div class="brand-sub">Push, email, SMS and automatic setup ideas</div></div></div></header>
 
   <div class="grid" style="grid-template-columns:1fr .9fr;">
-    <div class="card">
+    <div class="card desktop-only">
       <div class="eyebrow">Broadcast</div><h2>Send a message</h2>
       <label class="field">Title<input bind:value={title} placeholder="Fighters to Mat 1" /></label>
       <label class="field" style="margin-top:10px;">Message<textarea rows="3" bind:value={body}></textarea></label>
@@ -51,7 +52,7 @@
 
     <div class="card">
       <div class="eyebrow">Automatic suggestions</div><h2>Recommended setup</h2>
-      <div style="display:grid; gap:8px; margin-top:12px;">
+      <div style="display:grid; gap:8px; margin-top:12px;" use:phoneLimit={6}>
         {#each suggestions as suggestion (suggestion.Kind + suggestion.Title)}
           <div class="stat small"><strong>{suggestion.Title}</strong><div class="muted">{suggestion.Reason}</div></div>
         {:else}<span class="muted">No suggestions yet.</span>{/each}
@@ -61,9 +62,11 @@
 
   <div class="card" style="margin-top:18px;">
     <h2>Recent announcements</h2>
+    <div use:phoneLimit={6}>
     {#each announcements as announcement (announcement.id)}
       <div class="row"><strong>{announcement.title}</strong><span class="muted small">{announcement.channels} · {announcement.audience} · {announcement.createdAt}</span></div>
     {:else}<span class="muted">Nothing sent yet.</span>{/each}
+    </div>
   </div>
 </div>
 

@@ -10,6 +10,8 @@ coverage.*
 *.db
 *.db-shm
 *.db-wal
+# Bundled offline demo fixture is a tracked build asset.
+!web/static/j3-demo.db
 /data/
 **/data/uploads/
 
