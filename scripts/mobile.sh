@@ -73,7 +73,7 @@ start_emulator() {
     adb devices
     return 0
   fi
-  echo "🚀 Starting $AVD_NAME…"
+  echo "🚀 Starting ${AVD_NAME}…"
   nohup emulator -avd "$AVD_NAME" -no-snapshot -gpu auto -no-audio >/tmp/j3-emulator.log 2>&1 &
   adb wait-for-device
   echo "⏳ Waiting for boot (this can take up to two minutes)…"

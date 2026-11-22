@@ -7667,22 +7667,6 @@
   "/api/v1/demo/medals": {
     "medals": [
       {
-        "id": "ok-medal-01-gold-ok-f01",
-        "fighterId": "ok-f01",
-        "name": "Haruto Tanaka",
-        "club": "Okami Jiu Jitsu",
-        "clubColour": "#b91c1c",
-        "kind": "gold"
-      },
-      {
-        "id": "ok-medal-02-silver-ok-f02",
-        "fighterId": "ok-f02",
-        "name": "Mika Smith",
-        "club": "Skegness Dojo",
-        "clubColour": "#2563eb",
-        "kind": "silver"
-      },
-      {
         "id": "ok-medal-03-bronze-ok-f03",
         "fighterId": "ok-f03",
         "name": "Aiden Mori",
@@ -7750,6 +7734,22 @@
         "id": "ok-medal-10-silver-ok-f22",
         "fighterId": "ok-f22",
         "name": "Emma Smith",
+        "club": "Skegness Dojo",
+        "clubColour": "#2563eb",
+        "kind": "silver"
+      },
+      {
+        "id": "ok-medal-01-gold-ok-f01",
+        "fighterId": "ok-f01",
+        "name": "Haruto Tanaka",
+        "club": "Okami Jiu Jitsu",
+        "clubColour": "#b91c1c",
+        "kind": "gold"
+      },
+      {
+        "id": "ok-medal-02-silver-ok-f02",
+        "fighterId": "ok-f02",
+        "name": "Mika Smith",
         "club": "Skegness Dojo",
         "clubColour": "#2563eb",
         "kind": "silver"
@@ -13996,25 +13996,25 @@
         "ID": "tpl-okami",
         "Name": "Okami Challengers 2027 (full)",
         "ConfigJSON": "{\"name\":\"Okami Jiu Jitsu Challengers Tournament 2027\",\"disciplines\":[{\"name\":\"Open Hand Kata\"}],\"categories\":[{\"name\":\"Adults\",\"kind\":\"age\",\"min\":18,\"max\":99}],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T22:34:10.302Z"
+        "CreatedAt": "2026-11-22T23:10:28.077Z"
       },
       {
         "ID": "tpl-club",
         "Name": "Club open day (empty)",
         "ConfigJSON": "{\"name\":\"Club Open Day\",\"disciplines\":[],\"categories\":[],\"constraints\":{\"cap\":50,\"maxPools\":8},\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T22:34:10.302Z"
+        "CreatedAt": "2026-11-22T23:10:28.077Z"
       },
       {
         "ID": "tpl-kata",
         "Name": "Kata only (empty)",
         "ConfigJSON": "{\"name\":\"Kata Challenge\",\"disciplines\":[{\"name\":\"Open Hand Kata\"},{\"name\":\"Weapons Kata\"}],\"categories\":[],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T22:34:10.302Z"
+        "CreatedAt": "2026-11-22T23:10:28.077Z"
       },
       {
         "ID": "tpl-newhaza",
         "Name": "Newaza tournament (empty)",
         "ConfigJSON": "{\"name\":\"Newaza Tournament\",\"disciplines\":[{\"name\":\"Randori / Katamewaza\"},{\"name\":\"Ground Fighting\"}],\"categories\":[],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-22T22:34:10.302Z"
+        "CreatedAt": "2026-11-22T23:10:28.077Z"
       }
     ]
   },
@@ -14025,5 +14025,5 @@
     "expiresAt": "2099-01-01T00:00:00Z",
     "userId": "u-owner"
   },
-  "generatedAt": "2026-11-22T22:34:12Z"
+  "generatedAt": "2026-11-22T23:10:30Z"
 }

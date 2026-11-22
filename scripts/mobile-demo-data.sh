@@ -18,7 +18,7 @@ rm -f "$DB" "${DB}-shm" "${DB}-wal" "$OUT" "$SERVER_LOG" "$BIN"
 echo "🌱 Seeding bundled Okami 2027 mid-event database…"
 go run ./cmd/j3d reset -okami -db "$DB" >/dev/null
 
-echo "🚀 Starting temporary venue server on :$PORT…"
+echo "🚀 Starting temporary venue server on :${PORT}…"
 go build -o "$BIN" ./cmd/j3d
 J3_DEMO=1 "$BIN" -addr "127.0.0.1:$PORT" -db "$DB" -seed >"$SERVER_LOG" 2>&1 &
 SERVER_PID=$!

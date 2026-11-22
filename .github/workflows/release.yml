@@ -19,7 +19,10 @@ jobs:
     needs: verify
     uses: ./.github/workflows/mobile.yml
     with:
-      require_signed_ios: true
+      # Unsigned simulator .app is always produced. Signed IPA is added when
+      # Apple secrets are configured. Tagged releases must not be blocked when
+      # an operator has not supplied device-signing credentials.
+      require_signed_ios: false
     secrets: inherit
 
   package:
