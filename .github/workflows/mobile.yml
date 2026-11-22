@@ -199,14 +199,16 @@ jobs:
           fi
       - name: Create Android test AVD
         run: |
-          AVD_HOME="$GITHUB_WORKSPACE/.android-avd/avd"
-          mkdir -p "$AVD_HOME"
-          echo "ANDROID_AVD_HOME=$AVD_HOME" >> "$GITHUB_ENV"
+          export ANDROID_SDK_HOME="$HOME/.android"
+          export ANDROID_AVD_HOME="$ANDROID_SDK_HOME/avd"
+          mkdir -p "$ANDROID_AVD_HOME"
+          echo "ANDROID_SDK_HOME=$ANDROID_SDK_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_AVD_HOME=$ANDROID_AVD_HOME" >> "$GITHUB_ENV"
           echo no | avdmanager create avd -n j3-ci \
             -k 'system-images;android-35;google_apis;x86_64' -d pixel --force
-          echo "AVDs in $AVD_HOME:"
+          echo "AVDs in $ANDROID_AVD_HOME:"
           avdmanager list avd
-          test -f "$AVD_HOME/j3-ci.ini"
+          test -f "$ANDROID_AVD_HOME/j3-ci.ini"
       - name: Start Android emulator
         run: |
           nohup emulator -avd j3-ci -no-snapshot -no-audio -no-boot-anim -no-window \
