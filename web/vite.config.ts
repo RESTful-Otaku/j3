@@ -14,7 +14,7 @@ const docsManifest = JSON.parse(readFileSync(join(rootDir, 'static/docs/manifest
 };
 const docEntries = docsManifest.docs
   .map((doc) => doc.path ?? (doc.slug ? `/docs/${doc.slug}` : ''))
-  .filter((entry): entry is string => Boolean(entry));
+  .filter((entry): entry is `/${string}` => entry.startsWith('/'));
 
 export default defineConfig({
   plugins: [
