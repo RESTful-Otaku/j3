@@ -212,7 +212,7 @@ jobs:
       - name: Start Android emulator
         run: |
           nohup emulator -avd j3-ci -no-snapshot -no-audio -no-boot-anim -no-window \
-            -gpu swiftshader_indirect > /tmp/j3-emulator.log 2>&1 &
+            -gpu off > /tmp/j3-emulator.log 2>&1 &
           for _ in $(seq 1 300); do
             if adb get-state 2>/dev/null | tr -d '\r' | grep -q '^device$'; then
               if adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' | grep -q 1; then
