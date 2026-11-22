@@ -205,8 +205,7 @@ APK verified on `j3-pixel-10-pro` with live and offline evidence in `docs/qa/`.
 **External-dependency remainder only**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: push the compaction/auth change; confirm CI + mobile workflow; then work only on
-the external-dependency remainder. For QA use `bun run dev`; for phones rebuild with
+**Next actions**: work only on the external-dependency remainder. For QA use `bun run dev`; for phones rebuild with
 `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
 
 ---
