@@ -32,8 +32,11 @@ Required iOS secrets: `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD`,
 ## Releases (`.github/workflows/release.yml`)
 
 Release builds call CI and mobile (requiring the signed iOS QA app), then package final production
-binaries (`j3d` for Linux/macOS/Windows), the optimised web client bundle and `LICENSE` as
-`j3-production-<sha>`. All artifacts are attached to the GitHub release.
+binaries (`j3d` for Linux amd64/arm64, macOS arm64 and Windows), the optimised web client bundle,
+the OpenAPI reference, full guide/documentation site and `LICENSE`. Downloads are
+`j3-production-<sha>.tar.gz`; the deploy workflow consumes the companion `deploy-production-<sha>`
+artifact. Only the curated `j3-*` release assets are attached to the GitHub release, avoiding
+GitHub's secondary rate limit from uploading every static file separately.
 
 ## Environments (`.github/workflows/deploy.yml`)
 

@@ -60,10 +60,16 @@ jobs:
           test -f dist/web/docs/HOSTING.md
           test -f dist/web/docs/hosting.html
           test -f dist/LICENSE
+          tar -czf "dist/j3-production-${GITHUB_SHA::7}.tar.gz" -C dist bin web LICENSE
+          test -s "dist/j3-production-${GITHUB_SHA::7}.tar.gz"
           echo "✅ Production server, client, API, docs site and licence are packaged"
       - uses: actions/upload-artifact@v7
         with:
-          name: j3-production-${{ github.sha }}
+          name: j3-production-release-${{ github.sha }}
+          path: dist/j3-production-*.tar.gz
+      - uses: actions/upload-artifact@v7
+        with:
+          name: deploy-production-${{ github.sha }}
           path: dist
 
   publish:
@@ -73,6 +79,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
+          pattern: j3-*
           path: artifacts
           merge-multiple: true
       - name: Create release

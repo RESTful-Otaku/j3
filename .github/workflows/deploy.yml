@@ -33,6 +33,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
+          pattern: deploy-production-*
           path: artifacts
           merge-multiple: true
       - uses: actions/upload-artifact@v7
