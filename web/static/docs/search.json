@@ -512,8 +512,20 @@
   {
     "title": "Displays & screens \u00b7 Themes and branding",
     "section": "Running an event",
-    "text": "White-label tokens control colours, fonts, logos and banners. Corner colours and result glyphs are configurable; the Street Fighter theme adds lineups and announcer energy.",
+    "text": "White-label tokens control colours, fonts, logos and banners. Corner colours and result glyphs are configurable; the Street Fighter theme is the default high-energy palette, with dark ink on its bright pink/orange/yellow fills so labels stay legible. Banners use `contain` so the entire uploaded image is visible against a themed backdrop.",
     "url": "/docs/displays#themes-and-branding"
+  },
+  {
+    "title": "Displays & screens \u00b7 Navigation and fit",
+    "section": "Running an event",
+    "text": "The desktop navigation is drag-resizable (180\u2013380 px, arrow keys supported) and stores the chosen width; labels and spacing scale with it. The active view gets a bright themed left bar and glow, and the mobile drawer/bottom bar use the same treatment. The account switcher is clipped to the nav pane.",
+    "url": "/docs/displays#navigation-and-fit"
+  },
+  {
+    "title": "Displays & screens \u00b7 Demo replay",
+    "section": "Running an event",
+    "text": "When the server has `J3_DEMO=1`, a **Demo replay** launcher follows you across every screen. It runs a deterministic event and lets you play, pause, restart, step, scrub and change speed. The panel shows the same playhead as Mat, Table, Bracket and Ceremony state cards; `/tables`, `/public` and `/ceremony` also reflect the selected bout, standings and medals live. `/simulate` uses the same control",
+    "url": "/docs/displays#demo-replay"
   },
   {
     "title": "Displays & screens \u00b7 PA and announcements",
@@ -626,7 +638,7 @@
   {
     "title": "CI & releases \u00b7 Releases (.github/workflows/release.yml)",
     "section": "Developers",
-    "text": "Release builds call CI and mobile, then package final production binaries (`j3d` for Linux amd64/arm64, macOS arm64 and Windows), the optimised web client bundle, the OpenAPI reference, full guide/documentation site and `LICENSE`. Downloads are `j3-production-<sha>.tar.gz`; the deploy workflow consumes the companion `deploy-production-<sha>` artifact. Only curated `j3-*` release assets are attache",
+    "text": "Release builds call CI and mobile, then attach exactly four download categories to the GitHub release: GitHub's auto-generated **Source code** archives, one hosted server executable (`j3-server-linux-amd64`), the production Android client (`j3-android-<version>.apk`) and the iOS simulator client (`j3-ios-<version>.app.zip`, containing the `.app` bundle). No QA apps, docs bundles, web archives or I",
     "url": "/docs/ci#releases-github-workflows-release-yml"
   },
   {

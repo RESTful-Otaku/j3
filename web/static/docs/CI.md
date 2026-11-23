@@ -35,12 +35,12 @@ so a release without Apple/Android secrets still completes; see `docs/ENVIRONMEN
 
 ## Releases (`.github/workflows/release.yml`)
 
-Release builds call CI and mobile, then package final production binaries (`j3d` for Linux
-amd64/arm64, macOS arm64 and Windows), the optimised web client bundle, the OpenAPI reference, full
-guide/documentation site and `LICENSE`. Downloads are `j3-production-<sha>.tar.gz`; the deploy
-workflow consumes the companion `deploy-production-<sha>` artifact. Only curated `j3-*` release
-assets are attached to the GitHub release, avoiding GitHub's secondary rate limit from uploading
-every static file separately.
+Release builds call CI and mobile, then attach exactly four download categories to the GitHub
+release: GitHub's auto-generated **Source code** archives, one hosted server executable
+(`j3-server-linux-amd64`), the production Android client (`j3-android-<version>.apk`) and the iOS
+simulator client (`j3-ios-<version>.app.zip`, containing the `.app` bundle). No QA apps, docs bundles,
+web archives or IPA files are published. The deploy workflow consumes the same server executable
+artifact (`j3-server-release-<sha>`).
 
 ## Environments (`.github/workflows/deploy.yml`)
 
