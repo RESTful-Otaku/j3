@@ -88,6 +88,7 @@ check "kata round create" "201" "$(status -X POST "$BASE/api/v1/demo/kata/perfor
 check "kata advancement" "200" "$(status -X POST "$BASE/api/v1/demo/kata/advance" -H 'Content-Type: application/json' -d '{"advanceCount":8}')"
 check "schedule drift" "200" "$(status -X POST "$BASE/api/v1/demo/schedule/drift" -H 'Content-Type: application/json' -d '{"minutes":5}')"
 check "medal award" "200" "$(status -X POST "$BASE/api/v1/demo/medals/award" -H 'Content-Type: application/json' -d '{"gold":"f01","silver":"f02","bronze":["f03","f04"]}')"
+check "medal recompute" "200" "$(status -X POST "$BASE/api/v1/demo/medals/recompute" -H 'Content-Type: application/json' -d '{}')"
 check "tie-break standings" "200" "$(status "$BASE/api/v1/demo/standings?chain=wins,submissions,points_scored")"
 check "sparring rotation" "200" "$(status -X POST "$BASE/api/v1/demo/rotation" -H 'Content-Type: application/json' -d '{"fighters":["f01","f02","f03","f04"],"mats":["Mat 1","Mat 2"],"rounds":3}')"
 check "official bracket stages" "200" "$(status "$BASE/api/v1/demo/brackets?eventId=ev-demo")"

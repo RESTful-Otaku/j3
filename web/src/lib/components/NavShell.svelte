@@ -4,6 +4,7 @@
   import { api, type DemoIdentity } from '../api';
   import { landingForRole, session, switchDemoUser, uiRole } from '../auth';
   import { eventTitle } from '../event-title';
+  import { appMode, setAppMode } from '../demo-replay';
   import {
     canUseOnPhone, currentRole, HOME_ROUTE, isPhoneWidth, itemsForRole,
     MOBILE_PRIMARY_HREFS, NAV_GROUPS, phoneHome, type NavItem, type Role,
@@ -174,6 +175,10 @@
   <header class="mobile-bar">
     <div class="mobile-bar-row">
       <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard" on:click={closeMobile}>J3</a>
+      <div class="mode-switch compact" role="group" aria-label="Application mode">
+        <button class:active={$appMode === 'live'} aria-label="Switch to live event mode" aria-pressed={$appMode === 'live'} on:click={() => setAppMode('live')}>●</button>
+        <button class:active={$appMode === 'sim'} aria-label="Switch to simulated tournament mode" aria-pressed={$appMode === 'sim'} on:click={() => setAppMode('sim')}>🎬</button>
+      </div>
       <button class="hamburger" data-guide="nav-mobile-menu" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
     </div>
     <div class="mobile-event" title={$eventTitle}>
@@ -188,6 +193,10 @@
       <div class="drawer-head" title={$eventTitle}>
         <span class="event-card-title">{$eventTitle}</span>
         <button class="hamburger" aria-label="Close navigation" on:click={closeMobile}>✕</button>
+      </div>
+      <div class="mode-switch drawer" role="group" aria-label="Application mode">
+        <button class:active={$appMode === 'live'} aria-pressed={$appMode === 'live'} on:click={() => { setAppMode('live'); closeMobile(); }}>● <span>Live event</span></button>
+        <button class:active={$appMode === 'sim'} aria-pressed={$appMode === 'sim'} on:click={() => { setAppMode('sim'); closeMobile(); }}>🎬 <span>Simulated</span></button>
       </div>
       <nav aria-label="Main navigation">
         {#each NAV_GROUPS as group}
@@ -258,6 +267,14 @@
         <span class="event-card-title">{$eventTitle}</span>
       </div>
     {/if}
+    <div class="mode-switch" class:compact={!expanded} role="group" aria-label="Application mode">
+      <button class:active={$appMode === 'live'} aria-label="Switch to live event mode" aria-pressed={$appMode === 'live'} title="Live event" on:click={() => setAppMode('live')}>
+        ● {#if expanded}<span>Live event</span>{/if}
+      </button>
+      <button class:active={$appMode === 'sim'} aria-label="Switch to simulated tournament mode" aria-pressed={$appMode === 'sim'} title="Simulated tournament" on:click={() => setAppMode('sim')}>
+        🎬 {#if expanded}<span>Simulated</span>{/if}
+      </button>
+    </div>
     <button class="help-btn" data-guide="nav-help-compact" aria-label="Start guided tour" title="Guided tour" on:click={startTour}>
       ❓{#if expanded}<span>Help & guided tour</span>{/if}
     </button>
@@ -343,6 +360,14 @@
   .event-card { display:grid; gap:2px; min-width:0; padding:10px 12px; border-radius:12px; background:var(--brand-surface-3); border:1px solid var(--brand-border); }
   .event-card-label, .mobile-event-label { text-transform:uppercase; letter-spacing:.14em; font-size:.58rem; font-weight:900; color:var(--brand-muted); }
   .event-card-title { font-family:var(--font-display); font-weight:800; font-size:.88em; line-height:1.25; min-width:0; overflow:hidden; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; }
+  .mode-switch { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:12px; background:var(--brand-surface-3); border:1px solid var(--brand-border); }
+  .mode-switch button { display:flex; align-items:center; justify-content:center; gap:5px; min-width:0; padding:7px 6px; border-radius:9px; border:1px solid transparent; background:transparent; color:var(--brand-muted); cursor:pointer; font-size:.72em; font-weight:800; white-space:nowrap; }
+  .mode-switch button:hover { color:var(--brand-ink); }
+  .mode-switch button.active { border-color:var(--brand-accent); background:var(--brand-primary-fill); color:var(--brand-on-primary); box-shadow:0 0 14px color-mix(in srgb, var(--brand-accent) 30%, transparent); }
+  .mode-switch.compact { grid-template-columns:1fr; width:52px; margin:0 auto; }
+  .mode-switch.compact button { padding:8px 0; font-size:.95em; }
+  .mode-switch.compact button.active { box-shadow:inset 3px 0 0 var(--brand-accent); }
+  .mode-switch.drawer { grid-template-columns:1fr 1fr; }
   .hamburger { background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-ink); border-radius:9px; padding:8px 10px; cursor:pointer; line-height:1; font-size:1em; min-width:38px; }
   .nav-shell.collapsed .hamburger { margin:0 auto; }
   nav { display:grid; gap:2px; overflow-y:auto; flex:1; width:100%; scrollbar-width:thin; }
@@ -374,6 +399,8 @@
   .mobile-event { display:grid; gap:1px; min-width:0; }
   .mobile-event-title { font-family:var(--font-display); font-weight:800; font-size:.8rem; line-height:1.2; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mobile-bar .hamburger { margin-left:auto; }
+  .mobile-bar .mode-switch.compact { display:flex; width:auto; }
+  .mobile-bar .mode-switch.compact button { min-width:36px; padding:7px 8px; }
   .mobile-bottom {
     position:fixed; left:0; right:0; bottom:0; z-index:815;
     display:grid; grid-template-columns:repeat(auto-fit, minmax(0,1fr)); gap:2px;

@@ -27,6 +27,17 @@
     "sync:api-docs": "bash scripts/sync-api-docs.sh",
     "release": "bash scripts/release.sh",
     "cicd": "bash scripts/cicd.sh",
-    "test:tui": "bash scripts/test-tui.sh"
+    "test:tui": "bash scripts/test-tui.sh",
+    "qa:docker": "bash scripts/qa-docker.sh up",
+    "qa:docker:full": "bash scripts/qa-docker.sh full",
+    "qa:docker:okami": "bash scripts/qa-docker.sh okami",
+    "qa:docker:clean": "bash scripts/qa-docker.sh clean",
+    "qa:docker:light": "bash scripts/qa-docker.sh light",
+    "qa:docker:dev": "bash scripts/qa-docker.sh dev",
+    "qa:docker:down": "bash scripts/qa-docker.sh down",
+    "qa:docker:reset": "bash scripts/qa-docker.sh reset",
+    "qa:docker:simulate": "bash scripts/qa-docker.sh simulate",
+    "qa:docker:logs": "bash scripts/qa-docker.sh logs",
+    "qa:docker:url": "bash scripts/qa-docker.sh url"
   }
 }

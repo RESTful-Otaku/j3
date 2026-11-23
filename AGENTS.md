@@ -5,7 +5,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, phone-scoped UX, QA mobile builds, PolyForm NC licence, free hosting plan. Local gates green (2026-11-23); GitHub Actions blocked by billing. |
+| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, app-wide Live/Sim replay, immediate real-time view updates, full per-discipline medals, containerised QA stack, phone-scoped UX, QA mobile builds, PolyForm NC licence, free hosting plan. Local gates green (2026-11-23); GitHub Actions blocked by billing. |
 | Repo | `git@github.com:RESTful-Otaku/j3.git` (`main`) |
 | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
 | Created / updated | 2026-11-19 / 2026-11-23 |
@@ -98,20 +98,30 @@ incidents, notifications, media, exports.
   per-round history.
 - **Live scoring**: authoritative server clock, hold/submission/penalty events, undo, assignment
   checks, result locking, SSE fan-out, officials console with 400-entry JJJ catalogue and
-  server-resolved points.
+  server-resolved points. Material writes also emit cheap `state.changed` invalidations, so brackets,
+  officials, scoreboard/mat/display, public, tables, pools, overlay, widgets and ceremonies refetch
+  immediately in live mode while replay mode stays isolated.
+- **Medals**: deterministic podiums per category × discipline × event type (fighting, Ne-Waza,
+  Randori, continuous/sparring, kata/weapons), dual-bronze policy, manual overrides and one-shot
+  recompute from completed results via `POST /api/v1/demo/medals/recompute`.
 - **Kata/drills**: catalogue, numbered rounds, bunkai, panel judging, advancement, weapon kata,
   fair sparring rotation.
 - **Displays**: `/display`, `/public`, `/brackets`, `/tables`, `/pools`, `/control`, `/setup`,
   `/data`, `/audit`, `/settings`, `/details`, `/simulate`, `/official`, `/mat`, `/ceremony`,
   `/view`, `/ui`; PA/TTS toasts, celebrations, Street Fighter default with contrast-safe bright fills,
-  ultrawide CSS; resizable nav with themed active state; full-image banners; global demo replay player
-  with play/pause/restart/step/scrub and Mat/Table/Bracket/Ceremony state cards.
+  ultrawide CSS; resizable nav with themed active state; full-bleed host banners; explicit
+  **Live event / Simulated tournament** nav toggle. Sim mode shows a global replay widget on every
+  view (play/pause, restart, step, scrub, ¼×–8× speed, live/table/bracket/ceremony state); `/simulate`
+  is the full event-by-event console.
 - **Builder**: drag/resize/save/clone/load/delete live widget layouts; standalone `/view` screens.
 - **Data**: generic allow-listed query API, data explorer, audit view, CSV import/export, uploads
   with dominant/highlight colour extraction, 11-locale label dictionary.
 - **Scheduling**: persisted timeline, drift, projections, mark-complete, rest warnings, big clock.
-- **CLI/mobile**: TUI `dev.sh`, Capacitor Android/iOS, branded APK with bundled seeded SQLite and
-  read-only API snapshot; live LAN data when reachable.
+- **CLI/mobile**: TUI `dev.sh` with Docker QA submenu, Capacitor Android/iOS, branded APK with bundled
+  seeded SQLite and read-only API snapshot; live LAN data when reachable.
+- **Local QA stack**: Docker/Podman images, one-shot seed/sim containers, shared SQLite volume, nginx
+  same-origin `/api` proxy (SSE-safe), `full`/`okami`/`clean`/`light`/`dev` modes and `j3d simulate`.
+  Simulated fights use catalogue point values (typical totals 10–40) and instant-win submissions.
 - **Not yet wired (external dependency)**: payments/waivers, VAR, full content translation,
   physical-device install, venue hardware tuning, offline write outbox.
 
@@ -176,6 +186,7 @@ states. Offline write outbox remains a future enhancement.
 | D-054–D-058 | CI mobile builds produce installable Android QA APK, iOS simulator app and signed real-device IPA when Apple secrets exist; emulator/simulator runtime smoke is required; QA builds self-seed and auto-login as admin; white-label title comes from event config; PolyForm Noncommercial 1.0.0 with attribution; Oracle Always Free A1 recommended for free prod/staging. |
 | D-059–D-063 | One shared theme store; pure-white light, high-contrast dark gray and loud Street Fighter themes; organiser title/logo/banner/primary/secondary overrides applied from event tokens with computed readable ink; safe `.env.example` plus least-privilege workflows; `v*` tags publish versioned hosted APK/`.app` built with public `J3_SERVER_URL`, with signing secrets optional rather than release-blocking. |
 | D-064–D-068 | GitHub releases publish only source, Linux server binary, versioned APK and iOS simulator `.app.zip`; Street Fighter is the default theme and dark ink keeps its neon gradient readable; nav is drag-resizable with a strong active border and banners use `contain`; demo replay is a shared global playhead with pause/restart/scrub and derived Mat/Table/Bracket/Ceremony state; standings/team rankings/kata reads are event-scoped and public-safe so tables never 500. |
+| D-069–D-074 | Global Live/Simulated nav toggle with URL/localStorage persistence and a replay widget on every view; full event-by-event `/simulate` console; containerised Docker/Podman QA stack with static web proxy, one-shot seed/sim jobs and `j3d simulate`; `golang:1.27.1-alpine` pin to avoid the modernc sqlite compiler ICE; SSE `state.changed` invalidations for every operational view; deterministic full medal set per category/discipline/event type including kata, with manual overrides and recompute. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -192,6 +203,12 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-23 — Live/sim modes, real-time views and full medals**: explicit Live event / Simulated
+  tournament nav toggle with a persistent replay widget on every view and a full event-by-event
+  console; containerised Docker/Podman QA stack with seeded/simulated modes and `j3d simulate`;
+  server `state.changed` SSE invalidations make brackets, officials, scoreboards, public, tables,
+  pools, overlay, custom widgets and ceremonies update immediately; medals now cover every category,
+  discipline and event type including kata, with deterministic recompute and manual overrides.
 - **2026-11-23 — Demo replay + display polish**: Street Fighter is the default theme with dark ink on bright fills; nav is drag-resizable with a clear themed active indicator and clipped account switcher; banners show the whole image; global demo replay supports play/pause/restart/step/scrub and follows every screen; `/public`, `/tables` and `/ceremony` render replay state; tables/kata/team rankings reads hardened against 500s.
 - **2026-11-22 — Themes + versioned mobile releases**: pure-white light, high-contrast dark gray and Street Fighter themes; shared theme persistence; event token overrides for title/logo/banner/main/secondary colours with contrast-safe text; safe `.env.example` and environment/secrets guide; workflows fixed for Android SDK PATH/boot and iOS simulator parsing; tagged releases publish hosted APK/`.app` with backend URL baked in.
 - **2026-11-22 — CI/CD + licensing**: mobile workflows build installable QA apps, run emulator/simulator smoke, release production server/web/API/docs/mobile artifacts; QA builds self-seed and auto-login as admin; event-config title replaces `J Cubed`; PolyForm NC licence and free Oracle hosting plan documented; TUI has one-step build+deploy actions and hosted-APK build.
@@ -214,14 +231,15 @@ and smoke-tested in CI but not published. See `docs/HOSTING.md` for free Oracle 
 
 **Current blocker**: GitHub Actions runs are currently rejected before jobs start with the account
 billing/spending-limit error. Resolve billing in GitHub settings, then rerun `Mobile builds`,
-`Release` and `Deploy` for the `v0.7.3` tag. This is not a repository code defect.
+`Release` and `Deploy` for the `v0.7.4` tag. This is not a repository code defect.
 
 **External-dependency remainder**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: resolve GitHub billing, rerun the `v0.7.3` workflow chain and verify the four
-published assets. For QA use `bun run dev`; for phones rebuild a standalone self-seeding offline APK
-with `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
+**Next actions**: resolve GitHub billing, rerun the `v0.7.4` workflow chain and verify the four
+published assets. For fast full QA use `bash scripts/qa-docker.sh full` (see `docs/DOCKER.md`); for
+native QA use `bun run dev`. For phones rebuild a standalone self-seeding offline APK with
+`bash scripts/mobile.sh build`, or a LAN/HTTPS client with
 `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
 
 ---

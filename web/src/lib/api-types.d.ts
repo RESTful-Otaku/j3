@@ -905,6 +905,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/medals/recompute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recompute every category/discipline/event-type podium from results */
+        post: operations["recomputeMedals"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/demo/kata": {
         parameters: {
             query?: never;
@@ -1455,6 +1472,8 @@ export interface components {
         VersionInfo: {
             name: string;
             version: string;
+            /** @description True when the venue server is running with seeded demo data */
+            demo?: boolean;
         };
         /** @enum {string} */
         Role: "admin" | "tournament_runner" | "official" | "club_leader" | "fighter" | "spectator";
@@ -1532,6 +1551,24 @@ export interface components {
             themeTokens: string;
             detailsJson: string;
             mats: string[];
+        };
+        Medal: {
+            id: string;
+            fighterId: string;
+            name: string;
+            club: string;
+            clubColour: string;
+            kind: string;
+            categoryId: string;
+            category: string;
+            disciplineId: string;
+            discipline: string;
+            eventType: string;
+            awardKey: string;
+            source: string;
+        };
+        MedalsResponse: {
+            medals: components["schemas"]["Medal"][];
         };
         StandingRow: {
             fighterId: string;
@@ -3233,7 +3270,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MedalsResponse"];
+                };
             };
         };
     };
@@ -3251,7 +3290,29 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MedalsResponse"];
+                };
+            };
+        };
+    };
+    recomputeMedals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Updated medals */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MedalsResponse"];
+                };
             };
         };
     };

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/restful-otaku/j3/internal/rules"
+	"github.com/restful-otaku/j3/internal/techniques"
 )
 
 type Fighter struct {
@@ -25,16 +26,20 @@ type Bout struct {
 	Round      string `json:"round"`
 	RedID      string `json:"redId"`
 	BlueID     string `json:"blueId"`
-	Outcome    string `json:"outcome"`
-	Method     string `json:"method"`
-	PointsRed  int    `json:"pointsRed"`
-	PointsBlue int    `json:"pointsBlue"`
-	Sequence   int    `json:"sequence"`
+	Outcome    string   `json:"outcome"`
+	Method     string   `json:"method"`
+	Techniques []string `json:"techniques,omitempty"`
+	PointsRed  int      `json:"pointsRed"`
+	PointsBlue int      `json:"pointsBlue"`
+	Sequence   int      `json:"sequence"`
 }
 
 type Medal struct {
-	FighterID string `json:"fighterId"`
-	Kind      string `json:"kind"`
+	FighterID  string `json:"fighterId"`
+	Kind       string `json:"kind"`
+	Category   string `json:"category,omitempty"`
+	Discipline string `json:"discipline,omitempty"`
+	EventType  string `json:"eventType,omitempty"`
 }
 
 type Standing struct {
@@ -59,6 +64,121 @@ type Result struct {
 }
 
 type record struct{ wins, losses, draws, points int }
+
+var scoringTechniques = func() []techniques.Technique {
+	out := []techniques.Technique{}
+	for _, tech := range techniques.All() {
+		if tech.Kind == "score" && !tech.InstantWin && tech.Points > 0 {
+			out = append(out, tech)
+		}
+	}
+	return out
+}()
+
+var finishingTechniques = func() []techniques.Technique {
+	out := []techniques.Technique{}
+	for _, tech := range techniques.All() {
+		if tech.InstantWin && tech.Kind == "submission" {
+			out = append(out, tech)
+		}
+	}
+	return out
+}()
+
+var scoreLabels = []struct{ key, label string }{
+	{"strike", "strikes"}, {"kick", "kicks"}, {"throw", "throws"},
+	{"takedown", "takedowns"}, {"sweep", "sweeps"}, {"reap", "reaps"},
+	{"hook", "hooks"}, {"hold", "holds"}, {"ground", "ground work"},
+	{"control", "control"}, {"break", "breaks"}, {"ippon", "ippon"},
+	{"wazaari", "waza-ari"},
+}
+
+func scoreSide(rng *rand.Rand, target int) (int, []techniques.Technique) {
+	total := 0
+	picked := []techniques.Technique{}
+	for attempts := 0; total < target && attempts < 80; attempts++ {
+		tech := scoringTechniques[rng.Intn(len(scoringTechniques))]
+		if tech.Points > target-total {
+			continue
+		}
+		total += tech.Points
+		picked = append(picked, tech)
+	}
+	if total == 0 {
+		tech := scoringTechniques[0]
+		total, picked = tech.Points, []techniques.Technique{tech}
+	}
+	return total, picked
+}
+
+func summariseScore(picked []techniques.Technique) string {
+	counts := map[string]int{}
+	for _, tech := range picked {
+		counts[tech.PointKey]++
+	}
+	type labelCount struct{ label string; count int }
+	top := []labelCount{}
+	for _, entry := range scoreLabels {
+		if counts[entry.key] > 0 {
+			top = append(top, labelCount{entry.label, counts[entry.key]})
+		}
+	}
+	sort.SliceStable(top, func(i, j int) bool { return top[i].count > top[j].count })
+	if len(top) == 0 {
+		return "decision"
+	}
+	if len(top) > 2 {
+		top = top[:2]
+	}
+	labels := make([]string, 0, len(top))
+	for _, entry := range top {
+		labels = append(labels, entry.label)
+	}
+	return strings.Join(labels, " + ")
+}
+
+func techniqueNames(picked []techniques.Technique) []string {
+	names := make([]string, 0, len(picked))
+	for _, tech := range picked {
+		names = append(names, tech.English)
+	}
+	return names
+}
+
+// scoreFight builds a full JJJ score from catalogue point values. Decisions
+// keep the winner ahead; submissions are independent because a tap ends the
+// contest no matter what the point tally says.
+func scoreFight(rng *rand.Rand) (red, blue int, method string, used []string, submission bool) {
+	roll := rng.Intn(100)
+	if roll < 6 {
+		points := 10 + rng.Intn(21)
+		return points, points, "draw", []string{"draw"}, false
+	}
+	if roll < 10 {
+		return 0, 0, "forfeit", []string{"forfeit"}, false
+	}
+
+	winnerTarget := 10 + rng.Intn(31) // 10–40, typical of a full fight
+	loserTarget := 4 + rng.Intn(24)
+	if loserTarget >= winnerTarget {
+		loserTarget = winnerTarget - 2
+	}
+	redPoints, redPicked := scoreSide(rng, winnerTarget)
+	bluePoints, bluePicked := scoreSide(rng, loserTarget)
+	all := append(append([]techniques.Technique{}, redPicked...), bluePicked...)
+	method = summariseScore(all)
+
+	if roll < 30 {
+		finish := finishingTechniques[rng.Intn(len(finishingTechniques))]
+		// A losing fighter can be ahead on points; the submission still wins.
+		redPoints = 10 + rng.Intn(31)
+		bluePoints = 10 + rng.Intn(31)
+		method = finish.English
+		used = append(techniqueNames(all), finish.English)
+		return redPoints, bluePoints, method, used, true
+	}
+	return redPoints, bluePoints, method, techniqueNames(all), false
+}
 
 // Run simulates pools, round-robin, knockout and a bronze decider. The same
 // seed always yields the same event, which is what makes verification possible.
@@ -99,25 +219,24 @@ func Run(seed int64, count int) Result {
 
 	addBout := func(stage, round, a, b string) {
 		sequence++
-		methods := []string{"points", "submission", "points", "points", "forfeit", "draw"}
-		method := methods[rng.Intn(len(methods))]
-		redPoints, bluePoints := rng.Intn(9)+1, rng.Intn(8)
+		redPoints, bluePoints, method, used, submission := scoreFight(rng)
 		outcome := "win_red"
-		switch method {
-		case "draw":
-			outcome, redPoints, bluePoints = "draw", 0, 0
-		case "submission":
-			outcome, redPoints, bluePoints = "submission_red", 0, 0
-		case "forfeit":
-			outcome = "forfeit_red"
+		if submission {
+			outcome = "submission_red"
 		}
-		if rng.Intn(2) == 0 && outcome != "draw" && !strings.Contains(outcome, "red") {
+		if method == "draw" || method == "forfeit" {
+			outcome = method + "_red"
+			if method == "draw" {
+				outcome = "draw"
+			}
+		}
+		if outcome != "draw" && rng.Intn(2) == 0 {
 			outcome = replaceCorner(outcome)
 			redPoints, bluePoints = bluePoints, redPoints
 		}
 		result.Bouts = append(result.Bouts, Bout{
 			ID: fmt.Sprintf("b%03d", sequence), Stage: stage, Round: round,
-			RedID: a, BlueID: b, Outcome: outcome, Method: method,
+			RedID: a, BlueID: b, Outcome: outcome, Method: method, Techniques: used,
 			PointsRed: redPoints, PointsBlue: bluePoints, Sequence: sequence,
 		})
 		result.TopMoves[method]++
@@ -195,10 +314,10 @@ func Run(seed int64, count int) Result {
 		advance = next
 	}
 	if len(advance) > 0 {
-		result.Medals = append(result.Medals, Medal{advance[0], "gold"}, Medal{advance[0], "champion"})
+		result.Medals = append(result.Medals, Medal{FighterID: advance[0], Kind: "gold"}, Medal{FighterID: advance[0], Kind: "champion"})
 	}
 	if finalLoser != "" {
-		result.Medals = append(result.Medals, Medal{finalLoser, "silver"})
+		result.Medals = append(result.Medals, Medal{FighterID: finalLoser, Kind: "silver"})
 	}
 	if len(semiLosers) == 2 {
 		// No-rematch rule: if they already met, award two bronzes instead.
@@ -207,15 +326,21 @@ func Run(seed int64, count int) Result {
 			addBout("bronze", "Bronze decider", semiLosers[0], semiLosers[1])
 			last := result.Bouts[len(result.Bouts)-1]
 			if last.Outcome == "draw" {
-				result.Medals = append(result.Medals, Medal{semiLosers[0], "bronze"}, Medal{semiLosers[1], "bronze"})
+				result.Medals = append(result.Medals, Medal{FighterID: semiLosers[0], Kind: "bronze"}, Medal{FighterID: semiLosers[1], Kind: "bronze"})
 			} else if strings.Contains(last.Outcome, "red") {
-				result.Medals = append(result.Medals, Medal{semiLosers[0], "bronze"})
+				result.Medals = append(result.Medals, Medal{FighterID: semiLosers[0], Kind: "bronze"})
 			} else {
-				result.Medals = append(result.Medals, Medal{semiLosers[1], "bronze"})
+				result.Medals = append(result.Medals, Medal{FighterID: semiLosers[1], Kind: "bronze"})
 			}
 		} else {
-			result.Medals = append(result.Medals, Medal{semiLosers[0], "bronze"}, Medal{semiLosers[1], "bronze"})
+			result.Medals = append(result.Medals, Medal{FighterID: semiLosers[0], Kind: "bronze"}, Medal{FighterID: semiLosers[1], Kind: "bronze"})
 		}
+	}
+
+	for i := range result.Medals {
+		result.Medals[i].Category = "Open"
+		result.Medals[i].Discipline = "JJ Fighting System"
+		result.Medals[i].EventType = "fight"
 	}
 
 	for _, fighter := range fighters {
@@ -238,10 +363,20 @@ func Run(seed int64, count int) Result {
 }
 
 func replaceCorner(value string) string {
-	if strings.Contains(value, "red") {
+	switch {
+	case strings.HasPrefix(value, "submission_red"):
+		return "submission_blue"
+	case strings.HasPrefix(value, "submission_blue"):
+		return "submission_red"
+	case strings.HasPrefix(value, "forfeit_red"):
+		return "forfeit_blue"
+	case strings.HasPrefix(value, "forfeit_blue"):
+		return "forfeit_red"
+	case strings.Contains(value, "red"):
 		return "win_blue"
+	default:
+		return "win_red"
 	}
-	return "win_red"
 }
 
 func met(bouts []Bout, a, b string) bool {

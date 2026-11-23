@@ -540,6 +540,17 @@
   },
   {
     "group": "Demo & operations",
+    "method": "POST",
+    "path": "/api/v1/demo/medals/recompute",
+    "operationId": "recomputeMedals",
+    "title": "Recompute every category/discipline/event-type podium from results",
+    "description": "",
+    "auth": true,
+    "parameters": [],
+    "body": ""
+  },
+  {
+    "group": "Demo & operations",
     "method": "GET",
     "path": "/api/v1/demo/my-contests",
     "operationId": "myContests",

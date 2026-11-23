@@ -2,10 +2,12 @@
 package seed
 
 import (
+	"context"
 	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/restful-otaku/j3/internal/awards"
 	"github.com/restful-otaku/j3/internal/db"
 )
 
@@ -306,14 +308,22 @@ func EnsureOkami(store *db.DB) error {
 		{state: "forfeit", outcome: "win_blue", events: []scoreRow{{"forfeit", "blue", "Technical result · Injury", "", 0}}},
 		{state: "forfeit", outcome: "dq_red", events: []scoreRow{{"technical", "blue", "Technical result · Cheating / unsportsmanlike conduct", "red", 0}}},
 		{state: "complete", outcome: "draw", events: []scoreRow{{"score", "red", "Throw · koshi-guruma", "", 2}, {"score", "blue", "Sweep · tomoe-nage", "", 2}}},
-		{state: "pending", outcome: "", seconds: 180},
-		{state: "pending", outcome: "", seconds: 180},
-		{state: "pending", outcome: "", seconds: 180},
+		{state: "complete", outcome: "win_red", events: []scoreRow{{"score", "red", "Hold down twenty seconds (Ippon)", "", 5}, {"score", "blue", "Kick · mawashi geri", "", 1}}},
+		{state: "complete", outcome: "win_blue", events: []scoreRow{{"score", "blue", "Submission · triangle choke", "", 0}, {"score", "red", "Throw · seoi nage", "", 2}}},
+		{state: "complete", outcome: "win_red", events: []scoreRow{{"score", "red", "Takedown · morote gari", "", 3}, {"score", "blue", "Shido · passivity", "shido", -1}}},
 		{state: "pending", outcome: "", seconds: 180},
 		{state: "complete", outcome: "win_blue", events: []scoreRow{{"submission", "blue", "Submission · rear naked choke", "", 0}}},
 		{state: "complete", outcome: "win_red", events: []scoreRow{{"score", "red", "Ippon · ura-nage", "", 3}}},
 		{state: "live", outcome: "", seconds: 61, running: true, events: []scoreRow{{"score", "red", "Kick · mawashi geri", "", 1}, {"score", "blue", "Takedown · kata-guruma", "", 2}}},
 		{state: "paused", outcome: "", seconds: 24, events: []scoreRow{{"penalty", "blue", "Yellow card", "yellow", -1}}},
+	}
+	fightDisciplines := []string{
+		"ok-disc-randori", "ok-disc-ground", "ok-disc-cont10", "ok-disc-cont16",
+		"ok-disc-cont18", "ok-disc-spar", "ok-disc-kata", "ok-disc-weapons",
+	}
+	fightCategories := []string{
+		"ok-age-minor", "ok-weight-light", "ok-age-teen", "ok-age-adult",
+		"ok-weight-light", "ok-weight-mid", "ok-age-teen", "ok-age-adult",
 	}
 	for i, fixture := range fixtures {
 		fightID := fmt.Sprintf("ok-fight-%02d", i+1)
@@ -324,9 +334,10 @@ func EnsureOkami(store *db.DB) error {
 			completed = fmt.Sprintf("strftime('%%Y-%%m-%%dT%%H:%%M:%%fZ','now','-%d minutes')", len(fixtures)-i)
 		}
 		add(`INSERT OR IGNORE INTO fights
-			(id, event_id, mat_id, category_id, round_label, red_fighter_id, blue_fighter_id, state, outcome, completed_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, `+sqlOrNull(completed)+`)`,
-			fightID, okamiEvent, mat, []string{"ok-age-minor", "ok-weight-light", "ok-age-adult", "ok-weight-mid"}[i%4],
+			(id, event_id, mat_id, category_id, discipline_id, round_label, red_fighter_id, blue_fighter_id, state, outcome, completed_at)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, `+sqlOrNull(completed)+`)`,
+			fightID, okamiEvent, mat, fightCategories[i%len(fightCategories)],
+			fightDisciplines[i%len(fightDisciplines)],
 			[]string{"Randori", "Ground", "Continuous", "Sparring"}[i%4],
 			red, blue, fixture.state, fixture.outcome)
 		add(`INSERT OR IGNORE INTO fight_officials (fight_id, user_id, role) VALUES (?, ?, 'referee')`,
@@ -405,12 +416,17 @@ func EnsureOkami(store *db.DB) error {
 		case i >= 6:
 			status, round = "live", 2
 		}
+		kataCategory := []string{"ok-age-minor", "ok-age-teen", "ok-age-adult"}[i%3]
+		kataDiscipline := "ok-disc-kata"
+		if round > 1 {
+			kataDiscipline = "ok-disc-weapons"
+		}
 		add(`INSERT OR IGNORE INTO kata_performances
-			(id, event_id, fighter_id, kata_name, panel_size, round_number, kata_type, status, total)
-			VALUES (?, ?, ?, ?, 3, ?, ?, ?, ?)`,
+			(id, event_id, fighter_id, kata_name, panel_size, round_number, kata_type, status, total, category_id, discipline_id)
+			VALUES (?, ?, ?, ?, 3, ?, ?, ?, ?, ?, ?)`,
 			performanceID, okamiEvent, fmt.Sprintf("ok-f%02d", i+1),
 			[]string{"Hekigan-ken", "Seiyunchin", "Gekusai-dai", "Pinan sono ichi", "Kanku-dai"}[i%5],
-			round, "tokuyi", status, float64(24+i%4))
+			round, "tokuyi", status, float64(24+i%4), kataCategory, kataDiscipline)
 		for judge := 1; judge <= 3; judge++ {
 			for section := 1; section <= 3; section++ {
 				if status == "pending" || (status == "live" && section > 1) {
@@ -449,15 +465,8 @@ func EnsureOkami(store *db.DB) error {
 			fmt.Sprintf("ok-ent-ok-disc-ground-%02d", i+1), attended, excluded)
 	}
 
-	// Medals already awarded in the completed blocks of the programme.
-	for i, award := range []struct{ id, kind string }{
-		{"ok-f01", "gold"}, {"ok-f02", "silver"}, {"ok-f03", "bronze"}, {"ok-f04", "bronze"},
-		{"ok-f06", "gold"}, {"ok-f07", "silver"}, {"ok-f08", "bronze"}, {"ok-f09", "bronze"},
-		{"ok-f21", "gold"}, {"ok-f22", "silver"}, {"ok-f16", "bronze"}, {"ok-f16", "bronze"},
-	} {
-		add(`INSERT OR IGNORE INTO medals (id, event_id, fighter_id, kind) VALUES (?, ?, ?, ?)`,
-			fmt.Sprintf("ok-medal-%02d-%s-%s", i+1, award.kind, award.id), okamiEvent, award.id, award.kind)
-	}
+	// Medals for completed fight and kata blocks are derived below from every
+	// category/discipline/event-type podium (including dual-bronze policies).
 	// Idempotent audit trail entries describing the mid-event state.
 	for _, entry := range []struct{ action, target, actor, role, after string }{
 		{"okami.seed", okamiEvent, "u-tony", "tournament_runner", `{"seeded":true,"year":2027}`},
@@ -493,6 +502,9 @@ func EnsureOkami(store *db.DB) error {
 		if _, err := tx.Exec(statement.query, statement.args...); err != nil {
 			return fmt.Errorf("okami seed %q: %w", statement.query, err)
 		}
+	}
+	if _, err := awards.ReconcileTx(context.Background(), tx, okamiEvent); err != nil {
+		return fmt.Errorf("okami seed medals: %w", err)
 	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte("demo"), bcrypt.DefaultCost)

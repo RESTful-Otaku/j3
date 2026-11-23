@@ -195,6 +195,8 @@ func (s *Server) buildBracket(w http.ResponseWriter, r *http.Request) {
 	}
 	s.audit(r, "bracket.build", "event", req.EventID,
 		fmt.Sprintf(`{"format":%q,"stages":%d}`, format, len(specs)))
+	s.broadcastState("brackets")
+	_, _ = s.recomputeAwards(r.Context(), s.defaultEventID(r))
 	stages, err := s.listBrackets(r, req.EventID, req.CategoryID)
 	if err != nil {
 		writeError(w, err)
@@ -348,6 +350,9 @@ func (s *Server) promoteSlot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.audit(r, "bracket.promote", "slot", slotID, fmt.Sprintf(`{"result":%q}`, icon))
+	s.broadcastState("brackets")
+	s.broadcastState("standings")
+	_, _ = s.recomputeAwards(r.Context(), s.defaultEventID(r))
 	stages, err := s.listBrackets(r, eventID, "")
 	if err != nil {
 		writeError(w, err)

@@ -5,6 +5,7 @@
   import { notifySuccess, notifyError } from '../../../lib/toast';
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
+  import { onLiveChange } from '../../../lib/live-updates';
 
   type Slot = { id: string; name: string; colour: string };
   type BracketNode = { id: string; label: string; a: Slot | null; b: Slot | null; winner: string };
@@ -59,7 +60,12 @@
   }
 
   onMount(() => {
-    void api.bracketStages().then((result) => (serverStages = result.stages)).catch(() => {});
+    const loadStages = () => api.bracketStages().then((result) => (serverStages = result.stages)).catch(() => {});
+    const loadFights = () => api.fights().then((data) => {
+      fights = data.fights;
+      if (bracket.length > 0) buildBracket();
+    }).catch(() => {});
+    void loadStages();
     const stopFights = livePoll(api.fights, 2000, (data) => {
       fights = data.fights;
       if (bracket.length > 0) buildBracket();
@@ -68,8 +74,9 @@
       pools = data.pools;
       if (bracket.length === 0) buildBracket();
     });
+    const stopLive = onLiveChange(['brackets', 'fights'], () => { void loadStages(); void loadFights(); });
     window.addEventListener('resize', drawConnectors);
-    return () => { stopFights(); stopPools(); window.removeEventListener('resize', drawConnectors); };
+    return () => { stopFights(); stopPools(); stopLive(); window.removeEventListener('resize', drawConnectors); };
   });
 
   async function buildOfficial(direct = false) {

@@ -33,13 +33,26 @@ The desktop navigation is drag-resizable (180–380 px, arrow keys supported) an
 width; labels and spacing scale with it. The active view gets a bright themed left bar and glow, and
 the mobile drawer/bottom bar use the same treatment. The account switcher is clipped to the nav pane.
 
-## Demo replay
+## Live event / Simulated tournament
 
-When the server has `J3_DEMO=1`, a **Demo replay** launcher follows you across every screen. It runs
-a deterministic event and lets you play, pause, restart, step, scrub and change speed. The panel shows
-the same playhead as Mat, Table, Bracket and Ceremony state cards; `/tables`, `/public` and
-`/ceremony` also reflect the selected bout, standings and medals live. `/simulate` uses the same
-controller, so scrubbing in one place stays coherent everywhere.
+The nav has an explicit **Live event / Simulated tournament** toggle (including compact and mobile
+nav). Live is the real venue state. Simulated mode is app-wide and persists in the URL and local
+storage; it shows a persistent replay widget on every view with play/pause, restart, previous/next
+bout, speed and full scrubbing. `/simulate` is the full event-by-event console and switches the app
+into simulated mode; **Stop & go live** returns to real data. Replay frames never mutate live views.
+
+Mat, Table, Bracket and Ceremony state cards share the same playhead, and `/public`, `/tables` and
+`/ceremony` also reflect the selected bout, standings and medals. Scrubbing in one place stays
+coherent everywhere.
+
+## Live invalidation
+
+The venue server broadcasts cheap `state.changed` SSE frames after material writes: results,
+brackets and promotions, officials, kata scores/advancement, medals and schedule changes. Open
+brackets, officials console, scoreboard/mat/display, public, tables, pools, overlay, custom widgets
+and the medal ceremony refetch immediately on those frames instead of waiting for a poll interval.
+Fight scores and the authoritative clock keep their existing detailed fight payloads. Polling remains
+as a fallback if a connection drops.
 
 ## PA and announcements
 

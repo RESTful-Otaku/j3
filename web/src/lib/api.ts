@@ -27,6 +27,8 @@ export type DemoSession = components['schemas']['Session'];
 export type DemoIdentity = components['schemas']['DemoIdentity'];
 export type DemoIdentitiesResponse = components['schemas']['DemoIdentitiesResponse'];
 
+export type MedalRow = components['schemas']['Medal'];
+
 // Inline until the generated contract includes the demo credential sheet and
 // invite responses. Shape mirrors GET /api/v1/demo/credentials and POST
 // /api/v1/invites; keeping it here avoids hand-editing api-types.d.ts.
@@ -382,7 +384,8 @@ export const api = {
   pools: () => getJson<PoolsResponse>('/api/v1/demo/pools'),
   generatePools: (body: GeneratePoolsRequest) =>
     postJson<PoolsResponse>('/api/v1/demo/pools/generate', body),
-  medals: () => getJson<{ medals: { id: string; fighterId: string; name: string; club: string; clubColour: string; kind: string }[] }>('/api/v1/demo/medals'),
+  medals: () => getJson<{ medals: MedalRow[] }>('/api/v1/demo/medals'),
+  recomputeMedals: () => postJson<{ medals: MedalRow[] }>('/api/v1/demo/medals/recompute', {}),
   kataCatalogue: () => getJson<{ kata: { id: string; name: string; style: string; level: string; discipline: string; isWeapon: boolean }[] }>('/api/v1/demo/kata/catalogue'),
   training: () => getJson<{ sessions: { id: string; title: string; kind: string; leader: string; startsAt: string; duration: number }[] }>('/api/v1/demo/training'),
   rotation: (body: { fighters: string[]; mats: string[]; rounds: number }) =>
@@ -529,11 +532,11 @@ export type FightState = {
 
 export type SimulationBout = {
   id: string; stage: string; round: string; redId: string; blueId: string;
-  outcome: string; method: string; pointsRed: number; pointsBlue: number; sequence: number;
+  outcome: string; method: string; techniques?: string[]; pointsRed: number; pointsBlue: number; sequence: number;
 };
 export type SimulationResult = {
   bouts: SimulationBout[];
-  medals: { fighterId: string; kind: string }[];
+  medals: { fighterId: string; kind: string; category?: string; discipline?: string; eventType?: string }[];
   standings: { fighterId: string; name: string; club: string; wins: number; losses: number; draws: number; points: number }[];
   topMoves: Record<string, number>;
   clubPoints: Record<string, number>;

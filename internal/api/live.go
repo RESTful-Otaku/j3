@@ -80,6 +80,16 @@ func (h *LiveHub) broadcast(event liveEvent) {
 	}
 }
 
+// broadcastState tells every open view that a non-score dataset changed. Score
+// frames keep their authoritative fight payload; this is only an invalidation
+// nudge for brackets, contest lists, kata, medals, standings and schedule.
+func (s *Server) broadcastState(kind string) {
+	if s == nil || s.Hub == nil {
+		return
+	}
+	s.Hub.broadcast(liveEvent{Type: "state.changed", Payload: map[string]string{"kind": kind}})
+}
+
 type scoreEventView struct {
 	Seq       int    `json:"seq"`
 	Kind      string `json:"kind"`
@@ -446,6 +456,11 @@ func (s *Server) submitFight(w http.ResponseWriter, r *http.Request) {
 	_, _ = s.Store.ExecContext(r.Context(), `UPDATE fight_state SET running=0 WHERE fight_id=?`, id)
 	s.audit(r, "fight.submit", "fight", id, fmt.Sprintf(`{"outcome":%q}`, body.Outcome))
 	s.broadcastFight(r, id, "fight.complete")
+	s.broadcastState("fights")
+	s.broadcastState("brackets")
+	s.broadcastState("medals")
+	s.broadcastState("standings")
+	_, _ = s.recomputeAwards(r.Context(), s.defaultEventID(r))
 	s.getFightState(w, r)
 }
 

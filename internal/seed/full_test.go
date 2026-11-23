@@ -41,12 +41,18 @@ func TestFullTournamentSeedIsCompleteAndIdempotent(t *testing.T) {
 		t.Fatalf("demo data incomplete: %+v", counts)
 	}
 
-	var bronze int
+	var bronze, kataMedals, groups int
 	if err := store.QueryRow(`SELECT COUNT(*) FROM medals WHERE kind = 'bronze'`).Scan(&bronze); err != nil {
 		t.Fatal(err)
 	}
-	if bronze != 2 {
-		t.Fatalf("dual bronze expected, got %d", bronze)
+	if err := store.QueryRow(`SELECT COUNT(*) FROM medals WHERE event_type = 'kata'`).Scan(&kataMedals); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.QueryRow(`SELECT COUNT(DISTINCT category_id || '|' || discipline_id || '|' || event_type) FROM medals`).Scan(&groups); err != nil {
+		t.Fatal(err)
+	}
+	if bronze < 4 || kataMedals < 3 || groups < 3 {
+		t.Fatalf("expected medals across multiple divisions and kata, got bronze=%d kata=%d groups=%d", bronze, kataMedals, groups)
 	}
 
 	var promoted int

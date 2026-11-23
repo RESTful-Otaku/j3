@@ -988,6 +988,10 @@ paths:
       responses:
         '200':
           description: Medals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedalsResponse'
   /api/v1/demo/medals/award:
     post:
       operationId: awardMedals
@@ -995,6 +999,21 @@ paths:
       responses:
         '200':
           description: Updated medals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedalsResponse'
+  /api/v1/demo/medals/recompute:
+    post:
+      operationId: recomputeMedals
+      summary: Recompute every category/discipline/event-type podium from results
+      responses:
+        '200':
+          description: Updated medals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedalsResponse'
   /api/v1/demo/kata:
     get:
       operationId: listKata
@@ -1665,6 +1684,58 @@ components:
           type: array
           items:
             type: string
+    Medal:
+      type: object
+      required:
+      - id
+      - fighterId
+      - name
+      - club
+      - clubColour
+      - kind
+      - categoryId
+      - category
+      - disciplineId
+      - discipline
+      - eventType
+      - awardKey
+      - source
+      properties:
+        id:
+          type: string
+        fighterId:
+          type: string
+        name:
+          type: string
+        club:
+          type: string
+        clubColour:
+          type: string
+        kind:
+          type: string
+        categoryId:
+          type: string
+        category:
+          type: string
+        disciplineId:
+          type: string
+        discipline:
+          type: string
+        eventType:
+          type: string
+        awardKey:
+          type: string
+        source:
+          type: string
+    MedalsResponse:
+      type: object
+      required:
+      - medals
+      properties:
+        medals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Medal'
     StandingRow:
       type: object
       required:

@@ -103,5 +103,10 @@ func (s *Server) callTechnicalResult(w http.ResponseWriter, r *http.Request) {
 	}
 	s.audit(r, "fight.technical", "fight", fightID, fmt.Sprintf(`{"outcome":%q,"reason":%q}`, outcome, body.Reason))
 	s.broadcastFight(r, fightID, "fight.technical")
+	s.broadcastState("fights")
+	s.broadcastState("brackets")
+	s.broadcastState("medals")
+	s.broadcastState("standings")
+	_, _ = s.recomputeAwards(r.Context(), s.defaultEventID(r))
 	s.getFightState(w, r)
 }

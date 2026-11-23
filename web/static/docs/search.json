@@ -468,10 +468,22 @@
     "url": "/docs/scoring#tie-breakers"
   },
   {
+    "title": "Live scoring rules \u00b7 Medals across the whole programme",
+    "section": "Running an event",
+    "text": "Medals are not limited to one fighting category. `awards.Reconcile` derives a deterministic podium for every category \u00d7 discipline \u00d7 event type present in results: JJ fighting, Ne-Waza/Katamewaza, Randori, continuous/sparring blocks and kata/weapon kata. Kata uses final panel totals; fights rank by wins then catalogue points. Gold, silver and one or two bronzes follow the configured format policy,",
+    "url": "/docs/scoring#medals-across-the-whole-programme"
+  },
+  {
     "title": "Live scoring rules \u00b7 Result codes",
     "section": "Running an event",
     "text": "`WP/LP/DP` (points), `WS/LS` (submission), `WT/LT` (technical/forfeit/injury/DQ/red card). W/L/D always show a glyph as well as a colour.",
     "url": "/docs/scoring#result-codes"
+  },
+  {
+    "title": "Live scoring rules \u00b7 Simulated tournament scores",
+    "section": "Running an event",
+    "text": "The global replay simulator uses the same technique catalogue as the officials console. Full simulated fights accumulate catalogue point values from strikes, throws, takedowns, holds and ground work, so typical totals finish in the 10\u201340 range. A submission is resolved from its catalogue entry as an instant win: the score may still be shown, but the tap decides the result regardless of who led.",
+    "url": "/docs/scoring#simulated-tournament-scores"
   },
   {
     "title": "Live scoring rules \u00b7 Confirmation and undo",
@@ -522,10 +534,16 @@
     "url": "/docs/displays#navigation-and-fit"
   },
   {
-    "title": "Displays & screens \u00b7 Demo replay",
+    "title": "Displays & screens \u00b7 Live event / Simulated tournament",
     "section": "Running an event",
-    "text": "When the server has `J3_DEMO=1`, a **Demo replay** launcher follows you across every screen. It runs a deterministic event and lets you play, pause, restart, step, scrub and change speed. The panel shows the same playhead as Mat, Table, Bracket and Ceremony state cards; `/tables`, `/public` and `/ceremony` also reflect the selected bout, standings and medals live. `/simulate` uses the same control",
-    "url": "/docs/displays#demo-replay"
+    "text": "The nav has an explicit **Live event / Simulated tournament** toggle (including compact and mobile nav). Live is the real venue state. Simulated mode is app-wide and persists in the URL and local storage; it shows a persistent replay widget on every view with play/pause, restart, previous/next bout, speed and full scrubbing. `/simulate` is the full event-by-event console and switches the app into ",
+    "url": "/docs/displays#live-event-simulated-tournament"
+  },
+  {
+    "title": "Displays & screens \u00b7 Live invalidation",
+    "section": "Running an event",
+    "text": "The venue server broadcasts cheap `state.changed` SSE frames after material writes: results, brackets and promotions, officials, kata scores/advancement, medals and schedule changes. Open brackets, officials console, scoreboard/mat/display, public, tables, pools, overlay, custom widgets and the medal ceremony refetch immediately on those frames instead of waiting for a poll interval. Fight scores ",
+    "url": "/docs/displays#live-invalidation"
   },
   {
     "title": "Displays & screens \u00b7 PA and announcements",
@@ -740,7 +758,7 @@
   {
     "title": "CLI & TUI \u00b7 QA and verification",
     "section": "Developers",
-    "text": "`bun run smoke` (80 API/UI checks), `bun run smoke:full` (full-seed), `bun run e2e` (browser/axe), `bun run load` (200 concurrent requests), `bun run test:tui` (44 menu actions).",
+    "text": "`bun run smoke` (80 API/UI checks), `bun run smoke:full` (full-seed), `bun run e2e` (browser/axe), `bun run load` (200 concurrent requests), `bun run test:tui` (57 menu actions).",
     "url": "/docs/cli#qa-and-verification"
   },
   {
@@ -756,6 +774,12 @@
     "url": "/docs/cli#mobile"
   },
   {
+    "title": "CLI & TUI \u00b7 Containerised QA",
+    "section": "Developers",
+    "text": "The **\ud83d\udc33 Docker QA \u25b8** TUI menu runs the container stack in `full`, `okami`, `clean`, `light` or `dev` mode. The same commands are available as `bun run qa:docker*` (see `docs/DOCKER.md`). `j3d simulate -seed 42 -fighters 50 -out snapshot.json` writes a deterministic tournament snapshot without needing curl or a running server.",
+    "url": "/docs/cli#containerised-qa"
+  },
+  {
     "title": "CLI & TUI \u00b7 Data and reset",
     "section": "Developers",
     "text": "`bun run reset` resets demo data; `bun run seed:full` creates the complete deterministic tournament. `GET /api/v1/demo/credentials` lists seeded accounts (password `demo`).",
@@ -766,6 +790,48 @@
     "section": "Developers",
     "text": "If the emulator crashes, check that the Android Studio SDK and AVD `j3-pixel-10-pro` are selected. If the venue URL changes, rebuild with `J3_SERVER_URL=...`. Logs and screenshots live in `docs/qa/`.",
     "url": "/docs/cli#troubleshooting"
+  },
+  {
+    "title": "Containerised QA",
+    "section": "Developers",
+    "text": "Docker/Podman demo stack, lifecycle commands, modes and replay snapshots.",
+    "url": "/docs/docker"
+  },
+  {
+    "title": "Containerised QA \u00b7 Containerised QA",
+    "section": "Developers",
+    "text": "# Containerised QA demo  A full, repeatable J3 demo runs in containers: a seeded venue API, a static web front end with a same-origin `/api` proxy (SSE-safe) and a deterministic tournament snapshot. Use Docker if available; `scripts/qa-docker.sh` falls back to Podman automatically.",
+    "url": "/docs/docker#containerised-qa"
+  },
+  {
+    "title": "Containerised QA \u00b7 Quick start",
+    "section": "Developers",
+    "text": "```bash bash scripts/qa-docker.sh full          # or: bun run qa:docker:full bash scripts/qa-docker.sh url ```  Default URLs are `http://localhost:5173`, `http://localhost:5173/simulate` and `http://localhost:8787/healthz`. Override ports with `J3_API_PORT` and `J3_WEB_PORT`.",
+    "url": "/docs/docker#quick-start"
+  },
+  {
+    "title": "Containerised QA \u00b7 Modes",
+    "section": "Developers",
+    "text": "| Command | What it boots | |---|---| | `up` / `full` | Full tournament plus mid-event Okami 2027 seed | | `okami` | Okami 2027 mid-event seed only | | `clean` | Minimal base seed with a 24-fighter snapshot | | `light` | Same small seed/snapshot as `clean` | | `dev` | Full seed with Vite hot reload mounted from `./web` |  Each mode recreates the `j3-qa-data` volume, so results are deterministic an",
+    "url": "/docs/docker#modes"
+  },
+  {
+    "title": "Containerised QA \u00b7 Lifecycle",
+    "section": "Developers",
+    "text": "```bash bash scripts/qa-docker.sh build      # build API + prod/dev web images bash scripts/qa-docker.sh status     # container state bash scripts/qa-docker.sh logs       # recent API logs bash scripts/qa-docker.sh follow     # stream API logs bash scripts/qa-docker.sh simulate   # regenerate /data/simulation.json bash scripts/qa-docker.sh reset      # discard data volume bash scripts/qa-docker.sh",
+    "url": "/docs/docker#lifecycle"
+  },
+  {
+    "title": "Containerised QA \u00b7 Compose equivalent",
+    "section": "Developers",
+    "text": "When a Compose provider is installed, `compose.yaml` is equivalent to the default `full` mode:  ```bash docker compose up --build # or: podman-compose up --build ```  The script is preferred locally because it works with Podman directly and needs no Compose provider. The multi-stage web image pins nginx so `/api` is proxied to the venue API on the same origin; live SSE and the global replay widget",
+    "url": "/docs/docker#compose-equivalent"
+  },
+  {
+    "title": "Containerised QA \u00b7 Replays and medals",
+    "section": "Developers",
+    "text": "Open `/simulate` to switch the whole app into **Simulated tournament** mode. The persistent replay widget follows every view and supports play/pause, restart, bout stepping, scrubbing and speed. The nav toggle returns to the real venue state at any time. Simulated fights use the catalogue point values (typical full totals 10\u201340) and instant-win submissions.  Seeded and recomputed medals are keyed ",
+    "url": "/docs/docker#replays-and-medals"
   },
   {
     "title": "API guide",
@@ -1036,6 +1102,12 @@
     "section": "API reference",
     "text": "Award gold, silver and one or two bronzes",
     "url": "/docs/api?path=/api/v1/demo/medals/award&method=POST"
+  },
+  {
+    "title": "POST /api/v1/demo/medals/recompute",
+    "section": "API reference",
+    "text": "Recompute every category/discipline/event-type podium from results",
+    "url": "/docs/api?path=/api/v1/demo/medals/recompute&method=POST"
   },
   {
     "title": "GET /api/v1/demo/my-contests",

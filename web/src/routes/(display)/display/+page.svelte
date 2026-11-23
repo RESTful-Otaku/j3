@@ -11,6 +11,7 @@
     type FightState,
   } from '../../../lib/api';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
+  import { onLiveChange } from '../../../lib/live-updates';
 
   let event: EventDisplayInfo | null = null;
   let fights: DemoFight[] = [];
@@ -52,10 +53,15 @@
         liveState = message.payload;
       }
     });
+    const stopLive = onLiveChange(['fights', 'officials', 'medals'], () => {
+      void api.fights().then((data) => { fights = data.fights; loading = false; }).catch(() => {});
+      if (selectedId) void api.officials(selectedId).then((data) => (officials = data.officials)).catch(() => {});
+    });
     return () => {
       stopFights();
       stopEvent();
       stopStream();
+      stopLive();
       clearInterval(officialTimer);
       clearInterval(clock);
     };

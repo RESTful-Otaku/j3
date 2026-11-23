@@ -29,6 +29,7 @@ func (s *Server) assignOfficial(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
+	s.broadcastState("officials")
 	s.audit(r, "official.assign", "fight", fightID,
 		`{"userId":"`+body.UserID+`","role":"`+body.Role+`"}`)
 	writeJSON(w, http.StatusOK, map[string]any{"fightId": fightID, "userId": body.UserID, "role": body.Role, "status": "assigned"})

@@ -71,20 +71,27 @@ test.describe('Interactive controls', () => {
   test('simulator: step, play and pause', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('/simulate');
+    await expect(page.locator('.replay-panel')).toBeVisible();
     await page.getByRole('button', { name: /Step/ }).click();
-    await expect(page.getByText(/Bout \d+/)).toBeVisible();
-    await page.getByRole('button', { name: /Play full tournament/ }).click();
-    await page.getByRole('button', { name: /Pause/ }).click();
+    await expect(page.getByText(/Bout \d+/).first()).toBeVisible();
+    const console = page.locator('.display-shell');
+    if (await console.getByRole('button', { name: /Pause/ }).isVisible()) {
+      await console.getByRole('button', { name: /Pause/ }).click();
+    }
+    await console.getByRole('button', { name: /Play full tournament/ }).click();
+    await console.getByRole('button', { name: /Pause/ }).click();
     expect(errors).toEqual([]);
   });
 
-  test('demo replay: start, scrub and inspect derived state', async ({ page }) => {
+  test('mode toggle: simulated widget follows every view and returns to live', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('/public');
-    await page.getByRole('button', { name: 'Open demo replay controls' }).click();
-    await page.getByRole('button', { name: 'Start', exact: true }).click();
+    await page.getByRole('button', { name: 'Switch to simulated tournament mode' }).click();
+    await expect(page.locator('.replay-panel')).toBeVisible();
     const scrub = page.getByRole('slider', { name: 'Scrub tournament replay' });
     await expect.poll(async () => Number(await scrub.getAttribute('max'))).toBeGreaterThan(0);
+    await expect(page).toHaveURL(/mode=sim/);
+
     await page.getByRole('button', { name: 'Pause replay' }).click();
     await scrub.evaluate((element) => {
       const input = element as HTMLInputElement;
@@ -94,6 +101,13 @@ test.describe('Interactive controls', () => {
     await expect(page.getByText(/Bout 6 of/)).toBeVisible();
     await page.getByRole('tab', { name: 'Table' }).click();
     await expect(page.locator('.rank').first()).toBeVisible();
+
+    await page.locator('.nav-shell').getByRole('link', { name: 'Brackets' }).click();
+    await expect(page.locator('.replay-panel')).toBeVisible();
+    await expect(page).toHaveURL(/mode=sim/);
+    await page.getByRole('button', { name: 'Switch to live event mode' }).click();
+    await expect(page.locator('.replay-panel')).toHaveCount(0);
+    await expect(page).not.toHaveURL(/mode=sim/);
     expect(errors).toEqual([]);
   });
 

@@ -34,7 +34,7 @@ test.describe('Mobile navigation & layouts', () => {
   test('operator screens stay on tablet and desktop', async ({ page }) => {
     for (const route of ['/setup', '/display', '/mat', '/control', '/data', '/audit', '/builder', '/ui', '/operations', '/overlay', '/official', '/permissions', '/simulate']) {
       await page.goto(route);
-      await expect(page).toHaveURL(/\/public$/);
+      await expect(page).toHaveURL(/\/public(?:\?|$)/);
     }
     await page.getByRole('button', { name: 'Open navigation' }).click();
     const drawer = page.locator('.mobile-drawer');

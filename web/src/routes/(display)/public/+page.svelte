@@ -6,6 +6,7 @@
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
   import { eventTitle } from '../../../lib/event-title';
   import { replaySnapshot } from '../../../lib/demo-replay';
+  import { onLiveChange } from '../../../lib/live-updates';
 
   let event: EventDisplayInfo | null = null;
   let fights: DemoFight[] = [];
@@ -28,8 +29,13 @@
     const stopStandings = livePoll(api.standings, 5000, (data) => (standings = data.standings));
     const stopSchedule = livePoll(api.schedule, 5000, (data) => (schedule = data.items));
     const clock = setInterval(() => (now = new Date()), 1000);
+    const stopLive = onLiveChange(['fights', 'standings', 'schedule', 'medals'], () => {
+      void api.fights().then((data) => (fights = data.fights)).catch(() => {});
+      void api.standings().then((data) => (standings = data.standings)).catch(() => {});
+      void api.schedule().then((data) => (schedule = data.items)).catch(() => {});
+    });
     return () => {
-      stopEvent(); stopFights(); stopStandings(); stopSchedule(); clearInterval(clock);
+      stopEvent(); stopFights(); stopStandings(); stopSchedule(); stopLive(); clearInterval(clock);
       window.removeEventListener('j3-session-changed', syncRole);
     };
   });
@@ -201,7 +207,14 @@
 
 <style>
   .small-portrait { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 800; }
-  .brand-banner { height:clamp(90px,10vw,160px); border-radius:16px; background:var(--event-banner) center/contain no-repeat, var(--brand-primary-fill); background-color:var(--brand-surface-2); border:1px solid var(--brand-border); margin-bottom:16px; }
+  /* Host banner is full-bleed across the display content area — it belongs to the organiser/club, not a card. */
+  .brand-banner {
+    height:clamp(90px,10vw,160px); width:calc(100% + clamp(28px,4vw,80px));
+    margin:0 calc(-1 * clamp(14px,2vw,40px)) 16px; border-radius:0;
+    border:0; border-bottom:1px solid var(--brand-border);
+    background:var(--event-banner) center/contain no-repeat, var(--brand-primary-fill);
+    background-color:var(--brand-surface-2);
+  }
   .replay-strip { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 14px; margin-bottom:16px; border-radius:14px; border:1px solid var(--brand-accent); background:color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface-2)); }
   .clock-hero { display:flex; gap:clamp(14px,3vw,50px); align-items:center; flex-wrap:wrap; padding:clamp(16px,2vw,30px); border-radius:20px; border:1px solid var(--brand-primary); background:linear-gradient(135deg, rgba(59,130,246,.18), transparent), var(--brand-surface-2); box-shadow:var(--brand-shadow); }
   .big-clock { font-family:var(--font-display); font-size:clamp(3rem,8vw,8rem); font-weight:800; line-height:1; letter-spacing:.02em; color:var(--brand-accent); }

@@ -26,6 +26,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/tables', label: 'Tables & rankings', icon: '📊', roles: all, group: 'Run today' },
   { href: '/pools', label: 'Fight pools', icon: '🧩', roles: all, group: 'Run today' },
   { href: '/ceremony', label: 'Medal ceremony', icon: '🏅', roles: all, group: 'Run today' },
+  { href: '/simulate', label: 'Tournament replay', icon: '🎬', roles: all, group: 'Run today' },
   { href: '/control', label: 'Display control', icon: '🖥️', roles: operators, group: 'Run today' },
   { href: '/overlay', label: 'Broadcast overlay', icon: '📡', roles: operators, group: 'Run today' },
   { href: '/event', label: 'Event config', icon: '📋', roles: all, group: 'Run today' },
@@ -46,7 +47,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/settings', label: 'Settings', icon: '⚙️', roles: all, group: 'Learn' },
   { href: '/license', label: 'Licence & attribution', icon: '⚖️', roles: all, group: 'Learn' },
 
-  { href: '/simulate', label: 'Event simulator', icon: '🎬', roles: operators, group: 'QA tools' },
   { href: '/ui', label: 'Component gallery', icon: '🧩', roles: ['admin', 'runner'], group: 'QA tools' },
 ];
 
@@ -59,7 +59,7 @@ export const HOME_ROUTE = '/public';
 // A small, persistent phone nav keeps participant/spectator destinations
 // reachable without forcing everyone through the full drawer. Organiser tools
 // are deliberately excluded here: they belong on tablet/desktop/display screens.
-export const MOBILE_PRIMARY_HREFS = ['/public', '/brackets', '/tables', '/event', '/club', '/guides', '/license', '/notifications'];
+export const MOBILE_PRIMARY_HREFS = ['/public', '/brackets', '/tables', '/simulate', '/event', '/club', '/guides', '/license', '/notifications'];
 
 // Phone scope: public information and the things participants, club leaders,
 // spectators and guardians need. Operational scoring/setup/audit views stay on

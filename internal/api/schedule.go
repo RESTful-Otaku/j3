@@ -96,6 +96,7 @@ func (s *Server) setDrift(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.audit(r, "schedule.drift", "event", eventID, fmt.Sprintf(`{"minutes":%d}`, body.Minutes))
+	s.broadcastState("schedule")
 	items, err := s.schedule(r, eventID)
 	if err != nil {
 		writeError(w, err)
@@ -120,6 +121,7 @@ func (s *Server) completeScheduleItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.audit(r, "schedule.complete", "schedule_item", id, `{"status":"complete"}`)
+	s.broadcastState("schedule")
 	items, err := s.schedule(r, eventID)
 	if err != nil {
 		writeError(w, err)

@@ -5,9 +5,14 @@ import { switchDemoUser } from './auth';
 
 type Call = { url: string; auth: string | null };
 
+function stubGlobal(name: string, value: unknown) {
+  Object.defineProperty(globalThis, name, { value, configurable: true, writable: true });
+}
+
+
 function mockApi(handler: (url: string, callCount: number) => { status: number; body: unknown }) {
   const calls: Call[] = [];
-  vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+  stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     const auth = new Headers(init?.headers).get('Authorization');
     calls.push({ url, auth });
@@ -31,7 +36,6 @@ describe('venue session handling', () => {
     localStorage.clear();
     resetAuthCache();
     vi.restoreAllMocks();
-    vi.unstubAllGlobals();
   });
 
   it('re-authenticates once and retries after a stale session (DB reset)', async () => {
@@ -110,7 +114,7 @@ describe('venue session handling', () => {
 
   it('QA bootstrap signs in as the bundled admin when the venue server is offline', async () => {
     window.history.replaceState({}, '', '/?offline=1');
-    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+    stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes('/j3-demo-data.json')) {
         return new Response(JSON.stringify({

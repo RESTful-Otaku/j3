@@ -1,8 +1,10 @@
 package seed
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/restful-otaku/j3/internal/awards"
 	"github.com/restful-otaku/j3/internal/db"
 	"github.com/restful-otaku/j3/internal/rules"
 )
@@ -184,8 +186,8 @@ func EnsureFull(store *db.DB) error {
 	for i := 0; i < 6; i++ {
 		performanceID := fmt.Sprintf("full-kata-%02d", i+1)
 		stmts = append(stmts, stmt(`INSERT OR IGNORE INTO kata_performances
-			(id, event_id, fighter_id, kata_name, panel_size, round_number, kata_type, status, total, bunkai_score)
-			VALUES (?, 'ev-demo', ?, ?, 5, 1, 'shitei', 'complete', ?, 0)`,
+			(id, event_id, fighter_id, kata_name, panel_size, round_number, kata_type, status, total, bunkai_score, category_id, discipline_id)
+			VALUES (?, 'ev-demo', ?, ?, 5, 1, 'shitei', 'complete', ?, 0, 'cat-kata', 'disc-kata')`,
 			performanceID, fmt.Sprintf("f%02d", i+41),
 			[]string{"Hekigan-ken", "Seiyunchin", "Kanku-dai", "Gekusai-dai", "Pinan sono ichi", "Koryu-no-kata"}[i],
 			7.4+float64(i)*0.3))
@@ -196,14 +198,7 @@ func EnsureFull(store *db.DB) error {
 		}
 	}
 
-	// Medals including dual bronze.
-	for _, award := range []struct{ id, kind string }{
-		{"f01", "gold"}, {"f02", "silver"}, {"f03", "bronze"}, {"f04", "bronze"},
-	} {
-		stmts = append(stmts, stmt(`INSERT OR IGNORE INTO medals
-			(id, event_id, category_id, fighter_id, kind) VALUES (?, 'ev-demo', 'cat-adult-76', ?, ?)`,
-			fmt.Sprintf("full-medal-%s-%s", award.kind, award.id), award.id, award.kind))
-	}
+	// Medals are derived below from every category/discipline/event-type podium.
 
 	for _, action := range []string{
 		"full.seed.teams", "full.seed.matches", "full.seed.bracket", "full.seed.kata", "full.seed.medals",
@@ -218,6 +213,9 @@ func EnsureFull(store *db.DB) error {
 		if _, err := tx.Exec(statement.query, statement.args...); err != nil {
 			return fmt.Errorf("full seed %q: %w", statement.query, err)
 		}
+	}
+	if _, err := awards.ReconcileTx(context.Background(), tx, "ev-demo"); err != nil {
+		return fmt.Errorf("full seed medals: %w", err)
 	}
 	return tx.Commit()
 }

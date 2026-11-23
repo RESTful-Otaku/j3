@@ -33,10 +33,28 @@ bunkai scores are stored separately from fight scores.
 An ordered chain resolves pool standings: wins, submissions, points scored, head-to-head, fewest
 conceded, fastest submission, positive play/majority as configured.
 
+## Medals across the whole programme
+
+Medals are not limited to one fighting category. `awards.Reconcile` derives a deterministic podium
+for every category × discipline × event type present in results: JJ fighting, Ne-Waza/Katamewaza,
+Randori, continuous/sparring blocks and kata/weapon kata. Kata uses final panel totals; fights rank
+by wins then catalogue points. Gold, silver and one or two bronzes follow the configured format
+policy, and manual awards remain as audited overrides.
+
+`POST /api/v1/demo/medals/recompute` rebuilds the full set from completed fights and kata scores.
+The ceremony and tables group medalists by discipline/category so each podium is announced separately.
+
 ## Result codes
 
 `WP/LP/DP` (points), `WS/LS` (submission), `WT/LT` (technical/forfeit/injury/DQ/red card). W/L/D
 always show a glyph as well as a colour.
+
+## Simulated tournament scores
+
+The global replay simulator uses the same technique catalogue as the officials console. Full simulated
+fights accumulate catalogue point values from strikes, throws, takedowns, holds and ground work, so
+typical totals finish in the 10–40 range. A submission is resolved from its catalogue entry as an
+instant win: the score may still be shown, but the tap decides the result regardless of who led.
 
 ## Confirmation and undo
 

@@ -14,6 +14,7 @@
   import { labelTableRows } from '../lib/responsive';
   import { loadEventBrand } from '../lib/event-brand';
   import { initTheme } from '../lib/theme';
+  import { initReplayUrl, syncReplayUrl } from '../lib/demo-replay';
 
   let mobile = false;
   let phone = false;
@@ -40,7 +41,7 @@
     }
   }
 
-  afterNavigate(() => { syncRoute(); labelTableRows(); guard(); });
+  afterNavigate(() => { syncRoute(); labelTableRows(); guard(); syncReplayUrl(); });
   onMount(() => {
     const sync = () => {
       mobile = window.innerWidth <= 820;
@@ -56,6 +57,7 @@
     window.addEventListener('j3-password-change-required', onPasswordRequired);
 
     initTheme();
+    initReplayUrl();
     void loadEventBrand();
     // QA mobile builds start with seeded data and an admin identity. Hold the
     // first render until that is ready so nobody sees a transient logged-out

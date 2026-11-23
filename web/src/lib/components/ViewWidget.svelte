@@ -3,8 +3,9 @@
   import {
     api, livePoll, broadcastPA,
     type DemoFight, type FightState, type StandingRow, type AuditEntry,
-    type KataPerformance, type PoolView, type BracketStage,
+    type KataPerformance, type PoolView, type BracketStage, type MedalRow,
   } from '../api';
+  import { onLiveChange } from '../live-updates';
 
   export let type = 'clock';
   export let title = '';
@@ -13,7 +14,7 @@
   let fights: DemoFight[] = [];
   let state: FightState | null = null;
   let standings: StandingRow[] = [];
-  let medals: { id: string; fighterId: string; name: string; club: string; clubColour: string; kind: string }[] = [];
+  let medals: MedalRow[] = [];
   let audit: AuditEntry[] = [];
   let kata: KataPerformance[] = [];
   let pools: PoolView[] = [];
@@ -44,7 +45,17 @@
       ? api.eventStream((message) => { if (message.payload) state = message.payload; })
       : () => {};
     const clock = type === 'clock' ? setInterval(() => (now = new Date()), 1000) : null;
-    return () => { stops.forEach((stop) => stop()); stopStream(); if (clock) clearInterval(clock); };
+    const stopLive = onLiveChange(['fights', 'brackets', 'standings', 'kata', 'medals', 'officials', 'schedule'], () => {
+      if (type === 'scoreboard' || type === 'upcoming') void api.fights().then((data) => (fights = data.fights)).catch(() => {});
+      if (type === 'standings') void api.standings().then((data) => (standings = data.standings)).catch(() => {});
+      if (type === 'medals') void api.medals().then((data) => (medals = data.medals)).catch(() => {});
+      if (type === 'kata') void api.kata().then((data) => (kata = data.performances)).catch(() => {});
+      if (type === 'pools') void api.pools().then((data) => (pools = data.pools)).catch(() => {});
+      if (type === 'brackets') void api.bracketStages().then((data) => (stages = data.stages)).catch(() => {});
+      if (type === 'charts') void api.stats().then((data) => (stats = data)).catch(() => {});
+      if (type === 'audit') void api.audit().then((data) => (audit = data.entries)).catch(() => {});
+    });
+    return () => { stops.forEach((stop) => stop()); stopStream(); stopLive(); if (clock) clearInterval(clock); };
   });
 
   $: liveFight = fights.find((fight) => fight.state === 'live') ?? fights[0];

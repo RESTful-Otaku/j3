@@ -67,6 +67,10 @@ func (s *Server) forfeitFight(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.audit(r, "fight.forfeit", "fight", fightID, string(payload))
+	s.broadcastState("fights")
+	s.broadcastState("brackets")
+	s.broadcastState("medals")
+	_, _ = s.recomputeAwards(r.Context(), s.defaultEventID(r))
 	writeJSON(w, http.StatusOK, map[string]any{"fightId": fightID, "state": "forfeit", "outcome": outcome})
 }
 

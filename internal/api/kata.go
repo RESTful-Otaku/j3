@@ -148,6 +148,8 @@ func (s *Server) submitKataScore(w http.ResponseWriter, r *http.Request) {
 		`UPDATE kata_performances SET total = ?, status = ? WHERE id = ?`, total, status, id)
 	s.audit(r, "kata.score", "kata_performance", id,
 		fmt.Sprintf(`{"judge":%d,"score":%v,"total":%v}`, body.Judge, body.Score, total))
+	s.broadcastState("kata")
+	_, _ = s.recomputeAwards(r.Context(), s.defaultEventID(r))
 	items, err := s.listKata(r)
 	if err != nil {
 		writeError(w, err)

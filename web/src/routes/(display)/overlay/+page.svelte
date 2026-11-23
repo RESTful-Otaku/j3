@@ -1,13 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api, livePoll, type DemoFight, type FightState } from '../../../lib/api';
+  import { onLiveChange } from '../../../lib/live-updates';
 
   let fights: DemoFight[] = [];
   let state: FightState | null = null;
   onMount(() => {
     const stopFights = livePoll(api.fights, 2000, (data) => (fights = data.fights));
     const stopStream = api.eventStream((message) => { if (message.payload) state = message.payload; });
-    return () => { stopFights(); stopStream(); };
+    const stopLive = onLiveChange(['fights'], () => void api.fights().then((data) => (fights = data.fights)).catch(() => {}));
+    return () => { stopFights(); stopStream(); stopLive(); };
   });
   $: fight = fights.find((item) => item.state === 'live') ?? fights[0];
 </script>

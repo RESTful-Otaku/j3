@@ -5,6 +5,7 @@
   import { api, livePoll, type PoolView, type DemoFight } from '../../../lib/api';
   import { notifySuccess, notifyError } from '../../../lib/toast';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
+  import { onLiveChange } from '../../../lib/live-updates';
 
   let pools: PoolView[] = [];
   let fights: DemoFight[] = [];
@@ -14,7 +15,11 @@
   onMount(() => {
     const stopPools = livePoll(api.pools, 4000, (data) => (pools = data.pools));
     const stopFights = livePoll(api.fights, 2000, (data) => (fights = data.fights));
-    return () => { stopPools(); stopFights(); };
+    const stopLive = onLiveChange(['brackets', 'fights'], () => {
+      void api.pools().then((data) => (pools = data.pools)).catch(() => {});
+      void api.fights().then((data) => (fights = data.fights)).catch(() => {});
+    });
+    return () => { stopPools(); stopFights(); stopLive(); };
   });
 
   async function generate() {

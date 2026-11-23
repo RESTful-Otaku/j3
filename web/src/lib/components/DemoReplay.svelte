@@ -1,31 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { api, type SimulationBout } from '../api';
   import {
-    loadReplay, pauseReplay, playReplay, replaySnapshot, restartReplay, seekReplay,
-    setReplaySpeed, startReplay, stepReplay, stopReplay, toggleReplayPlayback,
+    appMode, replayQuery, replaySnapshot, restartReplay, seekReplay, setAppMode,
+    setReplaySpeed, stepReplay, toggleReplayPlayback,
   } from '../demo-replay';
 
-  let demoAvailable = false;
-  let open = false;
   let view: 'mat' | 'table' | 'bracket' | 'ceremony' = 'mat';
   let seed = 42;
   let fighters = 50;
 
-  onMount(() => {
-    void api.version().then((info) => { demoAvailable = info.demo === true; }).catch(() => {});
-    const unsub = replaySnapshot.subscribe((state) => {
-      if (state.active) seed = state.seed;
-      if (state.active) fighters = state.fighters;
-    });
-    return unsub;
-  });
-
-  function load() {
-    void loadReplay(Number(seed) || 42, Number(fighters) || 50, true);
-  }
-
-  function stageGroups(completed: SimulationBout[]) {
+  function stageGroups(completed: typeof $replaySnapshot.bouts) {
     const groups = new Map<string, typeof completed>();
     for (const bout of completed) {
       const label = bout.stage === 'pool' ? `Pool · ${bout.round}` : bout.round;
@@ -38,138 +21,125 @@
   $: groups = stageGroups(state.completed);
 </script>
 
-{#if demoAvailable}
-  {#if !open}
-    <button class="replay-launcher" class:active={state.active} on:click={() => (open = true)}
-      aria-label="Open demo replay controls">
-      🎬 <span>Demo replay</span>{#if state.active}<em>{state.index + 1}/{state.total}</em>{/if}
-    </button>
-  {:else}
-    <section class="replay-panel" aria-label="Demo tournament replay">
-      <header>
-        <div>
-          <div class="eyebrow">Demo playback</div>
-          <strong>Tournament replay</strong>
-        </div>
-        <div style="display:flex; gap:6px;">
-          {#if state.active}
-            <button class="mini" on:click={() => stopReplay()} aria-label="Exit replay">✕</button>
-          {/if}
-          <button class="mini" on:click={() => (open = false)} aria-label="Minimise replay controls">–</button>
-        </div>
-      </header>
+{#if $appMode === 'sim'}
+  <section class="replay-panel" aria-label="Simulated tournament controls">
+    <header>
+      <div>
+        <div class="eyebrow">Virtual event · global playback</div>
+        <strong>🎬 Simulated tournament</strong>
+      </div>
+      <button class="mini exit" on:click={() => setAppMode('live')} aria-label="Return to live mode">● Live</button>
+    </header>
 
-      {#if !state.active}
-        <p class="hint">Run a deterministic event, then scrub any point in time. The controls follow you across every view.</p>
-        <div class="setup">
-          <label>Seed<input type="number" bind:value={seed} aria-label="Replay seed" /></label>
-          <label>Fighters<input type="number" min="8" max="200" bind:value={fighters} aria-label="Replay fighter count" /></label>
-          <button class="mini primary" on:click={load} disabled={state.loading}>{state.loading ? 'Loading…' : 'Start'}</button>
+    {#if state.loading}
+      <p class="hint">Loading a deterministic tournament…</p>
+    {:else if state.error}
+      <p class="error">{state.error}</p>
+      <button class="wide-btn" on:click={() => setAppMode('sim')}>Retry simulation</button>
+    {:else if !state.active}
+      <p class="hint">Simulation is starting…</p>
+    {:else}
+      <div class="timeline">
+        <div class="timeline-top">
+          <span>Bout {state.index + 1} of {state.total}</span>
+          <span>{Math.round(state.progress)}%</span>
         </div>
-        <button class="wide-btn" on:click={startReplay}>▶ Replay last event</button>
-        {#if state.error}<p class="error">{state.error}</p>{/if}
-      {:else}
-        <div class="timeline">
-          <div class="timeline-top">
-            <span>Bout {state.index + 1} of {state.total}</span>
-            <span>{Math.round(state.progress)}%</span>
+        <input type="range" min="0" max={Math.max(0, state.total - 1)} value={state.index}
+          on:input={(event) => seekReplay(Number((event.target as HTMLInputElement).value))}
+          aria-label="Scrub tournament replay" />
+      </div>
+
+      <div class="controls">
+        <button class="mini" on:click={() => restartReplay()} aria-label="Restart replay">↻</button>
+        <button class="mini" on:click={() => stepReplay(-1)} aria-label="Previous bout">⏮</button>
+        <button class="mini primary" on:click={toggleReplayPlayback} aria-label={state.playing ? 'Pause replay' : 'Play replay'}>
+          {state.playing ? '⏸' : '▶'}
+        </button>
+        <button class="mini" on:click={() => stepReplay(1)} aria-label="Next bout">⏭</button>
+        <select value={state.speed} on:change={(event) => setReplaySpeed(Number((event.target as HTMLSelectElement).value))}
+          aria-label="Replay speed">
+          <option value={80}>8×</option>
+          <option value={160}>4×</option>
+          <option value={450}>1×</option>
+          <option value={900}>½×</option>
+          <option value={1800}>¼×</option>
+        </select>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Replay state views">
+        {#each [['mat','Mat'],['table','Table'],['bracket','Bracket'],['ceremony','Ceremony']] as [id, label] (id)}
+          <button role="tab" aria-selected={view === id} class:active={view === id} on:click={() => (view = id as typeof view)}>{label}</button>
+        {/each}
+      </div>
+
+      <div class="replay-body">
+        {#if view === 'mat' && state.bout}
+          <div class="duel">
+            <div><span class="corner red">{state.bout.redId}</span><strong>{state.bout.pointsRed}</strong></div>
+            <em>vs</em>
+            <div><strong>{state.bout.pointsBlue}</strong><span class="corner blue">{state.bout.blueId}</span></div>
           </div>
-          <input type="range" min="0" max={Math.max(0, state.total - 1)} value={state.index}
-            on:input={(event) => seekReplay(Number((event.target as HTMLInputElement).value))}
-            aria-label="Scrub tournament replay" />
-        </div>
-
-        <div class="controls">
-          <button class="mini" on:click={() => restartReplay()} aria-label="Restart replay">↻</button>
-          <button class="mini" on:click={() => stepReplay(-1)} aria-label="Previous bout">⏮</button>
-          <button class="mini primary" on:click={toggleReplayPlayback} aria-label={state.playing ? 'Pause replay' : 'Play replay'}>
-            {state.playing ? '⏸' : '▶'}
-          </button>
-          <button class="mini" on:click={() => stepReplay(1)} aria-label="Next bout">⏭</button>
-          <select value={state.speed} on:change={(event) => setReplaySpeed(Number((event.target as HTMLSelectElement).value))}
-            aria-label="Replay speed">
-            <option value={120}>4×</option>
-            <option value={450}>1×</option>
-            <option value={900}>½×</option>
-            <option value={1800}>¼×</option>
-          </select>
-        </div>
-
-        <div class="tabs" role="tablist" aria-label="Replay state views">
-          {#each [['mat','Mat'],['table','Table'],['bracket','Bracket'],['ceremony','Ceremony']] as [id, label] (id)}
-            <button role="tab" aria-selected={view === id} class:active={view === id} on:click={() => (view = id as typeof view)}>{label}</button>
+          <p class="hint">{state.bout.stage} · {state.bout.round} · {state.bout.outcome.replaceAll('_', ' ')} · {state.bout.method}</p>
+          {#if state.bout.techniques?.length}<p class="hint small">{state.bout.techniques.slice(-6).join(' · ')}</p>{/if}
+        {:else if view === 'mat'}
+          <p class="hint">No bout at this point in the tournament.</p>
+        {:else if view === 'table'}
+          {#each state.standings.slice(0, 5) as row, i (row.fighterId)}
+            <div class="rank"><span>#{i + 1}</span><strong>{row.name}</strong><em>{row.club}</em><b>{row.points}</b></div>
           {/each}
-        </div>
-
-        <div class="replay-body">
-          {#if view === 'mat' && state.bout}
-            <div class="duel">
-              <div><span class="corner red">{state.bout.redId}</span><strong>{state.bout.pointsRed}</strong></div>
-              <em>vs</em>
-              <div><strong>{state.bout.pointsBlue}</strong><span class="corner blue">{state.bout.blueId}</span></div>
+        {:else if view === 'bracket'}
+          {#each groups.slice(-3) as [label, bouts] (label)}
+            <div class="group"><strong>{label}</strong>
+              {#each bouts.slice(-2) as bout (bout.id)}
+                <span>{bout.redId} vs {bout.blueId} → {bout.outcome.replaceAll('_', ' ')}</span>
+              {/each}
             </div>
-            <p class="hint">{state.bout.stage} · {state.bout.round} · {state.bout.outcome.replaceAll('_', ' ')} · {state.bout.method}</p>
-          {:else if view === 'mat'}
-            <p class="hint">No bout at this point in the tournament.</p>
-          {:else if view === 'table'}
-            {#each state.standings.slice(0, 5) as row, i (row.fighterId)}
-              <div class="rank"><span>#{i + 1}</span><strong>{row.name}</strong><em>{row.club}</em><b>{row.points}</b></div>
-            {/each}
-          {:else if view === 'bracket'}
-            {#each groups.slice(-3) as [label, bouts] (label)}
-              <div class="group"><strong>{label}</strong>
-                {#each bouts.slice(-2) as bout (bout.id)}
-                  <span>{bout.redId} vs {bout.blueId} → {bout.outcome.replaceAll('_', ' ')}</span>
-                {/each}
-              </div>
-            {:else}<p class="hint">No bracket results yet.</p>{/each}
-          {:else}
-            {#each ['gold', 'silver', 'bronze'] as kind (kind)}
-              <div class="group"><strong>{kind}</strong>
-                {#each state.medals.filter((medal) => medal.kind === kind) as medal (medal.id)}
-                  <span>{medal.name}</span>
-                {:else}<span class="hint">To be decided</span>{/each}
-              </div>
-            {/each}
-          {/if}
-        </div>
+          {:else}<p class="hint">No bracket results yet.</p>{/each}
+        {:else}
+          {#each ['gold', 'silver', 'bronze'] as kind (kind)}
+            <div class="group"><strong>{kind}</strong>
+              {#each state.medals.filter((medal) => medal.kind === kind) as medal (medal.id)}
+                <span>{medal.name}</span>
+              {:else}<span class="hint">To be decided</span>{/each}
+            </div>
+          {/each}
+        {/if}
+      </div>
 
-        <p class="hint small">Seed {state.seed} · {state.fighters} fighters · changes follow every display tab.</p>
-      {/if}
-    </section>
-  {/if}
+      <div class="inspect-links">
+        <span>Inspect this moment</span>
+        <a href="/public?{replayQuery(state)}">Public</a>
+        <a href="/tables?{replayQuery(state)}">Tables</a>
+        <a href="/brackets?{replayQuery(state)}">Brackets</a>
+        <a href="/ceremony?{replayQuery(state)}">Ceremony</a>
+      </div>
+      <a class="wide-btn console-link" href="/simulate?{replayQuery(state)}">🎛 Open full replay console</a>
+      <p class="hint small">Seed {state.seed} · {state.fighters} fighters · {state.speed === 80 ? '8×' : state.speed === 160 ? '4×' : state.speed === 450 ? '1×' : state.speed === 900 ? '½×' : '¼×'} playback</p>
+    {/if}
+  </section>
 {/if}
 
 <style>
-  .replay-launcher {
-    position:fixed; right:12px; bottom:52px; z-index:890; display:flex; align-items:center; gap:8px;
-    padding:9px 14px; border-radius:999px; border:1px solid var(--brand-border);
-    background:var(--brand-surface-2); color:var(--brand-ink); box-shadow:var(--brand-shadow);
-    cursor:pointer; font-size:.8rem; font-weight:800;
-  }
-  .replay-launcher.active { border-color:var(--brand-accent); box-shadow:0 0 18px color-mix(in srgb, var(--brand-accent) 35%, transparent); }
-  .replay-launcher em { font-style:normal; color:var(--brand-accent); }
   .replay-panel {
     position:fixed; right:12px; bottom:52px; z-index:890; width:min(370px, calc(100vw - 24px));
-    max-height:min(70vh, 640px); overflow:auto; display:grid; gap:10px; padding:14px;
-    border-radius:16px; border:1px solid var(--brand-border); background:var(--brand-surface-2);
-    box-shadow:var(--brand-shadow);
+    max-height:min(72vh, 660px); overflow:auto; display:grid; gap:10px; padding:14px;
+    border-radius:16px; border:1px solid var(--brand-accent); background:var(--brand-surface-2);
+    box-shadow:0 0 0 2px color-mix(in srgb, var(--brand-accent) 20%, transparent), var(--brand-shadow);
   }
   header { display:flex; justify-content:space-between; align-items:center; gap:10px; }
   header strong { font-family:var(--font-display); font-size:1rem; }
+  .eyebrow { text-transform:uppercase; letter-spacing:.12em; font-size:.6rem; font-weight:900; color:var(--brand-muted); }
   .hint { margin:0; color:var(--brand-muted); font-size:.76rem; line-height:1.4; }
   .hint.small { font-size:.68rem; }
   .error { margin:0; color:var(--loss); font-size:.76rem; }
-  .setup { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:end; }
-  .setup label { display:grid; gap:3px; font-size:.68rem; color:var(--brand-muted); }
-  .setup input { width:100%; padding:7px; border-radius:8px; background:var(--brand-surface-3); color:var(--brand-ink); border:1px solid var(--brand-border); }
   .wide-btn, .mini {
     padding:8px 10px; border-radius:9px; border:1px solid var(--brand-border);
     background:var(--brand-surface-3); color:var(--brand-ink); cursor:pointer; font-size:.78rem; font-weight:700;
   }
-  .wide-btn { width:100%; }
+  .wide-btn { width:100%; text-align:center; text-decoration:none; }
+  .console-link { border-color:var(--brand-accent); color:var(--brand-accent); }
+  .mini.exit { border-color:var(--win); }
   .mini.primary { background:var(--brand-primary-fill); color:var(--brand-on-primary); border-color:transparent; }
-  .mini:disabled { opacity:.55; cursor:wait; }
   .timeline { display:grid; gap:4px; }
   .timeline-top { display:flex; justify-content:space-between; font-size:.72rem; color:var(--brand-muted); }
   .timeline input { width:100%; accent-color:var(--brand-accent); }
@@ -191,8 +161,10 @@
   .rank b { text-align:right; color:var(--brand-accent); }
   .group { display:grid; gap:3px; padding:7px 9px; border-radius:8px; background:var(--brand-surface-3); font-size:.7rem; }
   .group span { color:var(--brand-muted); }
+  .inspect-links { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
+  .inspect-links span { font-size:.68rem; color:var(--brand-muted); }
+  .inspect-links a { padding:4px 8px; border-radius:999px; background:var(--brand-surface-3); color:var(--brand-ink); font-size:.66rem; font-weight:700; text-decoration:none; }
   @media (max-width: 700px) {
-    .replay-launcher, .replay-panel { right:8px; bottom:132px; }
-    .replay-panel { max-height:45vh; width:calc(100vw - 16px); }
+    .replay-panel { right:8px; bottom:132px; max-height:45vh; width:calc(100vw - 16px); }
   }
 </style>

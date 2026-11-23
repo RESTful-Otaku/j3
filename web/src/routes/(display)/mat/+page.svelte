@@ -4,6 +4,7 @@
   import { notifySuccess, notifyError } from '../../../lib/toast';
   import { guideAction } from '../../../lib/guide';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
+  import { onLiveChange } from '../../../lib/live-updates';
 
   let event: EventDisplayInfo | null = null;
   let fights: DemoFight[] = [];
@@ -30,7 +31,13 @@
     const stopStream = api.eventStream((message) => {
       if (message.payload && message.payload.fightId === selected) state = message.payload;
     });
-    return () => { stopEvent(); stopFights(); stopStream(); };
+    const stopLive = onLiveChange(['fights', 'officials'], () => {
+      void api.fights().then((data) => {
+        fights = data.fights;
+        if (!selected) selected = (data.fights.find((f) => f.mat === selectedMat) ?? data.fights[0])?.id ?? '';
+      }).catch(() => {});
+    });
+    return () => { stopEvent(); stopFights(); stopStream(); stopLive(); };
   });
 
   let selected = '';

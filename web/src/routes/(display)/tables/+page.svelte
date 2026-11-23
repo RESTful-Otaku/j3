@@ -2,11 +2,13 @@
   import { onMount } from 'svelte';
   import { initials } from '../../../lib/format';
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
-  import { api, type StandingRow, type KataPerformance } from '../../../lib/api';
+  import { api, type StandingRow, type KataPerformance, type MedalRow } from '../../../lib/api';
   import { replaySnapshot } from '../../../lib/demo-replay';
+  import { onLiveChange } from '../../../lib/live-updates';
 
   let standings: StandingRow[] = [];
   let kataPerformances: KataPerformance[] = [];
+  let medals: MedalRow[] = [];
   let tab: 'overall' | 'category' | 'medals' | 'kata' = 'overall';
   let category = '';
   let query = '';
@@ -15,9 +17,10 @@
 
   async function load() {
     try {
-      const [ranking, kataData] = await Promise.all([api.standings(), api.kata()]);
+      const [ranking, kataData, medalData] = await Promise.all([api.standings(), api.kata(), api.medals()]);
       standings = ranking.standings;
       kataPerformances = kataData.performances;
+      medals = medalData.medals;
       loadError = '';
     } catch {
       loadError = 'Live results are temporarily unavailable. Retrying automatically…';
@@ -26,7 +29,8 @@
   onMount(() => {
     void load();
     const handle = setInterval(() => void load(), 3000);
-    return () => clearInterval(handle);
+    const stopLive = onLiveChange(['standings', 'kata', 'medals', 'fights'], () => void load());
+    return () => { clearInterval(handle); stopLive(); };
   });
 
   async function submitScore(id: string, judge: number, value: number) {
@@ -44,7 +48,16 @@
     (!category || row.category === category) &&
     (!group || row.belt === group) &&
     `${row.name} ${row.club}`.toLowerCase().includes(query.toLowerCase()));
-  $: medalRows = filtered.slice().sort((a, b) => b.points - a.points).slice(0, 12);
+  $: displayMedals = replay.active
+    ? replay.medals.map((medal) => ({
+        id: medal.id, fighterId: medal.fighterId, name: medal.name, club: medal.club,
+        clubColour: '#b91c1c', kind: medal.kind,
+        categoryId: '', category: medal.category ?? '', disciplineId: '',
+        discipline: medal.discipline ?? '', eventType: medal.eventType ?? '',
+        awardKey: '', source: 'replay',
+      }))
+    : medals;
+  $: medalRows = displayMedals.filter((medal) => !category || medal.category === category).slice(0, 40);
 </script>
 
 <svelte:head><title>J3 · Tables & rankings</title></svelte:head>
@@ -129,12 +142,15 @@
     </div>
   {:else if tab === 'medals'}
     <div class="grid" use:phoneLimit={6} style="grid-template-columns: repeat(auto-fit, minmax(min(100%,300px), 1fr));">
-      {#each medalRows as row, i (row.fighterId)}
-        <div class="stat slide-in" style="border-left:5px solid {i === 0 ? '#fbbf24' : i === 1 ? '#cbd5e1' : i === 2 ? '#d97706' : 'var(--brand-primary)'};">
-          <div class="value">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</div>
+      {#each medalRows as row (row.id)}
+        <div class="stat slide-in" style="border-left:5px solid {row.kind === 'gold' ? '#fbbf24' : row.kind === 'silver' ? '#cbd5e1' : '#d97706'};">
+          <div class="value">{row.kind === 'gold' ? '🥇' : row.kind === 'silver' ? '🥈' : '🥉'}</div>
           <div><strong>{row.name}</strong></div>
-          <div class="small muted">{row.club} · {row.category} · {row.points} pts</div>
+          <div class="small muted">{row.club} · {row.category} · {row.discipline || row.eventType}</div>
+          <div class="small" style="color:var(--brand-primary); text-transform:capitalize;">{row.kind} · {row.eventType.replaceAll('_', ' ')}</div>
         </div>
+      {:else}
+        <div class="card muted">No medals awarded yet.</div>
       {/each}
     </div>
   {:else}

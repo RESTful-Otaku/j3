@@ -20,19 +20,20 @@ def back():
     global seq
     seq += 'q'                    # leave submenu
 
-# Main: run demo, full demo, then three submenus.
+# Main: run demo, full demo, then every submenu.
 action(1); action(2)
-for menu in [3, 4, 5, 6, 7]:
+for menu in [3, 4, 5, 6, 7, 8]:
     action(menu)
     if menu == 3:  count = 7      # QA options + back
     elif menu == 4: count = 5     # data
     elif menu == 5: count = 9     # build
     elif menu == 6: count = 9     # mobile
+    elif menu == 7: count = 9     # Docker QA
     else: count = 9              # docs & guides
     for i in range(1, count + 1):
         action(i)
     back()
-action(8)                         # Exit
+action(9)                         # Exit
 open(sys.argv[1], 'w').write(seq)
 PY
 
@@ -44,6 +45,7 @@ build-menu build-exec build-release build-cicd deploy-dev deploy-staging deploy-
 build-and-deploy-staging build-and-deploy-production menu-back \
 mobile-menu mobile-build-apk mobile-emulator mobile-install mobile-build-install mobile-url \
 run-demo-phone mobile-build-ios mobile-build-hosted mobile-back \
+docker-menu docker-full docker-okami docker-clean docker-light docker-dev docker-build docker-down docker-reset docker-back \
 docs-menu docs-home docs-api docs-guide docs-development docs-ci docs-hosting docs-guides \
 docs-refresh docs-back \
 exit"

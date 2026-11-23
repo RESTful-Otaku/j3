@@ -8,7 +8,7 @@
 ## QA and verification
 
 `bun run smoke` (80 API/UI checks), `bun run smoke:full` (full-seed), `bun run e2e` (browser/axe),
-`bun run load` (200 concurrent requests), `bun run test:tui` (44 menu actions).
+`bun run load` (200 concurrent requests), `bun run test:tui` (57 menu actions).
 
 ## Build and deploy
 
@@ -20,6 +20,13 @@
 `bash scripts/mobile.sh build` regenerates J3 icons, seeds the bundled database/snapshot and builds
 the APK. `install` starts the Pixel 10 Pro AVD (Android Studio SDK, `-gpu auto`) and installs/launches
 it. `url` prints the baked LAN URL.
+
+## Containerised QA
+
+The **🐳 Docker QA ▸** TUI menu runs the container stack in `full`, `okami`, `clean`, `light` or `dev`
+mode. The same commands are available as `bun run qa:docker*` (see `docs/DOCKER.md`).
+`j3d simulate -seed 42 -fighters 50 -out snapshot.json` writes a deterministic tournament snapshot
+without needing curl or a running server.
 
 ## Data and reset
 

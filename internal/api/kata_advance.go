@@ -78,6 +78,8 @@ func (s *Server) advanceKata(w http.ResponseWriter, r *http.Request) {
 	}
 	s.audit(r, "kata.advance", "event", eventID,
 		`{"from":`+strconv.Itoa(currentRound)+`,"to":`+strconv.Itoa(currentRound+1)+`,"count":`+strconv.Itoa(len(promotions))+`}`)
+	s.broadcastState("kata")
+	_, _ = s.recomputeAwards(r.Context(), s.defaultEventID(r))
 	items, err := s.listKata(r)
 	if err != nil {
 		writeError(w, err)

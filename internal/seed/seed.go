@@ -207,6 +207,17 @@ func Ensure(store *db.DB) error {
 		add(`INSERT OR IGNORE INTO mats (id, event_id, name, sort_order) VALUES (?, ?, ?, ?)`,
 			fmt.Sprintf("mat-%d", i+1), "ev-demo", name, i+1)
 	}
+	for i, discipline := range []struct{ id, name string }{
+		{"disc-fight", "JJ Fighting System"},
+		{"disc-newaza", "Ne-Waza / Katamewaza"},
+		{"disc-kata", "Kata"},
+	} {
+		add(`INSERT OR IGNORE INTO disciplines (id, event_id, name, rules_json, sort_order)
+			VALUES (?, 'ev-demo', ?, '{}', ?)`, discipline.id, discipline.name, i+1)
+	}
+	add(`INSERT OR IGNORE INTO discipline_formats
+		(event_id, discipline_id, format, knockout, third_place, dual_bronze, retry_ties, order_policy)
+		VALUES ('ev-demo', 'disc-fight', 'single_elimination', 'single_elimination', 'rematch', 1, 0, 'weight_then_age')`)
 
 	// Entrants: assign by index-derived category, with kata as a second division.
 	byCategory := map[string][]string{}
@@ -236,28 +247,35 @@ func Ensure(store *db.DB) error {
 	sort.Strings(catKeys)
 	for _, cat := range catKeys {
 		ids := byCategory[cat]
-		for i := 0; i+1 < len(ids) && fightNo < 16; i += 2 {
+		for i := 0; i+1 < len(ids) && fightNo < 30; i += 2 {
 			fightNo++
 			id := fmt.Sprintf("fight-%02d", fightNo)
 			fightIDs = append(fightIDs, id)
 			state, outcome := "pending", ""
 			switch {
-			case fightNo <= 3:
+			case i < 4:
 				state, outcome = "complete", "win_red"
-			case fightNo == 4:
+				if i%2 == 1 {
+					outcome = "win_blue"
+				}
+			case i == 4:
 				state = "live"
-			case fightNo == 5:
-				state, outcome = "complete", "draw"
 			}
 			matID := "mat-1"
 			if cat == "cat-kata" {
 				matID = "mat-4"
 			}
+			roundLabel := fmt.Sprintf("Round %d", 1+(fightNo%3))
+			if cat == "cat-kata" {
+				roundLabel = "Kata " + roundLabel
+			} else if cat == "cat-adult-82" {
+				roundLabel = "Ne-Waza " + roundLabel
+			}
 			add(`INSERT OR IGNORE INTO fights
 				(id, event_id, mat_id, category_id, round_label,
 				 red_fighter_id, blue_fighter_id, state, outcome)
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-				id, "ev-demo", matID, cat, fmt.Sprintf("Round %d", 1+(fightNo%3)),
+				id, "ev-demo", matID, cat, roundLabel,
 				ids[i], ids[i+1], state, outcome)
 			if state == "live" {
 				add(`INSERT OR IGNORE INTO fight_events (fight_id, seq, kind, actor_user_id, payload_json) VALUES (?, ?, ?, ?, ?)`,

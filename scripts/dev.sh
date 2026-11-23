@@ -212,6 +212,29 @@ qa_menu() {
   done
 }
 
+docker_menu() {
+  while true; do
+    select_menu "Docker QA demo" \
+      "🐳 Full seeded tournament" "🥋 Okami mid-event" "🧹 Clean base seed" \
+      "💡 Light 24-fighter demo" "🔥 Dev hot reload" "🏗 Build container images" \
+      "🛑 Stop containers" "♻️ Reset QA data" "← Back"
+    choice=$?
+    [ "$choice" -eq 255 ] && return
+    case "$choice" in
+      0) tui_log docker-full; spinner "Docker QA full tournament" bash scripts/qa-docker.sh full ;;
+      1) tui_log docker-okami; spinner "Docker QA Okami mid-event" bash scripts/qa-docker.sh okami ;;
+      2) tui_log docker-clean; spinner "Docker QA clean seed" bash scripts/qa-docker.sh clean ;;
+      3) tui_log docker-light; spinner "Docker QA light demo" bash scripts/qa-docker.sh light ;;
+      4) tui_log docker-dev; spinner "Docker QA dev hot reload" bash scripts/qa-docker.sh dev ;;
+      5) tui_log docker-build; spinner "Building QA images" bash scripts/qa-docker.sh build ;;
+      6) tui_log docker-down; spinner "Stopping QA containers" bash scripts/qa-docker.sh down ;;
+      7) tui_log docker-reset; spinner "Resetting QA data" bash scripts/qa-docker.sh reset ;;
+      8) tui_log docker-back; return ;;
+    esac
+    pause
+  done
+}
+
 data_menu() {
   while true; do
     select_menu "Demo data & state" \
@@ -297,7 +320,7 @@ while true; do
   select_menu "J3 developer console" \
     "▶ Run full local demo" "🚀 Run fully seeded tournament" "🧪 QA & verification  ▸" \
     "💾 Demo data  ▸" "🏗 Build & deploy  ▸" "📱 Mobile  ▸" \
-    "📚 Docs & guides  ▸" "❌ Exit"
+    "🐳 Docker QA  ▸" "📚 Docs & guides  ▸" "❌ Exit"
   choice=$?
   case "$choice" in
     0) tui_log run-demo; run_demo ;;
@@ -306,7 +329,8 @@ while true; do
     3) tui_log data-menu; data_menu ;;
     4) tui_log build-menu; build_menu ;;
     5) tui_log mobile-menu; mobile_menu ;;
-    6) tui_log docs-menu; docs_menu ;;
-    7) tui_log exit; echo "  👋 Bye!"; exit 0 ;;
+    6) tui_log docker-menu; docker_menu ;;
+    7) tui_log docs-menu; docs_menu ;;
+    8) tui_log exit; echo "  👋 Bye!"; exit 0 ;;
   esac
 done

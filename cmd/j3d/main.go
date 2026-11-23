@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,12 +11,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/restful-otaku/j3/internal/api"
 	"github.com/restful-otaku/j3/internal/config"
 	"github.com/restful-otaku/j3/internal/db"
 	"github.com/restful-otaku/j3/internal/seed"
+	"github.com/restful-otaku/j3/internal/simulator"
 )
 
 func main() {
@@ -26,6 +29,9 @@ func main() {
 			return
 		case "reset":
 			must(seedCommand(os.Args[2:], true))
+			return
+		case "simulate":
+			must(simulateCommand(os.Args[2:]))
 			return
 		}
 	}
@@ -120,6 +126,34 @@ func seedCommand(args []string, reset bool) error {
 	}
 	log.Printf("demo data ready in %s", *dbPath)
 	return nil
+}
+
+// simulateCommand emits the same deterministic snapshot as the public demo
+// endpoint, so QA containers can generate a tournament without curl or jq.
+func simulateCommand(args []string) error {
+	flags := flag.NewFlagSet("simulate", flag.ContinueOnError)
+	seed := flags.Int64("seed", 42, "simulation seed")
+	fighters := flags.Int("fighters", 50, "number of fighters")
+	out := flags.String("out", "", "write JSON snapshot to this file (default: stdout)")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	result := simulator.Run(*seed, *fighters)
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	if *out == "" {
+		_, err = os.Stdout.Write(data)
+		return err
+	}
+	if dir := filepath.Dir(*out); dir != "." {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return err
+		}
+	}
+	return os.WriteFile(*out, data, 0o644)
 }
 
 func must(err error) {

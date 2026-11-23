@@ -105,6 +105,14 @@
       "file": "CLI.md"
     },
     {
+      "slug": "docker",
+      "title": "Containerised QA",
+      "description": "Docker/Podman demo stack, lifecycle commands, modes and replay snapshots.",
+      "icon": "🐳",
+      "group": "Developers",
+      "file": "DOCKER.md"
+    },
+    {
       "slug": "api-guide",
       "title": "API guide",
       "description": "Authentication, boundaries and worked examples.",

@@ -14,7 +14,10 @@ export type ReplayStanding = {
   points: number;
 };
 
-export type ReplayMedal = { id: string; fighterId: string; name: string; club: string; kind: string };
+export type ReplayMedal = {
+  id: string; fighterId: string; name: string; club: string; kind: string;
+  category?: string; discipline?: string; eventType?: string;
+};
 
 export type ReplaySnapshot = {
   active: boolean;
@@ -28,6 +31,7 @@ export type ReplaySnapshot = {
   progress: number;
   speed: number;
   bout: SimulationBout | null;
+  bouts: SimulationBout[];
   completed: SimulationBout[];
   standings: ReplayStanding[];
   medals: ReplayMedal[];
@@ -35,6 +39,10 @@ export type ReplaySnapshot = {
   topMoves: Array<[string, number]>;
 };
 
+export type AppMode = 'live' | 'sim';
+
+/** Global operating mode. Live is the real event; sim replays a deterministic tournament. */
+export const appMode = writable<AppMode>('live');
 export const replayActive = writable(false);
 export const replayPlaying = writable(false);
 export const replayLoading = writable(false);
@@ -114,10 +122,23 @@ function medalsAt(result: SimulationResult, completed: SimulationBout[], index: 
   const rows = standingsAt(result, completed);
   const meta = new Map(rows.map((row) => [row.fighterId, row]));
   const medals: ReplayMedal[] = [];
-  const push = (fighterId: string, kind: string) => {
-    if (!fighterId || medals.some((medal) => medal.fighterId === fighterId && medal.kind === kind)) return;
+  const push = (fighterId: string, kind: string, context?: { category?: string; discipline?: string; eventType?: string }) => {
+    if (!fighterId) return;
+    const existing = medals.find((medal) => medal.fighterId === fighterId && medal.kind === kind);
+    if (existing) {
+      if (context) {
+        existing.category = context.category ?? existing.category;
+        existing.discipline = context.discipline ?? existing.discipline;
+        existing.eventType = context.eventType ?? existing.eventType;
+      }
+      return;
+    }
     const row = meta.get(fighterId);
-    medals.push({ id: `${fighterId}-${kind}`, fighterId, name: row?.name ?? fighterId, club: row?.club ?? '', kind });
+    medals.push({
+      id: `${fighterId}-${kind}`, fighterId, name: row?.name ?? fighterId, club: row?.club ?? '', kind,
+      category: context?.category ?? 'Open', discipline: context?.discipline ?? 'JJ Fighting System',
+      eventType: context?.eventType ?? 'fight',
+    });
   };
 
   const final = [...completed].reverse().find(isFinal);
@@ -130,7 +151,7 @@ function medalsAt(result: SimulationResult, completed: SimulationBout[], index: 
   // Once the bracket is complete, trust the server-resolved medal list (it also
   // handles no-rematch bronze rules and shared bronzes).
   if (total > 0 && index >= total - 1) {
-    for (const medal of result.medals) push(medal.fighterId, medal.kind);
+    for (const medal of result.medals) push(medal.fighterId, medal.kind, medal);
   }
   return medals;
 }
@@ -150,6 +171,20 @@ function topMovesAt(completed: SimulationBout[]): Array<[string, number]> {
   const moves = new Map<string, number>();
   for (const bout of completed) moves.set(bout.method, (moves.get(bout.method) ?? 0) + 1);
   return [...moves.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+const REPLAY_QUERY_KEYS = ['mode', 'replay', 'seed', 'fighters', 'speed'] as const;
+let urlSyncStarted = false;
+
+/** Query string that keeps a replay position when opening another view or a new tab. */
+export function replayQuery(state: ReplaySnapshot = get(replaySnapshot)): string {
+  const params = new URLSearchParams();
+  params.set('mode', 'sim');
+  params.set('replay', String(state.index));
+  params.set('seed', String(state.seed));
+  params.set('fighters', String(state.fighters));
+  if (state.speed !== 450) params.set('speed', String(state.speed));
+  return params.toString();
 }
 
 export const replaySnapshot = derived(
@@ -172,6 +207,7 @@ export const replaySnapshot = derived(
       progress: total ? ((index + 1) / total) * 100 : 0,
       speed: $speed,
       bout: bouts[index] ?? null,
+      bouts,
       completed,
       standings: $result ? standingsAt($result, completed) : [],
       medals: $result ? medalsAt($result, completed, index, total) : [],
@@ -265,4 +301,85 @@ export function startReplay() {
 export function stopReplay() {
   pauseReplay();
   replayActive.set(false);
+}
+
+function persistAppMode(mode: AppMode) {
+  appMode.set(mode);
+  if (typeof window !== 'undefined') window.localStorage.setItem('j3-app-mode', mode);
+}
+
+/** Switch the whole app between the real event and the deterministic replay. */
+export function setAppMode(mode: AppMode) {
+  if (mode === 'live') {
+    persistAppMode('live');
+    stopReplay();
+    return;
+  }
+  persistAppMode('sim');
+  if (!get(replayResult)) {
+    void loadReplay(get(replaySeed), get(replayFighters), true);
+    return;
+  }
+  if (!get(replayActive)) startReplay();
+  else if (!get(replayPlaying)) playReplay();
+}
+
+export function toggleAppMode() {
+  setAppMode(get(appMode) === 'sim' ? 'live' : 'sim');
+}
+
+/**
+ * Restore a replay from `?replay=N` and keep the URL in sync while it plays.
+ * Called once from the root layout so every view can be inspected at the same
+ * event, including when opened in a new tab.
+ */
+export function initReplayUrl(): void {
+  if (typeof window === 'undefined' || urlSyncStarted) return;
+  urlSyncStarted = true;
+
+  const url = new URL(window.location.href);
+  const modeParam = url.searchParams.get('mode');
+  const storedMode = window.localStorage.getItem('j3-app-mode');
+  const simRequested = modeParam === 'sim' || url.searchParams.has('replay') || storedMode === 'sim';
+  persistAppMode(modeParam === 'live' ? 'live' : simRequested ? 'sim' : 'live');
+
+  if (url.searchParams.has('replay')) {
+    const seed = Number(url.searchParams.get('seed')) || get(replaySeed);
+    const fighters = Number(url.searchParams.get('fighters')) || get(replayFighters);
+    const speed = Number(url.searchParams.get('speed')) || get(replaySpeed);
+    const index = Math.max(0, Number(url.searchParams.get('replay')) || 0);
+    replaySeed.set(seed);
+    replayFighters.set(fighters);
+    setReplaySpeed(speed);
+    void loadReplay(seed, fighters, false).then(() => seekReplay(index));
+  } else if (simRequested) {
+    void loadReplay(get(replaySeed), get(replayFighters), true);
+  }
+
+  replaySnapshot.subscribe(applyReplayUrl);
+}
+
+function applyReplayUrl(state: ReplaySnapshot) {
+  if (typeof window === 'undefined') return;
+  const next = new URL(window.location.href);
+  if (!state.active) {
+    let changed = false;
+    for (const key of REPLAY_QUERY_KEYS) {
+      if (next.searchParams.has(key)) { next.searchParams.delete(key); changed = true; }
+    }
+    if (changed) window.history.replaceState(window.history.state, '', next);
+    return;
+  }
+  const query = replayQuery(state);
+  if (next.search !== `?${query}`) {
+    for (const key of REPLAY_QUERY_KEYS) next.searchParams.delete(key);
+    for (const [key, value] of new URLSearchParams(query)) next.searchParams.set(key, value);
+    window.history.replaceState(window.history.state, '', next);
+  }
+}
+
+/** Re-apply the current playhead after client-side navigation (e.g. a paused replay). */
+export function syncReplayUrl(): void {
+  if (!urlSyncStarted) return;
+  applyReplayUrl(get(replaySnapshot));
 }

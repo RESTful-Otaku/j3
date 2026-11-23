@@ -9,6 +9,7 @@
   import { notifySuccess, notifyError } from '../../lib/toast';
   import ConfirmDialog from '../../lib/components/ConfirmDialog.svelte';
   import { guideAction } from '../../lib/guide';
+  import { onLiveChange } from '../../lib/live-updates';
 
   let contests: DemoFight[] = [];
   let selected = '';
@@ -48,7 +49,7 @@
   };
 
   onMount(() => {
-    void api.myContests()
+    const loadContests = () => api.myContests()
       .then((data) => {
         contests = data.contests;
         role = data.role;
@@ -60,6 +61,7 @@
           if (!selected) selected = (data.fights.find((fight) => fight.state === 'live') ?? data.fights[0])?.id ?? '';
         });
       });
+    void loadContests();
     void api.techniques().then((data) => {
       catalogue = data;
       const first = data.techniques.find((item) => item.kind === 'score');
@@ -73,7 +75,9 @@
       if (!selected) return;
       void api.fightState(selected).then((next) => (state = next)).catch(() => {});
     }, 1000);
-    return () => { stopContestFallback?.(); stopKata(); stopStream(); clearInterval(clock); };
+    const stopLive = onLiveChange(['fights', 'officials'], () => void loadContests());
+    const stopKataLive = onLiveChange(['kata', 'medals'], () => void api.kata().then((data) => (kataPerformances = data.performances)).catch(() => {}));
+    return () => { stopContestFallback?.(); stopKata(); stopStream(); stopLive(); stopKataLive(); clearInterval(clock); };
   });
 
   $: selectedFight = contests.find((fight) => fight.id === selected);
