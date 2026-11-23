@@ -1,19 +1,27 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api, livePoll, broadcastPA } from '../../../lib/api';
+  import { replaySnapshot } from '../../../lib/demo-replay';
   type Medal = { id: string; fighterId: string; name: string; club: string; clubColour: string; kind: string };
   let medals: Medal[] = [];
   let step = 0;
 
   onMount(() => livePoll(api.medals, 4000, (data) => (medals = data.medals as Medal[])));
   const podium = ['gold', 'silver', 'bronze'];
-  $: grouped = podium.map((kind) => ({ kind, winners: medals.filter((m) => m.kind === kind) }));
+  $: replay = $replaySnapshot;
+  $: displayMedals = replay.active
+    ? replay.medals.map((medal) => ({
+        id: medal.id, fighterId: medal.fighterId, name: medal.name,
+        club: medal.club || 'Independent', clubColour: '#b91c1c', kind: medal.kind,
+      }))
+    : medals;
+  $: grouped = podium.map((kind) => ({ kind, winners: displayMedals.filter((m) => m.kind === kind) }));
   $: activeKind = podium[step];
   function call() { broadcastPA('Medal ceremony at the podium — competitors please report', '', 8); }
   function next() {
     const nextStep = (step + 1) % podium.length;
     const kind = podium[nextStep];
-    const winners = medals.filter((m) => m.kind === kind);
+    const winners = displayMedals.filter((m) => m.kind === kind);
     step = nextStep;
     broadcastPA(`${kind.toUpperCase()} medalists to the podium: ${winners.map((m) => m.name).join(', ') || 'to be announced'}`, '', 10);
   }
@@ -24,7 +32,7 @@
 
 <div class="display-shell">
   <header class="display-header">
-    <div><div class="event-mark"><span class="crest">🏆</span>Medal ceremony</div><div class="meta">Podium call · live results</div></div>
+    <div><div class="event-mark"><span class="crest">🏆</span>Medal ceremony</div><div class="meta">{replay.active ? `Demo replay · bout ${replay.index + 1}/${replay.total}` : 'Podium call · live results'}</div></div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button class="btn" on:click={previous}>← Previous</button>
       <button class="btn" on:click={call}>📣 Call all</button>

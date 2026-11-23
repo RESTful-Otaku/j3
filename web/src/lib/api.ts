@@ -351,7 +351,7 @@ export const postJson = <T>(url: string, body: unknown) => requestJson<T>(url, {
 
 export const api = {
   health: () => getJson<{ status: string }>('/healthz'),
-  version: () => getJson<{ name: string; version: string }>('/api/v1/version'),
+  version: () => getJson<{ name: string; version: string; demo?: boolean }>('/api/v1/version'),
   roles: () => getJson<{ roles: RoleInfo[] }>('/api/v1/roles'),
   demo: () => getJson<{ counts: DemoCounts }>('/api/v1/demo'),
   identities: () => getJson<DemoIdentitiesResponse>('/api/v1/demo/identities'),

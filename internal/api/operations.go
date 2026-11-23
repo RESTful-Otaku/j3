@@ -78,7 +78,7 @@ func (s *Server) teamRankings(w http.ResponseWriter, r *http.Request) {
 		  SUM(CASE WHEN m.kind='bronze' THEN 1 ELSE 0 END)
 		FROM medals m JOIN fighters f ON f.id = m.fighter_id
 		LEFT JOIN clubs c ON c.id = f.club_id
-		WHERE m.event_id='ev-demo' GROUP BY c.name`)
+		WHERE m.event_id=? GROUP BY c.name`, s.eventIDFromRequest(r))
 	if err != nil {
 		writeError(w, err)
 		return
@@ -93,6 +93,10 @@ func (s *Server) teamRankings(w http.ResponseWriter, r *http.Request) {
 		}
 		item.Points = item.Gold*3 + item.Silver*2 + item.Bronze
 		rankings = append(rankings, item)
+	}
+	if err := rows.Err(); err != nil {
+		writeError(w, err)
+		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"teams": rankings})
 }

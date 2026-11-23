@@ -5,6 +5,7 @@
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
   import { eventTitle } from '../../../lib/event-title';
+  import { replaySnapshot } from '../../../lib/demo-replay';
 
   let event: EventDisplayInfo | null = null;
   let fights: DemoFight[] = [];
@@ -39,6 +40,7 @@
   $: upcoming = fights.filter((f) => f.state === 'pending').slice(0, 12);
   $: finished = fights.filter((f) => f.state === 'complete');
   $: leaders = standings.slice(0, 10);
+  $: replay = $replaySnapshot;
   async function drift(minutes: number) {
     const result = await api.setDrift(minutes);
     schedule = result.items;
@@ -61,6 +63,15 @@
   </header>
 
   <div class="brand-banner" aria-label="J3 banner"></div>
+  {#if replay.active}
+    <div class="replay-strip" aria-live="polite">
+      <span class="eyebrow">Demo replay · {replay.index + 1}/{replay.total}</span>
+      {#if replay.bout}
+        <strong>{replay.bout.redId} {replay.bout.pointsRed} — {replay.bout.pointsBlue} {replay.bout.blueId}</strong>
+        <span class="muted small">{replay.bout.stage} · {replay.bout.round} · {replay.bout.outcome.replaceAll('_', ' ')}</span>
+      {:else}<strong>Tournament ready</strong>{/if}
+    </div>
+  {/if}
   <div class="clock-hero slide-in">
     <div>
       <div class="eyebrow">Venue time</div>
@@ -190,7 +201,8 @@
 
 <style>
   .small-portrait { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 800; }
-  .brand-banner { height:clamp(90px,10vw,160px); border-radius:16px; background:var(--event-banner) center/cover no-repeat; border:1px solid var(--brand-border); margin-bottom:16px; }
+  .brand-banner { height:clamp(90px,10vw,160px); border-radius:16px; background:var(--event-banner) center/contain no-repeat, var(--brand-primary-fill); background-color:var(--brand-surface-2); border:1px solid var(--brand-border); margin-bottom:16px; }
+  .replay-strip { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 14px; margin-bottom:16px; border-radius:14px; border:1px solid var(--brand-accent); background:color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface-2)); }
   .clock-hero { display:flex; gap:clamp(14px,3vw,50px); align-items:center; flex-wrap:wrap; padding:clamp(16px,2vw,30px); border-radius:20px; border:1px solid var(--brand-primary); background:linear-gradient(135deg, rgba(59,130,246,.18), transparent), var(--brand-surface-2); box-shadow:var(--brand-shadow); }
   .big-clock { font-family:var(--font-display); font-size:clamp(3rem,8vw,8rem); font-weight:800; line-height:1; letter-spacing:.02em; color:var(--brand-accent); }
   .phone-sections { display:none; }

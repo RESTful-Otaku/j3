@@ -207,6 +207,10 @@ func (s *Server) listKata(r *http.Request) ([]kataPerformanceView, error) {
 			}
 			items[i].Scores = append(items[i].Scores, score)
 		}
+		if err := scoreRows.Err(); err != nil {
+			scoreRows.Close()
+			return nil, err
+		}
 		scoreRows.Close()
 	}
 	return items, nil

@@ -21,6 +21,8 @@
   let switchError = '';
   let qaOpen = false;
   let activePath = '';
+  let navWidth = 244;
+  let resizing = false;
 
   afterNavigate(() => { activePath = window.location.pathname; });
 
@@ -32,10 +34,54 @@
     isMobile = window.innerWidth <= 820;
     isPhone = isPhoneWidth();
     items = visibleItems();
+    syncNavWidth();
   }
 
   function syncNavWidth() {
+    const width = isMobile ? 0 : expanded ? navWidth : 76;
+    const scale = Math.min(1.08, Math.max(0.82, width / 244));
     document.documentElement.dataset.nav = expanded ? 'wide' : 'compact';
+    document.documentElement.style.setProperty('--nav-width', `${width}px`);
+    document.documentElement.style.setProperty('--nav-scale', scale.toFixed(2));
+  }
+
+  function clampWidth(value: number) {
+    return Math.max(180, Math.min(380, Math.round(value)));
+  }
+
+  function persistWidth() {
+    localStorage.setItem('j3-nav-width', String(navWidth));
+    syncNavWidth();
+  }
+
+  function startResize(event: PointerEvent) {
+    event.preventDefault();
+    resizing = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    window.addEventListener('pointermove', resizeMove);
+    window.addEventListener('pointerup', stopResize);
+  }
+
+  function resizeMove(event: PointerEvent) {
+    if (!resizing) return;
+    navWidth = clampWidth(event.clientX);
+    persistWidth();
+  }
+
+  function stopResize() {
+    resizing = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    window.removeEventListener('pointermove', resizeMove);
+    window.removeEventListener('pointerup', stopResize);
+  }
+
+  function nudgeResize(event: KeyboardEvent) {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    navWidth = clampWidth(navWidth + (event.key === 'ArrowRight' ? 16 : -16));
+    persistWidth();
   }
 
   $: mobileItems = (() => {
@@ -65,6 +111,7 @@
 
   onMount(() => {
     expanded = localStorage.getItem('j3-nav-expanded') === '1';
+    navWidth = clampWidth(Number(localStorage.getItem('j3-nav-width')) || 244);
     qaOpen = localStorage.getItem('j3-nav-qa') === '1';
     activePath = window.location.pathname;
     syncViewport();
@@ -74,6 +121,7 @@
     window.addEventListener('resize', syncViewport);
     window.addEventListener('j3-session-changed', syncSession);
     return () => {
+      stopResize();
       window.removeEventListener('resize', syncViewport);
       window.removeEventListener('j3-session-changed', syncSession);
     };
@@ -266,40 +314,61 @@
     {:else}
       <div class="collapsed-role" title="Viewing as {role}">{role.slice(0, 1).toUpperCase()}</div>
     {/if}
+    {#if expanded && !isMobile}
+      <button type="button" class="resize-handle" aria-label="Resize navigation"
+        title="Drag or use arrow keys to resize navigation" on:pointerdown={startResize} on:keydown={nudgeResize}></button>
+    {/if}
   </aside>
 {/if}
 
 <style>
   .nav-shell {
-    position:fixed; top:0; left:0; bottom:0; z-index:800; width:244px;
+    position:fixed; top:0; left:0; bottom:0; z-index:800;
+    width:var(--nav-width, 244px); font-size:calc(1rem * var(--nav-scale, 1));
     background:var(--brand-surface-2); border-right:1px solid var(--brand-border);
     display:flex; flex-direction:column; padding:18px 12px; gap:10px;
-    box-shadow:8px 0 30px rgba(0,0,0,.25); transition:width .2s ease;
+    box-shadow:8px 0 30px rgba(0,0,0,.25); transition:width .12s ease;
   }
   .nav-shell.collapsed { width:76px; padding:18px 10px; align-items:center; }
+  .resize-handle {
+    position:absolute; top:0; right:-3px; bottom:0; width:8px; cursor:col-resize;
+    background:transparent; border:0; border-right:3px solid transparent; padding:0; transition:border-color .16s ease;
+  }
+  .resize-handle:hover, .resize-handle:focus-visible, .resize-handle:active {
+    border-right-color:var(--brand-primary); outline:none;
+    box-shadow:6px 0 18px rgba(0,0,0,.3);
+  }
   .nav-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:46px; padding:2px 4px 8px; }
   .nav-shell.collapsed .nav-head { flex-direction:column; gap:8px; width:100%; padding:2px 0 10px; }
   .event-card { display:grid; gap:2px; min-width:0; padding:10px 12px; border-radius:12px; background:var(--brand-surface-3); border:1px solid var(--brand-border); }
   .event-card-label, .mobile-event-label { text-transform:uppercase; letter-spacing:.14em; font-size:.58rem; font-weight:900; color:var(--brand-muted); }
-  .event-card-title { font-family:var(--font-display); font-weight:800; font-size:.88rem; line-height:1.25; min-width:0; overflow:hidden; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; }
-  .hamburger { background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-ink); border-radius:9px; padding:8px 10px; cursor:pointer; line-height:1; font-size:1rem; min-width:38px; }
+  .event-card-title { font-family:var(--font-display); font-weight:800; font-size:.88em; line-height:1.25; min-width:0; overflow:hidden; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; }
+  .hamburger { background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-ink); border-radius:9px; padding:8px 10px; cursor:pointer; line-height:1; font-size:1em; min-width:38px; }
   .nav-shell.collapsed .hamburger { margin:0 auto; }
   nav { display:grid; gap:2px; overflow-y:auto; flex:1; width:100%; scrollbar-width:thin; }
-  .group-label, .group-toggle { margin:12px 8px 4px; font-size:.65rem; letter-spacing:.14em; text-transform:uppercase; color:var(--brand-muted); font-weight:900; }
+  .group-label, .group-toggle { margin:12px 8px 4px; font-size:.65em; letter-spacing:.14em; text-transform:uppercase; color:var(--brand-muted); font-weight:900; }
   .group-toggle { width:calc(100% - 16px); text-align:left; background:none; border:0; cursor:pointer; padding:4px 0; }
   .group-toggle:hover { color:var(--brand-ink); }
   .group-divider { height:1px; background:var(--brand-border); margin:8px 10px 5px; }
-  .nav-item { display:flex; gap:12px; align-items:center; min-height:42px; padding:10px 12px; border-radius:11px; color:var(--brand-muted); text-decoration:none; font-size:.86rem; white-space:nowrap; border-left:3px solid transparent; }
-  .nav-item .icon { font-size:1.1rem; width:24px; text-align:center; flex:none; }
+  .nav-item { display:flex; gap:12px; align-items:center; min-height:42px; padding:10px 12px; border-radius:11px; color:var(--brand-muted); text-decoration:none; font-size:.86em; white-space:nowrap; border-left:3px solid transparent; }
+  .nav-item .icon { font-size:1.1em; width:24px; text-align:center; flex:none; }
   .nav-item:hover, .nav-item:focus-visible { background:var(--brand-surface-3); color:var(--brand-ink); text-decoration:none; }
-  .nav-item.active { background:var(--brand-surface-3); color:var(--brand-ink); border-left-color:var(--brand-primary); font-weight:800; }
+  .nav-item.active {
+    background:linear-gradient(90deg, color-mix(in srgb, var(--brand-primary) 30%, var(--brand-surface-3)), var(--brand-surface-3));
+    color:var(--brand-ink); border-left-color:var(--brand-primary); font-weight:800;
+    box-shadow:inset 4px 0 0 var(--brand-accent), 0 0 0 1px color-mix(in srgb, var(--brand-primary) 45%, transparent);
+  }
+  :global([data-theme='street']) .nav-item.active {
+    border-left-color:var(--brand-accent);
+    box-shadow:inset 4px 0 0 var(--brand-accent), 0 0 20px color-mix(in srgb, var(--brand-accent) 35%, transparent);
+  }
   .nav-item.icon-only { justify-content:center; padding:12px 0; }
   .nav-shell.collapsed .nav-item { padding-left:9px; }
-  .help-btn { display:flex; gap:10px; align-items:center; width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-ink); cursor:pointer; font-size:.86rem; }
+  .help-btn { display:flex; gap:10px; align-items:center; width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-ink); cursor:pointer; font-size:.86em; }
   .nav-shell.collapsed .help-btn { justify-content:center; padding:11px 0; }
-  .role-picker { display:grid; gap:7px; padding:14px 8px 4px; border-top:1px solid var(--brand-border); }
-  .role-picker select { padding:9px; border-radius:9px; background:var(--brand-surface-3); color:var(--brand-ink); border:1px solid var(--brand-border); }
-  .collapsed-role { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--brand-primary); color:#fff; font-weight:800; margin-top:auto; }
+  .role-picker { display:grid; gap:7px; min-width:0; padding:14px 8px 4px; border-top:1px solid var(--brand-border); overflow:hidden; }
+  .role-picker select { width:100%; max-width:100%; min-width:0; padding:9px; border-radius:9px; background:var(--brand-surface-3); color:var(--brand-ink); border:1px solid var(--brand-border); font-size:.86em; }
+  .collapsed-role { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--brand-primary); color:var(--brand-on-primary); font-weight:800; margin-top:auto; }
   .mobile-bar { position:fixed; top:0; left:0; right:0; z-index:810; display:grid; gap:3px; padding:7px 14px 8px; background:var(--brand-surface-2); border-bottom:1px solid var(--brand-border); }
   .mobile-bar-row { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:34px; }
   .mobile-event { display:grid; gap:1px; min-width:0; }
@@ -319,7 +388,10 @@
   }
   .quick-item .icon { font-size:1.05rem; line-height:1; }
   .quick-label { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .quick-item.active { color:var(--brand-ink); background:var(--brand-surface-3); box-shadow:inset 0 -2px 0 var(--brand-primary); }
+  .quick-item.active {
+    color:var(--brand-ink); background:var(--brand-surface-3);
+    box-shadow:inset 0 -3px 0 var(--brand-accent), 0 0 0 1px color-mix(in srgb, var(--brand-primary) 45%, transparent);
+  }
   .quick-item:hover, .quick-item:focus-visible { color:var(--brand-ink); text-decoration:none; }
   .scrim { position:fixed; inset:0; z-index:820; background:rgba(2,6,23,.65); border:0; cursor:pointer; }
   .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(86vw, 340px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:18px; display:flex; flex-direction:column; gap:12px; box-shadow:-16px 0 44px rgba(0,0,0,.45); animation:slide .22s ease-out; }

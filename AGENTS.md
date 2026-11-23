@@ -103,7 +103,9 @@ incidents, notifications, media, exports.
   fair sparring rotation.
 - **Displays**: `/display`, `/public`, `/brackets`, `/tables`, `/pools`, `/control`, `/setup`,
   `/data`, `/audit`, `/settings`, `/details`, `/simulate`, `/official`, `/mat`, `/ceremony`,
-  `/view`, `/ui`; PA/TTS toasts, celebrations, Street Fighter theme, ultrawide CSS.
+  `/view`, `/ui`; PA/TTS toasts, celebrations, Street Fighter default with contrast-safe bright fills,
+  ultrawide CSS; resizable nav with themed active state; full-image banners; global demo replay player
+  with play/pause/restart/step/scrub and Mat/Table/Bracket/Ceremony state cards.
 - **Builder**: drag/resize/save/clone/load/delete live widget layouts; standalone `/view` screens.
 - **Data**: generic allow-listed query API, data explorer, audit view, CSV import/export, uploads
   with dominant/highlight colour extraction, 11-locale label dictionary.
@@ -154,7 +156,7 @@ incidents, notifications, media, exports.
 | 4 Displays/scheduling | ✅ | boards, drift, TTS, builder, overlays |
 | 5 Kata/drills | ✅ | catalogue, panels, advancement, rotation |
 | 6 White-label depth | ~ | check-in/weigh-in, team points, CSV, overlays, 11 locales; external gaps remain |
-| 7 Verification | ✅ | fuzz/property/sim, 115 E2E, smoke, load, race, QA |
+| 7 Verification | ✅ | fuzz/property/sim, 118 E2E, smoke, load, race, QA |
 
 ## 10. Definition of done
 
@@ -173,6 +175,7 @@ states. Offline write outbox remains a future enhancement.
 | D-049–D-053 | Owner `j3@local` / `J3 Owner` overridable; env password or one-time generated + forced change; `admin` virtual role without role CHECK migration; privileged accounts only via token invites; demo credentials/identity switching work offline. |
 | D-054–D-058 | CI mobile builds produce installable Android QA APK, iOS simulator app and signed real-device IPA when Apple secrets exist; emulator/simulator runtime smoke is required; QA builds self-seed and auto-login as admin; white-label title comes from event config; PolyForm Noncommercial 1.0.0 with attribution; Oracle Always Free A1 recommended for free prod/staging. |
 | D-059–D-063 | One shared theme store; pure-white light, high-contrast dark gray and loud Street Fighter themes; organiser title/logo/banner/primary/secondary overrides applied from event tokens with computed readable ink; safe `.env.example` plus least-privilege workflows; `v*` tags publish versioned hosted APK/`.app` built with public `J3_SERVER_URL`, with signing secrets optional rather than release-blocking. |
+| D-064–D-068 | GitHub releases publish only source, Linux server binary, versioned APK and iOS simulator `.app.zip`; Street Fighter is the default theme and dark ink keeps its neon gradient readable; nav is drag-resizable with a strong active border and banners use `contain`; demo replay is a shared global playhead with pause/restart/scrub and derived Mat/Table/Bracket/Ceremony state; standings/team rankings/kata reads are event-scoped and public-safe so tables never 500. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -189,6 +192,7 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-23 — Demo replay + display polish**: Street Fighter is the default theme with dark ink on bright fills; nav is drag-resizable with a clear themed active indicator and clipped account switcher; banners show the whole image; global demo replay supports play/pause/restart/step/scrub and follows every screen; `/public`, `/tables` and `/ceremony` render replay state; tables/kata/team rankings reads hardened against 500s.
 - **2026-11-22 — Themes + versioned mobile releases**: pure-white light, high-contrast dark gray and Street Fighter themes; shared theme persistence; event token overrides for title/logo/banner/main/secondary colours with contrast-safe text; safe `.env.example` and environment/secrets guide; workflows fixed for Android SDK PATH/boot and iOS simulator parsing; tagged releases publish hosted APK/`.app` with backend URL baked in.
 - **2026-11-22 — CI/CD + licensing**: mobile workflows build installable QA apps, run emulator/simulator smoke, release production server/web/API/docs/mobile artifacts; QA builds self-seed and auto-login as admin; event-config title replaces `J Cubed`; PolyForm NC licence and free Oracle hosting plan documented; TUI has one-step build+deploy actions and hosted-APK build.
 - **2026-11-22 — Auth rollout**: real admin role, hosted owner bootstrap, authority matrix, token
@@ -203,15 +207,21 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 14. Current state
 
-**Delivered**: complete app described above; local gates green; CI/mobile/release/deploy workflows
-green; APK verified on `j3-pixel-10-pro` with live and offline evidence in `docs/qa/`. Release mobile
-artifacts are installable Android QA APK plus iOS simulator app and real-device IPA when Apple secrets
-are configured. See `docs/HOSTING.md` for free Oracle Always Free prod/staging hosting.
+**Delivered**: complete app described above; local gates green; APK verified on `j3-pixel-10-pro`
+with live and offline evidence in `docs/qa/`. Release assets are curated to source archives,
+`j3-server-linux-amd64`, `j3-android-<version>.apk` and `j3-ios-<version>.app.zip`; QA apps are built
+and smoke-tested in CI but not published. See `docs/HOSTING.md` for free Oracle Always Free hosting.
 
-**External-dependency remainder only**: payment/waiver gateways, VAR/video integration, full content
+**Current blocker**: GitHub Actions runs are currently rejected before jobs start with the account
+billing/spending-limit error. Resolve billing in GitHub settings, then rerun `Mobile builds`, retag
+the final commit and verify `Release` + `Deploy`. This is not a repository code defect.
+
+**External-dependency remainder**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: work only on the external-dependency remainder. For QA use `bun run dev`; for phones rebuild a standalone self-seeding offline APK with `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
+**Next actions**: resolve GitHub billing, then force `v0.7.2` (or create `v0.7.3`) on the final green
+commit and verify the full workflow chain. For QA use `bun run dev`; for phones rebuild a standalone
+self-seeding offline APK with `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
 `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
 
 ---

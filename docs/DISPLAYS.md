@@ -23,7 +23,23 @@ section tabs and explicit "show more" controls instead of horizontal or endless 
 ## Themes and branding
 
 White-label tokens control colours, fonts, logos and banners. Corner colours and result glyphs are
-configurable; the Street Fighter theme adds lineups and announcer energy.
+configurable; the Street Fighter theme is the default high-energy palette, with dark ink on its bright
+pink/orange/yellow fills so labels stay legible. Banners use `contain` so the entire uploaded image is
+visible against a themed backdrop.
+
+## Navigation and fit
+
+The desktop navigation is drag-resizable (180–380 px, arrow keys supported) and stores the chosen
+width; labels and spacing scale with it. The active view gets a bright themed left bar and glow, and
+the mobile drawer/bottom bar use the same treatment. The account switcher is clipped to the nav pane.
+
+## Demo replay
+
+When the server has `J3_DEMO=1`, a **Demo replay** launcher follows you across every screen. It runs
+a deterministic event and lets you play, pause, restart, step, scrub and change speed. The panel shows
+the same playhead as Mat, Table, Bracket and Ceremony state cards; `/tables`, `/public` and
+`/ceremony` also reflect the selected bout, standings and medals live. `/simulate` uses the same
+controller, so scrubbing in one place stays coherent everywhere.
 
 ## PA and announcements
 

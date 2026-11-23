@@ -3,6 +3,7 @@
   import '../app.css';
   import ToastHost from '../lib/components/ToastHost.svelte';
   import NavShell from '../lib/components/NavShell.svelte';
+  import DemoReplay from '../lib/components/DemoReplay.svelte';
   import TourOverlay from '../lib/components/TourOverlay.svelte';
   import { afterNavigate, goto } from '$app/navigation';
   import { ensureQaFirstRun, syncRoleFromSession, uiRole } from '../lib/auth';
@@ -90,6 +91,7 @@
 </script>
 
 {#if !docsRoute}<NavShell />{/if}
+{#if !docsRoute}<DemoReplay />{/if}
 <div class="link-status" aria-live="polite"><span class:down={!online}></span>{online ? 'Live link' : 'Offline'}</div>
 <ToastHost />
 {#if !docsRoute}<TourOverlay />{/if}

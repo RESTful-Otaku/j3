@@ -3,6 +3,7 @@
   import { initials } from '../../../lib/format';
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import { api, type StandingRow, type KataPerformance } from '../../../lib/api';
+  import { replaySnapshot } from '../../../lib/demo-replay';
 
   let standings: StandingRow[] = [];
   let kataPerformances: KataPerformance[] = [];
@@ -35,9 +36,11 @@
     kataPerformances = (await api.advanceKata(8)).performances;
   }
 
-  $: categories = Array.from(new Set(standings.map((row) => row.category))).sort();
-  $: groups = Array.from(new Set(standings.map((row) => row.belt))).filter(Boolean).sort();
-  $: filtered = standings.filter((row) =>
+  $: replay = $replaySnapshot;
+  $: displayStandings = replay.active ? (replay.standings as StandingRow[]) : standings;
+  $: categories = Array.from(new Set(displayStandings.map((row) => row.category))).sort();
+  $: groups = Array.from(new Set(displayStandings.map((row) => row.belt))).filter(Boolean).sort();
+  $: filtered = displayStandings.filter((row) =>
     (!category || row.category === category) &&
     (!group || row.belt === group) &&
     `${row.name} ${row.club}`.toLowerCase().includes(query.toLowerCase()));
@@ -49,7 +52,7 @@
 <div class="display-shell">
   {#if loadError}<div class="card" style="margin-bottom:14px; border-color:var(--loss);">{loadError}</div>{/if}
   <header class="display-header" data-guide="tables-header">
-    <div><div class="event-mark"><span class="crest">J3</span>Tables & rankings</div><div class="meta">Overall · category · medals · kata · live</div></div>
+    <div><div class="event-mark"><span class="crest">J3</span>Tables & rankings</div><div class="meta">{replay.active ? `Demo replay · bout ${replay.index + 1}/${replay.total}` : 'Overall · category · medals · kata · live'}</div></div>
     <div class="tabs">
       {#each [['overall','Overall'],['category','Category'],['medals','Medals'],['kata','Kata panel']] as [id, label]}
         <button class="tab" class:active={tab === id} on:click={() => (tab = id as typeof tab)}>{label}</button>

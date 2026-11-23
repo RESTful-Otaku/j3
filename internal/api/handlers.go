@@ -34,8 +34,8 @@ func (s *Server) readyz(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) versionInfo(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{
-		"name": "J3 venue server", "version": s.Version,
+	writeJSON(w, http.StatusOK, map[string]any{
+		"name": "J3 venue server", "version": s.Version, "demo": demoMode(),
 	})
 }
 

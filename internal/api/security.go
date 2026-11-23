@@ -18,7 +18,7 @@ var publicGetRoutes = map[string]bool{
 	"/api/v1/demo": true, "/api/v1/demo/fights": true, "/api/v1/demo/standings": true,
 	"/api/v1/demo/identities": true, "/api/v1/demo/credentials": true,
 	"/api/v1/demo/event": true, "/api/v1/demo/belts": true, "/api/v1/demo/simulate": true,
-	"/api/v1/demo/stats": true, "/api/v1/demo/kata/catalogue": true,
+	"/api/v1/demo/stats": true, "/api/v1/demo/kata": true, "/api/v1/demo/kata/catalogue": true,
 	"/api/v1/demo/brackets": true, "/api/v1/demo/pools": true, "/api/v1/demo/medals": true,
 	"/api/v1/demo/schedule": true, "/api/v1/demo/event-config": true,
 	"/api/v1/demo/team-rankings": true, "/api/v1/demo/techniques": true,

@@ -167,7 +167,7 @@
       </select></label>
       <label class="field">Appearance<select bind:value={settings.appearance} on:change={applyTheme}>
         <option value="system">Follow system</option><option value="light">Light</option>
-        <option value="dark">Dark gray</option><option value="street">Street Fighter</option>
+        <option value="dark">Dark gray</option><option value="street">Street Fighter (recommended)</option>
       </select></label>
     </div>
     <div class="capabilities" style="margin-top:12px;">

@@ -78,6 +78,25 @@ test.describe('Interactive controls', () => {
     expect(errors).toEqual([]);
   });
 
+  test('demo replay: start, scrub and inspect derived state', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto('/public');
+    await page.getByRole('button', { name: 'Open demo replay controls' }).click();
+    await page.getByRole('button', { name: 'Start', exact: true }).click();
+    const scrub = page.getByRole('slider', { name: 'Scrub tournament replay' });
+    await expect.poll(async () => Number(await scrub.getAttribute('max'))).toBeGreaterThan(0);
+    await page.getByRole('button', { name: 'Pause replay' }).click();
+    await scrub.evaluate((element) => {
+      const input = element as HTMLInputElement;
+      input.value = '5';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await expect(page.getByText(/Bout 6 of/)).toBeVisible();
+    await page.getByRole('tab', { name: 'Table' }).click();
+    await expect(page.locator('.rank').first()).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
   test('details: generate a sparring rotation', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('/details');

@@ -108,24 +108,28 @@ func (s *Server) displayOfficials(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) standings(w http.ResponseWriter, r *http.Request) {
+	eventID := s.eventIDFromRequest(r)
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT f.id, f.display_name, COALESCE(c.name, 'Open'),
 		       COALESCE(b.label, ''), COALESCE(cl.name, 'Independent'),
 		       COALESCE(cl.primary_colour, '#64748b'), COALESCE(cl.logo_path, ''),
-		       COALESCE(SUM(CASE WHEN (ft.red_fighter_id = f.id AND ft.outcome = 'win_red')
-		                  OR (ft.blue_fighter_id = f.id AND ft.outcome = 'win_blue') THEN 1 ELSE 0 END), 0),
-		       COALESCE(SUM(CASE WHEN (ft.red_fighter_id = f.id AND ft.outcome = 'win_blue')
-		                  OR (ft.blue_fighter_id = f.id AND ft.outcome = 'win_red') THEN 1 ELSE 0 END), 0),
-		       COALESCE(SUM(CASE WHEN ft.outcome = 'draw' AND
-		                  (ft.red_fighter_id = f.id OR ft.blue_fighter_id = f.id) THEN 1 ELSE 0 END), 0)
+		       COALESCE(SUM(CASE WHEN (ft.side = 'red' AND ft.outcome = 'win_red')
+		                  OR (ft.side = 'blue' AND ft.outcome = 'win_blue') THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN (ft.side = 'red' AND ft.outcome = 'win_blue')
+		                  OR (ft.side = 'blue' AND ft.outcome = 'win_red') THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN ft.outcome = 'draw' THEN 1 ELSE 0 END), 0)
 		FROM fighters f
-		LEFT JOIN fights ft ON ft.red_fighter_id = f.id OR ft.blue_fighter_id = f.id
+		LEFT JOIN (
+		  SELECT red_fighter_id AS fighter_id, 'red' AS side, outcome FROM fights WHERE event_id = ?
+		  UNION ALL
+		  SELECT blue_fighter_id AS fighter_id, 'blue' AS side, outcome FROM fights WHERE event_id = ?
+		) ft ON ft.fighter_id = f.id
 		LEFT JOIN clubs cl ON cl.id = f.club_id
 		LEFT JOIN belt_ranks b ON b.id = f.belt_rank_id
-		LEFT JOIN entrants e ON e.fighter_id = f.id
+		LEFT JOIN entrants e ON e.fighter_id = f.id AND e.event_id = ?
 		LEFT JOIN categories c ON c.id = e.category_id
 		GROUP BY f.id, c.name, b.label, cl.name
-		ORDER BY 8 DESC, 10 DESC, f.display_name`)
+		ORDER BY 8 DESC, 10 DESC, f.display_name`, eventID, eventID, eventID)
 	if err != nil {
 		writeError(w, err)
 		return
