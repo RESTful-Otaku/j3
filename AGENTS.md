@@ -5,10 +5,10 @@
 
 | Field | Value |
 |---|---|
-| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, phone-scoped UX, QA mobile apps in releases, PolyForm NC licence, free hosting plan. Local gates and GitHub Actions green (2026-11-22). |
+| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, phone-scoped UX, QA mobile builds, PolyForm NC licence, free hosting plan. Local gates green (2026-11-23); GitHub Actions blocked by billing. |
 | Repo | `git@github.com:RESTful-Otaku/j3.git` (`main`) |
 | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
-| Created / updated | 2026-11-19 / 2026-11-22 |
+| Created / updated | 2026-11-19 / 2026-11-23 |
 
 ---
 
@@ -213,15 +213,15 @@ with live and offline evidence in `docs/qa/`. Release assets are curated to sour
 and smoke-tested in CI but not published. See `docs/HOSTING.md` for free Oracle Always Free hosting.
 
 **Current blocker**: GitHub Actions runs are currently rejected before jobs start with the account
-billing/spending-limit error. Resolve billing in GitHub settings, then rerun `Mobile builds`, retag
-the final commit and verify `Release` + `Deploy`. This is not a repository code defect.
+billing/spending-limit error. Resolve billing in GitHub settings, then rerun `Mobile builds`,
+`Release` and `Deploy` for the `v0.7.3` tag. This is not a repository code defect.
 
 **External-dependency remainder**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: resolve GitHub billing, then force `v0.7.2` (or create `v0.7.3`) on the final green
-commit and verify the full workflow chain. For QA use `bun run dev`; for phones rebuild a standalone
-self-seeding offline APK with `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
+**Next actions**: resolve GitHub billing, rerun the `v0.7.3` workflow chain and verify the four
+published assets. For QA use `bun run dev`; for phones rebuild a standalone self-seeding offline APK
+with `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
 `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
 
 ---
