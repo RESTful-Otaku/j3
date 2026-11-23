@@ -229,14 +229,15 @@ with live and offline evidence in `docs/qa/`. Release assets are curated to sour
 `j3-server-linux-amd64`, `j3-android-<version>.apk` and `j3-ios-<version>.app.zip`; QA apps are built
 and smoke-tested in CI but not published. See `docs/HOSTING.md` for free Oracle Always Free hosting.
 
-**Current blocker**: GitHub Actions runs are currently rejected before jobs start with the account
-billing/spending-limit error. Resolve billing in GitHub settings, then rerun `Mobile builds`,
-`Release` and `Deploy` for the `v0.7.4` tag. This is not a repository code defect.
+**Current blocker**: `main` is at `cee6cea` and tag `v0.7.4` is pushed. GitHub Actions runs for the
+tag (`45099245577`, `45099245595`, `45099247549`, `45099247622`) again failed before jobs started
+with the account billing/spending-limit error (no job logs were produced). This is not a repository
+code defect.
 
 **External-dependency remainder**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: resolve GitHub billing, rerun the `v0.7.4` workflow chain and verify the four
+**Next actions**: resolve GitHub billing, rerun the four failed `v0.7.4` workflow runs and verify the
 published assets. For fast full QA use `bash scripts/qa-docker.sh full` (see `docs/DOCKER.md`); for
 native QA use `bun run dev`. For phones rebuild a standalone self-seeding offline APK with
 `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
