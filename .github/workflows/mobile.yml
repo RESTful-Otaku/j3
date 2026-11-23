@@ -223,11 +223,9 @@ jobs:
                 exit 0
               fi
             fi
-            if ! pgrep -f "emulator -avd j3-ci" >/dev/null 2>&1; then
-              echo "Emulator process exited unexpectedly"
-              cat /tmp/j3-emulator.log
-              exit 1
-            fi
+            # The modern emulator launcher execs qemu-system, so pgrep -f on the
+            # launcher command line is unreliable. Poll adb until boot completes;
+            # the 10-minute loop is the authoritative timeout.
             sleep 2
           done
           cat /tmp/j3-emulator.log
