@@ -229,7 +229,8 @@ with live and offline evidence in `docs/qa/`. Release assets are curated to sour
 `j3-server-linux-amd64`, `j3-android-<version>.apk` and `j3-ios-<version>.app.zip`; QA apps are built
 and smoke-tested in CI but not published. See `docs/HOSTING.md` for free Oracle Always Free hosting.
 
-**Current blocker**: `main` is at `cee6cea` and tag `v0.7.4` is pushed. GitHub Actions runs for the
+**Current blocker**: release commit `cee6cea` is tagged `v0.7.4`; docs follow-up `6c59a57` is on
+`main`. GitHub Actions runs for the
 tag (`45099245577`, `45099245595`, `45099247549`, `45099247622`) again failed before jobs started
 with the account billing/spending-limit error (no job logs were produced). This is not a repository
 code defect.
