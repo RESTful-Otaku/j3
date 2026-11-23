@@ -15,9 +15,13 @@ permissions:
   contents: read
 
 jobs:
+  # Free-only policy: hosted runners are free only on public repositories.
+  # On a private repository every job is skipped before a runner is requested.
   branch-name:
     name: Branch convention
-    if: github.event_name == 'pull_request'
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     steps:
       - name: Validate feature/bug/fix/chore/perf/improv prefix
@@ -34,6 +38,7 @@ jobs:
 
   workflows:
     name: Workflow configuration
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -47,6 +52,7 @@ jobs:
 
   go:
     name: Go venue server
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -70,6 +76,7 @@ jobs:
 
   web:
     name: Web (Bun)
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -95,6 +102,7 @@ jobs:
 
   smoke:
     name: End-to-end smoke
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -110,6 +118,7 @@ jobs:
 
   load:
     name: Load & stability
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -135,6 +144,7 @@ jobs:
 
   e2e:
     name: Browser E2E + accessibility
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -159,7 +169,8 @@ jobs:
 
   required-checks:
     name: All checks passed
-    if: always()
+    if: >-
+      always() && github.event.repository.visibility == 'public'
     needs: [branch-name, workflows, go, web, smoke, load, e2e]
     runs-on: ubuntu-latest
     steps:

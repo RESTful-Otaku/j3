@@ -1,8 +1,9 @@
 # Containerised QA demo
 
 A full, repeatable J3 demo runs in containers: a seeded venue API, a static web front end with a
-same-origin `/api` proxy (SSE-safe) and a deterministic tournament snapshot. Use Docker if available;
-`scripts/qa-docker.sh` falls back to Podman automatically.
+same-origin `/api` proxy (SSE-safe) and a deterministic tournament snapshot. `scripts/qa-docker.sh`
+uses a **working** Docker daemon when available and otherwise falls back to Podman; an installed
+Docker CLI with no daemon no longer blocks the stack.
 
 ## Quick start
 
@@ -12,7 +13,10 @@ bash scripts/qa-docker.sh url
 ```
 
 Default URLs are `http://localhost:5173`, `http://localhost:5173/simulate` and
-`http://localhost:8787/healthz`. Override ports with `J3_API_PORT` and `J3_WEB_PORT`.
+`http://localhost:8787/healthz`. If a default port is busy, the script picks the next free one and
+prints the real URLs; `status` and `url` always report the published host ports. Explicit
+`J3_API_PORT` / `J3_WEB_PORT` values must be free, and `J3_CONTAINER_RUNTIME` can force a runtime
+(`docker` or `podman`) after checking that it is running.
 
 ## Modes
 

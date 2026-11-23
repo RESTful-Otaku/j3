@@ -68,8 +68,11 @@ permissions:
   actions: read
 
 jobs:
+  # Free-only policy: hosted runners are free only on public repositories.
+  # On a private repository every job is skipped before a runner is requested.
   android:
     name: Android QA + hosted APK
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -254,6 +257,7 @@ jobs:
 
   ios:
     name: iOS QA + hosted app
+    if: github.event.repository.visibility == 'public'
     runs-on: macos-15-intel
     timeout-minutes: 50
     steps:
@@ -450,7 +454,8 @@ jobs:
 
   required-checks:
     name: Mobile checks passed
-    if: always()
+    if: >-
+      always() && github.event.repository.visibility == 'public'
     needs: [android, ios]
     runs-on: ubuntu-latest
     steps:

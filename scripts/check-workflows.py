@@ -8,6 +8,8 @@ for p in root.glob('*.yml'):
         errors.append(f'{p}: invalid YAML {e}')
         continue
     for job_name, job in (data.get('jobs') or {}).items():
+        if 'github.event.repository.visibility' not in str((job or {}).get('if','')):
+            errors.append(f'{p}:{job_name} missing public-repo free-runner gate')
         uses=(job or {}).get('uses','')
         if uses.startswith('./.github/workflows/'):
             target=pathlib.Path(uses[2:])

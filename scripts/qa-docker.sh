@@ -1,23 +1,78 @@
 #!/usr/bin/env bash
 # Local full QA demo: one seeded venue server, one static web front end and a
-# deterministic tournament snapshot. Uses Docker when available, Podman when not.
+# deterministic tournament snapshot. Uses a working Docker daemon when available,
+# otherwise Podman; auto-selects free host ports when the defaults are busy.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+log() { printf '\n==> %s\n' "$*"; }
+die() { echo "error: $*" >&2; exit 1; }
+
+runtime_works() {
+  command -v "$1" >/dev/null 2>&1 && "$1" info >/dev/null 2>&1
+}
+
 RUNTIME="${J3_CONTAINER_RUNTIME:-}"
-if [[ -z "$RUNTIME" ]]; then
-  if command -v docker >/dev/null 2>&1; then RUNTIME=docker
-  elif command -v podman >/dev/null 2>&1; then RUNTIME=podman
-  else
-    echo "No container runtime found. Install Docker or Podman." >&2
-    exit 1
-  fi
+if [[ -n "$RUNTIME" ]]; then
+  runtime_works "$RUNTIME" || die "container runtime '$RUNTIME' is not running (check '${RUNTIME} info')"
+else
+  # A Docker CLI can be installed with no daemon; only pick runtimes that work.
+  for candidate in docker podman; do
+    if runtime_works "$candidate"; then RUNTIME="$candidate"; break; fi
+  done
+  [[ -n "$RUNTIME" ]] || die "no running container runtime found (tried docker and podman)"
 fi
+
+port_available() {
+  python3 - "$1" <<'PY'
+import socket, sys
+sock = socket.socket()
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+try:
+    sock.bind(('0.0.0.0', int(sys.argv[1])))
+except OSError:
+    raise SystemExit(1)
+finally:
+    sock.close()
+PY
+}
+
+pick_port() {
+  local start="$1" exclude="${2:-}" port
+  for port in $(seq "$start" "$((start + 50))"); do
+    [[ "$port" == "$exclude" ]] && continue
+    if port_available "$port"; then printf '%s' "$port"; return 0; fi
+  done
+  die "no free port found from $start"
+}
 
 API_PORT="${J3_API_PORT:-8787}"
 WEB_PORT="${J3_WEB_PORT:-5173}"
+
+# Resolve only when starting a stack: stopped containers must not look like port conflicts.
+resolve_ports() {
+  if [[ -n "${J3_API_PORT:-}" ]] && ! port_available "$API_PORT"; then
+    die "J3_API_PORT=$API_PORT is already in use"
+  fi
+  if [[ -n "${J3_WEB_PORT:-}" ]] && ! port_available "$WEB_PORT"; then
+    die "J3_WEB_PORT=$WEB_PORT is already in use"
+  fi
+  if ! port_available "$API_PORT"; then
+    local fallback
+    fallback="$(pick_port 8787 "$WEB_PORT")"
+    log "API port $API_PORT busy; using $fallback"
+    API_PORT="$fallback"
+  fi
+  if ! port_available "$WEB_PORT" || [[ "$WEB_PORT" == "$API_PORT" ]]; then
+    local fallback
+    fallback="$(pick_port 5173 "$API_PORT")"
+    log "Web port $WEB_PORT busy; using $fallback"
+    WEB_PORT="$fallback"
+  fi
+}
+
 SIM_SEED="${J3_SIM_SEED:-42}"
 SIM_FIGHTERS="${J3_SIM_FIGHTERS:-50}"
 NETWORK="j3-qa"
@@ -28,11 +83,19 @@ API_IMAGE="j3-qa-api:local"
 WEB_IMAGE="j3-qa-web:local"
 WEB_DEV_IMAGE="j3-qa-web:dev"
 
-log() { printf '\n==> %s\n' "$*"; }
-die() { echo "error: $*" >&2; exit 1; }
-
 container_exists() { "$RUNTIME" container inspect "$1" >/dev/null 2>&1; }
 image_exists() { "$RUNTIME" image inspect "$1" >/dev/null 2>&1; }
+
+published_port() {
+  local name="$1" target="${2:-}" mapping
+  if [[ -n "$target" ]]; then
+    mapping="$("$RUNTIME" port "$name" "$target" 2>/dev/null | head -1 || true)"
+  else
+    mapping="$("$RUNTIME" port "$name" 2>/dev/null | head -1 || true)"
+  fi
+  [[ -n "$mapping" ]] || return 1
+  printf '%s\n' "$mapping" | sed -E 's/.*:([0-9]+)[[:space:]]*$/\1/' | head -1
+}
 
 ensure_network() {
   if ! "$RUNTIME" network inspect "$NETWORK" >/dev/null 2>&1; then
@@ -144,16 +207,20 @@ wait_ready() {
 }
 
 print_urls() {
+  local api_port web_port
+  api_port="$(published_port "$API_NAME" 8787 || printf '%s' "$API_PORT")"
+  web_port="$(published_port "$WEB_NAME" || printf '%s' "$WEB_PORT")"
   printf '\nJ3 QA demo is ready\n'
-  printf '  Web:     http://localhost:%s\n' "$WEB_PORT"
-  printf '  Replay:  http://localhost:%s/simulate\n' "$WEB_PORT"
-  printf '  API:     http://localhost:%s/healthz\n' "$API_PORT"
+  printf '  Web:     http://localhost:%s\n' "$web_port"
+  printf '  Replay:  http://localhost:%s/simulate\n' "$web_port"
+  printf '  API:     http://localhost:%s/healthz\n' "$api_port"
   printf '  Runtime: %s\n' "$RUNTIME"
 }
 
 do_up() {
   local mode="$1"
   stop_stack
+  resolve_ports
   ensure_api_image force
   if [[ "$mode" == dev ]]; then ensure_web_image dev force; else ensure_web_image prod force; fi
   ensure_network
@@ -213,7 +280,13 @@ case "${1:-up}" in
   status)
     for name in "$API_NAME" "$WEB_NAME"; do
       if container_exists "$name"; then
-        printf '%s: %s\n' "$name" "$("$RUNTIME" inspect -f '{{.State.Status}}' "$name")"
+        state="$("$RUNTIME" inspect -f '{{.State.Status}}' "$name")"
+        port="$(published_port "$name" || true)"
+        if [[ -n "$port" ]]; then
+          printf '%s: %s (host port %s)\n' "$name" "$state" "$port"
+        else
+          printf '%s: %s\n' "$name" "$state"
+        fi
       else
         printf '%s: absent\n' "$name"
       fi

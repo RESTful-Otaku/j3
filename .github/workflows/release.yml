@@ -11,13 +11,17 @@ permissions:
   actions: read
 
 jobs:
+  # Free-only policy: hosted runners are free only on public repositories.
+  # On a private repository every job is skipped before a runner is requested.
   verify:
     name: Verify before release
+    if: github.event.repository.visibility == 'public'
     uses: ./.github/workflows/ci.yml
 
   mobile:
     name: Mobile QA apps
     needs: verify
+    if: github.event.repository.visibility == 'public'
     uses: ./.github/workflows/mobile.yml
     with:
       # Every tag publishes installable hosted clients plus QA apps. The public
@@ -33,6 +37,7 @@ jobs:
   package:
     name: Hosted server executable
     needs: [verify, mobile]
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -55,6 +60,7 @@ jobs:
   publish:
     name: Publish GitHub release
     needs: [verify, mobile, package]
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     steps:
       - name: Download server executable

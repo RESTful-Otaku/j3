@@ -5,7 +5,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, app-wide Live/Sim replay, immediate real-time view updates, full per-discipline medals, containerised QA stack, phone-scoped UX, QA mobile builds, PolyForm NC licence, free hosting plan. Local gates green (2026-11-23); GitHub Actions blocked by billing. |
+| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, app-wide Live/Sim replay, immediate real-time view updates, full per-discipline medals, containerised QA stack, phone-scoped UX, QA mobile builds, PolyForm NC licence, free hosting plan. Local gates green (2026-11-23); repo is public and hosted CI runs on free public runners. |
 | Repo | `git@github.com:RESTful-Otaku/j3.git` (`main`) |
 | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
 | Created / updated | 2026-11-19 / 2026-11-23 |
@@ -187,6 +187,7 @@ states. Offline write outbox remains a future enhancement.
 | D-059–D-063 | One shared theme store; pure-white light, high-contrast dark gray and loud Street Fighter themes; organiser title/logo/banner/primary/secondary overrides applied from event tokens with computed readable ink; safe `.env.example` plus least-privilege workflows; `v*` tags publish versioned hosted APK/`.app` built with public `J3_SERVER_URL`, with signing secrets optional rather than release-blocking. |
 | D-064–D-068 | GitHub releases publish only source, Linux server binary, versioned APK and iOS simulator `.app.zip`; Street Fighter is the default theme and dark ink keeps its neon gradient readable; nav is drag-resizable with a strong active border and banners use `contain`; demo replay is a shared global playhead with pause/restart/scrub and derived Mat/Table/Bracket/Ceremony state; standings/team rankings/kata reads are event-scoped and public-safe so tables never 500. |
 | D-069–D-074 | Global Live/Simulated nav toggle with URL/localStorage persistence and a replay widget on every view; full event-by-event `/simulate` console; containerised Docker/Podman QA stack with static web proxy, one-shot seed/sim jobs and `j3d simulate`; `golang:1.27.1-alpine` pin to avoid the modernc sqlite compiler ICE; SSE `state.changed` invalidations for every operational view; deterministic full medal set per category/discipline/event type including kata, with manual overrides and recompute. |
+| D-075 | Hosted CI is free-only: every job in every workflow is gated to public-repo visibility and `check:workflows` enforces it, so the private repo never requests a paid or 10× runner; local QA auto-detects a *working* Docker/Podman daemon and falls back to free host ports. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -203,6 +204,11 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-23 — Free-only CI + resilient local QA**: every hosted job now checks repository
+  visibility and `check:workflows` enforces it, so a private repo skips all runners (including the
+  10× macOS job) while the now-public repo runs free; `qa-docker.sh` picks a working Docker/Podman
+  daemon, falls back from busy default ports and reports the real published ports from `status`/`url`.
+  Docs and release policy unchanged.
 - **2026-11-23 — Live/sim modes, real-time views and full medals**: explicit Live event / Simulated
   tournament nav toggle with a persistent replay widget on every view and a full event-by-event
   console; containerised Docker/Podman QA stack with seeded/simulated modes and `j3d simulate`;
@@ -227,21 +233,24 @@ Rationale and status for older decisions remain in git history; all listed decis
 **Delivered**: complete app described above; local gates green; APK verified on `j3-pixel-10-pro`
 with live and offline evidence in `docs/qa/`. Release assets are curated to source archives,
 `j3-server-linux-amd64`, `j3-android-<version>.apk` and `j3-ios-<version>.app.zip`; QA apps are built
-and smoke-tested in CI but not published. See `docs/HOSTING.md` for free Oracle Always Free hosting.
+and smoke-tested when hosted CI runs (public repo) but not published. See `docs/HOSTING.md` for free
+Oracle Always Free hosting.
 
-**Current blocker**: release commit `cee6cea` is tagged `v0.7.4`; docs follow-up `6c59a57` is on
-`main`. GitHub Actions runs for the
-tag (`45099245577`, `45099245595`, `45099247549`, `45099247622`) again failed before jobs started
-with the account billing/spending-limit error (no job logs were produced). This is not a repository
-code defect.
+**Hosted CI status**: `RESTful-Otaku/j3` is now public, so GitHub-hosted runners are free and the
+visibility-gated workflows run normally. The old `v0.7.4` runs (`45099245577`, `45099245595`,
+`45099247549`, `45099247622`) failed before jobs started when the repo was private and the account
+had no billing/spending limit. All workflows now gate every job on public visibility and
+`check:workflows` enforces it, so no paid or 10× runner can be requested if visibility changes again.
+No billing action is needed.
 
 **External-dependency remainder**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: resolve GitHub billing, rerun the four failed `v0.7.4` workflow runs and verify the
-published assets. For fast full QA use `bash scripts/qa-docker.sh full` (see `docs/DOCKER.md`); for
-native QA use `bun run dev`. For phones rebuild a standalone self-seeding offline APK with
-`bash scripts/mobile.sh build`, or a LAN/HTTPS client with
+**Next actions**: push the free-only workflow/doc updates to `main`, confirm the new CI/mobile runs
+are green, then rerun the `v0.7.4` release/deploy workflows to publish the curated assets. Do not
+enable billing. Local fast QA is `bash scripts/qa-docker.sh full` (working Docker/Podman daemon, free
+auto-selected ports; see `docs/DOCKER.md`); native QA is `bun run dev`. For phones rebuild a
+standalone self-seeding offline APK with `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
 `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
 
 ---

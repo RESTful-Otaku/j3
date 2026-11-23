@@ -642,6 +642,12 @@
     "url": "/docs/ci#branches"
   },
   {
+    "title": "CI & releases \u00b7 Free-only hosted CI",
+    "section": "Developers",
+    "text": "No billing account, payment method or spending limit is required. Every job in every workflow has a job-level guard:  ```yaml if: github.event.repository.visibility == 'public' ```  GitHub-hosted runners are free for public repositories, and this repository is public, so the hosted gates run normally at no cost. The visibility guard remains as a safety rail: if the repo is ever made private again,",
+    "url": "/docs/ci#free-only-hosted-ci"
+  },
+  {
     "title": "CI & releases \u00b7 Automated gates (.github/workflows/ci.yml)",
     "section": "Developers",
     "text": "Go vet/test/race/build; Bun check/test/build; generated-type parity; smoke, load and Playwright + axe E2E; workflow syntax/TUI checks. All must pass before merge.",
@@ -668,7 +674,7 @@
   {
     "title": "CI & releases \u00b7 Local rigour",
     "section": "Developers",
-    "text": "Run `bun run cicd` or `bun run test:tui` before pushing. `bun run docs` rebuilds the documentation site; `bun run sync:api-docs` keeps the contract/guides/search index and shipped licence in sync.",
+    "text": "Run `bun run cicd` or `bun run test:tui` before pushing. `bun run qa:docker:full` boots the full seeded stack through a working Docker/Podman daemon (see `docs/DOCKER.md`). `bun run docs` rebuilds the documentation site; `bun run sync:api-docs` keeps the contract/guides/search index and shipped licence in sync.",
     "url": "/docs/ci#local-rigour"
   },
   {
@@ -800,13 +806,13 @@
   {
     "title": "Containerised QA \u00b7 Containerised QA",
     "section": "Developers",
-    "text": "# Containerised QA demo  A full, repeatable J3 demo runs in containers: a seeded venue API, a static web front end with a same-origin `/api` proxy (SSE-safe) and a deterministic tournament snapshot. Use Docker if available; `scripts/qa-docker.sh` falls back to Podman automatically.",
+    "text": "# Containerised QA demo  A full, repeatable J3 demo runs in containers: a seeded venue API, a static web front end with a same-origin `/api` proxy (SSE-safe) and a deterministic tournament snapshot. `scripts/qa-docker.sh` uses a **working** Docker daemon when available and otherwise falls back to Podman; an installed Docker CLI with no daemon no longer blocks the stack.",
     "url": "/docs/docker#containerised-qa"
   },
   {
     "title": "Containerised QA \u00b7 Quick start",
     "section": "Developers",
-    "text": "```bash bash scripts/qa-docker.sh full          # or: bun run qa:docker:full bash scripts/qa-docker.sh url ```  Default URLs are `http://localhost:5173`, `http://localhost:5173/simulate` and `http://localhost:8787/healthz`. Override ports with `J3_API_PORT` and `J3_WEB_PORT`.",
+    "text": "```bash bash scripts/qa-docker.sh full          # or: bun run qa:docker:full bash scripts/qa-docker.sh url ```  Default URLs are `http://localhost:5173`, `http://localhost:5173/simulate` and `http://localhost:8787/healthz`. If a default port is busy, the script picks the next free one and prints the real URLs; `status` and `url` always report the published host ports. Explicit `J3_API_PORT` / `J3_",
     "url": "/docs/docker#quick-start"
   },
   {
