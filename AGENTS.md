@@ -190,7 +190,7 @@ states. Offline write outbox remains a future enhancement.
 | D-069–D-074 | Global Live/Simulated nav toggle with URL/localStorage persistence and a replay widget on every view; full event-by-event `/simulate` console; containerised Docker/Podman QA stack with static web proxy, one-shot seed/sim jobs and `j3d simulate`; `golang:1.27.1-alpine` pin to avoid the modernc sqlite compiler ICE; SSE `state.changed` invalidations for every operational view; deterministic full medal set per category/discipline/event type including kata, with manual overrides and recompute. |
 | D-075 | Hosted CI is free-only: every job in every workflow is gated to public-repo visibility and `check:workflows` enforces it, so the private repo never requests a paid or 10× runner; local QA auto-detects a *working* Docker/Podman daemon and falls back to free host ports. |
 | D-076 | Seeded events default to Red vs White corner labels/colours applied across mat, official, details, brackets, overlay and replay; stable `red`/`blue` scoring slots keep audit deterministic. |
-| D-077 | Hosted Android smoke waits for adb `sys.boot_completed` and the package manager, retries APK installs with visible logs, and launches via `am start` with a monkey fallback and saved diagnostics. |
+| D-077 | Hosted Android smoke waits for adb `sys.boot_completed` and the package manager, retries APK installs, launches via `am start` with a monkey fallback, and tolerates `pidof` misses under `pipefail`, saving install/launch logs. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -209,8 +209,8 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 - **2026-11-24 — Resilient Android smoke**: emulator readiness now polls adb `sys.boot_completed`,
   the smoke script waits for the package manager, disables QA side-load verification, retries
-  installs and launches via `am start` with a monkey fallback, saving install/launch logs so hosted
-  failures are actionable.
+  installs, launches via `am start` with a monkey fallback, tolerates `pidof` misses under `pipefail`,
+  and saves install/launch logs so hosted failures are actionable.
 - **2026-11-24 — Red/White fighter corners**: seeded demo and Okami events now default to Red vs
   White corner labels and colours. Event config drives mat, official, details, brackets, overlay and
   replay surfaces while stable `red`/`blue` audit slots remain deterministic.

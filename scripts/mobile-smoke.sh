@@ -80,7 +80,9 @@ fi
 
 PID=""
 for _ in $(seq 1 60); do
-  PID="$("${ADB[@]}" shell pidof "$PACKAGE" 2>/dev/null | tr -d '\r' | awk '{print $1}')"
+  # `pidof` exits 1 until the process exists; with `pipefail` that would abort
+  # the whole smoke script before the retry loop gets a chance.
+  PID="$("${ADB[@]}" shell pidof "$PACKAGE" 2>/dev/null | tr -d '\r' | awk '{print $1}' || true)"
   [ -n "$PID" ] && break
   sleep 1
 done
