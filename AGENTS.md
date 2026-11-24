@@ -5,10 +5,10 @@
 
 | Field | Value |
 |---|---|
-| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, app-wide Live/Sim replay, immediate real-time view updates, full per-discipline medals, containerised QA stack, phone-scoped UX, QA mobile builds, PolyForm NC licence, free hosting plan. Local gates green (2026-11-23); repo is public and hosted CI runs on free public runners. |
+| Status | Delivered: branded offline-capable venue platform, full auth/invite chain, officials console, mid-event Okami 2027 seed, app-wide Live/Sim replay, immediate real-time view updates, full per-discipline medals, containerised QA stack, phone-scoped UX, QA mobile builds, PolyForm NC licence, free hosting plan. Hosted CI/Release/Deploy green and `v0.7.5` published (2026-11-24); local gates green. Repo is public and hosted CI runs on free public runners. |
 | Repo | `git@github.com:RESTful-Otaku/j3.git` (`main`) |
 | Working dir | `/var/home/restful-otaku/Dev/projects/j3` |
-| Created / updated | 2026-11-19 / 2026-11-23 |
+| Created / updated | 2026-11-19 / 2026-11-24 |
 
 ---
 
@@ -209,6 +209,10 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-24 — `v0.7.5` published**: free-only public-repo gates across all workflows, resilient
+  Android smoke (boot wait, explicit launch, prior-build uninstall, app-scoped crash gate), debug-key
+  fallback for hosted release APKs and Red vs White corners. Curated assets published from
+  `569934c`; no billing or branch protection enabled.
 - **2026-11-24 — Resilient Android smoke**: emulator readiness now polls adb `sys.boot_completed`,
   the smoke script waits for the package manager, disables QA side-load verification, retries
   installs, launches via `am start` with a monkey fallback, tolerates `pidof` misses under `pipefail`,
@@ -247,27 +251,28 @@ Rationale and status for older decisions remain in git history; all listed decis
 ## 14. Current state
 
 **Delivered**: complete app described above; local gates green; APK verified on `j3-pixel-10-pro`
-with live and offline evidence in `docs/qa/`. Release assets are curated to source archives,
-`j3-server-linux-amd64`, `j3-android-<version>.apk` and `j3-ios-<version>.app.zip`; QA apps are built
-and smoke-tested when hosted CI runs (public repo) but not published. See `docs/HOSTING.md` for free
+with live and offline evidence in `docs/qa/`. `v0.7.5` (`569934c`) publishes source archives,
+`j3-server-linux-amd64`, `j3-android-0.7.5.apk` and `j3-ios-0.7.5.app.zip`; QA apps are built and
+smoke-tested when hosted CI runs (public repo) but not published. See `docs/HOSTING.md` for free
 Oracle Always Free hosting.
 
-**Hosted CI status**: `RESTful-Otaku/j3` is now public, so GitHub-hosted runners are free and the
-visibility-gated workflows run normally. The old `v0.7.4` runs (`45099245577`, `45099245595`,
-`45099247549`, `45099247622`) failed before jobs started when the repo was private and the account
-had no billing/spending limit. All workflows now gate every job on public visibility and
-`check:workflows` enforces it, so no paid or 10× runner can be requested if visibility changes again.
-No billing action is needed.
+**Hosted CI status**: `RESTful-Otaku/j3` is public, so GitHub-hosted runners are free and the
+visibility-gated workflows run normally. Final `v0.7.5` verification on `569934c` is green: CI
+`45403247450`, Mobile `45403247408`, Release `45403287849` and Deploy `45403287727`. Earlier
+`v0.7.5` attempts were superseded before publication (missing runner debug keystore) or fixed after
+a system-log false positive; the old `v0.7.4` runs (`45099245577`, `45099245595`, `45099247549`,
+`45099247622`) failed before jobs started when the repo was private. Every hosted job still checks
+public visibility and `check:workflows` enforces it, so no paid or 10× runner can be requested if
+visibility changes again. No billing action is needed.
 
 **External-dependency remainder**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: push the free-only workflow/doc updates to `main`, confirm the new CI/mobile runs
-are green, then rerun the `v0.7.4` release/deploy workflows to publish the curated assets. Do not
-enable billing. Local fast QA is `bash scripts/qa-docker.sh full` (working Docker/Podman daemon, free
-auto-selected ports; see `docs/DOCKER.md`); native QA is `bun run dev`. For phones rebuild a
-standalone self-seeding offline APK with `bash scripts/mobile.sh build`, or a LAN/HTTPS client with
-`J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
+**Next actions**: none for the release; `v0.7.5` is published and all hosted gates are green. Do not
+enable billing or branch protection. Local fast QA is `bash scripts/qa-docker.sh full` (working
+Docker/Podman daemon, free auto-selected ports; see `docs/DOCKER.md`); native QA is `bun run dev`. For
+phones rebuild a standalone self-seeding offline APK with `bash scripts/mobile.sh build`, or a
+LAN/HTTPS client with `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
 
 ---
 
