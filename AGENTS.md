@@ -192,6 +192,7 @@ states. Offline write outbox remains a future enhancement.
 | D-076 | Seeded events default to Red vs White corner labels/colours applied across mat, official, details, brackets, overlay and replay; stable `red`/`blue` scoring slots keep audit deterministic. |
 | D-077 | Hosted Android smoke waits for adb `sys.boot_completed` and the package manager, retries APK installs, launches via `am start` with a monkey fallback, tolerates `pidof` misses under `pipefail`, and treats `uiautomator` dumps as diagnostics while gating on screenshot/logcat. |
 | D-078 | Hosted release APK builds generate the standard Android debug keystore when no signing secrets are configured, so free public runners can still publish an installable signed APK. |
+| D-079 | Android smoke uninstalls any prior signed build before install and scopes crash detection to the app PID/package, so QA/release key swaps and unrelated system warnings do not fail hosted deploys. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -213,7 +214,9 @@ Rationale and status for older decisions remain in git history; all listed decis
   installs, launches via `am start` with a monkey fallback, tolerates `pidof` misses under `pipefail`,
   and keeps `uiautomator` dumps as diagnostics while gating on screenshot/logcat, so hosted failures
   are actionable. Hosted release builds generate the standard debug keystore when signing secrets are
-  absent, keeping free public runners able to publish an installable APK.
+  absent, keeping free public runners able to publish an installable APK. Smoke now uninstalls prior
+  signed builds and scopes crash checks to the app PID/package, avoiding key-swap and system-log
+  false positives.
 - **2026-11-24 — Red/White fighter corners**: seeded demo and Okami events now default to Red vs
   White corner labels and colours. Event config drives mat, official, details, brackets, overlay and
   replay surfaces while stable `red`/`blue` audit slots remain deterministic.

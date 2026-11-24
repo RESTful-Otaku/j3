@@ -47,6 +47,10 @@ done
 "${ADB[@]}" shell settings put global package_verifier_enable 0 >/dev/null 2>&1 || true
 "${ADB[@]}" shell settings put global verify_apps_over_usb 0 >/dev/null 2>&1 || true
 
+# QA and hosted release builds use different keys; remove any prior signed build
+# instead of waiting for INSTALL_FAILED_UPDATE_INCOMPATIBLE and retrying.
+"${ADB[@]}" uninstall "$PACKAGE" >/dev/null 2>&1 || true
+
 echo "📲 Installing $APK on $STATE"
 INSTALL_LOG="$OUT/adb-install.txt"
 INSTALLED=0
@@ -115,7 +119,12 @@ if [ ! -s "$OUT/android-running.png" ]; then
 fi
 
 "${ADB[@]}" logcat -d -t 1000 > "$OUT/android-logcat.txt"
-if grep -Ei 'FATAL EXCEPTION|AndroidRuntime.*'"$PACKAGE"'|java\.lang\.(RuntimeException|IllegalStateException|NullPointerException)' "$OUT/android-logcat.txt"; then
+# Emulator system processes emit benign RuntimeException warnings. Only treat
+# logcat lines from this package or PID as an app crash.
+awk -v pkg="$PACKAGE" -v pid="$PID" '
+  index($0, pkg) || $0 ~ "(^|[^0-9])" pid "([^0-9]|$)" { print }
+' "$OUT/android-logcat.txt" > "$OUT/android-app-logcat.txt"
+if grep -Ei 'FATAL EXCEPTION|AndroidRuntime|java\.lang\.(RuntimeException|IllegalStateException|NullPointerException)' "$OUT/android-app-logcat.txt"; then
   echo "❌ Native client crashed"
   exit 1
 fi
