@@ -200,7 +200,7 @@
   {
     "title": "Official guide \u00b7 Select the contest and corner",
     "section": "Start here",
-    "text": "Choose the active contest and the red/blue corner before scoring. Corner colours and glyphs are configured by the organiser and never depend on colour alone.",
+    "text": "Choose the active contest and the first/second corner before scoring. Seeded events default to **Red vs White**; the organiser can change both names and colours per event. The API keeps stable `red`/`blue` scoring slots so results stay deterministic, while every operator surface shows the configured label. Never rely on colour alone.",
     "url": "/docs/official#select-the-contest-and-corner"
   },
   {

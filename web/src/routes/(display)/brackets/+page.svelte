@@ -6,6 +6,7 @@
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
   import { onLiveChange } from '../../../lib/live-updates';
+  import { cornerConfig } from '../../../lib/event-brand';
 
   type Slot = { id: string; name: string; colour: string };
   type BracketNode = { id: string; label: string; a: Slot | null; b: Slot | null; winner: string };
@@ -286,7 +287,7 @@
     <div class="card">
       <h2>Round robin — every pairing and its result</h2>
       <table style="width:100%; border-collapse:collapse; margin-top:12px;">
-        <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">Round</th><th>Mat</th><th>Red</th><th>Blue</th><th>Result</th><th>State</th></tr></thead>
+        <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">Round</th><th>Mat</th><th>{$cornerConfig.red.label}</th><th>{$cornerConfig.blue.label}</th><th>Result</th><th>State</th></tr></thead>
         <tbody use:phoneRows={10}>
           {#each fights as fight (fight.id)}
             <tr style="border-top:1px solid var(--brand-border);">

@@ -2,6 +2,7 @@
   import ConfirmDialog from '../../lib/components/ConfirmDialog.svelte';
   import { notify, notifySuccess, notifyWarning, notifyError } from '../../lib/toast';
   import { setTheme, themeChoice } from '../../lib/theme';
+  import { cornerConfig } from '../../lib/event-brand';
 
   let dialogOpen = false;
   let slider = 60;
@@ -86,9 +87,9 @@
   <div class="card" style="margin-top:18px;">
     <div class="eyebrow">Broadcast</div><h2>Scoreboard card</h2>
     <div class="scoreboard" style="margin-top:14px;">
-      <div class="corner"><span class="portrait" style="width:76px;height:76px;">YM</span><div><div class="small muted">RED · Blue belt</div><strong>Yuki Mori</strong></div><div class="score" style="margin-left:auto;">6</div></div>
+      <div class="corner"><span class="portrait" style="width:76px;height:76px;">YM</span><div><div class="small muted">{$cornerConfig.red.label} · Blue belt</div><strong>Yuki Mori</strong></div><div class="score" style="margin-left:auto;">6</div></div>
       <div style="text-align:center;"><div class="clock">02:14</div><span class="badge fighter">LIVE</span></div>
-      <div class="corner blue"><div class="score" style="margin-right:auto;">4</div><div><div class="small muted">BLUE · Purple belt</div><strong>Aisha Khan</strong></div><span class="portrait" style="width:76px;height:76px;">AK</span></div>
+      <div class="corner blue"><div class="score" style="margin-right:auto;">4</div><div><div class="small muted">{$cornerConfig.blue.label} · Purple belt</div><strong>Aisha Khan</strong></div><span class="portrait" style="width:76px;height:76px;">AK</span></div>
     </div>
   </div>
 </div>

@@ -1892,6 +1892,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateInvite'
+        cornerColours:
+          type: object
+          additionalProperties:
+            type: string
+          description: Organiser-facing mat corner colours keyed by internal slot (red, blue).
+        cornerLabels:
+          type: object
+          additionalProperties:
+            type: string
+          description: Organiser-facing mat corner names keyed by internal slot (red, blue).
         clubs:
           type: array
           items:

@@ -1,9 +1,22 @@
+import { writable } from 'svelte/store';
 import { api, type EventDisplayInfo } from './api';
 import { eventTitle } from './event-title';
 
 const browser = typeof window !== 'undefined';
 
 type JsonObject = Record<string, unknown>;
+
+export type CornerSlot = 'red' | 'blue';
+export type CornerStyle = { label: string; colour: string; ink: string };
+
+// Seeded events default to Red vs White. The internal slots stay red/blue so
+// scoring remains deterministic; the labels and colours are organiser config.
+const defaultCornerStyles = (): Record<CornerSlot, CornerStyle> => ({
+  red: { label: 'RED', colour: '#b91c1c', ink: '#ffffff' },
+  blue: { label: 'WHITE', colour: '#f8fafc', ink: '#0f172a' },
+});
+
+export const cornerConfig = writable<Record<CornerSlot, CornerStyle>>(defaultCornerStyles());
 
 export type EventBrand = {
   title: string;
@@ -12,6 +25,7 @@ export type EventBrand = {
   primary: string | null;
   secondary: string | null;
   accent: string | null;
+  corners: Record<CornerSlot, CornerStyle>;
 };
 
 let loaded = false;
@@ -88,6 +102,18 @@ function readBrand(data: EventDisplayInfo): EventBrand {
   const secondary = cssColour(tokens.secondary ?? colours.secondary);
   const accent = cssColour(tokens.accent ?? colours.accent ?? colours.highlight);
   const name = text(tokens.title) ?? text(details.title) ?? text(data.name) ?? 'J3 Tournament';
+  const cornerColours = object(details.cornerColours);
+  const cornerLabels = object(details.cornerLabels);
+  const defaults = defaultCornerStyles();
+  const corners = (['red', 'blue'] as CornerSlot[]).reduce((acc, slot) => {
+    const colour = cssColour(cornerColours[slot]) ?? defaults[slot].colour;
+    acc[slot] = {
+      label: text(cornerLabels[slot]) ?? defaults[slot].label,
+      colour,
+      ink: readableInk(colour),
+    };
+    return acc;
+  }, {} as Record<CornerSlot, CornerStyle>);
   return {
     title: name,
     bannerUrl: assetUrl(tokens.bannerPath ?? tokens.banner ?? data.bannerPath),
@@ -95,6 +121,7 @@ function readBrand(data: EventDisplayInfo): EventBrand {
     primary,
     secondary,
     accent,
+    corners,
   };
 }
 
@@ -112,6 +139,10 @@ export function applyEventBrand(): void {
   if (brand.accent) {
     pairs.push(['--brand-accent', brand.accent], ['--brand-on-accent', readableInk(brand.accent)]);
   }
+  for (const slot of ['red', 'blue'] as CornerSlot[]) {
+    const corner = brand.corners[slot];
+    pairs.push([`--${slot}-corner`, corner.colour], [`--on-${slot}-corner`, corner.ink]);
+  }
   if (brand.bannerUrl) pairs.push(['--event-banner', `url(${JSON.stringify(brand.bannerUrl)})`]);
   if (brand.logoUrl) pairs.push(['--event-logo', `url(${JSON.stringify(brand.logoUrl)})`]);
   for (const [key, value] of pairs) root.style.setProperty(key, value);
@@ -127,6 +158,7 @@ export async function loadEventBrand(): Promise<void> {
   try {
     brand = readBrand(await api.event());
     eventTitle.set(brand.title);
+    cornerConfig.set(brand.corners);
     applyEventBrand();
   } catch {
     /* keep the J3 Tournament placeholder and default palette */
@@ -137,5 +169,6 @@ export async function loadEventBrand(): Promise<void> {
 export async function reloadEventBrand(): Promise<void> {
   loaded = false;
   brand = null;
+  cornerConfig.set(defaultCornerStyles());
   await loadEventBrand();
 }

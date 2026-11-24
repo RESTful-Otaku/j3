@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api, livePoll, type EventDisplayInfo } from '../../../lib/api';
+  import { cornerConfig } from '../../../lib/event-brand';
 
   let event: EventDisplayInfo | null = null;
   let details: Record<string, any> = {};
@@ -64,10 +65,10 @@
     <div class="card slide-in">
       <div class="eyebrow">Fighter identification</div><h2>Competition corners</h2>
       <div style="display:flex; gap:14px; margin-top:16px;">
-        <div class="corner-chip" style="background:{details.cornerColours?.red ?? '#ef4444'}">RED</div>
-        <div class="corner-chip" style="background:{details.cornerColours?.blue ?? '#3b82f6'}">BLUE</div>
+        <div class="corner-chip" style="background:{$cornerConfig.red.colour}; color:{$cornerConfig.red.ink}">{$cornerConfig.red.label}</div>
+        <div class="corner-chip" style="background:{$cornerConfig.blue.colour}; color:{$cornerConfig.blue.ink}">{$cornerConfig.blue.label}</div>
       </div>
-      <p class="muted small" style="margin-top:14px;">Colours are set by the tournament runner and shown on every mat, scoreboard and bracket.</p>
+      <p class="muted small" style="margin-top:14px;">Names and colours are set by the tournament runner and shown on every mat, scoreboard and bracket.</p>
       <h3 style="margin-top:20px;">Mat areas</h3>
       <div class="capabilities">{#each event?.mats ?? [] as mat}<span class="cap on">{mat}</span>{/each}</div>
     </div>

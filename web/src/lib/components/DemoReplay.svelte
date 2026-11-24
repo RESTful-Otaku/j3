@@ -153,9 +153,9 @@
   .duel div { display:flex; align-items:center; gap:8px; }
   .duel strong { font-family:var(--font-display); font-size:1.5rem; }
   .duel em { color:var(--brand-accent); font-style:normal; font-weight:800; }
-  .corner { display:grid; place-items:center; min-width:54px; padding:5px; border-radius:8px; color:#fff; font-size:.68rem; font-weight:800; }
-  .corner.red { background:#b91c1c; }
-  .corner.blue { background:#1d4ed8; }
+  .corner { display:grid; place-items:center; min-width:54px; padding:5px; border-radius:8px; font-size:.68rem; font-weight:800; box-shadow:inset 0 0 0 1px rgba(15,23,42,.3); }
+  .corner.red { background:var(--red-corner); color:var(--on-red-corner); }
+  .corner.blue { background:var(--blue-corner); color:var(--on-blue-corner); }
   .rank { display:grid; grid-template-columns:28px 1fr auto 30px; gap:8px; align-items:center; padding:5px 8px; border-radius:8px; background:var(--brand-surface-3); font-size:.72rem; }
   .rank em { color:var(--brand-muted); font-style:normal; }
   .rank b { text-align:right; color:var(--brand-accent); }

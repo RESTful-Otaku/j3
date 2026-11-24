@@ -40,9 +40,12 @@ func EnsureOkami(store *db.DB) error {
 		{`INSERT OR IGNORE INTO themes (id, tenant_id, name, tokens_json)
 		  VALUES ('okami-theme','demo-tenant','Okami', ?)`,
 			[]any{`{"primary":"#b91c1c","accent":"#fbbf24","ink":"#f8fafc","style":"classic"}`}},
+		{`INSERT OR IGNORE INTO rule_sets (id, tenant_id, name, version, config_json)
+		  VALUES ('rs-okami', 'demo-tenant', 'Okami 2027 Rules', 1, ?)`,
+			[]any{`{"venue":"Skegness Grammar School Gymnasium, Skegness","protection":["Clean pressed Gi","Belt","Mouth guard","Head guard for youth divisions","Instep / shin guards for Randori"],` + cornerDefaultsJSON + `,"matchSeconds":300}`}},
 		{`INSERT OR IGNORE INTO events
-		  (id, tenant_id, theme_id, name, starts_at, ends_at, status)
-		  VALUES (?, 'demo-tenant', 'okami-theme', ?, '2027-11-20T09:15:00Z','2027-11-20T21:00:00Z','published')`,
+		  (id, tenant_id, theme_id, rule_set_id, name, starts_at, ends_at, status)
+		  VALUES (?, 'demo-tenant', 'okami-theme', 'rs-okami', ?, '2027-11-20T09:15:00Z','2027-11-20T21:00:00Z','published')`,
 			[]any{okamiEvent, "Okami Jiu Jitsu Challengers Tournament 2027"}},
 		{`INSERT OR IGNORE INTO event_info
 		  (event_id, organiser, venue, costs_json, refreshments, parking, hotel_json, evening_json, course_json, attendance_rule)

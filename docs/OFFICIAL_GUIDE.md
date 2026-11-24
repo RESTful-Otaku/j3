@@ -9,8 +9,10 @@ the mat assignment shown in the control room.
 
 ## Select the contest and corner
 
-Choose the active contest and the red/blue corner before scoring. Corner colours and glyphs are
-configured by the organiser and never depend on colour alone.
+Choose the active contest and the first/second corner before scoring. Seeded events default to
+**Red vs White**; the organiser can change both names and colours per event. The API keeps stable
+`red`/`blue` scoring slots so results stay deterministic, while every operator surface shows the
+configured label. Never rely on colour alone.
 
 ## Log a technique
 

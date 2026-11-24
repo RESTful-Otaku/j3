@@ -36,7 +36,7 @@ test.describe('Officials console', () => {
     const points = page.getByLabel('Configured points');
     await expect(points).toBeVisible();
     expect((await points.locator('option').count()) > 0).toBeTruthy();
-    await page.getByRole('button', { name: /^Log for RED/ }).click();
+    await page.getByRole('button', { name: /^Log for (RED|WHITE)/ }).click();
     await confirm(page);
     expect(errors).toEqual([]);
   });
@@ -58,7 +58,9 @@ test.describe('Officials console', () => {
     await expect(page.getByText(/RUNNING/).first()).toBeVisible();
     await page.getByRole('button', { name: /⏸ Pause/ }).click();
     await page.getByRole('button', { name: /^▶ Resume$/ }).click();
-    await page.getByRole('button', { name: 'Red wins', exact: true }).click();
+    const redWin = page.locator('[data-guide="official-result-win-red"]');
+    await expect(redWin).toHaveText(/^(RED|WHITE) wins$/);
+    await redWin.click();
     await confirm(page);
     expect(errors).toEqual([]);
   });

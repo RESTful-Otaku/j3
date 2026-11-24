@@ -20,6 +20,7 @@
   import { landingForRole, session, switchDemoUser, uiRole } from '../lib/auth';
   import { currentRole, HOME_ROUTE, itemsForRole, type Role as NavRole } from '../lib/nav';
   import { eventTitle } from '../lib/event-title';
+  import { cornerConfig } from '../lib/event-brand';
   import { cycleTheme, themeChoice } from '../lib/theme';
 
   let ready = false;
@@ -463,7 +464,7 @@
             <div class="corner red">
               <div class="portrait">{initials(selectedFight.red.name || '—')}</div>
               <div>
-                <div class="small muted">RED · {selectedFight.red.belt || '—'}</div>
+                <div class="small muted">{$cornerConfig.red.label} · {selectedFight.red.belt || '—'}</div>
                 <div style="font-weight:700; font-size:1.15rem;">{selectedFight.red.name || 'TBD'}</div>
                 <div class="small" style="color:{selectedFight.red.clubColour};">{selectedFight.red.club || 'Independent'}</div>
               </div>
@@ -477,7 +478,7 @@
             <div class="corner blue">
               <div class="portrait">{initials(selectedFight.blue.name || '—')}</div>
               <div>
-                <div class="small muted">BLUE · {selectedFight.blue.belt || '—'}</div>
+                <div class="small muted">{$cornerConfig.blue.label} · {selectedFight.blue.belt || '—'}</div>
                 <div style="font-weight:700; font-size:1.15rem;">{selectedFight.blue.name || 'TBD'}</div>
                 <div class="small" style="color:{selectedFight.blue.clubColour};">{selectedFight.blue.club || 'Independent'}</div>
               </div>
@@ -508,7 +509,7 @@
           <table style="width:100%; border-collapse:collapse; font-size:.88rem;">
             <thead>
               <tr class="muted small" style="text-align:left; border-bottom:1px solid var(--brand-border);">
-                <th style="padding:8px;">Fight</th><th>Mat</th><th>Category</th><th>Red</th><th>Blue</th><th>State</th><th>Result</th>
+                <th style="padding:8px;">Fight</th><th>Mat</th><th>Category</th><th>{$cornerConfig.red.label}</th><th>{$cornerConfig.blue.label}</th><th>State</th><th>Result</th>
               </tr>
             </thead>
             <tbody>

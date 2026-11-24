@@ -10,6 +10,7 @@
   import ConfirmDialog from '../../lib/components/ConfirmDialog.svelte';
   import { guideAction } from '../../lib/guide';
   import { onLiveChange } from '../../lib/live-updates';
+  import { cornerConfig, type CornerSlot } from '../../lib/event-brand';
 
   let contests: DemoFight[] = [];
   let selected = '';
@@ -27,6 +28,9 @@
   let detail = '';
   let technicalReason: TechnicalResultRequest['reason'] = 'injury';
   let technicalWinner: 'red' | 'blue' = 'red';
+
+  const cornerLabel = (slot: string): string =>
+    $cornerConfig[(slot === 'blue' ? 'blue' : 'red') as CornerSlot]?.label ?? slot.toUpperCase();
 
   type Pending = {
     kind: 'event' | 'card' | 'result' | 'submission' | 'technical' | 'kata';
@@ -177,7 +181,7 @@
 
   function logTechnique() {
     if (!selectedTechnique || !selected) return;
-    const label = `${corner.toUpperCase()} · ${selectedTechnique.english} / ${selectedTechnique.romaji}`;
+    const label = `${cornerLabel(corner)} · ${selectedTechnique.english} / ${selectedTechnique.romaji}`;
     ask({
       kind: 'event',
       label,
@@ -196,7 +200,7 @@
     if (!selected) return;
     ask({
       kind: 'card',
-      label: `${corner.toUpperCase()} · ${card === 'red' ? 'Red card' : 'Yellow card'}`,
+      label: `${cornerLabel(corner)} · ${card === 'red' ? 'Red card' : 'Yellow card'}`,
       action: async () => {
         const next = await api.fightEvent(selected, {
           corner,
@@ -214,7 +218,7 @@
   }
 
   function submitResult(outcome: string) {
-    const label = outcome === 'win_red' ? 'Red wins' : outcome === 'win_blue' ? 'Blue wins' : 'Draw';
+    const label = outcome === 'win_red' ? `${cornerLabel('red')} wins` : outcome === 'win_blue' ? `${cornerLabel('blue')} wins` : 'Draw';
     ask({ kind: 'result', label: `Result: ${label}`, action: () => api.submitFight(selected, outcome) });
   }
 
@@ -222,7 +226,7 @@
     if (!selected) return;
     ask({
       kind: 'technical',
-      label: `Technical result · ${technicalWinner.toUpperCase()} · ${reasonLabels[technicalReason]}${detail ? ` · ${detail}` : ''}`,
+      label: `Technical result · ${cornerLabel(technicalWinner)} · ${reasonLabels[technicalReason]}${detail ? ` · ${detail}` : ''}`,
       action: () => api.technicalResult(selected, { winner: technicalWinner, reason: technicalReason, detail }),
     });
   }
@@ -289,7 +293,7 @@
             <span>Round {state?.round ?? 1} · {state?.state ?? 'pending'}</span>
           </div>
           {#if state?.holdSeconds}
-            <div class="hold">HOLD · {state.holdCorner.toUpperCase()} · {state.holdSeconds}s</div>
+            <div class="hold">HOLD · {cornerLabel(state.holdCorner)} · {state.holdSeconds}s</div>
           {/if}
         </div>
         <div class="action-row">
@@ -306,8 +310,8 @@
         <div class="eyebrow">2 · Technique search</div>
         <h2>Find a technique, choose points</h2>
         <div class="corner-picker">
-          <button class="corner-btn red" data-guide="official-corner-red" class:active={corner === 'red'} on:click={() => { corner = 'red'; guideAction('official-corner'); }}>🔴 RED<br />{selectedFight?.red.name ?? ''}</button>
-          <button class="corner-btn blue" class:active={corner === 'blue'} on:click={() => { corner = 'blue'; guideAction('official-corner'); }}>🔵 BLUE<br />{selectedFight?.blue.name ?? ''}</button>
+          <button class="corner-btn red" data-guide="official-corner-red" class:active={corner === 'red'} on:click={() => { corner = 'red'; guideAction('official-corner'); }}><span class="corner-dot" style="background:{$cornerConfig.red.colour}"></span> {$cornerConfig.red.label}<br />{selectedFight?.red.name ?? ''}</button>
+          <button class="corner-btn blue" class:active={corner === 'blue'} on:click={() => { corner = 'blue'; guideAction('official-corner'); }}><span class="corner-dot" style="background:{$cornerConfig.blue.colour}"></span> {$cornerConfig.blue.label}<br />{selectedFight?.blue.name ?? ''}</button>
         </div>
         <input class="tab search-input" type="search" placeholder="Search English, romaji, Japanese or type…" bind:value={search} aria-label="Search techniques" />
         <div class="chips">
@@ -331,7 +335,7 @@
               </select>
             </label>
             <button class="btn primary" data-guide="official-tech-button" on:click={logTechnique}>
-              Log for {corner.toUpperCase()} {selectedTechnique.instantWin ? '· INSTANT WIN' : ''}
+              Log for {cornerLabel(corner)} {selectedTechnique.instantWin ? '· INSTANT WIN' : ''}
             </button>
           </div>
         {/if}
@@ -360,8 +364,8 @@
           <div class="eyebrow">Technical win / loss</div>
           <div class="technical-row">
             <select bind:value={technicalWinner} aria-label="Technical winner">
-              <option value="red">Red wins</option>
-              <option value="blue">Blue wins</option>
+              <option value="red">{$cornerConfig.red.label} wins</option>
+              <option value="blue">{$cornerConfig.blue.label} wins</option>
             </select>
             <select bind:value={technicalReason} aria-label="Technical reason">
               {#each Object.entries(reasonLabels) as [value, label]}<option {value}>{label}</option>{/each}
@@ -374,8 +378,8 @@
         <div class="eyebrow" style="margin-top:20px;">Confirm final decision</div>
         {#if levelScores}<div class="level-note">Scores are level — confirm a draw or call a technical decision.</div>{/if}
         <div class="action-row">
-          <button class="btn" data-guide="official-result-win-red" on:click={() => submitResult('win_red')}>Red wins</button>
-          <button class="btn" on:click={() => submitResult('win_blue')}>Blue wins</button>
+          <button class="btn" data-guide="official-result-win-red" on:click={() => submitResult('win_red')}>{$cornerConfig.red.label} wins</button>
+          <button class="btn" on:click={() => submitResult('win_blue')}>{$cornerConfig.blue.label} wins</button>
           <button class="btn" on:click={() => submitResult('draw')}>Draw</button>
         </div>
         <button class="btn quiet" style="margin-top:14px;" on:click={() => api.undoFightEvent(selected).then((next) => { state = next; notifySuccess('Last entry undone'); }).catch((error) => notifyError(error.message))}>↶ Undo last entry</button>
@@ -435,7 +439,8 @@
   .corner-picker { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .corner-btn { padding:12px; border-radius:12px; border:2px solid transparent; cursor:pointer; background:var(--brand-surface-3); color:var(--brand-ink); font-weight:700; }
   .corner-btn.red.active { border-color:var(--red-corner); }
-  .corner-btn.blue.active { border-color:var(--blue-corner); }
+  .corner-btn.blue.active { border-color:var(--blue-corner); box-shadow:0 0 0 1px rgba(15,23,42,.35); }
+  .corner-dot { display:inline-block; width:10px; height:10px; border-radius:50%; border:1px solid rgba(15,23,42,.35); vertical-align:middle; }
   .search-input { margin-top:12px; padding:11px 12px; border-radius:10px; border:1px solid var(--brand-border); background:var(--brand-surface-2); }
   .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; max-height:76px; overflow:auto; }
   .chip { padding:5px 9px; border-radius:999px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-muted); font-size:.72rem; cursor:pointer; }

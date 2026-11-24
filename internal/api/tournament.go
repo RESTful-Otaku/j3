@@ -71,6 +71,7 @@ type createTournamentRequest struct {
 	Invites       []createInvite      `json:"invites"`
 	Protection    []string            `json:"protection"`
 	CornerColours map[string]string   `json:"cornerColours"`
+	CornerLabels  map[string]string   `json:"cornerLabels"`
 	Schedule      []map[string]string `json:"schedule"`
 	Clubs         []struct {
 		Name   string `json:"name"`
@@ -154,9 +155,21 @@ func (s *Server) createFromRequest(w http.ResponseWriter, r *http.Request, req c
 		}
 	}
 
+	// Internal scoring slots stay "red"/"blue" for determinism, but the
+	// organiser-facing labels and colours default to Red vs White and are
+	// completely configurable per event.
+	cornerColours := req.CornerColours
+	if len(cornerColours) == 0 {
+		cornerColours = map[string]string{"red": "#b91c1c", "blue": "#f8fafc"}
+	}
+	cornerLabels := req.CornerLabels
+	if len(cornerLabels) == 0 {
+		cornerLabels = map[string]string{"red": "RED", "blue": "WHITE"}
+	}
 	detailsJSON, _ := json.Marshal(map[string]any{
 		"disciplines": req.Disciplines, "protection": req.Protection,
-		"cornerColours": req.CornerColours, "schedule": req.Schedule, "venue": req.Venue,
+		"cornerColours": cornerColours, "cornerLabels": cornerLabels,
+		"schedule": req.Schedule, "venue": req.Venue,
 	})
 	categoryJSON, _ := json.Marshal(req.Categories)
 	constraintJSON, _ := json.Marshal(req.Constraints)

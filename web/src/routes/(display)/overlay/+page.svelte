@@ -34,7 +34,8 @@
   .overlay { min-height:100vh; background:transparent; padding:28px; color:#fff; font-family:var(--font-display); }
   .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   .scorebug { display:inline-flex; align-items:center; gap:18px; padding:12px 22px; border-radius:14px; background:rgba(8,12,24,.82); border:1px solid rgba(255,255,255,.2); box-shadow:0 12px 40px rgba(0,0,0,.5); font-size:clamp(1rem,2vw,2rem); }
-  .corner.red { color:#fca5a5; } .corner.blue { color:#93c5fd; }
+  .corner.red { color:var(--red-corner); color:color-mix(in srgb, var(--red-corner) 65%, #ffffff); }
+  .corner.blue { color:var(--blue-corner); color:color-mix(in srgb, var(--blue-corner) 65%, #ffffff); }
   .clock { font-weight:800; letter-spacing:.05em; }
   .lower-third { margin-top:12px; display:inline-block; padding:8px 16px; border-radius:10px; background:rgba(8,12,24,.8); font-size:clamp(.8rem,1.4vw,1.3rem); }
 </style>

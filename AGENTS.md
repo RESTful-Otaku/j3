@@ -112,7 +112,8 @@ incidents, notifications, media, exports.
   ultrawide CSS; resizable nav with themed active state; full-bleed host banners; explicit
   **Live event / Simulated tournament** nav toggle. Sim mode shows a global replay widget on every
   view (play/pause, restart, step, scrub, ¼×–8× speed, live/table/bracket/ceremony state); `/simulate`
-  is the full event-by-event console.
+  is the full event-by-event console. Fighter corners default to **Red vs White** and are fully
+  configurable per event; internal scoring slots stay `red`/`blue` for deterministic results.
 - **Builder**: drag/resize/save/clone/load/delete live widget layouts; standalone `/view` screens.
 - **Data**: generic allow-listed query API, data explorer, audit view, CSV import/export, uploads
   with dominant/highlight colour extraction, 11-locale label dictionary.
@@ -188,6 +189,8 @@ states. Offline write outbox remains a future enhancement.
 | D-064–D-068 | GitHub releases publish only source, Linux server binary, versioned APK and iOS simulator `.app.zip`; Street Fighter is the default theme and dark ink keeps its neon gradient readable; nav is drag-resizable with a strong active border and banners use `contain`; demo replay is a shared global playhead with pause/restart/scrub and derived Mat/Table/Bracket/Ceremony state; standings/team rankings/kata reads are event-scoped and public-safe so tables never 500. |
 | D-069–D-074 | Global Live/Simulated nav toggle with URL/localStorage persistence and a replay widget on every view; full event-by-event `/simulate` console; containerised Docker/Podman QA stack with static web proxy, one-shot seed/sim jobs and `j3d simulate`; `golang:1.27.1-alpine` pin to avoid the modernc sqlite compiler ICE; SSE `state.changed` invalidations for every operational view; deterministic full medal set per category/discipline/event type including kata, with manual overrides and recompute. |
 | D-075 | Hosted CI is free-only: every job in every workflow is gated to public-repo visibility and `check:workflows` enforces it, so the private repo never requests a paid or 10× runner; local QA auto-detects a *working* Docker/Podman daemon and falls back to free host ports. |
+| D-076 | Seeded events default to Red vs White corner labels/colours applied across mat, official, details, brackets, overlay and replay; stable `red`/`blue` scoring slots keep audit deterministic. |
+| D-077 | Hosted Android smoke waits for adb `sys.boot_completed`, waits for the package manager and retries APK installs with visible logs. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -204,6 +207,12 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-24 — Resilient Android smoke**: emulator readiness now polls adb `sys.boot_completed`,
+  the smoke script waits for the package manager, disables QA side-load verification and retries
+  installs with saved diagnostics so hosted failures are actionable.
+- **2026-11-24 — Red/White fighter corners**: seeded demo and Okami events now default to Red vs
+  White corner labels and colours. Event config drives mat, official, details, brackets, overlay and
+  replay surfaces while stable `red`/`blue` audit slots remain deterministic.
 - **2026-11-23 — Free-only CI + resilient local QA**: every hosted job now checks repository
   visibility and `check:workflows` enforces it, so a private repo skips all runners (including the
   10× macOS job) while the now-public repo runs free; `qa-docker.sh` picks a working Docker/Podman

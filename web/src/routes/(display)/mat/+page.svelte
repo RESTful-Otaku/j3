@@ -5,6 +5,7 @@
   import { guideAction } from '../../../lib/guide';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
   import { onLiveChange } from '../../../lib/live-updates';
+  import { cornerConfig } from '../../../lib/event-brand';
 
   let event: EventDisplayInfo | null = null;
   let fights: DemoFight[] = [];
@@ -13,11 +14,11 @@
   type Outcome = 'win_red' | 'win_blue' | 'draw';
   let confirmOpen = false;
   let outcome: Outcome = 'win_red';
-  const outcomeLabels: Record<Outcome, string> = {
-    win_red: 'Red wins',
-    win_blue: 'Blue wins',
+  $: outcomeLabels = {
+    win_red: `${$cornerConfig.red.label} wins`,
+    win_blue: `${$cornerConfig.blue.label} wins`,
     draw: 'Draw',
-  };
+  } as Record<Outcome, string>;
 
   async function loadState(id: string) {
     try { state = await api.fightState(id); } catch { state = null; }
@@ -106,13 +107,13 @@
       <div class="eyebrow">{selectedFight.round} · {selectedFight.category}</div>
       <h2>{selectedFight.red.name} <span class="muted">vs</span> {selectedFight.blue.name}</h2>
       <div class="score-row">
-        <div><span class="corner-label red">RED · {selectedFight.red.belt}</span><div class="big-score">{state.redScore}</div></div>
+        <div><span class="corner-label red">{$cornerConfig.red.label} · {selectedFight.red.belt}</span><div class="big-score">{state.redScore}</div></div>
         <div style="text-align:center;">
           <div class="clock" class:paused={!state.running}>{String(Math.floor(state.seconds / 60)).padStart(2,'0')}:{String(state.seconds % 60).padStart(2,'0')}</div>
           {#if state.holdSeconds > 0}<div class="hold-badge">HOLD · {state.holdCorner} · {state.holdSeconds}s</div>{/if}
           <div class="muted small">Round {state.round} · {state.running ? 'running' : 'paused'}</div>
         </div>
-        <div style="text-align:right;"><span class="corner-label blue">BLUE · {selectedFight.blue.belt}</span><div class="big-score">{state.blueScore}</div></div>
+        <div style="text-align:right;"><span class="corner-label blue">{$cornerConfig.blue.label} · {selectedFight.blue.belt}</span><div class="big-score">{state.blueScore}</div></div>
       </div>
 
       <div class="control-grid">
@@ -131,10 +132,10 @@
       </div>
       <div class="control-grid" data-guide="mat-scores">
         {#each [1, 2, 3, 4] as points}
-          <button class="btn" on:click={() => score('red', points)}>Red +{points}</button>
+          <button class="btn" on:click={() => score('red', points)}>{$cornerConfig.red.label} +{points}</button>
         {/each}
         {#each [1, 2, 3, 4] as points}
-          <button class="btn" on:click={() => score('blue', points)}>Blue +{points}</button>
+          <button class="btn" on:click={() => score('blue', points)}>{$cornerConfig.blue.label} +{points}</button>
         {/each}
       </div>
       <div class="control-grid">
@@ -161,7 +162,8 @@
 <style>
   .score-row { display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; gap:18px; margin:18px 0; }
   .corner-label { font-weight:800; font-size:1.2rem; }
-  .corner-label.red { color:#ef4444; } .corner-label.blue { color:#3b82f6; }
+  .corner-label.red { color:var(--red-corner); }
+  .corner-label.blue { color:var(--blue-corner); text-shadow:0 1px 3px rgba(15,23,42,.55); }
   .big-score { font-family:var(--font-display); font-size:clamp(3rem,8vw,7rem); font-weight:800; }
   .clock { font-family:var(--font-display); font-size:2.6rem; font-weight:800; }
   .clock.paused { color:var(--draw); animation:pulse 1s infinite alternate; }

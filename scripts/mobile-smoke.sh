@@ -34,8 +34,39 @@ if [ "$STATE" != "device" ]; then
   exit 1
 fi
 
+# Boot completion can precede a usable package manager by a few seconds.
+for _ in $(seq 1 60); do
+  if "${ADB[@]}" shell pm list packages >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+# Emulator images can reject side-loaded APKs while package verification is still
+# settling; QA builds are local artefacts, so disable that check for the smoke run.
+"${ADB[@]}" shell settings put global package_verifier_enable 0 >/dev/null 2>&1 || true
+"${ADB[@]}" shell settings put global verify_apps_over_usb 0 >/dev/null 2>&1 || true
+
 echo "📲 Installing $APK on $STATE"
-"${ADB[@]}" install -r "$APK" >/dev/null
+INSTALL_LOG="$OUT/adb-install.txt"
+INSTALLED=0
+for attempt in 1 2 3; do
+  if "${ADB[@]}" install -r "$APK" >"$INSTALL_LOG" 2>&1; then
+    INSTALLED=1
+    break
+  fi
+  echo "⚠️  Install attempt $attempt failed:"
+  cat "$INSTALL_LOG"
+  if grep -Eq 'INSTALL_FAILED_(UPDATE_INCOMPATIBLE|VERSION_DOWNGRADE|ALREADY_EXISTS|INVALID_APK|PERMISSIONS)' "$INSTALL_LOG"; then
+    "${ADB[@]}" uninstall "$PACKAGE" >/dev/null 2>&1 || true
+  fi
+  sleep 3
+done
+if [ "$INSTALLED" -ne 1 ]; then
+  echo "❌ APK installation failed (see $INSTALL_LOG)"
+  "${ADB[@]}" logcat -d -t 500 > "$OUT/android-logcat.txt" || true
+  exit 1
+fi
 "${ADB[@]}" shell am force-stop "$PACKAGE" >/dev/null 2>&1 || true
 "${ADB[@]}" shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
 

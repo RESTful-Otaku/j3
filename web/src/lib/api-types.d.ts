@@ -1636,6 +1636,14 @@ export interface components {
             categories?: components["schemas"]["CreateCategory"][];
             constraints?: components["schemas"]["CreateConstraints"];
             invites?: components["schemas"]["CreateInvite"][];
+            /** @description Organiser-facing mat corner colours keyed by internal slot (red, blue). */
+            cornerColours?: {
+                [key: string]: string;
+            };
+            /** @description Organiser-facing mat corner names keyed by internal slot (red, blue). */
+            cornerLabels?: {
+                [key: string]: string;
+            };
             clubs?: {
                 name?: string;
                 colour?: string;
