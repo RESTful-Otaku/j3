@@ -118,8 +118,9 @@ incidents, notifications, media, exports.
 - **Data**: generic allow-listed query API, data explorer, audit view, CSV import/export, uploads
   with dominant/highlight colour extraction, 11-locale label dictionary.
 - **Scheduling**: persisted timeline, drift, projections, mark-complete, rest warnings, big clock.
-- **CLI/mobile**: TUI `dev.sh` with Docker QA submenu, Capacitor Android/iOS, branded APK with bundled
-  seeded SQLite and read-only API snapshot; live LAN data when reachable.
+- **CLI/mobile**: TUI `dev.sh` with Docker QA submenu, Capacitor Android/iOS, self-contained branded
+  QA APK with bundled seeded SQLite and read-only API snapshot plus offline simulated writes; live LAN
+  data when reachable. Phone UI uses safe-area-aware chrome and compact fight/match cards.
 - **Local QA stack**: Docker/Podman images, one-shot seed/sim containers, shared SQLite volume, nginx
   same-origin `/api` proxy (SSE-safe), `full`/`okami`/`clean`/`light`/`dev` modes and `j3d simulate`.
   Simulated fights use catalogue point values (typical totals 10–40) and instant-win submissions.
@@ -193,6 +194,10 @@ states. Offline write outbox remains a future enhancement.
 | D-077 | Hosted Android smoke waits for adb `sys.boot_completed` and the package manager, retries APK installs, launches via `am start` with a monkey fallback, tolerates `pidof` misses under `pipefail`, and treats `uiautomator` dumps as diagnostics while gating on screenshot/logcat. |
 | D-078 | Hosted release APK builds generate the standard Android debug keystore when no signing secrets are configured, so free public runners can still publish an installable signed APK. |
 | D-079 | Android smoke uninstalls any prior signed build before install and scopes crash detection to the app PID/package, so QA/release key swaps and unrelated system warnings do not fail hosted deploys. |
+| D-080 | Local builds stage into root `build/{android,ios,web,server}`; mobile outputs include the seeded SQLite/API snapshot, iOS stages synced assets plus an Xcode-built `.app` when available, and `release.sh` mirrors web/server outputs into `dist/` for existing deploy commands. |
+| D-081 | Local QA APK is self-contained: bundled seeded SQLite and read-only API snapshot, offline fallback for Capacitor's HTTP 200 HTML responses, simulated writes persisted in `localStorage`, QA autologin and full-phone route unlock; hosted/production phones keep participant-only scope. |
+| D-082 | Phone UI is purpose-built: safe-area tokens on fixed chrome and overlays, compact duel/match/score cards, horizontally scrolling contest tabs, touch promotion controls on their own bracket line, and 320px/safe-area E2E guards. |
+| D-083 | Explicit local `dev`/`qa`/`prod` web flavours stage into `build/web-{dev,qa,prod}` with configurable API URLs; production is mirrored into `build/web` and `dist/web` so existing deploy commands are unchanged. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -209,6 +214,20 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-24 — Self-contained QA APK + mobile polish**: local QA APKs carry the seeded SQLite and
+  API snapshot, survive Capacitor's HTML fallback for unknown `/api` paths and keep simulated writes
+  in `localStorage`, so emulator and device QA need no venue server. Phone layouts now use safe-area
+  tokens for fixed bars/drawers/toasts/dialogs/replay/guide, compact duel and match cards, a cleaner
+  two-row mat score console, horizontally scrolling contest lists and bracket controls that stop
+  stealing name width; 320px and safe-area E2E checks guard the result.
+- **2026-11-24 — Explicit web flavours**: `bun run build:dev`, `build:qa` and `build:prod` stage
+  separate bundles in `build/web-{dev,qa,prod}`; optional `J3_DEV_API_URL`, `J3_QA_API_URL` and
+  `J3_PROD_API_URL` select a remote API and production still mirrors `build/web` and `dist/web`.
+- **2026-11-24 — Local build outputs**: all local builds now stage into a root `build/` tree with
+  `android/`, `ios/`, `web/` and `server/` directories. The Android helper copies the APK beside its
+  bundled seeded SQLite and API snapshot, the iOS helper stages the same data plus the synced
+  Capacitor project and a simulator `.app` when Xcode is present, and `bun run build` refreshes
+  `build/web`. `scripts/release.sh` keeps `dist/` as a deploy-compatible mirror.
 - **2026-11-24 — `v0.7.5` published**: free-only public-repo gates across all workflows, resilient
   Android smoke (boot wait, explicit launch, prior-build uninstall, app-scoped crash gate), debug-key
   fallback for hosted release APKs and Red vs White corners. Curated assets published from
@@ -256,6 +275,16 @@ with live and offline evidence in `docs/qa/`. `v0.7.5` (`569934c`) publishes sou
 smoke-tested when hosted CI runs (public repo) but not published. See `docs/HOSTING.md` for free
 Oracle Always Free hosting.
 
+**Local QA builds (2026-11-24)**: fresh `dev`/`qa`/`prod` web bundles are staged under
+`build/web-{dev,qa,prod}` and production under `build/web` + `dist/web`; local and cross-platform
+server binaries are in `build/server`. Local gates are green (`go test`, 21 web unit tests,
+svelte-check with no warnings, 120 E2E, `check:workflows`). The self-contained QA APK is
+`build/android/j3-demo.apk` (sha256 `b105ba1a72e844a141da6abcd5aeb5052b5efac815b6cdb1c8468518cb10a335`);
+smoke passed on `emulator-5554` (pid `4732`) with seeded data, no venue-server errors, zero horizontal
+overflow across public/operator screens and a persisted offline `RED +1` write. Fresh screenshots are
+in `build/android/smoke/screens/`. The physical Pixel was not attached, so device install remains to be
+done by the user.
+
 **Hosted CI status**: `RESTful-Otaku/j3` is public, so GitHub-hosted runners are free and the
 visibility-gated workflows run normally. Final `v0.7.5` verification on `569934c` is green: CI
 `45403247450`, Mobile `45403247408`, Release `45403287849` and Deploy `45403287727`. Earlier
@@ -268,11 +297,13 @@ visibility changes again. No billing action is needed.
 **External-dependency remainder**: payment/waiver gateways, VAR/video integration, full content
 translation, physical-device install, venue projector/LED tuning, offline write outbox.
 
-**Next actions**: none for the release; `v0.7.5` is published and all hosted gates are green. Do not
-enable billing or branch protection. Local fast QA is `bash scripts/qa-docker.sh full` (working
-Docker/Podman daemon, free auto-selected ports; see `docs/DOCKER.md`); native QA is `bun run dev`. For
-phones rebuild a standalone self-seeding offline APK with `bash scripts/mobile.sh build`, or a
-LAN/HTTPS client with `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
+**Next actions**: attach the Pixel and run `adb install -r build/android/j3-demo.apk`; the APK is
+fully offline-seeded, so no venue server is needed. Do not enable billing or branch protection.
+Local builds stage under `build/{android,ios,web,server}`; the APK's SQLite/snapshot sit beside it.
+Local fast QA is `bash scripts/qa-docker.sh full` (working Docker/Podman daemon, free auto-selected
+ports; see `docs/DOCKER.md`); native QA is `bun run dev`. Rebuild with `bash scripts/mobile.sh build`,
+or bake a LAN/HTTPS URL with `J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build`.
+Hosted workflows were unchanged by the local polish and remain visibility-gated/free-only.
 
 ---
 

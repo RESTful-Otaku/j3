@@ -263,9 +263,9 @@
                 {#each [{ name: fight.red.name, colour: fight.red.clubColour, id: fight.red.id }, { name: fight.blue.name, colour: fight.blue.clubColour, id: fight.blue.id }] as fighter, i}
                   {@const corner = i === 0 ? 'red' : 'blue'}
                   {@const result = outcome(fight, corner)}
-                  <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--brand-border);">
+                  <div class="match-row" style="display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--brand-border);">
                     <span class="portrait small-portrait" style="background:{fighter.colour};">{initials(fighter.name)}</span>
-                    <span style="flex:1; font-weight:600;">{fighter.name || 'TBD'}</span>
+                    <span class="match-name" style="flex:1; font-weight:600;">{fighter.name || 'TBD'}</span>
                     {#each cards(fight, corner) as card}<span class="badge {card === 'red' ? 'official' : 'runner'}">{card === 'red' ? '🟥' : '🟨'}</span>{/each}
                     {#if result.code}<span class="badge {result.win ? 'fighter' : 'spectator'}">{result.code}</span>{/if}
                   </div>
@@ -337,6 +337,7 @@
   .bracket-slot:hover .slot-actions, .bracket-slot:focus-within .slot-actions { opacity:1; }
   @media (hover: none) { .slot-actions { opacity:1; } }
   .slot-actions .tab { padding:4px 7px; font-size:.72rem; }
+  .match-name { min-width:0; overflow-wrap:anywhere; }
   @media (max-width: 700px) {
     .bracket-wrap { display:grid; grid-template-columns:1fr; min-width:0; overflow:visible; padding-bottom:8px; }
     .bracket-column { min-width:0; width:100%; }
@@ -344,5 +345,13 @@
     .bracket-matches { justify-content:flex-start; }
     .bracket-rounds { display:grid !important; grid-template-columns:1fr; }
     .bracket-rounds > section { min-width:0; width:100%; }
+    /* Touch controls move to their own line so fighter names keep the width. */
+    .bracket-slot { flex-wrap:wrap; gap:6px; padding:7px; }
+    .bracket-slot > span:nth-child(2) { flex:1 1 calc(100% - 48px); }
+    .slot-actions { flex:1 1 100%; justify-content:flex-end; margin-top:2px; }
+    .slot-actions .tab { min-width:42px; padding:5px 8px; font-size:.76rem; }
+    .small-portrait, .portrait.tiny { width:36px; height:36px; border-radius:10px; font-size:.72rem; }
+    .match-row { gap:8px; padding:7px 0; }
+    .match-row .badge { flex:none; padding:2px 6px; }
   }
 </style>

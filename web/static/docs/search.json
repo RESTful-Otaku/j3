@@ -672,6 +672,12 @@
     "url": "/docs/ci#environments-github-workflows-deploy-yml"
   },
   {
+    "title": "CI & releases \u00b7 Local build outputs",
+    "section": "Developers",
+    "text": "Local builds stage into a single root `build/` tree so QA, deployment and release candidates come from predictable paths:  ``` build/android/   demo APK plus the seeded SQLite file and read-only API snapshot bundled in it build/ios/       iOS demo assets and, on macOS with Xcode, the unsigned simulator .app build/web/       production web bundle (API contract, docs and licence included) build/web-",
+    "url": "/docs/ci#local-build-outputs"
+  },
+  {
     "title": "CI & releases \u00b7 Local rigour",
     "section": "Developers",
     "text": "Run `bun run cicd` or `bun run test:tui` before pushing. `bun run qa:docker:full` boots the full seeded stack through a working Docker/Podman daemon (see `docs/DOCKER.md`). `bun run docs` rebuilds the documentation site; `bun run sync:api-docs` keeps the contract/guides/search index and shipped licence in sync.",

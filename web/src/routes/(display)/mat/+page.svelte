@@ -172,4 +172,19 @@
   .outcome-picker { display:flex; align-items:center; gap:8px; padding:0 10px; border-radius:10px; background:var(--brand-surface-3); border:1px solid var(--brand-border); font-size:.82rem; font-weight:800; }
   .outcome-picker select { background:transparent; color:var(--brand-ink); border:0; padding:9px 4px; font:inherit; cursor:pointer; }
   @keyframes pulse { from { opacity:1; } to { opacity:.5; } }
+  @media (max-width: 700px) {
+    .score-row { grid-template-columns:1fr 1fr; gap:8px 10px; margin:12px 0; }
+    .score-row > :nth-child(2) {
+      grid-column:1 / -1; grid-row:1; display:flex; align-items:center;
+      justify-content:center; gap:10px;
+    }
+    .corner-label { font-size:.86rem; line-height:1.2; overflow-wrap:anywhere; }
+    .big-score { font-size:2.4rem; }
+    .clock { font-size:2rem; }
+    .hold-badge { font-size:.74rem; padding:4px 8px; }
+    .control-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .control-grid .btn { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .outcome-picker { grid-column:1 / -1; justify-content:space-between; }
+    .tabs .tab { max-width:min(86vw, 320px); }
+  }
 </style>

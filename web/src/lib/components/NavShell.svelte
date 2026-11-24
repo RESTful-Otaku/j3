@@ -2,13 +2,24 @@
   import { onMount } from 'svelte';
   import { afterNavigate, goto } from '$app/navigation';
   import { api, type DemoIdentity } from '../api';
+  import { buildFlavor } from '../build-info';
   import { landingForRole, session, switchDemoUser, uiRole } from '../auth';
   import { eventTitle } from '../event-title';
   import { appMode, setAppMode } from '../demo-replay';
   import {
     canUseOnPhone, currentRole, HOME_ROUTE, isPhoneWidth, itemsForRole,
-    MOBILE_PRIMARY_HREFS, NAV_GROUPS, phoneHome, type NavItem, type Role,
+    MOBILE_PRIMARY_HREFS, NAV_GROUPS, phoneHome, qaFullPhone, type NavItem, type Role,
   } from '../nav';
+
+  // Short labels keep the bottom bar legible on 320-390px phones; the drawer
+  // still shows the full destination names.
+  const MOBILE_SHORT_LABELS: Record<string, string> = {
+    '/public': 'Public',
+    '/brackets': 'Brackets',
+    '/tables': 'Tables',
+    '/simulate': 'Replay',
+    '/event': 'Event',
+  };
 
   let expanded = false;
   let mobileOpen = false;
@@ -218,8 +229,13 @@
           {/if}
         {/each}
       </nav>
-      {#if isPhone}
+      {#if isPhone && !qaFullPhone}
         <p class="phone-note">Phone view shows public, participant, club and guardian screens. Scoring, setup and audit tools are available on tablet or desktop.</p>
+      {:else if isPhone && qaFullPhone}
+        <p class="phone-note">QA phone build: every operator screen is unlocked for local end-to-end testing.</p>
+      {/if}
+      {#if isPhone}
+        <p class="build-flavor">Build · {buildFlavor}</p>
       {/if}
       <button class="help-btn" data-guide="nav-help-full" aria-label="Start guided tour" on:click={startTour}>❓ Help & guided tour</button>
       <div class="role-picker">
@@ -246,7 +262,7 @@
     {#each mobileItems as item (item.href)}
       <a class="quick-item" class:active={isActive(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}
         href={item.href} title={item.label}>
-        <span class="icon">{item.icon}</span><span class="quick-label">{item.label}</span>
+        <span class="icon">{item.icon}</span><span class="quick-label">{MOBILE_SHORT_LABELS[item.href] ?? item.label}</span>
       </a>
     {/each}
     <button class="quick-item" data-guide="nav-mobile-more" aria-label="More navigation" aria-expanded={mobileOpen} on:click={toggle}>
@@ -394,26 +410,26 @@
   .role-picker { display:grid; gap:7px; min-width:0; padding:14px 8px 4px; border-top:1px solid var(--brand-border); overflow:hidden; }
   .role-picker select { width:100%; max-width:100%; min-width:0; padding:9px; border-radius:9px; background:var(--brand-surface-3); color:var(--brand-ink); border:1px solid var(--brand-border); font-size:.86em; }
   .collapsed-role { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--brand-primary); color:var(--brand-on-primary); font-weight:800; margin-top:auto; }
-  .mobile-bar { position:fixed; top:0; left:0; right:0; z-index:810; display:grid; gap:3px; padding:7px 14px 8px; background:var(--brand-surface-2); border-bottom:1px solid var(--brand-border); }
+  .mobile-bar { position:fixed; top:0; left:0; right:0; z-index:810; display:grid; gap:3px; padding:calc(7px + var(--safe-top)) calc(12px + var(--safe-left)) 8px calc(12px + var(--safe-right)); background:var(--brand-surface-2); border-bottom:1px solid var(--brand-border); }
   .mobile-bar-row { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:34px; }
   .mobile-event { display:grid; gap:1px; min-width:0; }
-  .mobile-event-title { font-family:var(--font-display); font-weight:800; font-size:.8rem; line-height:1.2; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mobile-event-title { font-family:var(--font-display); font-weight:800; font-size:.78rem; line-height:1.2; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mobile-bar .hamburger { margin-left:auto; }
   .mobile-bar .mode-switch.compact { display:flex; width:auto; }
   .mobile-bar .mode-switch.compact button { min-width:36px; padding:7px 8px; }
   .mobile-bottom {
     position:fixed; left:0; right:0; bottom:0; z-index:815;
     display:grid; grid-template-columns:repeat(auto-fit, minmax(0,1fr)); gap:2px;
-    padding:6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    padding:5px calc(5px + var(--safe-left)) calc(5px + var(--safe-bottom)) calc(5px + var(--safe-right));
     background:var(--brand-surface-2); border-top:1px solid var(--brand-border);
     box-shadow:0 -8px 24px rgba(0,0,0,.28);
   }
   .quick-item {
-    display:grid; place-items:center; gap:2px; min-width:0; padding:5px 2px;
+    display:grid; place-items:center; gap:2px; min-width:0; min-height:50px; padding:5px 2px;
     border:0; border-radius:10px; background:transparent; color:var(--brand-muted);
-    text-decoration:none; font-size:.62rem; font-weight:700; cursor:pointer;
+    text-decoration:none; font-size:.68rem; font-weight:700; cursor:pointer;
   }
-  .quick-item .icon { font-size:1.05rem; line-height:1; }
+  .quick-item .icon { font-size:1.15rem; line-height:1; }
   .quick-label { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .quick-item.active {
     color:var(--brand-ink); background:var(--brand-surface-3);
@@ -421,12 +437,13 @@
   }
   .quick-item:hover, .quick-item:focus-visible { color:var(--brand-ink); text-decoration:none; }
   .scrim { position:fixed; inset:0; z-index:820; background:rgba(2,6,23,.65); border:0; cursor:pointer; }
-  .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(86vw, 340px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:18px; display:flex; flex-direction:column; gap:12px; box-shadow:-16px 0 44px rgba(0,0,0,.45); animation:slide .22s ease-out; }
+  .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(86vw, 340px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) 16px; display:flex; flex-direction:column; gap:12px; box-shadow:-16px 0 44px rgba(0,0,0,.45); animation:slide .22s ease-out; }
   .drawer-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; }
   .drawer-head .event-card-title { flex:1; }
   .mobile-drawer nav { display:grid; gap:3px; overflow-y:auto; flex:1; }
   .mobile-drawer .nav-item { min-height:46px; }
   .mobile-drawer .group-label, .mobile-drawer .group-toggle { margin-top:10px; }
   .phone-note { margin:0; padding:10px 12px; border-radius:9px; background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-muted); font-size:.74rem; line-height:1.4; }
+  .build-flavor { margin:0; color:var(--brand-muted); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; }
   @keyframes slide { from { transform:translateX(100%); } to { transform:none; } }
 </style>

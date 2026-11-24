@@ -111,4 +111,13 @@
   .medal-icon { font-size:3rem; }
   .winner { display:grid; gap:6px; justify-items:center; margin-top:14px; }
   .winner .avatar { width:60px; height:60px; border-radius:18px; display:grid; place-items:center; color:#fff; font-weight:800; }
+  @media (max-width: 700px) {
+    .podium { gap:10px; margin-top:16px; }
+    .step { flex:1 1 100%; min-width:0; width:100%; max-width:none; padding:16px; border-radius:14px; }
+    .step.gold { min-height:0; order:1 !important; }
+    .step.silver { min-height:0; order:2 !important; }
+    .step.bronze { min-height:0; order:3 !important; }
+    .step.active { transform:none; }
+    .winner strong { min-width:0; overflow-wrap:anywhere; font-size:1rem; }
+  }
 </style>

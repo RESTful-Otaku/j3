@@ -123,4 +123,11 @@
   .bar-row { display:grid; grid-template-columns:90px 1fr 28px; align-items:center; gap:8px; font-size:.8rem; margin-top:6px; }
   .bar { height:10px; border-radius:999px; background:var(--brand-surface-3); overflow:hidden; }
   .bar-fill { height:100%; background:var(--brand-primary); border-radius:999px; }
+  @media (max-width: 700px) {
+    .widget { padding:13px 14px; }
+    .score-line { gap:6px; flex-wrap:nowrap; }
+    .score-line strong, .row > span { min-width:0; overflow-wrap:anywhere; font-size:.88rem; }
+    .score { font-size:1.6rem; flex:none; }
+    .bar-row { grid-template-columns:70px 1fr 26px; }
+  }
 </style>

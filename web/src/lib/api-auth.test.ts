@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { bootstrapQaSession, getJson, resetAuthCache } from './api';
+import { bootstrapQaSession, getJson, postJson, resetAuthCache, type FightState } from './api';
 import { switchDemoUser } from './auth';
 
 type Call = { url: string; auth: string | null };
@@ -110,6 +110,52 @@ describe('venue session handling', () => {
 
     await getJson('/api/v1/demo/standings');
     expect(calls.at(-1)?.auth).toBe('Bearer fighter-token');
+  });
+
+  it('serves and mutates bundled demo data when the WebView has no venue server', async () => {
+    window.history.replaceState({}, '', '/?offline=1');
+    stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/j3-demo-data.json')) {
+        return new Response(JSON.stringify({
+          session: {
+            token: 'offline-demo', email: 'owner@demo.j3', role: 'admin',
+            userId: 'u-owner', expiresAt: '2099-01-01T00:00:00Z',
+          },
+          '/api/v1/demo/standings': { standings: [{ fighterId: 'f01', wins: 3 }] },
+          '/api/v1/query?table=fighters&limit=100': {
+            table: 'fighters', columns: ['id'], rows: [{ id: 'f01' }], count: 1,
+          },
+          '/api/v1/fights/fight-01/state': {
+            fightId: 'fight-01', state: 'scheduled', outcome: '', running: false,
+            seconds: 180, round: 1, redScore: 0, blueScore: 0, redPenalty: 0,
+            bluePenalty: 0, redPenaltyPoints: 0, bluePenaltyPoints: 0,
+            holdSeconds: 0, holdCorner: '', events: [],
+          },
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      return new Response('<!doctype html><html>offline</html>', {
+        status: 200,
+        headers: { 'Content-Type': 'text/html' },
+      });
+    }));
+    localStorage.setItem('j3-session', JSON.stringify(freshSession));
+
+    await expect(getJson('/api/v1/demo/standings')).resolves.toEqual({
+      standings: [{ fighterId: 'f01', wins: 3 }],
+    });
+    await expect(getJson('/api/v1/query?table=fighters&limit=50&offset=0&order=asc')).resolves.toEqual({
+      table: 'fighters', columns: ['id'], rows: [{ id: 'f01' }], count: 1,
+    });
+    const started = await postJson<FightState>('/api/v1/fights/fight-01/start', { seconds: 180, round: 1 });
+    expect(started.running).toBe(true);
+    const scored = await postJson<FightState>('/api/v1/fights/fight-01/event', {
+      kind: 'score', corner: 'red', points: 10, techniqueId: 'ippon',
+    });
+    expect(scored.redScore).toBe(10);
+    await expect(getJson('/api/v1/fights/fight-01/state')).resolves.toMatchObject({
+      redScore: 10, state: 'live',
+    });
   });
 
   it('QA bootstrap signs in as the bundled admin when the venue server is offline', async () => {

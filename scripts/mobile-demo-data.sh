@@ -77,19 +77,51 @@ ENDPOINTS=(
   /api/v1/demo/training
   /api/v1/demo/view
   /api/v1/templates
+  '/api/v1/demo/techniques?limit=25&eventId=ev-okami'
+  '/api/v1/demo/techniques?limit=25'
+  '/api/v1/demo/audit?limit=250'
+  /api/v1/demo/permissions
+  /api/v1/demo/admin/users
+  '/api/v1/demo/officials?fightId=fight-01'
+  '/api/v1/demo/brackets?eventId=ev-okami'
+  '/api/v1/query?table=clubs&limit=50'
+  '/api/v1/query?table=clubs&limit=100'
+  '/api/v1/query?table=entrants&limit=500'
+  '/api/v1/query?table=fighters&limit=500'
+  '/api/v1/query?table=fighters&limit=100'
+  '/api/v1/query?table=events&limit=100'
+  '/api/v1/query?table=categories&limit=100'
+  '/api/v1/query?table=fights&limit=100'
+  '/api/v1/query?table=pools&limit=100'
+  '/api/v1/query?table=belt_ranks&limit=100'
+  '/api/v1/query?table=users&limit=100'
+  '/api/v1/query?table=audit_log&limit=100'
 )
 
 TMP="$(mktemp)"
 jq -n '{}' >"$TMP"
-for path in "${ENDPOINTS[@]}"; do
+
+capture_endpoint() {
+  local path="$1"
+  local response
   response="$(curl -fsS -H "Authorization: Bearer $TOKEN" "http://127.0.0.1:$PORT$path" || true)"
   if [[ -z "$response" ]] || ! jq -e . >/dev/null 2>&1 <<<"$response"; then
     echo "⚠️  Skipping $path"
-    continue
+    return 0
   fi
   jq --arg key "$path" --argjson value "$response" '.[$key] = $value' "$TMP" >"${TMP}.next"
   mv "${TMP}.next" "$TMP"
+}
+
+for path in "${ENDPOINTS[@]}"; do
+  capture_endpoint "$path"
 done
+
+# Every seeded fight gets its own state snapshot so the offline mat and
+# official screens can open any contest without a venue server.
+while IFS= read -r fight_id; do
+  [ -n "$fight_id" ] && capture_endpoint "/api/v1/fights/${fight_id}/state"
+done < <(jq -r '."/api/v1/demo/fights".fights[].id // empty' "$TMP")
 
 jq \
   --arg userId "$USER_ID" \

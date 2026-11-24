@@ -23,7 +23,7 @@ test('mobile keeps a persistent nav and home icon', async ({ page }) => {
 
   await expect(page.locator('.mobile-bar .brand-mark')).toBeVisible();
   await expect(page.locator('.mobile-bottom')).toBeVisible();
-  await page.locator('.mobile-bottom').getByRole('link', { name: /Public board/ }).click();
+  await page.locator('.mobile-bottom').getByRole('link', { name: /Public/ }).click();
   await expect(page).toHaveURL(/\/public$/);
   await expect(page.locator('.mobile-bottom')).toBeVisible();
 

@@ -77,6 +77,32 @@ artifact (`j3-server-release-<sha>`).
 Staging/production deploys are environment-gated and consume the release bundle. Hosted owner
 credentials come from `J3_OWNER_*`; never commit passwords.
 
+## Local build outputs
+
+Local builds stage into a single root `build/` tree so QA, deployment and release candidates come
+from predictable paths:
+
+```
+build/android/   demo APK plus the seeded SQLite file and read-only API snapshot bundled in it
+build/ios/       iOS demo assets and, on macOS with Xcode, the unsigned simulator .app
+build/web/       production web bundle (API contract, docs and licence included)
+build/web-dev/   local development web bundle
+build/web-qa/    QA/staging web bundle
+build/web-prod/  production web bundle
+build/server/    local and cross-compiled server executables
+```
+
+`bun run build` refreshes and stages `build/web`; `bun run build:server` and `bun run build:local`
+cover the server executable or all local targets. Use `bun run build:dev`, `bun run build:qa` and
+`bun run build:prod` (or `bun run build:flavors`) for explicit web flavours. Set `J3_DEV_API_URL`,
+`J3_QA_API_URL` or `J3_PROD_API_URL` to point a flavour at a remote server; empty means same-origin.
+`bash scripts/mobile.sh build` and `bash scripts/mobile.sh build-ios` stage mobile outputs. Local QA
+mobile builds are self-contained, auto-login as admin and unlock every screen on a phone for
+on-device QA; hosted/production clients keep the participant-only phone scope. iOS builds always
+stage the seeded assets and synced Capacitor project; the native `.app` is produced when Xcode is
+available. Release builds mirror `build/web` and `build/server` into `dist/` so existing deployment
+commands keep working.
+
 ## Local rigour
 
 Run `bun run cicd` or `bun run test:tui` before pushing. `bun run qa:docker:full` boots the full

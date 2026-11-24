@@ -31,6 +31,54 @@ test.describe('Mobile navigation & layouts', () => {
     }
   });
 
+  test('320px fight and match names stay readable', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 720 });
+    for (const route of ['/public', '/brackets', '/tables', '/ceremony', '/view']) {
+      await page.goto(route);
+      await expect(page.locator('body')).not.toBeEmpty();
+      const metrics = await page.evaluate(() => ({
+        width: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      }));
+      expect(metrics.scrollWidth, `${route} should not scroll sideways at 320px`).toBeLessThanOrEqual(metrics.width + 1);
+      const clipped = await page.evaluate(() => {
+        const selectors = '.duel-name, .bracket-slot strong, .match-name, .scoreline > span, .winner strong';
+        return Array.from(document.querySelectorAll(selectors))
+          .filter((element) => element instanceof HTMLElement && element.getClientRects().length > 0)
+          .filter((element) => element.scrollWidth > element.clientWidth + 1)
+          .map((element) => (element.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 40));
+      });
+      expect(clipped, `${route} names should wrap instead of clipping`).toEqual([]);
+    }
+  });
+
+  test('safe-area tokens keep fixed chrome clear', async ({ page }) => {
+    await page.goto('/public');
+    await page.evaluate(() => {
+      const root = document.documentElement;
+      root.style.setProperty('--safe-top', '24px');
+      root.style.setProperty('--safe-right', '12px');
+      root.style.setProperty('--safe-bottom', '18px');
+      root.style.setProperty('--safe-left', '12px');
+    });
+    await expect(page.locator('.mobile-bar')).toBeVisible();
+    await expect(page.locator('.app-content.mobile')).toHaveCount(1);
+    await expect(page.locator('.mobile-bottom')).toBeVisible();
+    const padding = await page.evaluate(() => {
+      const bar = document.querySelector('.mobile-bar')!;
+      const content = document.querySelector('.app-content.mobile')!;
+      const bottom = document.querySelector('.mobile-bottom')!;
+      return {
+        bar: parseFloat(getComputedStyle(bar).paddingTop),
+        content: parseFloat(getComputedStyle(content).paddingTop),
+        bottom: parseFloat(getComputedStyle(bottom).paddingBottom),
+      };
+    });
+    expect(padding.bar).toBeGreaterThanOrEqual(28);
+    expect(padding.content).toBeGreaterThanOrEqual(100);
+    expect(padding.bottom).toBeGreaterThanOrEqual(20);
+  });
+
   test('operator screens stay on tablet and desktop', async ({ page }) => {
     for (const route of ['/setup', '/display', '/mat', '/control', '/data', '/audit', '/builder', '/ui', '/operations', '/overlay', '/official', '/permissions', '/simulate']) {
       await page.goto(route);

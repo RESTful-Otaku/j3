@@ -70,7 +70,7 @@
 {/if}
 
 <style>
-  .backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: rgba(2,6,23,.72); backdrop-filter: blur(6px); padding: 20px; }
+  .backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: rgba(2,6,23,.72); backdrop-filter: blur(6px); padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right)) calc(20px + var(--safe-bottom)) calc(20px + var(--safe-left)); }
   .dialog { width: min(460px, 100%); padding: 26px; border-radius: 20px; background: var(--brand-surface-2); border: 1px solid var(--brand-border); box-shadow: 0 30px 90px rgba(0,0,0,.55); animation: pop .22s ease-out; }
   .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .7rem; font-weight: 700; color: var(--brand-accent); }
   h2 { margin: 8px 0 10px; }

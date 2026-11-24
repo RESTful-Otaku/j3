@@ -104,8 +104,15 @@
 <style>
   .app-content { margin-left:var(--nav-width, 244px); transition:margin-left .2s ease; min-height:100vh; }
   .app-content.docs { margin-left:0; }
-  .app-content.mobile { padding-top:78px; padding-bottom:72px; }
+  .app-content.mobile {
+    padding-top:calc(var(--mobile-bar-height) + var(--safe-top));
+    padding-bottom:calc(72px + var(--safe-bottom));
+  }
   .link-status { position:fixed; right:12px; bottom:12px; z-index:700; display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:var(--brand-surface-2); border:1px solid var(--brand-border); color:var(--brand-muted); font-size:.72rem; }
   .link-status span { width:8px; height:8px; border-radius:50%; background:var(--win); }
   .link-status span.down { background:var(--loss); }
+  @media (max-width: 700px) {
+    /* The mobile bar already carries connection state; hide the duplicate. */
+    .link-status { display: none; }
+  }
 </style>

@@ -70,11 +70,17 @@ const PHONE_ROUTES = new Set([
   '/club', '/notifications', '/settings', '/guides', '/docs', '/view', '/demo-accounts', '/license',
 ]);
 
+// Local QA builds intentionally expose every screen on a phone so the full
+// event flow can be tested on the device. Hosted/production clients keep the
+// participant-only phone scope.
+export const qaFullPhone = import.meta.env.VITE_QA_FULL_PHONE === '1';
+
 export function isPhoneWidth(width = typeof window === 'undefined' ? 0 : window.innerWidth) {
   return width <= 700;
 }
 
 export function canUseOnPhone(path: string) {
+  if (qaFullPhone) return true;
   const pathname = path.split('?')[0];
   return PHONE_ROUTES.has(pathname) || pathname.startsWith('/docs/') ||
     pathname.startsWith('/invite/');
@@ -109,6 +115,7 @@ export const OPEN_ROUTES = new Set([
 ]);
 
 export function canAccessPath(role: Role, path: string, phone = false) {
+  if (phone && qaFullPhone) phone = false;
   if (phone && !canUseOnPhone(path)) return false;
   if (OPEN_ROUTES.has(path) || path.startsWith('/docs') || path.startsWith('/invite/')) return true;
   return itemsForRole(role).some((item) => item.href === path);

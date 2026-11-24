@@ -121,7 +121,7 @@
 
 <style>
   .replay-panel {
-    position:fixed; right:12px; bottom:52px; z-index:890; width:min(370px, calc(100vw - 24px));
+    position:fixed; right:calc(12px + var(--safe-right)); bottom:calc(52px + var(--safe-bottom)); z-index:890; width:min(370px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
     max-height:min(72vh, 660px); overflow:auto; display:grid; gap:10px; padding:14px;
     border-radius:16px; border:1px solid var(--brand-accent); background:var(--brand-surface-2);
     box-shadow:0 0 0 2px color-mix(in srgb, var(--brand-accent) 20%, transparent), var(--brand-shadow);
@@ -165,6 +165,6 @@
   .inspect-links span { font-size:.68rem; color:var(--brand-muted); }
   .inspect-links a { padding:4px 8px; border-radius:999px; background:var(--brand-surface-3); color:var(--brand-ink); font-size:.66rem; font-weight:700; text-decoration:none; }
   @media (max-width: 700px) {
-    .replay-panel { right:8px; bottom:132px; max-height:45vh; width:calc(100vw - 16px); }
+    .replay-panel { right:calc(8px + var(--safe-right)); bottom:calc(132px + var(--safe-bottom)); max-height:45vh; width:calc(100vw - 16px - var(--safe-left) - var(--safe-right)); }
   }
 </style>

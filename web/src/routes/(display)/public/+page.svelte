@@ -133,14 +133,14 @@
     {#each live as fight (fight.id)}
       <div class="card slide-in" style="border-color:var(--brand-primary);">
         <div class="meta">{fight.mat} · {fight.category} · {fight.round}</div>
-        <div class="live-duel" style="display:flex; justify-content:space-between; align-items:center; gap:18px; margin-top:12px;">
-          <div style="display:flex; align-items:center; gap:12px;">
+        <div class="live-duel">
+          <div class="duel-side red">
             <span class="portrait small-portrait" style="background:{fight.red.clubColour};">{initials(fight.red.name)}</span>
-            <strong style="font-size:1.2rem;">{fight.red.name}</strong>
+            <strong class="duel-name">{fight.red.name}</strong>
           </div>
-          <span class="vs" style="font-family:var(--font-display); font-size:2rem;">vs</span>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <strong style="font-size:1.2rem;">{fight.blue.name}</strong>
+          <span class="vs">vs</span>
+          <div class="duel-side blue">
+            <strong class="duel-name">{fight.blue.name}</strong>
             <span class="portrait small-portrait" style="background:{fight.blue.clubColour};">{initials(fight.blue.name)}</span>
           </div>
         </div>
@@ -158,7 +158,11 @@
     {#each upcoming as fight (fight.id)}
       <div class="stat flash">
         <div class="eyebrow">{fight.mat} · {fight.category}</div>
-        <div style="font-size:1.1rem; font-weight:700;">{fight.red.name} <span class="muted">vs</span> {fight.blue.name}</div>
+        <div class="matchup">
+          <span class="fighter red">{fight.red.name}</span>
+          <span class="sep">vs</span>
+          <span class="fighter blue">{fight.blue.name}</span>
+        </div>
         <div class="small muted">{fight.round}</div>
       </div>
     {:else}
@@ -197,7 +201,11 @@
     {#each finished.slice(-8) as fight (fight.id)}
       <div class="stat small">
         <div class="eyebrow">{fight.mat} · {fight.category}</div>
-        <div>{fight.red.name} <span class="muted">—</span> {fight.blue.name}</div>
+        <div class="matchup compact">
+          <span class="fighter red">{fight.red.name}</span>
+          <span class="sep">—</span>
+          <span class="fighter blue">{fight.blue.name}</span>
+        </div>
         <div class="muted">{fight.outcome === 'draw' ? 'Draw · DP / DP' : fight.outcome === 'win_red' ? 'Winner: ' + fight.red.name : 'Winner: ' + fight.blue.name}</div>
       </div>
     {/each}
@@ -207,6 +215,17 @@
 
 <style>
   .small-portrait { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 800; }
+  .live-duel { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-top:12px; }
+  .duel-side { display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
+  .duel-side.blue { justify-content:flex-end; }
+  .duel-name { font-size:1.2rem; min-width:0; overflow-wrap:anywhere; }
+  .vs { font-family:var(--font-display); font-size:2rem; }
+  .matchup { display:flex; align-items:center; gap:6px; font-size:1.05rem; font-weight:700; }
+  .matchup .fighter { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .matchup .fighter.red { flex:1; text-align:right; }
+  .matchup .fighter.blue { flex:1; }
+  .matchup .sep { flex:none; color:var(--brand-muted); font-size:.78rem; font-weight:600; }
+  .matchup.compact { font-size:.92rem; }
   /* Host banner is full-bleed across the display content area — it belongs to the organiser/club, not a card. */
   .brand-banner {
     height:clamp(90px,10vw,160px); width:calc(100% + clamp(28px,4vw,80px));
@@ -220,12 +239,26 @@
   .big-clock { font-family:var(--font-display); font-size:clamp(3rem,8vw,8rem); font-weight:800; line-height:1; letter-spacing:.02em; color:var(--brand-accent); }
   .phone-sections { display:none; }
   @media (max-width: 700px) {
-    .phone-sections { display:flex; gap:8px; overflow-x:visible; position:sticky; top:60px; z-index:6; padding:8px 0; margin-bottom:8px; background:var(--brand-surface); }
-    .phone-sections .tab { flex:1; padding:8px 4px; text-align:center; }
+    .phone-sections {
+      display:flex; gap:6px; overflow-x:auto; position:sticky;
+      top:calc(var(--mobile-bar-height) + var(--safe-top)); z-index:6;
+      padding:8px 0; margin-bottom:8px; background:var(--brand-surface);
+      scrollbar-width:none;
+    }
+    .phone-sections::-webkit-scrollbar { display:none; }
+    .phone-sections .tab {
+      flex:1 0 auto; min-width:0; max-width:none; padding:8px 4px; text-align:center;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
     .phone-section { display:none; }
     .phone-section.active { display:block; animation:sectionIn .22s ease-out; }
-    .live-duel { flex-direction:column; gap:8px; }
+    .live-duel { gap:7px; margin-top:8px; }
+    .duel-side { gap:6px; }
+    .small-portrait { width:34px; height:34px; border-radius:10px; font-size:.68rem; }
+    .duel-name { font-size:.94rem; line-height:1.15; }
     .live-duel .vs { display:none; }
+    .matchup { font-size:.92rem; gap:4px; }
+    .matchup.compact { font-size:.84rem; }
     @keyframes sectionIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
   }
 </style>

@@ -270,7 +270,7 @@ build_menu() {
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
-      0) tui_log build-exec; spinner "Building live executable" go build -o bin/j3d ./cmd/j3d; spinner "Building web app" bun run --cwd web build ;;
+      0) tui_log build-exec; spinner "Building server + web into build/" bash scripts/local-build.sh local ;;
       1) tui_log build-release; spinner "Building server, web, API and docs release" bash scripts/release.sh ;;
       2) tui_log build-cicd; spinner "Full CI/CD suite" bash scripts/cicd.sh ;;
       3) tui_log deploy-dev; spinner "Deploying development" bash scripts/deploy.sh development dist ;;
@@ -307,7 +307,7 @@ mobile_menu() {
       3) tui_log mobile-build-install; if ! test_stub "build-install-launch"; then bash scripts/mobile.sh build && bash scripts/mobile.sh install; fi ;;
       4) tui_log mobile-url; echo "  📡 Phone URL: $(bash scripts/mobile.sh url)" ;;
       5) tui_log run-demo-phone; run_demo_phone ;;
-      6) tui_log mobile-build-ios; if ! test_stub "build-ios"; then spinner "Building iOS app" bun run mobile:ios; fi ;;
+      6) tui_log mobile-build-ios; if ! test_stub "build-ios"; then spinner "Building iOS app" bash scripts/mobile.sh build-ios; fi ;;
       7) tui_log mobile-build-hosted; build_hosted_apk ;;
       8) tui_log mobile-back; return ;;
 

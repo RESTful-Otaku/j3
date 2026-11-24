@@ -40,7 +40,13 @@
 </div>
 
 <style>
-  .toast-stack { position: fixed; top: 18px; right: 18px; z-index: 900; display: grid; gap: 10px; width: min(420px, 90vw); }
+  .toast-stack {
+    position: fixed; top: calc(18px + var(--safe-top)); right: calc(18px + var(--safe-right));
+    z-index: 900; display: grid; gap: 10px; width: min(420px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
+  }
+  @media (max-width: 700px) {
+    .toast-stack { top: calc(84px + var(--safe-top)); right: calc(10px + var(--safe-right)); width: calc(100vw - 20px - var(--safe-left) - var(--safe-right)); }
+  }
   .toast {
     display: flex; gap: 12px; align-items: center; padding: 16px 18px; border-radius: 14px;
     background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-soft));

@@ -55,8 +55,24 @@ bun run demo     # skip the menu and start the full seeded demo immediately
 - `/pools` — pools and all matchups
 - `/control` — open views on other screens, save dashboard templates, theme and PA announcements
 
-The TUI menu also builds a **live executable** (`bin/j3d` + `dist/web`) and Capacitor targets
-for Android and iOS.
+The TUI menu also builds a **live executable** (`build/server/j3d`) and Capacitor targets for
+Android and iOS. Local builds are staged in a single predictable tree:
+
+```
+build/android/   self-contained QA APK plus bundled seeded SQLite and API snapshot
+build/ios/       iOS demo assets and, on macOS with Xcode, the simulator .app
+build/web/       production web bundle
+build/web-dev/   local development web bundle
+build/web-qa/    QA/staging web bundle
+build/web-prod/  production web bundle
+build/server/    local server executables
+```
+
+`bun run build` stages the web bundle in `build/web`; `bun run build:dev`, `build:qa` and
+`build:prod` (or `build:flavors`) stage explicit flavours with optional `J3_DEV_API_URL`,
+`J3_QA_API_URL` and `J3_PROD_API_URL` API targets. `bash scripts/local-build.sh all` builds every
+local target. `bun run release` still mirrors the web/server outputs into `dist/` for the existing
+deploy flow.
 
 Regenerate shared types after editing `api/openapi.yaml`:
 
@@ -74,17 +90,23 @@ from the browser. Open it from the TUI menu with **🔌 API explorer**.
 
 ```sh
 bun run dev              # menu → Mobile → Build demo APK / Start Pixel emulator / Install & launch
-bash scripts/mobile.sh url       # LAN URL for a physical phone on the same Wi-Fi
-bash scripts/mobile.sh build     # builds artifacts/j3-demo.apk
+bash scripts/mobile.sh build     # self-contained QA APK at build/android/j3-demo.apk
+adb install -r build/android/j3-demo.apk
 ```
 
-For a physical phone, use the menu option **Run venue server for phone** (binds all interfaces
-with demo auth), then install `artifacts/j3-demo.apk` via `adb install -r` or by opening it on the
-device. The venue URL is baked into the APK at build time with `J3_SERVER_URL`.
+The default local QA APK needs no venue server: it bundles the seeded Okami SQLite file and a
+read-only API snapshot, auto-logs in as admin, unlocks every screen on a phone for full end-to-end
+QA and persists simulated writes locally. The drawer shows the build flavour. To exercise live LAN
+sync instead, bake a server URL at build time:
+
+```sh
+J3_SERVER_URL="$(bash scripts/mobile.sh url)" bash scripts/mobile.sh build
+```
 
 GitHub Actions builds the Android APK and an iOS simulator .app on every push/PR; signed IPA
 builds run when Apple secrets are configured.
 
 ## Status
 
-Phase 0 (foundation) in progress. See `AGENTS.md` §11 for the roadmap and §14 for decisions.
+Delivered white-label venue platform with a self-contained QA APK. See `AGENTS.md` §13 for decisions
+and §14 for current release/hosting status.

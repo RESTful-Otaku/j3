@@ -470,5 +470,28 @@
   .kata-grid input { width:100%; padding:7px; border-radius:8px; background:var(--brand-surface-2); color:var(--brand-ink); border:1px solid var(--brand-border); }
   @keyframes pulse { from { opacity:1; } to { opacity:.5; } }
   @media (max-width:1100px) { .console-grid { grid-template-columns:1fr 1fr; } .technique-card { grid-column:1 / -1; grid-row:2; } }
-  @media (max-width:720px) { .console-grid { grid-template-columns:1fr; } .technique-card { grid-column:auto; grid-row:auto; } .selection { grid-template-columns:1fr; } }
+  @media (max-width:720px) {
+    .console-grid { grid-template-columns:minmax(0,1fr); width:100%; }
+    .console-grid > *, .technique-card { min-width:0; max-width:100%; }
+    .technique-card { grid-column:auto; grid-row:auto; }
+    .selection { grid-template-columns:minmax(0,1fr); }
+    .scoreline {
+      display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+      align-items:center; gap:8px; margin-top:10px; font-size:.88rem;
+    }
+    .scoreline > span { text-align:center; font-size:.82rem; line-height:1.15; }
+    .scoreline strong { font-size:1.2rem; white-space:nowrap; }
+    .score-meta { gap:6px; font-size:.68rem; }
+    .score-meta > span { min-width:0; overflow-wrap:anywhere; }
+    .clock-panel { padding:12px; }
+    .clock { font-size:2.6rem; }
+    .corner-picker { gap:7px; }
+    .corner-btn { padding:9px; font-size:.8rem; line-height:1.25; overflow-wrap:anywhere; }
+    .chips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
+    .chips::-webkit-scrollbar { display:none; }
+    .chip { flex:0 0 auto; }
+    .finish-card, .technical { min-width:0; max-width:100%; }
+    .technical-row { grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); }
+    .technical select, .technical input, .point-picker select { width:100%; min-width:0; }
+  }
 </style>

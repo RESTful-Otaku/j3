@@ -4,6 +4,9 @@ set -uo pipefail
 export PATH="$HOME/.bun/bin:$PATH"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=build-paths.sh
+source scripts/build-paths.sh
+j3_prepare_build_dirs
 
 STUDIO_SDK="$HOME/Android/Sdk"
 LEGACY_SDK="/home/linuxbrew/.linuxbrew/share/android-commandlinetools"
@@ -17,6 +20,10 @@ fi
 JAVA21="${JAVA_HOME:-/home/linuxbrew/.linuxbrew/Cellar/openjdk@21/21.0.13.1/libexec}"
 AVD_NAME="${J3_AVD:-j3-pixel-10-pro}"
 APK="web/android/app/build/outputs/apk/debug/app-debug.apk"
+APK_OUT="$J3_BUILD_ANDROID/j3-demo.apk"
+LOCAL_APK_OUT="$J3_BUILD_ANDROID/local.apk"
+DB_OUT="$J3_BUILD_ANDROID/j3-demo.db"
+SNAPSHOT_OUT="$J3_BUILD_ANDROID/j3-demo-data.json"
 
 setup_env() {
   export ANDROID_HOME="$ANDROID_SDK"
@@ -45,12 +52,57 @@ build_apk() {
   else
     echo "📦 Building standalone offline demo (no venue URL baked)"
   fi
-  VITE_API_BASE_URL="$server_url" VITE_OFFLINE_DEMO=1 VITE_QA_AUTOLOGIN=1 bun run --cwd web build >/dev/null || return 1
+  VITE_API_BASE_URL="$server_url" VITE_OFFLINE_DEMO=1 VITE_QA_AUTOLOGIN=1 VITE_QA_FULL_PHONE=1 \
+    bun run --cwd web build >/dev/null || return 1
   (cd web && bunx cap sync android) >/dev/null || return 1
   (cd web/android && ./gradlew assembleDebug --no-daemon) || return 1
-  mkdir -p artifacts
-  cp "$APK" artifacts/j3-demo.apk
-  echo "✅ APK ready: artifacts/j3-demo.apk"
+  j3_prepare_build_dir "$J3_BUILD_ANDROID"
+  cp "$APK" "$APK_OUT"
+  cp "$APK" "$LOCAL_APK_OUT"
+  cp web/static/j3-demo.db "$DB_OUT"
+  cp web/static/j3-demo-data.json "$SNAPSHOT_OUT"
+  echo "✅ APK ready: $LOCAL_APK_OUT (also $APK_OUT)"
+  echo "   Bundled demo data: $DB_OUT and $SNAPSHOT_OUT"
+}
+
+build_ios() {
+  python3 scripts/mobile-icons.py || return 1
+  bash scripts/mobile-demo-data.sh || return 1
+  local server_url="${J3_SERVER_URL:-}"
+  if [ -n "$server_url" ]; then
+    echo "📡 Baking venue URL into iOS client: $server_url (offline demo fallback bundled)"
+  else
+    echo "📦 Building standalone offline iOS demo (no venue URL baked)"
+  fi
+  VITE_API_BASE_URL="$server_url" VITE_OFFLINE_DEMO=1 VITE_QA_AUTOLOGIN=1 VITE_QA_FULL_PHONE=1 \
+    bun run --cwd web build >/dev/null || return 1
+  (cd web && bunx cap sync ios) >/dev/null || return 1
+
+  j3_prepare_build_dir "$J3_BUILD_IOS"
+  cp web/static/j3-demo.db "$J3_BUILD_IOS/j3-demo.db"
+  cp web/static/j3-demo-data.json "$J3_BUILD_IOS/j3-demo-data.json"
+
+  if command -v xcodebuild >/dev/null 2>&1; then
+    local derived="$J3_BUILD_IOS/derivedData"
+    echo "🍎 Building iOS simulator app → $J3_BUILD_IOS/J3.app"
+    (cd web/ios/App && xcodebuild -project App.xcodeproj -scheme App \
+      -configuration Release -sdk iphonesimulator \
+      -derivedDataPath "$derived" CODE_SIGNING_ALLOWED=NO build) || return 1
+    local app
+    app=$(find "$derived/Build/Products" -type d -name App.app \
+      -path '*Release-iphonesimulator*' 2>/dev/null | head -1)
+    [ -n "$app" ] || { echo "❌ Xcode build produced no App.app"; return 1; }
+    rm -rf "$J3_BUILD_IOS/J3.app"
+    cp -R "$app" "$J3_BUILD_IOS/J3.app"
+    echo "✅ iOS simulator app ready: $J3_BUILD_IOS/J3.app"
+  else
+    echo "ℹ️  Xcode not available here; Capacitor project synced at web/ios/App"
+    echo "   Staged iOS demo assets in $J3_BUILD_IOS; build the .app on macOS with:"
+    echo "   cd web/ios/App && xcodebuild -project App.xcodeproj -scheme App \\"
+    echo "     -configuration Release -sdk iphonesimulator \\"
+    echo "     -derivedDataPath ../../../build/ios/derivedData CODE_SIGNING_ALLOWED=NO build"
+  fi
+  echo "✅ iOS build assets ready: $J3_BUILD_IOS"
 }
 
 ensure_avd() {
@@ -88,12 +140,12 @@ start_emulator() {
 install_apk() {
   check_env || return 1
   start_emulator || return 1
-  if [ ! -f "$APK" ]; then
-    echo "⚠️  No APK found — building first"
+  if [ ! -f "$APK_OUT" ]; then
+    echo "⚠️  No staged APK found — building first"
     build_apk || return 1
   fi
-  echo "⬇️  Installing APK…"
-  adb install -r "$APK" || return 1
+  echo "⬇️  Installing APK from $APK_OUT…"
+  adb install -r "$APK_OUT" || return 1
   adb shell monkey -p com.j3.tournaments -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
   echo "✅ J3 launched on emulator"
 }
@@ -107,12 +159,13 @@ lan_url() {
 case "${1:-}" in
   env) check_env ;;
   build) build_apk ;;
+  build-ios) build_ios ;;
   avd) ensure_avd ;;
   emulator) start_emulator ;;
   install) install_apk ;;
   url) lan_url ;;
   *)
-    echo "Usage: scripts/mobile.sh {env|build|avd|emulator|install|url}"
+    echo "Usage: scripts/mobile.sh {env|build|build-ios|avd|emulator|install|url}"
     exit 1
     ;;
 esac

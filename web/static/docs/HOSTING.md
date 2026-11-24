@@ -68,7 +68,7 @@ Build/cross-compile locally and upload from a release:
 
 ```bash
 bash scripts/release.sh
-scp dist/bin/j3d-linux-arm64 user@vm:/tmp/j3d
+scp build/server/j3d-linux-arm64 user@vm:/tmp/j3d
 ssh user@vm 'sudo install -m 0755 /tmp/j3d /opt/j3/bin/j3d.new && sudo mv /opt/j3/bin/j3d.new /opt/j3/bin/j3d'
 ```
 

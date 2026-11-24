@@ -31,7 +31,7 @@
     ? ''
     : preferredTop + 330 <= vh
       ? `top:${Math.max(12, preferredTop)}px; left:${cardLeft}px;`
-      : `bottom:12px; left:${cardLeft}px;`;
+      : `bottom:calc(12px + env(safe-area-inset-bottom, 0px)); left:${cardLeft}px;`;
 
   // Manual navigation or a guide jump can change the target without a resize.
   afterNavigate(() => {
@@ -231,7 +231,7 @@
 <style>
   .tour-root { position:fixed; inset:0; z-index:950; pointer-events:none; }
   .spotlight { position:fixed; border:3px solid var(--brand-accent, #38bdf8); border-radius:14px; box-shadow:0 0 0 9999px rgba(2,6,23,.68), 0 0 34px rgba(56,189,248,.6); pointer-events:none; transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease; animation:pulse 1.8s ease-in-out infinite; }
-  .tour-card { position:fixed; width:min(352px, 92vw); max-height:calc(100vh - 24px); overflow:auto; padding:18px; border-radius:16px; background:var(--brand-surface-2,#0f172a); border:1px solid var(--brand-accent,#38bdf8); box-shadow:0 24px 80px rgba(0,0,0,.6); pointer-events:auto; }
+  .tour-card { position:fixed; width:min(352px, calc(100vw - 24px - var(--safe-left) - var(--safe-right))); max-height:calc(100vh - 24px - var(--safe-top) - var(--safe-bottom)); overflow:auto; padding:18px; border-radius:16px; background:var(--brand-surface-2,#0f172a); border:1px solid var(--brand-accent,#38bdf8); box-shadow:0 24px 80px rgba(0,0,0,.6); pointer-events:auto; }
   h2 { margin:8px 0; font-size:1.15rem; }
   p { color:var(--brand-muted,#94a3b8); font-size:.88rem; line-height:1.5; margin:6px 0; }
   .hint { padding:8px 10px; border-radius:10px; background:var(--brand-surface-3,#1e293b); color:var(--brand-ink,#e2e8f0); font-size:.82rem; }
@@ -245,7 +245,7 @@
   .btn.ghost { background:transparent; border-color:var(--brand-border,#334155); }
   .btn:disabled { opacity:.55; cursor:not-allowed; }
   @media (max-width: 820px) {
-    .tour-card { left:12px !important; right:12px; top:auto !important; bottom:12px; width:auto; max-height:58vh; overflow:auto; }
+    .tour-card { left:calc(12px + var(--safe-left)) !important; right:calc(12px + var(--safe-right)) !important; top:auto !important; bottom:calc(84px + var(--safe-bottom)) !important; width:auto; max-height:58vh; overflow:auto; }
     .actions { flex-wrap:wrap; }
   }
   @keyframes pulse { 0%,100% { filter:brightness(1); } 50% { filter:brightness(1.35); } }

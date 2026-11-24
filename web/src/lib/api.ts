@@ -101,12 +101,23 @@ export class PasswordChangeRequiredError extends Error {
 // assets, so every API path must be rewritten to that origin.
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined || '').replace(/\/+$/, '');
 const OFFLINE_DEMO = import.meta.env.VITE_OFFLINE_DEMO === '1';
+const OFFLINE_STATE_KEY = 'j3-offline-state';
 
 // Native builds ship a seeded mid-event snapshot plus the SQLite file it came
 // from. If the venue LAN is unreachable, read-only phone screens fall back to
 // that snapshot so the app still opens with real data.
-type LocalSnapshot = Record<string, unknown> & { session?: DemoSession };
+type LocalSnapshot = Record<string, unknown> & {
+  session?: DemoSession;
+  __fightStates?: Record<string, FightState>;
+};
 let localSnapshot: Promise<LocalSnapshot | null> | null = null;
+const OFFLINE_MUTABLE_KEYS = [
+  '__fightStates',
+  '/api/v1/demo/fights',
+  '/api/v1/demo/kata',
+  '/api/v1/demo/role-requests',
+  '/api/v1/demo/schedule',
+];
 
 function offlineDemoEnabled() {
   if (OFFLINE_DEMO) return true;
@@ -114,25 +125,129 @@ function offlineDemoEnabled() {
   return new URLSearchParams(window.location.search).get('offline') === '1';
 }
 
+function jsonResponse(value: unknown): Response {
+  return new Response(JSON.stringify(value), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function isJsonResponse(response: Response) {
+  const type = response.headers.get('content-type') || '';
+  return type.includes('application/json') || type.includes('+json');
+}
+
+function saveOfflineState(snapshot: LocalSnapshot) {
+  if (typeof localStorage === 'undefined') return;
+  const patch: Record<string, unknown> = {};
+  for (const key of OFFLINE_MUTABLE_KEYS) {
+    if (snapshot[key] !== undefined) patch[key] = snapshot[key];
+  }
+  try {
+    localStorage.setItem(OFFLINE_STATE_KEY, JSON.stringify(patch));
+  } catch { /* storage can be disabled in private WebViews */ }
+}
+
 function bundledSnapshot(): Promise<LocalSnapshot | null> {
   if (!offlineDemoEnabled()) return Promise.resolve(null);
   if (!localSnapshot) {
     localSnapshot = fetch('/j3-demo-data.json', { cache: 'no-store' })
-      .then((response) => response.ok ? response.json() as Promise<LocalSnapshot> : null)
+      .then(async (response) => {
+        if (!response.ok) return null;
+        const snapshot = await response.json() as LocalSnapshot;
+        if (typeof localStorage !== 'undefined') {
+          try {
+            const stored = localStorage.getItem(OFFLINE_STATE_KEY);
+            if (stored) Object.assign(snapshot, JSON.parse(stored));
+          } catch { /* ignore corrupt local QA state */ }
+        }
+        return snapshot;
+      })
       .catch(() => null);
   }
   return localSnapshot;
 }
 
+function blankFightState(fightId: string): FightState {
+  return {
+    fightId, state: 'scheduled', outcome: '', running: false, seconds: 180, round: 1,
+    redScore: 0, blueScore: 0, redPenalty: 0, bluePenalty: 0,
+    redPenaltyPoints: 0, bluePenaltyPoints: 0, holdSeconds: 0, holdCorner: '',
+    events: [],
+  };
+}
+
+function recomputeFightState(state: FightState) {
+  state.redScore = 0;
+  state.blueScore = 0;
+  state.redPenalty = 0;
+  state.bluePenalty = 0;
+  state.redPenaltyPoints = 0;
+  state.bluePenaltyPoints = 0;
+  for (const event of state.events) {
+    if (event.kind === 'score') {
+      if (event.corner === 'red') state.redScore += event.points;
+      if (event.corner === 'blue') state.blueScore += event.points;
+    }
+    if (event.kind === 'penalty') {
+      if (event.corner === 'red') {
+        state.redPenalty += 1;
+        state.redPenaltyPoints += event.points;
+      }
+      if (event.corner === 'blue') {
+        state.bluePenalty += 1;
+        state.bluePenaltyPoints += event.points;
+      }
+    }
+  }
+}
+
+async function offlineFightState(fightId: string): Promise<FightState> {
+  const snapshot = await bundledSnapshot();
+  if (!snapshot) return blankFightState(fightId);
+  snapshot.__fightStates ??= {};
+  const seed = snapshot[`/api/v1/fights/${fightId}/state`] as FightState | undefined;
+  const existing = snapshot.__fightStates[fightId] ?? seed;
+  const state: FightState = existing
+    ? JSON.parse(JSON.stringify(existing)) as FightState
+    : blankFightState(fightId);
+  snapshot.__fightStates[fightId] = state;
+  return state;
+}
+
 async function localResponse(url: string): Promise<Response | null> {
   const snapshot = await bundledSnapshot();
   if (!snapshot) return null;
-  const value = snapshot[url] ?? snapshot[url.split('?')[0]];
-  if (value === undefined) return null;
-  return new Response(JSON.stringify(value), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+
+  const match = url.match(/^\/api\/v1\/fights\/([^/]+)\/state$/);
+  if (match) return jsonResponse(await offlineFightState(decodeURIComponent(match[1])));
+
+  // The data explorer varies limit/offset/search/sort. Map any query for a
+  // bundled table onto the seeded snapshot for that table instead of requiring
+  // an exact query-string match.
+  const query = url.match(/^\/api\/v1\/(?:demo\/)?query\?(.*)$/);
+  if (query) {
+    const table = new URLSearchParams(query[1]).get('table');
+    const entry = table && Object.entries(snapshot).find(([key]) => {
+      if (!/^\/api\/v1\/(?:demo\/)?query\?/.test(key)) return false;
+      return new URLSearchParams(key.split('?')[1]).get('table') === table;
+    });
+    if (entry) return jsonResponse(entry[1]);
+  }
+
+  // Native builds sometimes receive a local 404 from the WebView instead of a
+  // network error. Accept both the exact key and the demo-prefixed alias used
+  // by the offline snapshot generator.
+  const base = url.split('?')[0];
+  const keys = [
+    url,
+    base,
+    url.replace(/^\/api\/v1\//, '/api/v1/demo/'),
+    base.replace(/^\/api\/v1\//, '/api/v1/demo/'),
+  ];
+  const key = keys.find((candidate) => snapshot[candidate] !== undefined);
+  if (!key) return null;
+  return jsonResponse(snapshot[key]);
 }
 
 export function apiUrl(path: string): string {
@@ -306,14 +421,180 @@ function isAuthEndpoint(url: string) {
   return url.startsWith('/api/v1/auth/') || url.startsWith('/api/v1/signup');
 }
 
+async function offlineWriteResponse(url: string, init?: RequestInit): Promise<Response | null> {
+  if (!offlineDemoEnabled()) return null;
+  const method = (init?.method || 'GET').toUpperCase();
+  if (method === 'GET' || method === 'HEAD') return null;
+  const snapshot = await bundledSnapshot();
+  if (!snapshot) return null;
+  let body: Record<string, unknown> = {};
+  try { body = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>; } catch { /* empty body */ }
+  const now = () => new Date().toISOString();
+
+  const fight = url.match(/^\/api\/v1\/fights\/([^/]+)\/(start|pause|resume|event|hold|undo|submit|technical)$/);
+  if (fight) {
+    const id = decodeURIComponent(fight[1]);
+    const action = fight[2];
+    const state = await offlineFightState(id);
+    if (action === 'start') {
+      state.state = 'live';
+      state.running = true;
+      state.seconds = Number(body.seconds ?? 180);
+      state.round = Number(body.round ?? 1);
+    } else if (action === 'pause') {
+      state.running = false;
+    } else if (action === 'resume') {
+      state.running = true;
+    } else if (action === 'event') {
+      const label = String(body.pointLabel ?? '').toLowerCase();
+      const points = Number(body.points ?? (label.includes('waza') ? 7 : label.includes('ippon') ? 10 : 0));
+      state.events.push({
+        seq: state.events.length + 1,
+        kind: String(body.kind ?? 'score'),
+        corner: String(body.corner ?? 'red'),
+        points,
+        technique: String(body.technique ?? body.techniqueId ?? ''),
+        card: String(body.card ?? ''),
+        actor: 'offline-demo',
+        createdAt: now(),
+      });
+      recomputeFightState(state);
+    } else if (action === 'hold') {
+      state.holdCorner = String(body.corner ?? 'red');
+      state.holdSeconds = Number(body.seconds ?? 20);
+      state.events.push({
+        seq: state.events.length + 1, kind: 'hold', corner: state.holdCorner,
+        points: 0, technique: `hold-${state.holdSeconds}s`, card: '', actor: 'offline-demo', createdAt: now(),
+      });
+    } else if (action === 'undo') {
+      state.events.pop();
+      recomputeFightState(state);
+    } else {
+      state.state = 'complete';
+      state.running = false;
+      state.outcome = String(body.outcome ?? body.winner ?? 'red');
+    }
+    const fights = snapshot['/api/v1/demo/fights'] as { fights?: Record<string, unknown>[] } | undefined;
+    const row = fights?.fights?.find((item) => item.id === id);
+    if (row) {
+      row.state = state.state;
+      row.outcome = state.outcome;
+      row.events = state.events;
+    }
+    saveOfflineState(snapshot);
+    return jsonResponse(state);
+  }
+
+  const kataKey = '/api/v1/demo/kata';
+  const kata = snapshot[kataKey] as { performances: Record<string, unknown>[] } | undefined;
+  if (kata && url.startsWith('/api/v1/demo/kata')) {
+    if (url.endsWith('/kata/performances')) {
+      kata.performances.push({ id: `kata-${Date.now()}`, ...body, round: Number(body.round ?? 1) });
+    } else {
+      const score = url.match(/\/kata\/([^/]+)\/scores$/);
+      if (score) {
+        const row = kata.performances.find((item) => item.id === decodeURIComponent(score[1]));
+        if (row) {
+          const scores = (row.scores ??= []) as Record<string, unknown>[];
+          scores.push(body);
+        }
+      }
+    }
+    saveOfflineState(snapshot);
+    if (url.endsWith('/kata/advance')) {
+      return jsonResponse({ advanced: Number(body.advanceCount ?? 8), round: Number(body.round ?? 2), performances: kata.performances });
+    }
+    return jsonResponse(kata);
+  }
+
+  const scheduleKey = '/api/v1/demo/schedule';
+  const schedule = snapshot[scheduleKey] as { items: Record<string, unknown>[] } | undefined;
+  if (schedule && url.startsWith('/api/v1/demo/schedule')) {
+    const complete = url.match(/\/schedule\/([^/]+)\/complete$/);
+    if (complete) {
+      const item = schedule.items.find((entry) => entry.id === decodeURIComponent(complete[1]));
+      if (item) item.completed = true;
+    }
+    saveOfflineState(snapshot);
+    return jsonResponse(schedule);
+  }
+
+  if (url.includes('/brackets/')) {
+    return jsonResponse({
+      format: 'direct elimination',
+      stages: (snapshot['/api/v1/demo/brackets'] as { stages?: unknown } | undefined)?.stages ?? [],
+    });
+  }
+  if (url.includes('/pools/generate')) {
+    return jsonResponse(snapshot['/api/v1/demo/pools'] ?? { pools: [] });
+  }
+  if (url.includes('/medals/recompute')) {
+    return jsonResponse(snapshot['/api/v1/demo/medals'] ?? { medals: [] });
+  }
+  if (url.startsWith('/api/v1/demo/role-requests/') && url.endsWith('/approve')) {
+    const requests = snapshot['/api/v1/demo/role-requests'] as { requests: Record<string, unknown>[] } | undefined;
+    if (requests) {
+      const id = decodeURIComponent(url.split('/').at(-2) ?? '');
+      const item = requests.requests.find((entry) => entry.id === id);
+      if (item) item.status = 'approved';
+      saveOfflineState(snapshot);
+    }
+    return jsonResponse({ status: 'approved' });
+  }
+  if (url.startsWith('/api/v1/demo/entrants/') && url.endsWith('/checkin')) {
+    return jsonResponse({
+      entrantId: decodeURIComponent(url.split('/').at(-2) ?? ''),
+      weightKg: Number(body.weightKg ?? 0),
+      outOfClass: false,
+    });
+  }
+  if (url === '/api/v1/demo/auto-run') {
+    return jsonResponse({ pools: 6, stages: 4, officials: 8 });
+  }
+  if (url === '/api/v1/demo/rotation') {
+    return jsonResponse({ pairs: [], count: 0 });
+  }
+  if (url === '/api/v1/demo/import') {
+    return jsonResponse({ imported: Array.isArray(body.rows) ? body.rows.length : 0 });
+  }
+  if (url === '/api/v1/signup/preview') {
+    return jsonResponse({
+      heightCm: Number(body.heightCm ?? 0), weightKg: Number(body.weightKg ?? 0), eligible: [], capacity: 0, spaces: 0, full: false,
+    });
+  }
+  if (url === '/api/v1/signup') {
+    return jsonResponse({
+      userId: `offline-${Date.now()}`, status: 'registered', role: 'fighter',
+      heightCm: Number(body.heightCm ?? 0), weightKg: Number(body.weightKg ?? 0),
+      eligible: [], selected: [],
+    });
+  }
+  if (url.includes('/auth/password')) return jsonResponse({ changed: true, mustChangePassword: false });
+  if (url.includes('/invites')) return jsonResponse({ invites: [] });
+  return jsonResponse({ ok: true, status: 'ok', changed: true });
+}
+
 async function send(url: string, init: RequestInit | undefined, headers: Headers): Promise<Response> {
+  let response: Response;
   try {
-    return await fetch(apiUrl(url), { ...init, headers });
+    response = await fetch(apiUrl(url), { ...init, headers });
   } catch {
     const local = await localResponse(url);
     if (local) return local;
+    const write = await offlineWriteResponse(url, init);
+    if (write) return write;
     throw new Error('Cannot reach the venue server — check that J3 is running');
   }
+  // Capacitor answers unknown same-origin API paths with the SPA index (HTTP
+  // 200 text/html) instead of letting fetch fail. In offline-demo builds that
+  // is the same "no venue server" condition, so serve bundled data instead.
+  if (offlineDemoEnabled() && (!response.ok || !isJsonResponse(response))) {
+    const local = await localResponse(url);
+    if (local) return local;
+    const write = await offlineWriteResponse(url, init);
+    if (write) return write;
+  }
+  return response;
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -425,6 +706,12 @@ export const api = {
   technicalResult: (id: string, body: TechnicalResultRequest) =>
     postJson<FightState>(`/api/v1/fights/${encodeURIComponent(id)}/technical`, body),
   eventStream: (onEvent: (event: { type: string; fightId?: string; payload?: FightState }) => void) => {
+    if (offlineDemoEnabled()) {
+      // The native WebView has no venue SSE endpoint; emit the cheap invalidation
+      // frame the views use so live mode keeps refetching bundled/simulated state.
+      const timer = window.setInterval(() => onEvent({ type: 'state.changed' }), 5000);
+      return () => window.clearInterval(timer);
+    }
     const source = new EventSource(apiUrl('/api/v1/events/stream'));
     source.onmessage = (message) => {
       try { onEvent(JSON.parse(message.data)); } catch { /* ignore malformed frames */ }
