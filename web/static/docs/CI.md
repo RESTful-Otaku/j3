@@ -45,8 +45,11 @@ QA artifacts: `j3-android-qa-<sha>`, `j3-android-smoke-<sha>`, `j3-ios-simulator
 
 Android smoke waits for `sys.boot_completed` through adb (not `pgrep`, because the modern emulator
 launcher execs `qemu-system`), then waits for the package manager, disables side-load verification
-for the QA device and retries `adb install` three times. Installer output and a failure logcat are
-kept in `artifacts/android-smoke/`, so install failures are visible in the smoke artifact.
+for the QA device and retries `adb install` three times. It launches the Capacitor activity with
+`am start` (monkey fallback), tolerates early `pidof` misses and treats `uiautomator` dumps as
+diagnostics: render success is gated on a captured screenshot and a crash-free logcat. Installer,
+launcher, UI-dump, screenshot and logcat evidence are kept in `artifacts/android-smoke/`, so hosted
+failures are visible in the smoke artifact.
 
 Tagged releases also build **hosted production clients** with the public `J3_SERVER_URL` baked in:
 
