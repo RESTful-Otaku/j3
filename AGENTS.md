@@ -191,6 +191,7 @@ states. Offline write outbox remains a future enhancement.
 | D-075 | Hosted CI is free-only: every job in every workflow is gated to public-repo visibility and `check:workflows` enforces it, so the private repo never requests a paid or 10× runner; local QA auto-detects a *working* Docker/Podman daemon and falls back to free host ports. |
 | D-076 | Seeded events default to Red vs White corner labels/colours applied across mat, official, details, brackets, overlay and replay; stable `red`/`blue` scoring slots keep audit deterministic. |
 | D-077 | Hosted Android smoke waits for adb `sys.boot_completed` and the package manager, retries APK installs, launches via `am start` with a monkey fallback, tolerates `pidof` misses under `pipefail`, and treats `uiautomator` dumps as diagnostics while gating on screenshot/logcat. |
+| D-078 | Hosted release APK builds generate the standard Android debug keystore when no signing secrets are configured, so free public runners can still publish an installable signed APK. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -211,7 +212,8 @@ Rationale and status for older decisions remain in git history; all listed decis
   the smoke script waits for the package manager, disables QA side-load verification, retries
   installs, launches via `am start` with a monkey fallback, tolerates `pidof` misses under `pipefail`,
   and keeps `uiautomator` dumps as diagnostics while gating on screenshot/logcat, so hosted failures
-  are actionable.
+  are actionable. Hosted release builds generate the standard debug keystore when signing secrets are
+  absent, keeping free public runners able to publish an installable APK.
 - **2026-11-24 — Red/White fighter corners**: seeded demo and Okami events now default to Red vs
   White corner labels and colours. Event config drives mat, official, details, brackets, overlay and
   replay surfaces while stable `red`/`blue` audit slots remain deterministic.

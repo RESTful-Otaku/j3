@@ -172,7 +172,17 @@ jobs:
             export J3_ANDROID_KEY_ALIAS="${ANDROID_KEY_ALIAS:-j3}"
             export J3_ANDROID_KEY_PASSWORD="${ANDROID_KEY_PASSWORD:-$ANDROID_KEYSTORE_PASSWORD}"
           else
-            echo "::warning::ANDROID_KEYSTORE secrets not set; using the runner debug keystore for the release APK"
+            # Hosted runners do not always ship ~/.android/debug.keystore, so
+            # create the standard debug key explicitly when no release key is set.
+            mkdir -p "$HOME/.android"
+            if [ ! -f "$HOME/.android/debug.keystore" ]; then
+              keytool -genkeypair -v \
+                -keystore "$HOME/.android/debug.keystore" -storetype JKS \
+                -storepass android -keypass android -alias androiddebugkey \
+                -keyalg RSA -keysize 2048 -validity 10000 \
+                -dname "CN=Android Debug,O=Android,C=US" >/dev/null
+            fi
+            echo "::warning::ANDROID_KEYSTORE secrets not set; generated the standard debug keystore for the release APK"
           fi
           export J3_VERSION_NAME="${{ steps.version.outputs.name }}"
           export J3_VERSION_CODE="${{ steps.version.outputs.code }}"

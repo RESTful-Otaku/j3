@@ -53,12 +53,14 @@ failures are visible in the smoke artifact.
 
 Tagged releases also build **hosted production clients** with the public `J3_SERVER_URL` baked in:
 
-- `j3-android-<version>.apk` — signed release APK (stable key when Android secrets are set);
+- `j3-android-<version>.apk` — signed release APK (stable key when Android secrets are set; the
+  runner's standard debug key is generated and used otherwise);
 - `j3-ios-<version>.app.zip` — unsigned simulator app for Xcode/simulator testing;
 - `j3-ios-<version>.ipa` — real-device ad-hoc/development IPA when Apple secrets are configured.
 
 Both production clients get their own emulator/simulator smoke run. Signing credentials are optional
-so a release without Apple/Android secrets still completes; see `docs/ENVIRONMENT.md`.
+so a release without Apple/Android secrets still completes: CI generates the standard debug keystore
+when no Android key is supplied; see `docs/ENVIRONMENT.md`.
 
 ## Releases (`.github/workflows/release.yml`)
 
