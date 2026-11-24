@@ -68,7 +68,15 @@ if [ "$INSTALLED" -ne 1 ]; then
   exit 1
 fi
 "${ADB[@]}" shell am force-stop "$PACKAGE" >/dev/null 2>&1 || true
-"${ADB[@]}" shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
+
+# Launch the Capacitor activity directly; monkey is a fallback for shells where
+# `am start` is unavailable. Keep output so a launch failure is diagnosable.
+LAUNCH_LOG="$OUT/adb-launch.txt"
+if ! "${ADB[@]}" shell am start -n "$PACKAGE/com.j3.tournaments.MainActivity" >"$LAUNCH_LOG" 2>&1; then
+  echo "⚠️  am start failed; trying monkey launcher"
+  cat "$LAUNCH_LOG"
+  "${ADB[@]}" shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1 >>"$LAUNCH_LOG" 2>&1 || true
+fi
 
 PID=""
 for _ in $(seq 1 60); do
