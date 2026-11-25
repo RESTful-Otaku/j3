@@ -18081,25 +18081,25 @@
         "ID": "tpl-okami",
         "Name": "Okami Challengers 2027 (full)",
         "ConfigJSON": "{\"name\":\"Okami Jiu Jitsu Challengers Tournament 2027\",\"disciplines\":[{\"name\":\"Open Hand Kata\"}],\"categories\":[{\"name\":\"Adults\",\"kind\":\"age\",\"min\":18,\"max\":99}],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-25T10:54:22.884Z"
+        "CreatedAt": "2026-11-25T12:25:08.908Z"
       },
       {
         "ID": "tpl-club",
         "Name": "Club open day (empty)",
         "ConfigJSON": "{\"name\":\"Club Open Day\",\"disciplines\":[],\"categories\":[],\"constraints\":{\"cap\":50,\"maxPools\":8},\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-25T10:54:22.884Z"
+        "CreatedAt": "2026-11-25T12:25:08.908Z"
       },
       {
         "ID": "tpl-kata",
         "Name": "Kata only (empty)",
         "ConfigJSON": "{\"name\":\"Kata Challenge\",\"disciplines\":[{\"name\":\"Open Hand Kata\"},{\"name\":\"Weapons Kata\"}],\"categories\":[],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-25T10:54:22.884Z"
+        "CreatedAt": "2026-11-25T12:25:08.908Z"
       },
       {
         "ID": "tpl-newhaza",
         "Name": "Newaza tournament (empty)",
         "ConfigJSON": "{\"name\":\"Newaza Tournament\",\"disciplines\":[{\"name\":\"Randori / Katamewaza\"},{\"name\":\"Ground Fighting\"}],\"categories\":[],\"saveTemplate\":true}",
-        "CreatedAt": "2026-11-25T10:54:22.884Z"
+        "CreatedAt": "2026-11-25T12:25:08.908Z"
       }
     ]
   },
@@ -19274,7 +19274,7 @@
         "targetId": "ev-demo",
         "beforeJson": "",
         "afterJson": "{\"status\":\"published\"}",
-        "createdAt": "2026-11-25T10:54:23.561Z"
+        "createdAt": "2026-11-25T12:25:09.583Z"
       },
       {
         "id": 7,
@@ -19285,7 +19285,7 @@
         "targetId": "ev-okami",
         "beforeJson": "",
         "afterJson": "{\"offsetMinutes\":7}",
-        "createdAt": "2026-11-25T10:54:22.884Z"
+        "createdAt": "2026-11-25T12:25:08.908Z"
       },
       {
         "id": 6,
@@ -19296,7 +19296,7 @@
         "targetId": "ok-fight-15",
         "beforeJson": "",
         "afterJson": "{\"outcome\":\"dq_red\",\"reason\":\"cheating\"}",
-        "createdAt": "2026-11-25T10:54:22.884Z"
+        "createdAt": "2026-11-25T12:25:08.908Z"
       },
       {
         "id": 5,
@@ -19307,7 +19307,7 @@
         "targetId": "ok-fight-14",
         "beforeJson": "",
         "afterJson": "{\"outcome\":\"win_blue\",\"reason\":\"injury\"}",
-        "createdAt": "2026-11-25T10:54:22.884Z"
+        "createdAt": "2026-11-25T12:25:08.908Z"
       },
       {
         "id": 4,
@@ -19318,7 +19318,7 @@
         "targetId": "ok-fight-12",
         "beforeJson": "",
         "afterJson": "{\"card\":\"shido\",\"corner\":\"red\"}",
-        "createdAt": "2026-11-25T10:54:22.884Z"
+        "createdAt": "2026-11-25T12:25:08.908Z"
       },
       {
         "id": 3,
@@ -19329,7 +19329,7 @@
         "targetId": "ok-fight-11",
         "beforeJson": "",
         "afterJson": "{\"running\":true,\"mat\":\"Mat 1\"}",
-        "createdAt": "2026-11-25T10:54:22.884Z"
+        "createdAt": "2026-11-25T12:25:08.908Z"
       },
       {
         "id": 2,
@@ -19340,7 +19340,7 @@
         "targetId": "ev-okami",
         "beforeJson": "",
         "afterJson": "{\"seeded\":true,\"year\":2027}",
-        "createdAt": "2026-11-25T10:54:22.884Z"
+        "createdAt": "2026-11-25T12:25:08.907Z"
       },
       {
         "id": 1,
@@ -19351,7 +19351,7 @@
         "targetId": "ev-demo",
         "beforeJson": "",
         "afterJson": "{\"status\":\"published\"}",
-        "createdAt": "2026-11-25T10:54:22.872Z"
+        "createdAt": "2026-11-25T12:25:08.896Z"
       }
     ]
   },
@@ -25994,7 +25994,7 @@
         "action": "demo.seed",
         "actor_role": "tournament_runner",
         "actor_user_id": "u-runner",
-        "created_at": "2026-11-25T10:54:22.872Z",
+        "created_at": "2026-11-25T12:25:08.896Z",
         "id": 1,
         "target_id": "ev-demo",
         "target_type": "event"
@@ -26003,7 +26003,7 @@
         "action": "okami.seed",
         "actor_role": "tournament_runner",
         "actor_user_id": "u-tony",
-        "created_at": "2026-11-25T10:54:22.884Z",
+        "created_at": "2026-11-25T12:25:08.907Z",
         "id": 2,
         "target_id": "ev-okami",
         "target_type": "fight"
@@ -26012,7 +26012,7 @@
         "action": "fight.start",
         "actor_role": "official",
         "actor_user_id": "u-keeper-1",
-        "created_at": "2026-11-25T10:54:22.884Z",
+        "created_at": "2026-11-25T12:25:08.908Z",
         "id": 3,
         "target_id": "ok-fight-11",
         "target_type": "fight"
@@ -26021,7 +26021,7 @@
         "action": "fight.penalty",
         "actor_role": "official",
         "actor_user_id": "u-keeper-2",
-        "created_at": "2026-11-25T10:54:22.884Z",
+        "created_at": "2026-11-25T12:25:08.908Z",
         "id": 4,
         "target_id": "ok-fight-12",
         "target_type": "fight"
@@ -26030,7 +26030,7 @@
         "action": "fight.technical",
         "actor_role": "official",
         "actor_user_id": "u-keeper-2",
-        "created_at": "2026-11-25T10:54:22.884Z",
+        "created_at": "2026-11-25T12:25:08.908Z",
         "id": 5,
         "target_id": "ok-fight-14",
         "target_type": "fight"
@@ -26039,7 +26039,7 @@
         "action": "fight.technical",
         "actor_role": "official",
         "actor_user_id": "u-keeper-1",
-        "created_at": "2026-11-25T10:54:22.884Z",
+        "created_at": "2026-11-25T12:25:08.908Z",
         "id": 6,
         "target_id": "ok-fight-15",
         "target_type": "fight"
@@ -26048,7 +26048,7 @@
         "action": "schedule.drift",
         "actor_role": "tournament_runner",
         "actor_user_id": "u-tony",
-        "created_at": "2026-11-25T10:54:22.884Z",
+        "created_at": "2026-11-25T12:25:08.908Z",
         "id": 7,
         "target_id": "ev-okami",
         "target_type": "fight"
@@ -26057,7 +26057,7 @@
         "action": "demo.seed",
         "actor_role": "tournament_runner",
         "actor_user_id": "u-runner",
-        "created_at": "2026-11-25T10:54:23.561Z",
+        "created_at": "2026-11-25T12:25:09.583Z",
         "id": 8,
         "target_id": "ev-demo",
         "target_type": "event"
@@ -26531,7 +26531,7 @@
         "technique": "Ippon · seoi nage",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.877Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       },
       {
         "seq": 2,
@@ -26541,7 +26541,7 @@
         "technique": "Waza-ari · koshi guruma",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.877Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       }
     ]
   },
@@ -26569,7 +26569,7 @@
         "technique": "Throw from kick",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.877Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       },
       {
         "seq": 2,
@@ -26579,7 +26579,7 @@
         "technique": "Submission · cross armbar",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.877Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       }
     ]
   },
@@ -26607,7 +26607,7 @@
         "technique": "Waza-ari · tomoe nage",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       },
       {
         "seq": 2,
@@ -26617,7 +26617,7 @@
         "technique": "Waza-ari · osae-komi",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       }
     ]
   },
@@ -26645,7 +26645,7 @@
         "technique": "Hold down · kesa-gatame",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       },
       {
         "seq": 2,
@@ -26655,7 +26655,7 @@
         "technique": "Shido · passivity",
         "card": "shido",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       }
     ]
   },
@@ -26683,7 +26683,7 @@
         "technique": "Sweep · harai-goshi",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       },
       {
         "seq": 2,
@@ -26693,7 +26693,7 @@
         "technique": "Palm strike",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       }
     ]
   },
@@ -26721,7 +26721,7 @@
         "technique": "Triangle choke",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.901Z"
       }
     ]
   },
@@ -26749,7 +26749,7 @@
         "technique": "Takedown · morote gari",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       },
       {
         "seq": 2,
@@ -26759,7 +26759,7 @@
         "technique": "Yellow card",
         "card": "yellow",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       }
     ]
   },
@@ -26787,7 +26787,7 @@
         "technique": "Knee strike",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       },
       {
         "seq": 2,
@@ -26797,7 +26797,7 @@
         "technique": "Throw · haraigoshi",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       }
     ]
   },
@@ -26825,7 +26825,7 @@
         "technique": "Mount control",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       },
       {
         "seq": 2,
@@ -26835,7 +26835,7 @@
         "technique": "Guard pass",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.878Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       }
     ]
   },
@@ -26863,7 +26863,7 @@
         "technique": "Ippon · ippon seoi nage",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       },
       {
         "seq": 2,
@@ -26873,7 +26873,7 @@
         "technique": "Waza-ari",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       }
     ]
   },
@@ -26901,7 +26901,7 @@
         "technique": "Throw · seoi nage",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       },
       {
         "seq": 2,
@@ -26911,7 +26911,7 @@
         "technique": "Palm strike",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       }
     ]
   },
@@ -26939,7 +26939,7 @@
         "technique": "Hold · yoko-shiho-gatame",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       },
       {
         "seq": 2,
@@ -26949,7 +26949,7 @@
         "technique": "Shido",
         "card": "shido",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       }
     ]
   },
@@ -26977,7 +26977,7 @@
         "technique": "Reap · osoto-gari",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.902Z"
       }
     ]
   },
@@ -27005,7 +27005,7 @@
         "technique": "Technical result · Injury",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       }
     ]
   },
@@ -27033,7 +27033,7 @@
         "technique": "Technical result · Cheating / unsportsmanlike conduct",
         "card": "red",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       }
     ]
   },
@@ -27061,7 +27061,7 @@
         "technique": "Throw · koshi-guruma",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       },
       {
         "seq": 2,
@@ -27071,7 +27071,7 @@
         "technique": "Sweep · tomoe-nage",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.879Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       }
     ]
   },
@@ -27099,7 +27099,7 @@
         "technique": "Hold down twenty seconds (Ippon)",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       },
       {
         "seq": 2,
@@ -27109,7 +27109,7 @@
         "technique": "Kick · mawashi geri",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       }
     ]
   },
@@ -27137,7 +27137,7 @@
         "technique": "Submission · triangle choke",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       },
       {
         "seq": 2,
@@ -27147,7 +27147,7 @@
         "technique": "Throw · seoi nage",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       }
     ]
   },
@@ -27175,7 +27175,7 @@
         "technique": "Takedown · morote gari",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       },
       {
         "seq": 2,
@@ -27185,7 +27185,7 @@
         "technique": "Shido · passivity",
         "card": "shido",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.903Z"
       }
     ]
   },
@@ -27230,7 +27230,7 @@
         "technique": "Submission · rear naked choke",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.904Z"
       }
     ]
   },
@@ -27258,7 +27258,7 @@
         "technique": "Ippon · ura-nage",
         "card": "",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.904Z"
       }
     ]
   },
@@ -27286,7 +27286,7 @@
         "technique": "Kick · mawashi geri",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.904Z"
       },
       {
         "seq": 2,
@@ -27296,7 +27296,7 @@
         "technique": "Takedown · kata-guruma",
         "card": "",
         "actor": "u-keeper-1",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.904Z"
       }
     ]
   },
@@ -27324,7 +27324,7 @@
         "technique": "Yellow card",
         "card": "yellow",
         "actor": "u-keeper-2",
-        "createdAt": "2026-11-25T10:54:22.880Z"
+        "createdAt": "2026-11-25T12:25:08.904Z"
       }
     ]
   },
@@ -27335,5 +27335,5 @@
     "expiresAt": "2099-01-01T00:00:00Z",
     "userId": "u-owner"
   },
-  "generatedAt": "2026-11-25T10:54:27Z"
+  "generatedAt": "2026-11-25T12:25:13Z"
 }
