@@ -259,6 +259,13 @@
     .live-duel .vs { display:none; }
     .matchup { font-size:.92rem; gap:4px; }
     .matchup.compact { font-size:.84rem; }
+    /* Phone board: compact the hero clock and banner so the actual fights land
+       higher on the screen and there is far less scrolling before content. */
+    .brand-banner { height: clamp(56px, 7vw, 96px); margin: 0 calc(-1 * clamp(10px, 2vw, 24px)) 12px; }
+    .clock-hero { padding: clamp(10px, 2vw, 18px); gap: clamp(10px, 3vw, 26px); }
+    .big-clock { font-size: clamp(1.7rem, 9vw, 4.2rem); }
+    .clock-hero .eyebrow { font-size: .7rem; }
+    .phone-sections { top: calc(var(--mobile-bar-height) + var(--safe-top)); }
     @keyframes sectionIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
   }
 </style>

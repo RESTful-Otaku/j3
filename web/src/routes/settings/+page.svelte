@@ -3,8 +3,7 @@
   import { api, type BeltOption } from '../../lib/api';
   import { session, uiRole } from '../../lib/auth';
   import { LOCALES, translate } from '../../lib/i18n';
-  import { notify, notifySuccess, notifyError } from '../../lib/toast';
-  import { guideAction } from '../../lib/guide';
+  import { notifySuccess, notifyError } from '../../lib/toast';
   import { setTheme, themeChoice, type ThemeChoice } from '../../lib/theme';
 
   const KEY = 'j3-settings-v1';
@@ -33,6 +32,7 @@
   };
   let settings: Settings = { ...defaults };
   let belts: BeltOption[] = [];
+  let saving = false;
 
   onMount(async () => {
     try { belts = (await api.belts()).belts; } catch { belts = []; }
@@ -49,16 +49,21 @@
     const localeInfo = LOCALES.find((item) => item.id === settings.locale);
     document.documentElement.dir = localeInfo?.dir ?? 'ltr';
   }
-
   function applyTheme() {
     setTheme(settings.appearance);
     applyLocale();
   }
-  function save() {
-    localStorage.setItem(KEY, JSON.stringify(settings));
-    applyTheme();
-    notifySuccess('Account settings saved');
-    guideAction('settings-saved');
+  async function save() {
+    saving = true;
+    try {
+      localStorage.setItem(KEY, JSON.stringify(settings));
+      applyTheme();
+      notifySuccess('Settings saved');
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : 'Save failed');
+    } finally {
+      saving = false;
+    }
   }
 
   const mediaOptions: Record<string, string[]> = {
@@ -78,8 +83,7 @@
         settings.clubColour = result.colour;
         settings.clubHighlight = result.highlight;
       }
-      save();
-      notify(`${kind} uploaded · colours ${result.colour} / ${result.highlight}`);
+      notifySuccess(`${kind} uploaded`);
     } catch (error) {
       notifyError(error instanceof Error ? error.message : 'Upload failed');
     }
@@ -89,118 +93,165 @@
 
 <svelte:head><title>J3 · Account settings</title></svelte:head>
 
-<div class="shell">
+<div class="shell settings-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-mark">J3</div><div><div class="brand-name">Account settings</div><div class="brand-sub">Your details, units, grade and preferences</div></div></div>
-    <a class="btn" href="/">← Back to dashboard</a>
+    <div class="brand"><div class="brand-mark">J3</div><div><div class="brand-name">Account settings</div><div class="brand-sub">Your profile and preferences</div></div></div>
+    <a class="btn" href="/">← Back</a>
   </header>
 
-  <div class="card" style="margin-bottom:18px;">
-    <div class="eyebrow">Getting started</div><h2>Hands-on guides</h2>
-    <p class="muted small">Learn by doing: create a small tournament, run a mat, score a contest or follow your own fights. Track progress, jump to a step or reset it all.</p>
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-      <a class="btn primary" href="/guides">📊 View progress & checklist</a>
-      <button class="btn" on:click={() => window.dispatchEvent(new CustomEvent('j3-start-tour', { detail: { role: uiRole(session()?.role ?? settings.accountRole) } }))}>▶ Restart guide</button>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:18px;">
-    <div class="eyebrow">Attribution</div><h2>J3 licence</h2>
-    <p class="muted small">J3 is © 2026 Jonathan Harrison (RESTful_Otaku), licensed under PolyForm Noncommercial 1.0.0. Free for non-commercial use; not for sale.</p>
-    <a class="btn small" href="/license">View licence & attribution →</a>
-  </div>
-
-<div class="card" data-guide="settings-profile">
-    <h2>Profile</h2>
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top:14px;">
-      <label class="field">Full name<input bind:value={settings.name} /></label>
-      <label class="field">Email<input type="email" bind:value={settings.email} /></label>
-      <label class="field">Mobile phone<input type="tel" bind:value={settings.phone} /></label>
-      <label class="field">Date of birth<input type="date" bind:value={settings.dateOfBirth} /></label>
-      <label class="field">Club affiliation<select bind:value={settings.clubId}>
-        <option value="">Independent / no club</option>
-        <option value="club-riverside">Riverside Jiu Jitsu</option>
-        <option value="club-hilltop">Hilltop Dojo</option>
-        <option value="club-city">City Warriors</option>
-        <option value="club-sakura">Sakura Jiu Jitsu Academy</option>
-      </select></label>
-    </div>
-
-    <h2 style="margin-top:26px;">Stats & units</h2>
-    <div class="tabs" style="margin-top:10px;">
-      <button class="tab" class:active={settings.unitSystem === 'metric'} on:click={() => (settings.unitSystem = 'metric')}>Metric</button>
-      <button class="tab" class:active={settings.unitSystem === 'imperial'} on:click={() => (settings.unitSystem = 'imperial')}>Imperial</button>
-    </div>
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top:12px;">
-      {#if settings.unitSystem === 'metric'}
-        <label class="field">Height (cm)<input type="number" bind:value={settings.heightCm} /></label>
-        <label class="field">Weight (kg)<input type="number" step="0.1" bind:value={settings.weightKg} /></label>
-      {:else}
-        <label class="field">Height (ft)<input type="number" bind:value={settings.heightFt} /></label>
-        <label class="field">Height (in)<input type="number" bind:value={settings.heightIn} /></label>
-        <label class="field">Weight (lb)<input type="number" bind:value={settings.weightLb} /></label>
-      {/if}
-    </div>
-
-    <h2 style="margin-top:26px;">Rank / grade belt</h2>
-    <p class="muted small">Choose from the full Jiu Jitsu spectrum — each option shows its colour.</p>
-    <div class="belt-row" style="margin-top:12px;">
-      <div class="belt-swatch" style="background:{settings.beltRankId === '__custom__' ? settings.customBeltColour : selectedBelt?.colour || '#94a3b8'}"></div>
-      <select bind:value={settings.beltRankId}>
-        {#each belts as belt (belt.id)}
-          <option value={belt.id}>{belt.label}</option>
-        {/each}
-        <option value="__custom__">✏️ Enter my own…</option>
-      </select>
-    </div>
-    {#if settings.beltRankId === '__custom__'}
-      <div class="grid" style="grid-template-columns: 100px 1fr; margin-top:10px;">
-        <label class="field">Colour<input type="color" bind:value={settings.customBeltColour} /></label>
-        <label class="field">Belt name<input bind:value={settings.customBeltLabel} placeholder="e.g. Red & White senior" /></label>
-      </div>
-    {/if}
-
-    <h2 style="margin-top:26px;">Language & appearance</h2>
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top:12px;">
-      <label class="field">Language<select bind:value={settings.locale}>
-        {#each locales as locale}<option value={locale.id}>{locale.label}</option>{/each}
-      </select></label>
-      <label class="field">Appearance<select bind:value={settings.appearance} on:change={applyTheme}>
-        <option value="system">Follow system</option><option value="light">Light</option>
-        <option value="dark">Dark gray</option><option value="street">Street Fighter (recommended)</option>
-      </select></label>
-    </div>
-    <div class="capabilities" style="margin-top:12px;">
-      {#each ['dashboard','setup','scoreboard','brackets','tables','medals','upcoming','live'] as key}
-        <span class="cap on">{translate(settings.locale, key as any)}</span>
-      {/each}
-    </div>
-    <h2 style="margin-top:26px;">Media & branding</h2>
-    <p class="muted small">Uploads are limited by account type. Main and highlight colours are detected from your image.</p>
-    <label class="field" style="margin-top:10px;">Account type<select bind:value={settings.accountRole}>
-      <option value="fighter">Fighter — photo</option>
-      <option value="official">Official — photo</option>
-      <option value="club_leader">Club leader — logo & banner</option>
-      <option value="tournament_runner">Runner / organiser — logo & banner</option>
-    </select></label>
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-top:12px;">
-      {#each mediaOptions[settings.accountRole] ?? [] as kind}
-        <label class="field">{kind === 'photo' ? 'Your photo' : kind === 'club' ? 'Club symbol / logo' : 'Banner'}
-          <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" on:change={(e) => uploadMedia(e, kind)} />
+  <form class="settings-form" on:submit|preventDefault={save}>
+    <section class="card">
+      <div class="eyebrow">Profile</div>
+      <h2>Your details</h2>
+      <div class="field-row">
+        <label class="field">Full name
+          <input bind:value={settings.name} required />
         </label>
-      {/each}
-      <label class="field">Main colour<input type="color" bind:value={settings.clubColour} /></label>
-      <label class="field">Highlight colour<input type="color" bind:value={settings.clubHighlight} /></label>
+        <label class="field">Email
+          <input type="email" bind:value={settings.email} required />
+        </label>
+      </div>
+      <div class="field-row">
+        <label class="field">Mobile phone
+          <input type="tel" bind:value={settings.phone} />
+        </label>
+        <label class="field">Club
+          <select bind:value={settings.clubId}>
+            <option value="">Independent / no club</option>
+            <option value="club-riverside">Riverside Jiu Jitsu</option>
+            <option value="club-hilltop">Hilltop Dojo</option>
+            <option value="club-city">City Warriors</option>
+            <option value="club-sakura">Sakura Jiu Jitsu Academy</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">Stats &amp; units</div>
+      <h2>Height &amp; weight</h2>
+      <div class="tabs" style="margin-top:8px;">
+        <button class="tab" class:active={settings.unitSystem === 'metric'} on:click={() => (settings.unitSystem = 'metric')}>Metric</button>
+        <button class="tab" class:active={settings.unitSystem === 'imperial'} on:click={() => (settings.unitSystem = 'imperial')}>Imperial</button>
+      </div>
+      <div class="field-row" style="margin-top:12px;">
+        {#if settings.unitSystem === 'metric'}
+          <label class="field">Height (cm)<input type="number" bind:value={settings.heightCm} /></label>
+          <label class="field">Weight (kg)<input type="number" step="0.1" bind:value={settings.weightKg} /></label>
+        {:else}
+          <label class="field">Height (ft)<input type="number" bind:value={settings.heightFt} /></label>
+          <label class="field">Weight (lb)<input type="number" bind:value={settings.weightLb} /></label>
+        {/if}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">Rank / grade</div>
+      <h2>Belt</h2>
+      <div class="belt-row" style="margin-top:10px;">
+        <div class="belt-swatch" style="background:{settings.beltRankId === '__custom__' ? settings.customBeltColour : selectedBelt?.colour || '#94a3b8'}"></div>
+        <select bind:value={settings.beltRankId}>
+          {#each belts as belt (belt.id)}
+            <option value={belt.id}>{belt.label}</option>
+          {/each}
+          <option value="__custom__">✏️ Enter my own…</option>
+        </select>
+      </div>
+      {#if settings.beltRankId === '__custom__'}
+        <div class="field-row" style="margin-top:10px;">
+          <label class="field">Colour
+            <input type="color" bind:value={settings.customBeltColour} />
+          </label>
+          <label class="field">Belt name
+            <input bind:value={settings.customBeltLabel} placeholder="e.g. Red & White senior" />
+          </label>
+        </div>
+      {/if}
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">Appearance &amp; language</div>
+      <h2>Preferences</h2>
+      <div class="field-row">
+        <label class="field">Language
+          <select bind:value={settings.locale}>
+            {#each locales as locale}<option value={locale.id}>{locale.label}</option>{/each}
+          </select>
+        </label>
+        <label class="field">Appearance
+          <select bind:value={settings.appearance} on:change={applyTheme}>
+            <option value="system">Follow system</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark gray</option>
+            <option value="street">Street Fighter</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">Media &amp; branding</div>
+      <h2>Uploads</h2>
+      <p class="muted small" style="margin:6px 0 12px;">
+        Main and highlight colours are detected from your image. Limited by account type.
+      </p>
+      <label class="field">Account type
+        <select bind:value={settings.accountRole}>
+          <option value="fighter">Fighter — photo</option>
+          <option value="official">Official — photo</option>
+          <option value="club_leader">Club leader — logo & banner</option>
+          <option value="tournament_runner">Runner / organiser — logo & banner</option>
+        </select>
+      </label>
+      <div class="field-row" style="margin-top:12px;">
+        {#each mediaOptions[settings.accountRole] ?? [] as kind}
+          <label class="field">{kind === 'photo' ? 'Your photo' : kind === 'club' ? 'Club symbol / logo' : 'Banner'}
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" on:change={(e) => uploadMedia(e, kind)} />
+          </label>
+        {/each}
+        <label class="field">Main colour
+          <input type="color" bind:value={settings.clubColour} />
+        </label>
+        <label class="field">Highlight colour
+          <input type="color" bind:value={settings.clubHighlight} />
+        </label>
+      </div>
+    </section>
+
+    <div class="action-row" style="margin-top:24px; justify-content:flex-end;">
+      <button class="btn primary" disabled={saving}>{saving ? 'Saving…' : 'Save settings'}</button>
     </div>
-    <div class="action-row"><button class="btn primary" on:click={save}>Save settings</button></div>
-    <p class="muted small" style="margin-top:12px;">Locales: English, French, German, Spanish, Portuguese, Hindi, Punjabi, Arabic, Japanese, Korean and Mandarin.</p>
-  </div>
+  </form>
 </div>
 
 <style>
-  :global(.field) { display:grid; gap:5px; font-size:.8rem; color:var(--brand-muted); }
-  :global(.field input), :global(.field select) { padding:9px 11px; border-radius:9px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-ink); width:100%; }
-  .belt-row { display:flex; gap:12px; align-items:center; }
-  .belt-swatch { width:54px; height:30px; border-radius:7px; border:2px solid rgba(255,255,255,.3); flex:none; }
-  .belt-row select { flex:1; padding:9px 11px; border-radius:9px; border:1px solid var(--brand-border); background:var(--brand-surface-3); color:var(--brand-ink); }
+  :global(.settings-shell) { max-width: 520px; margin: 0 auto; }
+  :global(.settings-shell) .shell { padding-bottom: calc(92px + var(--safe-bottom)); }
+  :global(.settings-shell) .eyebrow { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; }
+  :global(.settings-shell) h2 { font-size: 1.15rem; margin: 4px 0 14px; letter-spacing: -0.01em; }
+  :global(.settings-shell) .card { padding: 16px; gap: 0; }
+  :global(.settings-shell) .card + .card { margin-top: 12px; }
+  :global(.settings-shell) .field-row { display: grid; gap: 10px; grid-template-columns: 1fr; }
+  :global(.settings-shell) .field { display: grid; gap: 5px; font-size: .72rem; color: var(--brand-muted); margin: 0; }
+  :global(.settings-shell) .field input,
+  :global(.settings-shell) .field select { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--brand-border); background: var(--brand-surface-3); color: var(--brand-ink); width: 100%; font-size: 1rem; }
+  :global(.settings-shell) .field input:focus { outline: 2px solid var(--brand-accent); outline-offset: 1px; }
+  :global(.settings-shell) .belt-row { display: flex; gap: 12px; align-items: center; }
+  :global(.settings-shell) .belt-swatch { width: 44px; height: 30px; border-radius: 8px; border: 2px solid rgba(255,255,255,.35); flex: none; }
+  :global(.settings-shell) .belt-row select { flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--brand-border); background: var(--brand-surface-3); color: var(--brand-ink); }
+  :global(.settings-shell) .tabs { gap: 8px; margin-top: 6px; }
+  :global(.settings-shell) .tab { padding: 7px 14px; border-radius: 10px; border: 1px solid var(--brand-border); background: var(--brand-surface-3); color: var(--brand-ink); font-size: .82rem; font-weight: 700; }
+  :global(.settings-shell) .tab.active { background: var(--brand-primary); color: var(--brand-on-primary); border-color: var(--brand-primary); }
+  :global(.settings-shell) .btn { min-height: 46px; padding: 0 22px; font-size: 1rem; font-weight: 800; }
+  :global(.settings-shell) .btn.primary { background: var(--brand-primary-fill); color: var(--brand-on-primary); border: 0; border-radius: 12px; box-shadow: 0 10px 20px color-mix(in srgb, var(--brand-primary) 45%, transparent); }
+  :global(.settings-shell) .muted.small { font-size: .75rem; }
+  @media (max-width: 700px) {
+    :global(.settings-shell) { max-width: 100%; }
+    :global(.settings-shell) .shell { padding: calc(10px + var(--safe-top)) 14px calc(96px + var(--safe-bottom)) 14px; }
+    :global(.settings-shell) .card { padding: 14px; border-radius: 14px; }
+    :global(.settings-shell) .card + .card { margin-top: 10px; }
+    :global(.settings-shell) h2 { font-size: 1.05rem; margin: 3px 0 12px; }
+    :global(.settings-shell) .field-row { gap: 8px; }
+    :global(.settings-shell) .btn { min-height: 46px; width: 100%; justify-content: center; }
+  }
 </style>
