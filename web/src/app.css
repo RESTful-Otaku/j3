@@ -311,68 +311,94 @@ code {
 
 /* Responsive system: phone, portrait tablet, landscape tablet, desktop/LED. */
 @media (max-width: 700px) {
-  /* Content starts below the fixed mobile bar and clears the home indicator. */
+  /* Content starts below the fixed mobile bar and clears the home indicator.
+     Bottom persistent navigation is intentionally gone: everything lives in the
+     hamburger drawer, so shell bottom padding only clears the home indicator. */
   .shell {
-    padding: calc(12px + var(--safe-top)) calc(12px + var(--safe-left))
-             calc(84px + var(--safe-bottom)) calc(12px + var(--safe-right));
+    padding: calc(14px + var(--safe-top)) 16px calc(24px + var(--safe-bottom)) 16px;
   }
-  .topbar { align-items: flex-start; flex-direction: column; margin-bottom: 12px; gap: 8px; }
-  .brand-mark { width: 38px; height: 38px; }
-  .brand-name { font-size: 1rem; }
-  .brand-sub { font-size: .72rem; }
-  .card { padding: 13px 14px; border-radius: 12px; }
-  .grid { grid-template-columns: 1fr !important; gap: 10px !important; }
-  .section-title { margin: 22px 0 10px; gap: 8px; }
-  .section-title h2 { font-size: 1.08rem; }
-  .eyebrow { font-size: .66rem; letter-spacing: .11em; margin-bottom: 6px; }
-  .small, .muted.small { font-size: .76rem; }
-  .pill { padding: 5px 9px; font-size: .72rem; }
-  .action-row { flex-direction: column; align-items: stretch; }
-  .btn { justify-content: center; min-height: 44px; }
-  /* Long contest lists scroll horizontally instead of wrapping into a wall. */
-  .tabs {
-    gap: 6px; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
-    scrollbar-width: none; padding-bottom: 2px;
+  .topbar { align-items: flex-start; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .brand-mark { width: 44px; height: 44px; border-radius: 12px; }
+  .brand-name { font-size: 1.1rem; font-weight: 800; }
+  .brand-sub { font-size: 0.74rem; color: var(--brand-muted); }
+  .journey { gap: 8px; font-size: 0.8rem; padding: 12px 16px; margin-bottom: 18px; border-radius: 14px; background: var(--brand-surface-2); border: 1px solid var(--brand-border); }
+  .journey a { font-weight: 700; text-decoration: none; }
+  .journey span { color: var(--brand-muted); }
+  /* Cards: generous, elevated, single focus — less clutter, more breathing room. */
+  .card {
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--brand-surface-2);
+    border: 1px solid var(--brand-border);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22);
   }
+  .card + .card { margin-top: 16px; }
+  .card.accent { border-color: var(--brand-primary); box-shadow: 0 10px 32px color-mix(in srgb, var(--brand-primary) 25%, transparent); }
+  h2 { font-size: 1.35rem; margin-bottom: 8px; letter-spacing: -0.01em; }
+  h3 { font-size: 1.08rem; margin-bottom: 10px; }
+  .section-title { margin: 30px 0 16px; gap: 10px; align-items: baseline; }
+  .section-title h2 { font-size: 1.15rem; }
+  .eyebrow { font-size: 0.68rem; letter-spacing: 0.17em; margin-bottom: 8px; text-transform: uppercase; font-weight: 900; color: var(--brand-accent); }
+  .small, .muted.small { font-size: 0.78rem; }
+  .muted { color: var(--brand-muted); }
+  .pill { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--brand-border); background: var(--brand-surface-2); color: var(--brand-muted); font-size: 0.78rem; font-weight: 700; }
+  /* Buttons: full width, large touch target, clear primary. */
+  .action-row { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; align-items: stretch; }
+  .btn { width: 100%; justify-content: center; min-height: 48px; padding: 0 20px; font-size: 0.95rem; font-weight: 800; border-radius: 12px; border: 1px solid var(--brand-border); background: var(--brand-surface-3); color: var(--brand-ink); }
+  .btn:hover { transform: translateY(-1px); border-color: var(--brand-primary); color: var(--brand-ink); }
+  .btn.primary { background: var(--brand-primary-fill); color: var(--brand-on-primary); border-color: transparent; box-shadow: 0 10px 26px color-mix(in srgb, var(--brand-primary) 40%, transparent); }
+  .btn.secondary { background: var(--brand-secondary-fill); color: var(--brand-on-secondary); border-color: transparent; }
+  /* Forms: stacked, single column, roomy inputs. */
+  .field { display: grid; gap: 6px; font-size: 0.76rem; color: var(--brand-muted); margin-bottom: 2px; }
+  .field input, .field select { padding: 13px 14px; border-radius: 12px; border: 1px solid var(--brand-border); background: var(--brand-surface-3); color: var(--brand-ink); font-size: 1rem; width: 100%; }
+  .field input:focus { outline: 2px solid var(--brand-primary); outline-offset: 1px; border-color: var(--brand-primary); }
+  .tabs { gap: 8px; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; padding-bottom: 4px; margin-bottom: 2px; }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    flex: 0 0 auto; max-width: min(78vw, 260px); padding: 8px 11px; font-size: .8rem;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  /* Name hygiene: flex children must be allowed to shrink and wrap cleanly. */
+  .tab { flex: 0 0 auto; max-width: min(80vw, 250px); padding: 10px 16px; font-size: 0.88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 10px; border: 1px solid var(--brand-border); background: var(--brand-surface-2); color: var(--brand-muted); }
+  .tab:hover { color: var(--brand-ink); border-color: var(--brand-primary); }
+  .tab.active { background: var(--brand-primary-fill); color: var(--brand-on-primary); border-color: transparent; }
+  /* Name hygiene: flex children shrink and wrap cleanly. */
   .name, .fighter-name, .live-duel strong, .bracket-slot strong, .scoreline > span,
-  .score-line strong, .winner strong, .matchup .fighter {
-    min-width: 0; overflow-wrap: anywhere;
-  }
+  .score-line strong, .winner strong, .matchup .fighter { min-width: 0; overflow-wrap: anywhere; }
   /* Tables reflow into labelled cards on phones — never scroll sideways. */
   table, thead, tbody, tfoot, tr, th, td { display: block; width: 100%; }
   table { min-width: 0; white-space: normal; }
-  table[style*='font-size'] { font-size: .84rem !important; }
+  table[style*='font-size'] { font-size: 0.84rem !important; }
   thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-  tbody { display: grid; gap: 7px; }
-  tr { border: 1px solid var(--brand-border); border-radius: 10px; padding: 7px 9px; background: color-mix(in srgb, var(--brand-surface-3) 55%, transparent); }
-  th, td, td[style*='padding'] { padding: 3px 0 !important; border: 0; text-align: left !important; }
-  td { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; word-break: break-word; }
+  tbody { display: grid; gap: 10px; }
+  tr { border: 1px solid var(--brand-border); border-radius: 13px; padding: 12px 14px; background: color-mix(in srgb, var(--brand-surface-3) 60%, transparent); }
+  th, td, td[style*='padding'] { padding: 6px 0 !important; border: 0; text-align: left !important; }
+  td { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; word-break: break-word; }
   td > * { min-width: 0; overflow-wrap: anywhere; }
-  td::before { content: attr(data-label); flex: 0 1 auto; min-width: 0; color: var(--brand-muted); font-size: .66rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+  td::before { content: attr(data-label); flex: 0 1 auto; min-width: 0; color: var(--brand-muted); font-size: 0.68rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; }
   td:empty::before { content: ''; }
-  /* Scoped tables sometimes force nowrap; phone cards must always wrap. */
   th[style*='white-space'], td[style*='white-space'] { white-space: normal !important; }
   .phone-hidden { display: none !important; }
   .desktop-only { display: none !important; }
   .phone-limit-more {
-    display: block; width: 100%; margin: 9px 0 2px; padding: 10px 14px;
-    border-radius: 10px; border: 1px solid var(--brand-border);
+    display: block; width: 100%; margin: 10px 0 4px; padding: 12px 16px;
+    border-radius: 12px; border: 1px solid var(--brand-border);
     background: var(--brand-surface-3); color: var(--brand-ink);
-    font-size: .8rem; font-weight: 800; cursor: pointer;
+    font-size: 0.86rem; font-weight: 800; cursor: pointer;
   }
-  .journey { gap: 6px; font-size: .76rem; }
-  .notice { font-size: .78rem; }
-  .hero { grid-template-columns: 1fr; }
-  .scoreboard { grid-template-columns: 1fr; text-align: center; padding: 14px; }
-  .corner, .corner.blue { flex-direction: column; text-align: center; }
+  .notice { font-size: 0.84rem; padding: 14px 16px; border-radius: 12px; margin-bottom: 18px; background: color-mix(in srgb, var(--brand-accent) 12%, transparent); border-left: 4px solid var(--brand-accent); }
+  .hero { grid-template-columns: 1fr; gap: 16px; margin-bottom: 22px; }
+  .scoreboard { grid-template-columns: 1fr; text-align: center; padding: 16px; gap: 14px; }
+  .corner, .corner.blue { flex-direction: column; text-align: center; gap: 8px; }
   .corner .portrait { width: 48px; height: 48px; border-radius: 14px; }
-  .corner .score { font-size: 2.1rem; }
+  .corner .score { font-size: 2.2rem; }
+  .stat { padding: 16px; border-radius: 14px; background: var(--brand-surface-3); border: 1px solid var(--brand-border); }
+  .stat .value { font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; line-height: 1.1; }
+  .stat .label { font-size: 0.74rem; color: var(--brand-muted); margin-top: 6px; }
+  .grid { gap: 14px; }
+  .grid.stats { grid-template-columns: 1fr !important; }
+  .account { padding: 14px 16px; border-radius: 14px; min-height: 56px; }
+  .account .name { font-size: 0.95rem; font-weight: 700; }
+  .account .meta { font-size: 0.78rem; color: var(--brand-muted); }
+  .avatar { width: 44px; height: 44px; border-radius: 14px; font-size: 0.9rem; }
+  .badge { padding: 4px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; }
+  .placeholder { min-height: 130px; border-radius: 14px; font-size: 0.9rem; color: var(--brand-muted); background: var(--brand-surface-3); border: 1px dashed var(--brand-border); display: grid; place-items: center; text-align: center; }
+  p { line-height: 1.6; }
 }
 @media (min-width: 701px) and (max-width: 1024px) {
   .shell { padding: 20px 22px 70px; }

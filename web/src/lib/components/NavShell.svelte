@@ -184,26 +184,20 @@
 
 {#if isMobile}
   <header class="mobile-bar">
-    <div class="mobile-bar-row">
-      <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard" on:click={closeMobile}>J3</a>
-      <div class="mode-switch compact" role="group" aria-label="Application mode">
-        <button class:active={$appMode === 'live'} aria-label="Switch to live event mode" aria-pressed={$appMode === 'live'} on:click={() => setAppMode('live')}>●</button>
-        <button class:active={$appMode === 'sim'} aria-label="Switch to simulated tournament mode" aria-pressed={$appMode === 'sim'} on:click={() => setAppMode('sim')}>🎬</button>
-      </div>
-      <button class="hamburger" data-guide="nav-mobile-menu" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
-    </div>
-    <div class="mobile-event" title={$eventTitle}>
+    <a class="brand-mark" href={HOME_ROUTE} aria-label="Public dashboard" on:click={closeMobile}>J3</a>
+    <div class="mobile-bar-center" title={$eventTitle}>
       <span class="mobile-event-label">Event</span>
       <span class="mobile-event-title">{$eventTitle}</span>
     </div>
+    <button class="hamburger" data-guide="nav-mobile-menu" aria-label="Open navigation" aria-expanded={mobileOpen} on:click={toggle}>☰</button>
   </header>
 
   {#if mobileOpen}
     <button class="scrim" aria-label="Close navigation" on:click={closeMobile}></button>
     <aside class="mobile-drawer" aria-label="Navigation">
-      <div class="drawer-head" title={$eventTitle}>
-        <span class="event-card-title">{$eventTitle}</span>
-        <button class="hamburger" aria-label="Close navigation" on:click={closeMobile}>✕</button>
+      <div class="drawer-head">
+        <button class="close-btn" aria-label="Close navigation" on:click={closeMobile}>✕</button>
+        <span class="drawer-title">{$eventTitle}</span>
       </div>
       <div class="mode-switch drawer" role="group" aria-label="Application mode">
         <button class:active={$appMode === 'live'} aria-pressed={$appMode === 'live'} on:click={() => { setAppMode('live'); closeMobile(); }}>● <span>Live event</span></button>
@@ -220,9 +214,11 @@
             {/if}
             {#if group !== 'QA tools' || qaOpen}
               {#each groupItemsForRole as item (item.href)}
-                <a class="nav-item" class:active={isActive(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}
+                <a class="drawer-item" class:active={isActive(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}
                   href={item.href} on:click={closeMobile}>
-                  <span class="icon">{item.icon}</span><span>{item.label}</span>
+                  <span class="drawer-icon">{item.icon}</span>
+                  <span class="drawer-label">{item.label}</span>
+                  <span class="drawer-chevron">›</span>
                 </a>
               {/each}
             {/if}
@@ -230,7 +226,7 @@
         {/each}
       </nav>
       {#if isPhone && !qaFullPhone}
-        <p class="phone-note">Phone view shows public, participant, club and guardian screens. Scoring, setup and audit tools are available on tablet or desktop.</p>
+        <p class="phone-note">Phone view shows public, participant, club and guardian screens. Scoring, setup and audit tools are on tablet or desktop.</p>
       {:else if isPhone && qaFullPhone}
         <p class="phone-note">QA phone build: every operator screen is unlocked for local end-to-end testing.</p>
       {/if}
@@ -258,17 +254,6 @@
       </div>
     </aside>
   {/if}
-  <nav class="mobile-bottom" aria-label="Quick navigation">
-    {#each mobileItems as item (item.href)}
-      <a class="quick-item" class:active={isActive(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}
-        href={item.href} title={item.label}>
-        <span class="icon">{item.icon}</span><span class="quick-label">{MOBILE_SHORT_LABELS[item.href] ?? item.label}</span>
-      </a>
-    {/each}
-    <button class="quick-item" data-guide="nav-mobile-more" aria-label="More navigation" aria-expanded={mobileOpen} on:click={toggle}>
-      <span class="icon">☰</span><span class="quick-label">More</span>
-    </button>
-  </nav>
 {:else}
   <aside class:collapsed={!expanded} class="nav-shell">
     <div class="nav-head">
@@ -410,40 +395,31 @@
   .role-picker { display:grid; gap:7px; min-width:0; padding:14px 8px 4px; border-top:1px solid var(--brand-border); overflow:hidden; }
   .role-picker select { width:100%; max-width:100%; min-width:0; padding:9px; border-radius:9px; background:var(--brand-surface-3); color:var(--brand-ink); border:1px solid var(--brand-border); font-size:.86em; }
   .collapsed-role { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--brand-primary); color:var(--brand-on-primary); font-weight:800; margin-top:auto; }
-  .mobile-bar { position:fixed; top:0; left:0; right:0; z-index:810; display:grid; gap:3px; padding:calc(7px + var(--safe-top)) calc(12px + var(--safe-left)) 8px calc(12px + var(--safe-right)); background:var(--brand-surface-2); border-bottom:1px solid var(--brand-border); }
-  .mobile-bar-row { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:34px; }
-  .mobile-event { display:grid; gap:1px; min-width:0; }
-  .mobile-event-title { font-family:var(--font-display); font-weight:800; font-size:.78rem; line-height:1.2; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .mobile-bar .hamburger { margin-left:auto; }
-  .mobile-bar .mode-switch.compact { display:flex; width:auto; }
-  .mobile-bar .mode-switch.compact button { min-width:36px; padding:7px 8px; }
-  .mobile-bottom {
-    position:fixed; left:0; right:0; bottom:0; z-index:815;
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(0,1fr)); gap:2px;
-    padding:5px calc(5px + var(--safe-left)) calc(5px + var(--safe-bottom)) calc(5px + var(--safe-right));
-    background:var(--brand-surface-2); border-top:1px solid var(--brand-border);
-    box-shadow:0 -8px 24px rgba(0,0,0,.28);
-  }
-  .quick-item {
-    display:grid; place-items:center; gap:2px; min-width:0; min-height:50px; padding:5px 2px;
-    border:0; border-radius:10px; background:transparent; color:var(--brand-muted);
-    text-decoration:none; font-size:.68rem; font-weight:700; cursor:pointer;
-  }
-  .quick-item .icon { font-size:1.15rem; line-height:1; }
-  .quick-label { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .quick-item.active {
-    color:var(--brand-ink); background:var(--brand-surface-3);
-    box-shadow:inset 0 -3px 0 var(--brand-accent), 0 0 0 1px color-mix(in srgb, var(--brand-primary) 45%, transparent);
-  }
-  .quick-item:hover, .quick-item:focus-visible { color:var(--brand-ink); text-decoration:none; }
-  .scrim { position:fixed; inset:0; z-index:820; background:rgba(2,6,23,.65); border:0; cursor:pointer; }
-  .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(86vw, 340px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) 16px; display:flex; flex-direction:column; gap:12px; box-shadow:-16px 0 44px rgba(0,0,0,.45); animation:slide .22s ease-out; }
-  .drawer-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; }
-  .drawer-head .event-card-title { flex:1; }
-  .mobile-drawer nav { display:grid; gap:3px; overflow-y:auto; flex:1; }
-  .mobile-drawer .nav-item { min-height:46px; }
-  .mobile-drawer .group-label, .mobile-drawer .group-toggle { margin-top:10px; }
-  .phone-note { margin:0; padding:10px 12px; border-radius:9px; background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-muted); font-size:.74rem; line-height:1.4; }
+  .mobile-bar { position:fixed; top:0; left:0; right:0; z-index:810; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:calc(8px + var(--safe-top)) calc(12px + var(--safe-left)) 10px calc(12px + var(--safe-right)); background:var(--brand-surface-2); border-bottom:1px solid var(--brand-border); }
+  .brand-mark { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:var(--brand-primary-fill); color:var(--brand-on-primary); font-family:var(--font-display); font-weight:900; font-size:1.25rem; line-height:1; box-shadow:0 8px 20px color-mix(in srgb, var(--brand-primary) 40%, transparent); flex:none; }
+  .mobile-bar-center { display:flex; flex-direction:column; gap:1px; min-width:0; flex:1; }
+  .mobile-bar-center .mobile-event-label { text-transform:uppercase; letter-spacing:.14em; font-size:.62rem; font-weight:900; color:var(--brand-muted); }
+  .mobile-bar-center .mobile-event-title { font-family:var(--font-display); font-weight:800; font-size:.86rem; line-height:1.15; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--brand-ink); }
+  .mobile-bar .hamburger { background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-ink); border-radius:11px; padding:9px 11px; cursor:pointer; line-height:1; font-size:1.15rem; min-width:44px; height:44px; display:grid; place-items:center; }
+  .mobile-bar .hamburger:hover { background:color-mix(in srgb, var(--brand-primary) 12%, var(--brand-surface-3)); border-color:var(--brand-primary); }
+  .close-btn { background:transparent; border:0; color:var(--brand-ink); font-size:1.25rem; line-height:1; padding:6px; border-radius:10px; cursor:pointer; flex:none; }
+  .close-btn:hover { background:color-mix(in srgb, var(--brand-primary) 12%, var(--brand-surface-3)); }
+  .drawer-title { font-family:var(--font-display); font-weight:800; font-size:1.05rem; line-height:1.2; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--brand-ink); padding-right:6px; }
+  .mobile-drawer { position:fixed; top:0; right:0; bottom:0; width:min(92vw, 360px); z-index:830; background:var(--brand-surface-2); border-left:1px solid var(--brand-border); padding:calc(18px + var(--safe-top)) 18px calc(20px + var(--safe-bottom)) 18px; display:flex; flex-direction:column; gap:14px; box-shadow:-20px 0 52px rgba(0,0,0,.5); animation:slide .24s ease-out; overflow-y:auto; }
+  .drawer-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; padding-bottom:10px; border-bottom:1px solid var(--brand-border); margin-bottom:2px; }
+  .drawer-head .drawer-title { flex:1; }
+  .mobile-drawer nav { display:grid; gap:2px; overflow-y:auto; flex:1; }
+  .mobile-drawer .group-label { margin:14px 0 6px; font-size:.65rem; letter-spacing:.16em; text-transform:uppercase; color:var(--brand-muted); font-weight:900; }
+  .mobile-drawer .group-toggle { width:100%; text-align:left; background:none; border:0; cursor:pointer; padding:6px 0; color:var(--brand-muted); font-weight:800; font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+  .mobile-drawer .group-toggle:hover { color:var(--brand-ink); }
+  .drawer-item { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:52px; padding:12px 14px; border-radius:13px; color:var(--brand-muted); text-decoration:none; font-size:.95rem; font-weight:600; border:1px solid transparent; background:transparent; }
+  .drawer-item .drawer-icon { font-size:1.2rem; width:26px; text-align:center; flex:none; }
+  .drawer-item .drawer-label { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .drawer-item .drawer-chevron { font-size:.65rem; color:var(--brand-muted); flex:none; }
+  .drawer-item:hover { background:var(--brand-surface-3); color:var(--brand-ink); border-color:color-mix(in srgb, var(--brand-primary) 30%, transparent); text-decoration:none; }
+  .drawer-item.active { background:color-mix(in srgb, var(--brand-primary) 14%, var(--brand-surface-3)); color:var(--brand-ink); border-left:4px solid var(--brand-primary); padding-left:10px; font-weight:800; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 45%, transparent); }
+  .drawer-item.active .drawer-chevron { color:var(--brand-primary); }
+  .phone-note { margin:0; padding:12px 14px; border-radius:12px; background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-muted); font-size:.76rem; line-height:1.5; }
   .build-flavor { margin:0; color:var(--brand-muted); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; }
   @keyframes slide { from { transform:translateX(100%); } to { transform:none; } }
 </style>

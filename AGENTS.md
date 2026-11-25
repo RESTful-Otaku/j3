@@ -215,7 +215,7 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
-- **2026-11-25 — Mobile minimal redesign**: phone-only participant views stripped back for fighters, participants and club leaders. `/settings` is now a clean single-column preferences form (profile, stats/units, belt, appearance, media) with no licence/guide noise; `/signup` is a compact single-column registration form; `/public` phone board compacts the clock-hero and banner so fights land higher. All changes are scoped to `<=700px` so tablets, desktops and LED/display views are unchanged. 7/7 mobile E2E pass (viewport fit, safe area, 320px name wrap, drawer, operator-screen gating).
+- **2026-11-25 — Mobile minimal redesign (mobile-first overhaul)**: stripped back the phone UI for fighters, participants and club leaders. Removed the old-fashioned bottom tab bar — everything now lives in the collapsible hamburger drawer (top bar keeps J3 home mark + event title + hamburger). Reworked mobile cards, spacing, typography, buttons and forms for generous whitespace and larger touch targets (44px+), scoped to `<=700px` so tablets/desktops/LED are unchanged. `/settings`, `/signup` and `/public` are clean single-column views. 9/9 mobile+nav E2E pass (drawer open/close/navigate, safe-area chrome, 320px name wrap, viewport fit, operator-screen gating).
 - **2026-11-25 — Uniform build flavours**: web and mobile now share `dev` (local venue server),
   `qa` (standalone seeded data, autologin, full-phone unlock) and `prod` (requires `J3_SERVER_URL`,
   participant-only scope). Web stages `build/web-{dev,qa,prod}`; Android stages

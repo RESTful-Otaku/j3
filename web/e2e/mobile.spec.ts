@@ -63,20 +63,16 @@ test.describe('Mobile navigation & layouts', () => {
     });
     await expect(page.locator('.mobile-bar')).toBeVisible();
     await expect(page.locator('.app-content.mobile')).toHaveCount(1);
-    await expect(page.locator('.mobile-bottom')).toBeVisible();
     const padding = await page.evaluate(() => {
       const bar = document.querySelector('.mobile-bar')!;
       const content = document.querySelector('.app-content.mobile')!;
-      const bottom = document.querySelector('.mobile-bottom')!;
       return {
         bar: parseFloat(getComputedStyle(bar).paddingTop),
         content: parseFloat(getComputedStyle(content).paddingTop),
-        bottom: parseFloat(getComputedStyle(bottom).paddingBottom),
       };
     });
     expect(padding.bar).toBeGreaterThanOrEqual(28);
     expect(padding.content).toBeGreaterThanOrEqual(100);
-    expect(padding.bottom).toBeGreaterThanOrEqual(20);
   });
 
   test('operator screens stay on tablet and desktop', async ({ page }) => {
@@ -88,7 +84,7 @@ test.describe('Mobile navigation & layouts', () => {
     const drawer = page.locator('.mobile-drawer');
     await expect(drawer.getByRole('link', { name: /Official console/ })).toHaveCount(0);
     await expect(drawer.getByRole('link', { name: /Create tournament/ })).toHaveCount(0);
-    await expect(drawer.getByText(/Scoring, setup and audit tools are available on tablet or desktop/)).toBeVisible();
+    await expect(drawer.getByText(/Scoring, setup and audit tools are on tablet or desktop/)).toBeVisible();
   });
 
   test('bundled seeded data works with the venue server offline', async ({ page }) => {

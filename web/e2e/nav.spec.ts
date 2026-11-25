@@ -22,11 +22,17 @@ test('mobile keeps a persistent nav and home icon', async ({ page }) => {
   await page.goto('/brackets');
 
   await expect(page.locator('.mobile-bar .brand-mark')).toBeVisible();
-  await expect(page.locator('.mobile-bottom')).toBeVisible();
-  await page.locator('.mobile-bottom').getByRole('link', { name: /Public/ }).click();
-  await expect(page).toHaveURL(/\/public$/);
-  await expect(page.locator('.mobile-bottom')).toBeVisible();
+  await expect(page.locator('.mobile-drawer')).toHaveCount(0);
 
+  // Open the hamburger drawer and navigate from it — the bottom tab bar is gone.
+  await page.getByRole('button', { name: 'Open navigation' }).click();
+  const drawer = page.locator('.mobile-drawer');
+  await expect(drawer).toBeVisible();
+  await drawer.getByRole('link', { name: /Public/ }).click();
+  await expect(page).toHaveURL(/\/public$/);
+  await expect(drawer).toHaveCount(0);
+
+  // Brand mark is a home affordance.
   await page.locator('.mobile-bar .brand-mark').click();
   await expect(page).toHaveURL(/\/public$/);
 });
