@@ -22,6 +22,7 @@
   import { eventTitle } from '../lib/event-title';
   import { cornerConfig } from '../lib/event-brand';
   import { cycleTheme, themeChoice } from '../lib/theme';
+  import Card from '../lib/components/Card.svelte';
 
   let ready = false;
   let error = '';
@@ -351,46 +352,38 @@
 
     {#if activeTab === 'overview'}
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-        <div class="card">
-          <div class="eyebrow">01 · Setup</div>
-          <h3>Configure without tech skills</h3>
+        <Card title="Configure without tech skills" eyebrow="01 · Setup" expandable preview="Plain-language wizard, no jargon">
           <p class="muted small" style="margin-top:8px;">
             A plain-language wizard will guide you through branding, clubs, categories, rules
             and formats. No files, no jargon — just questions and a live preview.
           </p>
-        </div>
-        <div class="card">
-          <div class="eyebrow">02 · Run</div>
-          <h3>Multiple mats, one truth</h3>
+        </Card>
+        <Card title="Multiple mats, one truth" eyebrow="02 · Run" expandable preview={`${liveCount} live contest${liveCount === 1 ? '' : 's'} in this snapshot`}>
           <p class="muted small" style="margin-top:8px;">
-            {liveCount} live contest{liveCount === 1 ? '' : 's'} in this snapshot. Officials score on phones; every
-            confirmed event is committed and every display reads the same data.
+            Officials score on phones; every confirmed event is committed and every display reads
+            the same data.
           </p>
-        </div>
-        <div class="card">
-          <div class="eyebrow">03 · Trust</div>
-          <h3>Roles with boundaries</h3>
+        </Card>
+        <Card title="Roles with boundaries" eyebrow="03 · Trust" expandable preview="Every material action is audited">
           <p class="muted small" style="margin-top:8px;">
             Runners, officials, club leaders, fighters and spectators each see and can change
-            only what their authority allows. Every material action is audited.
+            only what their authority allows.
           </p>
-        </div>
-        <div class="card">
-          <div class="eyebrow">04 · Every screen</div>
-          <h3>Dedicated live views</h3>
+        </Card>
+        <Card title="Dedicated live views" eyebrow="04 · Every screen" expandable preview="Public dashboard, scoreboard, brackets, tables, pools">
           <p class="muted small" style="margin-top:8px;">
             Switch views here without losing the navigation. Use Display control when you want a
             board on its own TV tab: public dashboard, scoreboard, brackets, tables/medals/kata
             and fight pools.
           </p>
-          <div class="action-row">
+          <div class="action-row" style="margin-top:12px;">
             <a class="btn" href="/public">Public</a>
             <a class="btn" href="/brackets">Brackets</a>
             <a class="btn" href="/tables">Tables</a>
             <a class="btn" href="/pools">Pools</a>
             <a class="btn" href="/simulate">Simulate</a>
           </div>
-        </div>
+        </Card>
       </div>
     {:else if activeTab === 'accounts'}
       <div class="card">
@@ -437,15 +430,16 @@
           {/each}
         </div>
         {#if actor}
-          <div style="margin-top:22px; border-top:1px solid var(--brand-border); padding-top:18px;">
-            <div class="eyebrow">Permission check · {actor.roleLabel}</div>
-            <div class="capabilities">
-              {#each allActions as action}
-                <span class="cap" class:on={capabilities.includes(action)} class:off={!capabilities.includes(action)}>
-                  {capabilities.includes(action) ? '✓' : '✕'} {action.replaceAll('_', ' ')}
-                </span>
-              {/each}
-            </div>
+          <div style="margin-top:22px;">
+            <Card title="Permission check · {actor.roleLabel}" eyebrow="Allowed actions" expandable preview={`${capabilities.length} active`}>
+              <div class="capabilities">
+                {#each allActions as action}
+                  <span class="cap" class:on={capabilities.includes(action)} class:off={!capabilities.includes(action)}>
+                    {capabilities.includes(action) ? '✓' : '✕'} {action.replaceAll('_', ' ')}
+                  </span>
+                {/each}
+              </div>
+            </Card>
           </div>
         {/if}
       </div>
@@ -502,9 +496,8 @@
         {/if}
       </div>
     {:else if activeTab === 'fights'}
-      <div class="card">
-        <h2>Fight ledger</h2>
-        <p class="muted small">Every row is read from the committed database.</p>
+      <Card title="Fight ledger" eyebrow="Committed bouts" expandable preview={`${fights.length} fight${fights.length === 1 ? '' : 's'}`}>
+        <p class="muted small" style="margin-top:8px;">Every row is read from the committed database.</p>
         <div style="overflow-x:auto; margin-top:14px;">
           <table style="width:100%; border-collapse:collapse; font-size:.88rem;">
             <thead>
@@ -514,7 +507,7 @@
             </thead>
             <tbody>
               {#each fights as fight}
-                <tr style="border-bottom:1px solid var(--brand-border);">
+                <tr style="border-bottom:1px solid var(--brand-border);" class="reveal-item">
                   <td style="padding:8px;"><code>{fight.id}</code></td>
                   <td>{fight.mat}</td>
                   <td>{fight.category}</td>
@@ -531,7 +524,7 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     {:else if activeTab === 'signup'}
       <div class="grid" style="grid-template-columns: 1.2fr 1fr;">
         <div class="card">

@@ -1,21 +1,16 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { isPhoneWidth } from '../nav';
 
   export let title = '';
   export let eyebrow = '';
   export let expandable = true;
-  export let expanded = false;
+  export let expanded = true;
   export let preview = '';
 
   let isPhone = false;
 
-  onMount(() => {
-    isPhone = isPhoneWidth();
-  });
-
   function toggle() {
-    if (!isPhone || !expandable) return;
+    if (!expandable) return;
     expanded = !expanded;
   }
 
@@ -26,18 +21,18 @@
     }
   }
 
-  $: shouldShow = !isPhone || !expandable || expanded;
+  $: shouldShow = !expandable || expanded;
 </script>
 
-<div class="card" class:collapsed={isPhone && expandable && !expanded} aria-expanded={expanded ? 'true' : 'false'} class:open={expanded}>
-  {#if isPhone && expandable}
+<div class="card" class:collapsed={expandable && !expanded} aria-expanded={expanded ? 'true' : 'false'} class:open={expanded}>
+  {#if expandable}
     <div class="card-head" tabindex="0" on:click|stopImmediatePropagation={toggle} on:keydown={onKey} role="button" aria-expanded={expanded ? 'true' : 'false'} aria-label={title}>
       {#if eyebrow}<span class="card-eyebrow">{eyebrow}</span>{/if}
       <span class="card-title">{title}</span>
       {#if preview && !expanded}
         <span class="card-preview">{preview}</span>
       {/if}
-      <span class="card-chevron" class:rotated={expanded}>{expanded ? '▾' : '▸'}</span>
+      <span class="card-chevron" class:rotated={expanded}>{expanded ? '–' : '+'}</span>
     </div>
   {:else}
     {#if eyebrow}<span class="card-eyebrow">{eyebrow}</span>{/if}
@@ -47,7 +42,7 @@
   {#if shouldShow}
     <div class="card-body" class:showing={expanded}><slot /></div>
   {:else}
-    <div class="card-body" style="display:none;"></div>
+    <div class="card-body" hidden></div>
   {/if}
 </div>
 
@@ -61,8 +56,9 @@
   }
   .card-head {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     cursor: pointer;
     padding: 4px 0;
     z-index: 2;
@@ -92,13 +88,13 @@
     overflow-wrap: anywhere;
   }
   .card-chevron {
-    font-size: 0.7rem;
+    font-size: 1rem;
     font-weight: 800;
     color: var(--brand-muted);
     flex: none;
-    transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
+    transition: color 0.2s ease, transform 0.2s ease;
   }
-  .card-chevron.rotated { transform: rotate(180deg); }
+  .card-chevron.rotated { color: var(--brand-primary); transform: scale(1.1); }
   .card-body {
     padding-top: 10px;
     border-top: 1px solid var(--brand-border);
@@ -111,7 +107,14 @@
     to   { opacity: 1; transform: translateY(0); }
   }
   @media (max-width: 700px) {
-    .card-head { cursor: pointer; }
+    .card-head { cursor: pointer; flex-direction: column; align-items: start; justify-content: start; gap: 6px; }
+    .card.collapsed { border-color: var(--brand-border); }
+    .card.collapsed .card-head:hover { background: color-mix(in srgb, var(--brand-primary) 6%, transparent); }
+    .card.collapsed .card-body { display: none; }
+    .card.open { border-color: var(--brand-primary); box-shadow: 0 10px 34px color-mix(in srgb, var(--brand-primary) 28%, transparent); }
+  }
+  @media (min-width: 701px) {
+    .card-head { padding: 2px 0; }
     .card.collapsed { border-color: var(--brand-border); }
     .card.collapsed .card-head:hover { background: color-mix(in srgb, var(--brand-primary) 6%, transparent); }
     .card.collapsed .card-body { display: none; }
