@@ -161,23 +161,26 @@ downloads.example.com {
 
 Point DNS A/AAAA records at the VM. Caddy obtains and renews certificates automatically.
 
-## Mobile client against the hosted server
+## Mobile clients against a server
 
-Build an APK with the HTTPS API baked in:
+Three local mobile flavours are available (see `docs/CLI.md`):
 
 ```bash
-J3_SERVER_URL=https://api.example.com bash scripts/mobile.sh build
+bun run build:android:dev                       # local venue server via scripts/mobile.sh url
+bun run build:android:qa                        # standalone seeded APK, no server
+J3_SERVER_URL=https://api.example.com bun run build:android:prod  # live/production
 ```
 
-The QA build still bundles the seeded SQLite database and read-only API snapshot, so it opens with
-data and signs in as admin on first launch. While online it reads/writes through `api.example.com`;
-if the service is unavailable it falls back to the bundled read-only snapshot. Client-side settings
-and the QA identity live in local storage. **Offline write sync is not enabled yet** — scoring
-writes require the venue server; keep the server backed up and reachable during events.
+The **QA** build bundles the seeded SQLite database and read-only API snapshot, so it opens with
+data and signs in as admin on first launch. The **dev** and **production** builds talk only to their
+configured server; production requires `J3_SERVER_URL` and keeps normal participant-only phone scope.
+**Offline write sync is not enabled yet** — scoring writes require the venue server; keep the server
+backed up and reachable during events.
 
-Put `j3-android-qa.apk` under `/srv/j3/downloads/android/` for sideloading. iOS QA is easiest via
-TestFlight; an ad-hoc `.ipa` needs registered device UDIDs and a distribution profile, and a raw
-IPA link will not install like an APK.
+Hosted tagged releases use the production flavour with the public repository variable
+`J3_SERVER_URL` baked in. Put the signed release APK (or a QA APK for sideloading) under
+`/srv/j3/downloads/android/`. iOS QA is easiest via TestFlight; an ad-hoc `.ipa` needs registered
+device UDIDs and a distribution profile, and a raw IPA link will not install like an APK.
 
 For automatic versioned downloads, set the repository **variable** `J3_SERVER_URL` to the public API
 origin (e.g. `https://api.example.com`). Every `v*` tag then publishes `j3-android-<version>.apk`,

@@ -732,10 +732,10 @@
     "url": "/docs/hosting#caddy-https-sse"
   },
   {
-    "title": "Free hosting \u00b7 Mobile client against the hosted server",
+    "title": "Free hosting \u00b7 Mobile clients against a server",
     "section": "Developers",
-    "text": "Build an APK with the HTTPS API baked in:  ```bash J3_SERVER_URL=https://api.example.com bash scripts/mobile.sh build ```  The QA build still bundles the seeded SQLite database and read-only API snapshot, so it opens with data and signs in as admin on first launch. While online it reads/writes through `api.example.com`; if the service is unavailable it falls back to the bundled read-only snapshot.",
-    "url": "/docs/hosting#mobile-client-against-the-hosted-server"
+    "text": "Three local mobile flavours are available (see `docs/CLI.md`):  ```bash bun run build:android:dev                       # local venue server via scripts/mobile.sh url bun run build:android:qa                        # standalone seeded APK, no server J3_SERVER_URL=https://api.example.com bun run build:android:prod  # live/production ```  The **QA** build bundles the seeded SQLite database and read-",
+    "url": "/docs/hosting#mobile-clients-against-a-server"
   },
   {
     "title": "Free hosting \u00b7 SQLite backups",
@@ -774,15 +774,21 @@
     "url": "/docs/cli#qa-and-verification"
   },
   {
+    "title": "CLI & TUI \u00b7 Build flavours",
+    "section": "Developers",
+    "text": "| Flavour | Web | Android | iOS assets | Backend | |---|---|---|---|---| | dev (local) | `bun run build:dev` | `bun run build:android:dev` | `bun run build:ios:dev` | local venue server (`J3_DEV_API_URL` or `scripts/mobile.sh url`) | | QA (seeded, standalone) | `bun run build:qa` | `bun run build:android:qa` | `bun run build:ios:qa` | bundled demo database/API snapshot, no server needed | | produc",
+    "url": "/docs/cli#build-flavours"
+  },
+  {
     "title": "CLI & TUI \u00b7 Build and deploy",
     "section": "Developers",
-    "text": "`bun run build` builds Go + web + docs; `bun run release` produces release artifacts; `bun run cicd` runs the local CI/CD sequence; `bun run deploy` is environment-gated.",
+    "text": "`bun run build` builds Go + web + docs; `bun run release` produces release artifacts; `bun run cicd` runs the local CI/CD sequence; `bun run deploy` is environment-gated. Production web is mirrored into `build/web` and `dist/web`.",
     "url": "/docs/cli#build-and-deploy"
   },
   {
     "title": "CLI & TUI \u00b7 Mobile",
     "section": "Developers",
-    "text": "`bash scripts/mobile.sh build` regenerates J3 icons, seeds the bundled database/snapshot and builds the APK. `install` starts the Pixel 10 Pro AVD (Android Studio SDK, `-gpu auto`) and installs/launches it. `url` prints the baked LAN URL.",
+    "text": "`bash scripts/mobile.sh build` is the QA alias (standalone seeded APK). `install` starts the Pixel 10 Pro AVD (Android Studio SDK, `-gpu auto`) and installs/launches it. `url` prints the LAN URL used by the dev flavour. Staged APKs live in `build/android/` as `j3-dev.apk`, `j3-qa.apk` (also `j3-demo.apk`) and `j3-prod.apk`.",
     "url": "/docs/cli#mobile"
   },
   {

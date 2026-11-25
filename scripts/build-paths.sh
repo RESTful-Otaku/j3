@@ -26,6 +26,9 @@ j3_prepare_build_dirs() {
 
 j3_stage_dir() {
   local src="$1" dest="$2"
+  # Replace rather than merge so successive flavour builds cannot leave stale
+  # hashed chunks from a previous bundle in the staged output.
+  rm -rf "$dest"
   j3_prepare_build_dir "$dest"
   cp -R "$src"/. "$dest"/
 }

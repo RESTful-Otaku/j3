@@ -198,6 +198,7 @@ states. Offline write outbox remains a future enhancement.
 | D-081 | Local QA APK is self-contained: bundled seeded SQLite and read-only API snapshot, offline fallback for Capacitor's HTTP 200 HTML responses, simulated writes persisted in `localStorage`, QA autologin and full-phone route unlock; hosted/production phones keep participant-only scope. |
 | D-082 | Phone UI is purpose-built: safe-area tokens on fixed chrome and overlays, compact duel/match/score cards, horizontally scrolling contest tabs, touch promotion controls on their own bracket line, and 320px/safe-area E2E guards. |
 | D-083 | Explicit local `dev`/`qa`/`prod` web flavours stage into `build/web-{dev,qa,prod}` with configurable API URLs; production is mirrored into `build/web` and `dist/web` so existing deploy commands are unchanged. |
+| D-084 | The same three flavours cover mobile: `dev` targets the local venue server, `qa` is standalone/seeded with autologin and full-phone QA routes, and `prod` requires `J3_SERVER_URL` with participant-only phone scope. Android stages `j3-{dev,qa,prod}.apk` (QA also as `j3-demo.apk`); iOS stages matching asset sets. |
 
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
@@ -214,6 +215,11 @@ Rationale and status for older decisions remain in git history; all listed decis
 
 ## 13. Change log (recent)
 
+- **2026-11-25 — Uniform build flavours**: web and mobile now share `dev` (local venue server),
+  `qa` (standalone seeded data, autologin, full-phone unlock) and `prod` (requires `J3_SERVER_URL`,
+  participant-only scope). Web stages `build/web-{dev,qa,prod}`; Android stages
+  `build/android/j3-{dev,qa,prod}.apk`; iOS stages matching asset sets. Hosted workflows keep the
+  same production/QA split and free-only gates.
 - **2026-11-24 — Self-contained QA APK + mobile polish**: local QA APKs carry the seeded SQLite and
   API snapshot, survive Capacitor's HTML fallback for unknown `/api` paths and keep simulated writes
   in `localStorage`, so emulator and device QA need no venue server. Phone layouts now use safe-area
@@ -275,14 +281,16 @@ with live and offline evidence in `docs/qa/`. `v0.7.5` (`569934c`) publishes sou
 smoke-tested when hosted CI runs (public repo) but not published. See `docs/HOSTING.md` for free
 Oracle Always Free hosting.
 
-**Local QA builds (2026-11-24)**: fresh `dev`/`qa`/`prod` web bundles are staged under
+**Local QA builds (2026-11-25)**: `dev`/`qa`/`prod` web bundles are staged under
 `build/web-{dev,qa,prod}` and production under `build/web` + `dist/web`; local and cross-platform
-server binaries are in `build/server`. Local gates are green (`go test`, 21 web unit tests,
-svelte-check with no warnings, 120 E2E, `check:workflows`). The self-contained QA APK is
-`build/android/j3-demo.apk` (sha256 `b105ba1a72e844a141da6abcd5aeb5052b5efac815b6cdb1c8468518cb10a335`);
-smoke passed on `emulator-5554` (pid `4732`) with seeded data, no venue-server errors, zero horizontal
-overflow across public/operator screens and a persisted offline `RED +1` write. Fresh screenshots are
-in `build/android/smoke/screens/`. The physical Pixel was not attached, so device install remains to be
+server binaries are in `build/server`. Android stages `j3-dev.apk` (local venue server),
+`j3-qa.apk` (also `j3-demo.apk`) and `j3-prod.apk` when `J3_SERVER_URL` is supplied. Local gates are
+green (`go test`, 21 web unit tests, svelte-check with no warnings, 120 E2E, `check:workflows`). The
+self-contained QA APK is `build/android/j3-demo.apk` (sha256
+`c8d3f6bd816e0c5e5cf2c6038351476695293c0ed187112311804079d812d620`); smoke passed on
+`emulator-5554` (pid `4732`) with seeded data, no venue-server errors, zero horizontal overflow
+across public/operator screens and a persisted offline `RED +1` write. Fresh screenshots are in
+`build/android/smoke/screens/`. The physical Pixel was not attached, so device install remains to be
 done by the user.
 
 **Hosted CI status**: `RESTful-Otaku/j3` is public, so GitHub-hosted runners are free and the

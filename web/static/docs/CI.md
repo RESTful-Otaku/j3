@@ -52,7 +52,8 @@ It uninstalls any prior signed build before installing, so QA and hosted release
 conflict. Installer, launcher, UI-dump, screenshot and logcat evidence are kept in
 `artifacts/android-smoke/`, so hosted failures are visible in the smoke artifact.
 
-Tagged releases also build **hosted production clients** with the public `J3_SERVER_URL` baked in:
+Hosted jobs use the same flavours as local builds: the smoke-tested QA app is standalone/seeded,
+while tagged releases also build **hosted production clients** with the public `J3_SERVER_URL` baked in:
 
 - `j3-android-<version>.apk` — signed release APK (stable key when Android secrets are set; the
   runner's standard debug key is generated and used otherwise);
