@@ -14,6 +14,7 @@ type demoFighter struct {
 	Club       string  `json:"club"`
 	ClubColour string  `json:"clubColour"`
 	LogoPath   string  `json:"logoPath"`
+	AvatarPath string  `json:"avatarPath"`
 	Belt       string  `json:"belt"`
 	BeltColour string  `json:"beltColour"`
 	HeightCm   float64 `json:"heightCm"`
@@ -46,11 +47,11 @@ func (s *Server) allDemoFights(r *http.Request) ([]demoFight, error) {
 		       f.state, f.outcome,
 		       COALESCE(fr.id, ''), COALESCE(fr.display_name, ''),
 		       COALESCE(cr.name, ''), COALESCE(cr.primary_colour, '#64748b'),
-		       COALESCE(cr.logo_path, ''), COALESCE(br.label, ''), COALESCE(br.colour, '#94a3b8'),
+		       COALESCE(cr.logo_path, ''), COALESCE(fr.avatar_path, ''), COALESCE(br.label, ''), COALESCE(br.colour, '#94a3b8'),
 		       COALESCE(ur.height_cm, 0), COALESCE(fr.weight_kg, 0),
 		       COALESCE(fb.id, ''), COALESCE(fb.display_name, ''),
 		       COALESCE(cb.name, ''), COALESCE(cb.primary_colour, '#64748b'),
-		       COALESCE(cb.logo_path, ''), COALESCE(bb.label, ''), COALESCE(bb.colour, '#94a3b8'),
+		       COALESCE(cb.logo_path, ''), COALESCE(fb.avatar_path, ''), COALESCE(bb.label, ''), COALESCE(bb.colour, '#94a3b8'),
 		       COALESCE(ub.height_cm, 0), COALESCE(fb.weight_kg, 0)
 		FROM fights f
 		LEFT JOIN categories c  ON c.id = f.category_id
@@ -74,9 +75,9 @@ func (s *Server) allDemoFights(r *http.Request) ([]demoFight, error) {
 		var f demoFight
 		if err := rows.Scan(
 			&f.ID, &f.Category, &f.Mat, &f.Round, &f.State, &f.Outcome,
-			&f.Red.ID, &f.Red.Name, &f.Red.Club, &f.Red.ClubColour, &f.Red.LogoPath,
+			&f.Red.ID, &f.Red.Name, &f.Red.Club, &f.Red.ClubColour, &f.Red.LogoPath, &f.Red.AvatarPath,
 			&f.Red.Belt, &f.Red.BeltColour, &f.Red.HeightCm, &f.Red.WeightKg,
-			&f.Blue.ID, &f.Blue.Name, &f.Blue.Club, &f.Blue.ClubColour, &f.Blue.LogoPath,
+			&f.Blue.ID, &f.Blue.Name, &f.Blue.Club, &f.Blue.ClubColour, &f.Blue.LogoPath, &f.Blue.AvatarPath,
 			&f.Blue.Belt, &f.Blue.BeltColour, &f.Blue.HeightCm, &f.Blue.WeightKg,
 		); err != nil {
 			return nil, err

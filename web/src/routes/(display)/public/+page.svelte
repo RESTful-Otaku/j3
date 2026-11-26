@@ -4,6 +4,7 @@
   import { session, uiRole } from '../../../lib/auth';
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import Card from '../../../lib/components/Card.svelte';
+  import FighterPortrait from '../../../lib/components/FighterPortrait.svelte';
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
   import { eventTitle } from '../../../lib/event-title';
   import { replaySnapshot } from '../../../lib/demo-replay';
@@ -138,13 +139,25 @@
           <div class="meta">{fight.mat} · {fight.category} · {fight.round}</div>
           <div class="live-duel">
             <div class="duel-side red">
-              <span class="portrait small-portrait" style="background:{fight.red.clubColour};">{initials(fight.red.name)}</span>
+              <FighterPortrait
+                src={fight.red.avatarPath}
+                label={fight.red.name}
+                size="34px"
+                fallback={initials(fight.red.name)}
+                clubColour={fight.red.clubColour}
+              />
               <strong class="duel-name">{fight.red.name}</strong>
             </div>
             <span class="vs">vs</span>
             <div class="duel-side blue">
               <strong class="duel-name">{fight.blue.name}</strong>
-              <span class="portrait small-portrait" style="background:{fight.blue.clubColour};">{initials(fight.blue.name)}</span>
+              <FighterPortrait
+                src={fight.blue.avatarPath}
+                label={fight.blue.name}
+                size="34px"
+                fallback={initials(fight.blue.name)}
+                clubColour={fight.blue.clubColour}
+              />
             </div>
           </div>
         </div>
@@ -163,9 +176,27 @@
         <div class="stat flash reveal-item">
           <div class="eyebrow">{fight.mat} · {fight.category}</div>
           <div class="matchup">
-            <span class="fighter red">{fight.red.name}</span>
+            <div class="matchup-fighter red">
+              <FighterPortrait
+                src={fight.red.avatarPath}
+                label={fight.red.name}
+                size="28px"
+                fallback={initials(fight.red.name)}
+                clubColour={fight.red.clubColour}
+              />
+              <span class="fighter-name">{fight.red.name}</span>
+            </div>
             <span class="sep">vs</span>
-            <span class="fighter blue">{fight.blue.name}</span>
+            <div class="matchup-fighter blue">
+              <span class="fighter-name">{fight.blue.name}</span>
+              <FighterPortrait
+                src={fight.blue.avatarPath}
+                label={fight.blue.name}
+                size="28px"
+                fallback={initials(fight.blue.name)}
+                clubColour={fight.blue.clubColour}
+              />
+            </div>
           </div>
           <div class="small muted">{fight.round}</div>
         </div>
@@ -186,9 +217,23 @@
           {#each leaders as row, i (row.fighterId)}
             <tr style="border-top:1px solid var(--brand-border);" class="reveal-item">
               <td style="padding:8px;">{i + 1}</td>
-              <td><strong>{row.name}</strong> <span class="badge spectator">{row.belt}</span></td>
+              <td>
+                <FighterPortrait
+                  src={row.avatarPath}
+                  label={row.name}
+                  size="32px"
+                  fallback={initials(row.name)}
+                  clubColour={row.clubColour}
+                />
+                <strong>{row.name}</strong> <span class="badge spectator">{row.belt}</span>
+              </td>
               <td>{row.category}</td>
-              <td><span style="color:{row.clubColour};">●</span> {row.club}</td>
+              <td>
+                {#if row.clubLogo}
+                  <img src={row.clubLogo} alt={row.club} class="club-logo" />
+                {/if}
+                <span style="color:{row.clubColour};">●</span> {row.club}
+              </td>
               <td style="color:var(--win);">{row.wins}</td><td style="color:var(--draw);">{row.draws}</td>
               <td style="color:var(--loss);">{row.losses}</td>
               <td><strong>{row.points}</strong></td>
@@ -208,9 +253,27 @@
         <div class="stat small reveal-item">
           <div class="eyebrow">{fight.mat} · {fight.category}</div>
           <div class="matchup compact">
-            <span class="fighter red">{fight.red.name}</span>
+            <div class="matchup-fighter red">
+              <FighterPortrait
+                src={fight.red.avatarPath}
+                label={fight.red.name}
+                size="24px"
+                fallback={initials(fight.red.name)}
+                clubColour={fight.red.clubColour}
+              />
+              <span class="fighter-name">{fight.red.name}</span>
+            </div>
             <span class="sep">—</span>
-            <span class="fighter blue">{fight.blue.name}</span>
+            <div class="matchup-fighter blue">
+              <span class="fighter-name">{fight.blue.name}</span>
+              <FighterPortrait
+                src={fight.blue.avatarPath}
+                label={fight.blue.name}
+                size="24px"
+                fallback={initials(fight.blue.name)}
+                clubColour={fight.blue.clubColour}
+              />
+            </div>
           </div>
           <div class="muted">{fight.outcome === 'draw' ? 'Draw · DP / DP' : fight.outcome === 'win_red' ? 'Winner: ' + fight.red.name : 'Winner: ' + fight.blue.name}</div>
         </div>
@@ -228,15 +291,16 @@
   .duel-name { font-size:1.2rem; min-width:0; overflow-wrap:anywhere; }
   .vs { font-family:var(--font-display); font-size:2rem; }
   .matchup { display:flex; align-items:center; gap:6px; font-size:1.05rem; font-weight:700; }
-  .matchup .fighter { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .matchup .fighter.red { flex:1; text-align:right; }
-  .matchup .fighter.blue { flex:1; }
+  .matchup-fighter { display:flex; align-items:center; gap:6px; min-width:0; }
+  .matchup-fighter.red { flex:1; text-align:right; }
+  .matchup-fighter.blue { flex:1; }
+  .matchup-fighter .fighter-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .matchup .sep { flex:none; color:var(--brand-muted); font-size:.78rem; font-weight:600; }
   .matchup.compact { font-size:.92rem; }
+  .club-logo { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; margin-right: 4px; vertical-align: middle; }
   /* Host banner is full-bleed across the display content area — it belongs to the organiser/club, not a card. */
   .brand-banner {
-    height:clamp(90px,10vw,160px); width:calc(100% + clamp(28px,4vw,80px));
-    margin:0 calc(-1 * clamp(14px,2vw,40px)) 16px; border-radius:0;
+    height:clamp(90px,10vw,160px); width:100%; margin:0 0 16px; border-radius:0;
     border:0; border-bottom:1px solid var(--brand-border);
     background:var(--event-banner) center/contain no-repeat, var(--brand-primary-fill);
     background-color:var(--brand-surface-2);
@@ -268,7 +332,7 @@
     .matchup.compact { font-size:.84rem; }
     /* Phone board: compact the hero clock and banner so the actual fights land
        higher on the screen and there is far less scrolling before content. */
-    .brand-banner { height: clamp(56px, 7vw, 96px); margin: 0 calc(-1 * clamp(10px, 2vw, 24px)) 12px; }
+    .brand-banner { height: clamp(56px, 7vw, 96px); width:100%; margin:0 0 12px; }
     .clock-hero { padding: clamp(10px, 2vw, 18px); gap: clamp(10px, 3vw, 26px); }
     .big-clock { font-size: clamp(1.7rem, 9vw, 4.2rem); }
     .clock-hero .eyebrow { font-size: .7rem; }

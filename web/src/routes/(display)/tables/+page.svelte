@@ -3,6 +3,7 @@
   import { initials } from '../../../lib/format';
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import { api, type StandingRow, type KataPerformance, type MedalRow } from '../../../lib/api';
+  import FighterPortrait from '../../../lib/components/FighterPortrait.svelte';
   import { replaySnapshot } from '../../../lib/demo-replay';
   import { onLiveChange } from '../../../lib/live-updates';
 
@@ -162,7 +163,7 @@
           {#each filtered as row, i (row.fighterId)}
             <tr style="border-top:1px solid var(--brand-border);">
               <td style="padding:8px;">{i + 1}</td>
-              <td><span class="portrait tiny" style="background:{row.clubColour};">{initials(row.name)}</span> <strong>{row.name}</strong></td>
+              <td><FighterPortrait src={row.avatarPath} label={row.name} size="30px" fallback={initials(row.name)} clubColour={row.clubColour} /> <strong>{row.name}</strong></td>
               <td>{row.category}</td><td>{row.belt || '—'}</td>
               <td><span style="color:{row.clubColour};">●</span> {row.club}</td>
               <td style="color:var(--win);">{row.wins}</td><td style="color:var(--draw);">{row.draws}</td>
@@ -176,5 +177,4 @@
 </div>
 
 <style>
-  .portrait.tiny { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:9px; color:#fff; font-size:.72rem; font-weight:800; vertical-align:middle; margin-right:6px; }
 </style>

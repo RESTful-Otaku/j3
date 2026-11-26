@@ -57,13 +57,14 @@ func Ensure(store *db.DB) error {
 
 	add(`INSERT OR IGNORE INTO tenants (id, name, slug, locale) VALUES (?, ?, ?, ?)`,
 		tenantID, "J3 Demo Dojo", "demo", "en")
-	add(`INSERT OR IGNORE INTO themes (id, tenant_id, name, tokens_json) VALUES (?, ?, ?, ?)`,
+	add(`INSERT OR IGNORE INTO themes (id, tenant_id, name, tokens_json, logo_path, banner_path) VALUES (?, ?, ?, ?, ?, ?)`,
 		"demo-theme", tenantID, "J3 Default",
-		`{"primary":"#2563eb","accent":"#f59e0b","ink":"#0f172a"}`)
+		`{"primary":"#2563eb","accent":"#f59e0b","ink":"#0f172a"}`,
+		"/media/logo.png", "/media/banner.png")
 
-	for _, c := range clubs {
-		add(`INSERT OR IGNORE INTO clubs (id, tenant_id, name, primary_colour) VALUES (?, ?, ?, ?)`,
-			c.id, tenantID, c.name, c.colour)
+	for i, c := range clubs {
+		add(`INSERT OR IGNORE INTO clubs (id, tenant_id, name, logo_path, primary_colour) VALUES (?, ?, ?, ?, ?)`,
+			c.id, tenantID, c.name, fmt.Sprintf("/media/club_logo_%d.jpg", i+1), c.colour)
 	}
 
 	for i, rank := range []struct{ id, label, colour, kind string }{
@@ -169,9 +170,10 @@ func Ensure(store *db.DB) error {
 
 	for _, f := range fighters {
 		add(`INSERT OR IGNORE INTO fighters
-			(id, tenant_id, user_id, club_id, belt_rank_id, display_name, date_of_birth, weight_kg, gender)
-			VALUES (?, ?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?)`,
-			f.id, tenantID, f.userID, f.clubID, f.beltID, f.name, f.dob, f.weight, f.gender)
+			(id, tenant_id, user_id, club_id, belt_rank_id, display_name, date_of_birth, weight_kg, gender, avatar_path)
+			VALUES (?, ?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?, ?)`,
+			f.id, tenantID, f.userID, f.clubID, f.beltID, f.name, f.dob, f.weight, f.gender,
+			fmt.Sprintf("/media/fighter_%d.jpg", ((f.id[1]-'0')-1)%6+1))
 	}
 
 	add(`INSERT OR IGNORE INTO rule_sets (id, tenant_id, name, version, config_json) VALUES (?, ?, ?, ?, ?)`,

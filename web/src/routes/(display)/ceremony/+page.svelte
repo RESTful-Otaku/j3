@@ -3,8 +3,9 @@
   import { api, livePoll, broadcastPA } from '../../../lib/api';
   import { replaySnapshot } from '../../../lib/demo-replay';
   import { onLiveChange } from '../../../lib/live-updates';
+  import FighterPortrait from '../../../lib/components/FighterPortrait.svelte';
   type Medal = {
-    id: string; fighterId: string; name: string; club: string; clubColour: string;
+    id: string; fighterId: string; name: string; club: string; clubColour: string; avatarPath: string;
     kind: string; category: string; discipline: string; eventType: string; source: string;
   };
   let medals: Medal[] = [];
@@ -23,7 +24,7 @@
   $: displayMedals = replay.active
     ? replay.medals.map((medal) => ({
         id: medal.id, fighterId: medal.fighterId, name: medal.name,
-        club: medal.club || 'Independent', clubColour: '#b91c1c', kind: medal.kind,
+        club: medal.club || 'Independent', clubColour: '#b91c1c', avatarPath: '', kind: medal.kind,
         category: medal.category || '', discipline: medal.discipline || medal.eventType || '',
         eventType: medal.eventType || '', source: 'replay',
       }))
@@ -88,7 +89,7 @@
         <div class="eyebrow">{group.kind}</div>
         {#each group.winners as winner (winner.id)}
           <div class="winner celebrate">
-            <span class="avatar" style="background:{winner.clubColour}">{winner.name.split(' ').map((p) => p[0]).join('')}</span>
+            <FighterPortrait src={winner.avatarPath} label={winner.name} size="44px" fallback={winner.name.split(' ').map((p) => p[0]).join('')} clubColour={winner.clubColour} />
             <strong>{winner.name}</strong>
             <span class="muted">{winner.club}{winner.eventType ? ` · ${winner.eventType.replaceAll('_', ' ')}` : ''}</span>
           </div>
@@ -110,7 +111,6 @@
   .step.bronze { min-height:200px; }
   .medal-icon { font-size:3rem; }
   .winner { display:grid; gap:6px; justify-items:center; margin-top:14px; }
-  .winner .avatar { width:60px; height:60px; border-radius:18px; display:grid; place-items:center; color:#fff; font-weight:800; }
   @media (max-width: 700px) {
     .podium { gap:10px; margin-top:16px; }
     .step { flex:1 1 100%; min-width:0; width:100%; max-width:none; padding:16px; border-radius:14px; }

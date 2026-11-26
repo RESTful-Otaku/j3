@@ -15,6 +15,7 @@ type medalView struct {
 	Name         string `json:"name"`
 	Club         string `json:"club"`
 	ClubColour   string `json:"clubColour"`
+	AvatarPath   string `json:"avatarPath"`
 	Kind         string `json:"kind"`
 	CategoryID   string `json:"categoryId"`
 	Category     string `json:"category"`
@@ -121,7 +122,7 @@ func (s *Server) recomputeAwards(ctx context.Context, eventID string) (int, erro
 func (s *Server) listMedalsHandler(w http.ResponseWriter, r *http.Request) {
 	query := `
 		SELECT m.id, m.fighter_id, COALESCE(f.display_name, m.fighter_id),
-		       COALESCE(club.name,''), COALESCE(club.primary_colour,'#64748b'), m.kind,
+		       COALESCE(club.name,''), COALESCE(club.primary_colour,'#64748b'), COALESCE(f.avatar_path,''), m.kind,
 		       COALESCE(m.category_id,''), COALESCE(cat.name,''),
 		       COALESCE(m.discipline_id,''), COALESCE(dr.name, disc.name, ''),
 		       m.event_type, COALESCE(m.award_key,''), m.source
@@ -158,6 +159,7 @@ func (s *Server) listMedalsHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var medal medalView
 		if err := rows.Scan(&medal.ID, &medal.FighterID, &medal.Name, &medal.Club, &medal.ClubColour,
+			&medal.AvatarPath,
 			&medal.Kind, &medal.CategoryID, &medal.Category, &medal.DisciplineID,
 			&medal.Discipline, &medal.EventType, &medal.AwardKey, &medal.Source); err != nil {
 			writeError(w, err)

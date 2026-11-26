@@ -1558,6 +1558,7 @@ export interface components {
             name: string;
             club: string;
             clubColour: string;
+            avatarPath: string;
             kind: string;
             categoryId: string;
             category: string;
@@ -1577,6 +1578,8 @@ export interface components {
             belt: string;
             club: string;
             clubColour: string;
+            clubLogo: string;
+            avatarPath: string;
             wins: number;
             losses: number;
             draws: number;
@@ -1771,6 +1774,8 @@ export interface components {
             name: string;
             club: string;
             clubColour: string;
+            clubLogo: string;
+            avatarPath: string;
             belt: string;
             seed: number;
         };
@@ -1789,6 +1794,7 @@ export interface components {
             club: string;
             clubColour: string;
             logoPath: string;
+            avatarPath: string;
             belt: string;
             beltColour: string;
             heightCm: number;

@@ -5,10 +5,11 @@
   import { notifySuccess, notifyError } from '../../../lib/toast';
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import ConfirmDialog from '../../../lib/components/ConfirmDialog.svelte';
+  import FighterPortrait from '../../../lib/components/FighterPortrait.svelte';
   import { onLiveChange } from '../../../lib/live-updates';
   import { cornerConfig } from '../../../lib/event-brand';
 
-  type Slot = { id: string; name: string; colour: string };
+  type Slot = { id: string; name: string; colour: string; avatarPath: string; clubLogo: string };
   type BracketNode = { id: string; label: string; a: Slot | null; b: Slot | null; winner: string };
 
   let fights: DemoFight[] = [];
@@ -105,8 +106,8 @@
       notifyError(error instanceof Error ? error.message : 'Could not record result');
     }
   }
-  function toSlot(member: { id: string; name: string; clubColour: string }): Slot {
-    return { id: member.id, name: member.name, colour: member.clubColour };
+  function toSlot(member: { id: string; name: string; clubColour: string; avatarPath: string; clubLogo: string }): Slot {
+    return { id: member.id, name: member.name, colour: member.clubColour, avatarPath: member.avatarPath, clubLogo: member.clubLogo };
   }
   function winnerFor(a: Slot | null, b: Slot | null) {
     const fight = fights.find((f) =>
@@ -228,7 +229,13 @@
               <div class="bracket-match">
                 {#each match.slots as slot (slot.id)}
                   <div class="bracket-slot" class:advanced={slot.state === 'advanced'} class:out={slot.state === 'eliminated'}>
-                    <span class="portrait tiny" style="background:{slot.clubColour || '#64748b'};">{#if slot.clubLogo}<img src={slot.clubLogo} alt="" />{:else}{initials(slot.fighterName || 'TBD')}{/if}</span>
+                    <FighterPortrait
+                      src={slot.avatarPath}
+                      label={slot.fighterName || 'TBD'}
+                      size="42px"
+                      fallback={initials(slot.fighterName || 'TBD')}
+                      clubColour={slot.clubColour || '#64748b'}
+                    />
                     <span style="flex:1; min-width:0;">
                       <strong>{slot.fighterName || 'TBD'}</strong>
                       <span class="muted small" style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{slot.club || 'Independent'} · {slot.belt}</span>
@@ -260,11 +267,17 @@
             {#each roundFights as fight (fight.id)}
               <div class="card slide-in" style="padding:14px;">
                 <div class="small muted">{fight.mat} · {fight.category}</div>
-                {#each [{ name: fight.red.name, colour: fight.red.clubColour, id: fight.red.id }, { name: fight.blue.name, colour: fight.blue.clubColour, id: fight.blue.id }] as fighter, i}
+                {#each [{ name: fight.red.name, avatarPath: fight.red.avatarPath, clubColour: fight.red.clubColour, id: fight.red.id }, { name: fight.blue.name, avatarPath: fight.blue.avatarPath, clubColour: fight.blue.clubColour, id: fight.blue.id }] as fighter, i}
                   {@const corner = i === 0 ? 'red' : 'blue'}
                   {@const result = outcome(fight, corner)}
                   <div class="match-row" style="display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--brand-border);">
-                    <span class="portrait small-portrait" style="background:{fighter.colour};">{initials(fighter.name)}</span>
+                    <FighterPortrait
+                      src={fighter.avatarPath}
+                      label={fighter.name}
+                      size="42px"
+                      fallback={initials(fighter.name)}
+                      clubColour={fighter.clubColour}
+                    />
                     <span class="match-name" style="flex:1; font-weight:600;">{fighter.name || 'TBD'}</span>
                     {#each cards(fight, corner) as card}<span class="badge {card === 'red' ? 'official' : 'runner'}">{card === 'red' ? '🟥' : '🟨'}</span>{/each}
                     {#if result.code}<span class="badge {result.win ? 'fighter' : 'spectator'}">{result.code}</span>{/if}
@@ -321,8 +334,6 @@
 />
 
 <style>
-  .portrait.tiny img { width:100%; height:100%; object-fit:contain; border-radius:inherit; }
-  .small-portrait, .portrait.tiny { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: .85rem; flex: none; }
   .bracket-wrap { position:relative; display:flex; gap:clamp(18px,2vw,44px); align-items:stretch; overflow-x:auto; padding:12px 0 32px; min-height:min(68vh, 720px); min-width:max-content; }
   .bracket-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }
   .bracket-lines path { fill:none; stroke:var(--brand-accent); stroke-width:2; opacity:.7; }
@@ -350,7 +361,6 @@
     .bracket-slot > span:nth-child(2) { flex:1 1 calc(100% - 48px); }
     .slot-actions { flex:1 1 100%; justify-content:flex-end; margin-top:2px; }
     .slot-actions .tab { min-width:42px; padding:5px 8px; font-size:.76rem; }
-    .small-portrait, .portrait.tiny { width:36px; height:36px; border-radius:10px; font-size:.72rem; }
     .match-row { gap:8px; padding:7px 0; }
     .match-row .badge { flex:none; padding:2px 6px; }
   }

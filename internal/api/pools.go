@@ -21,6 +21,7 @@ type poolMember struct {
 	Club       string `json:"club"`
 	ClubColour string `json:"clubColour"`
 	ClubLogo   string `json:"clubLogo"`
+	AvatarPath string `json:"avatarPath"`
 	Belt       string `json:"belt"`
 	Seed       int    `json:"seed"`
 }
@@ -165,7 +166,7 @@ func (s *Server) listPools(r *http.Request, eventID string) ([]poolView, error) 
 		pool := poolView{ID: summary.id, Name: summary.name, Members: []poolMember{}}
 		memberRows, err := s.Store.QueryContext(r.Context(), `
 			SELECT f.id, f.display_name, COALESCE(c.name, ''),
-			       COALESCE(c.primary_colour, '#64748b'), COALESCE(br.label, ''),
+			       COALESCE(c.primary_colour, '#64748b'), COALESCE(c.logo_path, ''), COALESCE(br.label, ''), COALESCE(f.avatar_path, ''),
 			       COALESCE(pm.seed, 0)
 			FROM pool_members pm
 			JOIN fighters f ON f.id = pm.fighter_id
@@ -177,7 +178,7 @@ func (s *Server) listPools(r *http.Request, eventID string) ([]poolView, error) 
 		}
 		for memberRows.Next() {
 			var m poolMember
-			if err := memberRows.Scan(&m.ID, &m.Name, &m.Club, &m.ClubColour, &m.Belt, &m.Seed); err != nil {
+			if err := memberRows.Scan(&m.ID, &m.Name, &m.Club, &m.ClubColour, &m.ClubLogo, &m.AvatarPath, &m.Belt, &m.Seed); err != nil {
 				memberRows.Close()
 				return nil, err
 			}

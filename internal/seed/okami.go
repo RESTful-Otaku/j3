@@ -37,9 +37,9 @@ func EnsureOkami(store *db.DB) error {
 		args  []any
 	}{
 		{`INSERT OR IGNORE INTO tenants (id, name, slug) VALUES ('demo-tenant','J3 Demo','demo')`, nil},
-		{`INSERT OR IGNORE INTO themes (id, tenant_id, name, tokens_json)
-		  VALUES ('okami-theme','demo-tenant','Okami', ?)`,
-			[]any{`{"primary":"#b91c1c","accent":"#fbbf24","ink":"#f8fafc","style":"classic"}`}},
+		{`INSERT OR IGNORE INTO themes (id, tenant_id, name, tokens_json, logo_path, banner_path)
+		  VALUES ('okami-theme','demo-tenant','Okami', ?, ?, ?)`,
+			[]any{`{"primary":"#b91c1c","accent":"#fbbf24","ink":"#f8fafc","style":"classic"}`, "/media/logo.png", "/media/banner.png"}},
 		{`INSERT OR IGNORE INTO rule_sets (id, tenant_id, name, version, config_json)
 		  VALUES ('rs-okami', 'demo-tenant', 'Okami 2027 Rules', 1, ?)`,
 			[]any{`{"venue":"Skegness Grammar School Gymnasium, Skegness","protection":["Clean pressed Gi","Belt","Mouth guard","Head guard for youth divisions","Instep / shin guards for Randori"],` + cornerDefaultsJSON + `,"matchSeconds":300}`}},
@@ -85,14 +85,14 @@ func EnsureOkami(store *db.DB) error {
 	}
 
 	// Clubs, including Okami Jiu Jitsu.
-	for _, club := range []struct{ id, name, colour string }{
+	for i, club := range []struct{ id, name, colour string }{
 		{"okami", "Okami Jiu Jitsu", "#b91c1c"},
 		{"club-b", "Skegness Dojo", "#2563eb"},
 		{"club-c", "Lincoln Jiu Jitsu", "#16a34a"},
 		{"club-d", "Coastal Martial Arts", "#7c3aed"},
 	} {
-		add(`INSERT OR IGNORE INTO clubs (id, tenant_id, name, primary_colour) VALUES (?, 'demo-tenant', ?, ?)`,
-			club.id, club.name, club.colour)
+		add(`INSERT OR IGNORE INTO clubs (id, tenant_id, name, logo_path, primary_colour) VALUES (?, 'demo-tenant', ?, ?, ?)`,
+			club.id, club.name, fmt.Sprintf("/media/club_logo_%d.jpg", i+1), club.colour)
 	}
 
 	// Organiser and staff: 1 runner, 6 judges (3 per mat), 2 scorekeepers, 8 volunteers.
@@ -144,10 +144,11 @@ func EnsureOkami(store *db.DB) error {
 		     VALUES (?, 'demo-tenant', ?, 'fighter', ?, ?, 'active')`,
 			"ok-u"+id[2:], club, name, fmt.Sprintf("fighter%s@okami.j3", id[2:]))
 		add(`INSERT OR IGNORE INTO fighters
-		     (id, tenant_id, user_id, club_id, belt_rank_id, display_name, date_of_birth, weight_kg, gender)
-		     VALUES (?, 'demo-tenant', ?, ?, ?, ?, ?, ?, ?)`,
+		     (id, tenant_id, user_id, club_id, belt_rank_id, display_name, date_of_birth, weight_kg, gender, avatar_path)
+		     VALUES (?, 'demo-tenant', ?, ?, ?, ?, ?, ?, ?, ?)`,
 			id, "ok-u"+id[2:], club, belt, name,
-			fmt.Sprintf("%d-05-01", 2027-age), weight, gender)
+			fmt.Sprintf("%d-05-01", 2027-age), weight, gender,
+			fmt.Sprintf("/media/fighter_%d.jpg", (i%6)+1))
 		_ = band
 	}
 
