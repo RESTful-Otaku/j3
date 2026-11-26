@@ -65,7 +65,6 @@
       saving = false;
     }
   }
-
   const mediaOptions: Record<string, string[]> = {
     fighter: ['photo'],
     official: ['photo'],
@@ -99,8 +98,7 @@
     <a class="btn" href="/">← Back</a>
   </header>
 
-  <form class="settings-form" on:submit|preventDefault={save}>
-    <section class="card">
+  <section class="card">
       <div class="eyebrow">Profile</div>
       <h2>Your details</h2>
       <div class="field-row">
@@ -219,10 +217,9 @@
     </section>
 
     <div class="action-row" style="margin-top:24px; justify-content:flex-end;">
-      <button class="btn primary" disabled={saving}>{saving ? 'Saving…' : 'Save settings'}</button>
+      <button class="btn primary" on:click={save} disabled={saving}>{saving ? 'Saving…' : 'Save settings'}</button>
     </div>
-  </form>
-</div>
+  </div>
 
 <style>
   :global(.settings-shell) { max-width: 520px; margin: 0 auto; }

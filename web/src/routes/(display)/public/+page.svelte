@@ -113,7 +113,6 @@
 
   <section class="phone-section view-enter class:active={phoneSection === 'live'}">
     <Card title="Today's timeline" eyebrow="Schedule" expandable preview={nextUp ? `${nextUp.name} · ${formatTime(nextUp.projectedStart)}–${formatTime(nextUp.projectedEnd)}` : 'Schedule complete'}>
-    <div class="section-title"><h2>Today's timeline</h2></div>
     <div class="card">
       <table style="width:100%; border-collapse:collapse; font-size:clamp(.9rem,1.2vw,1.3rem);">
         <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">Projected</th><th>Event</th><th>Area</th><th>Status</th><th></th></tr></thead>
@@ -132,7 +131,7 @@
     </Card>
 
     <Card title="On the mats now" eyebrow="Live" expandable preview={live.length ? `${live.length} contest${live.length === 1 ? '' : 's'}` : 'No live contests'}>
-    <div class="section-title"><h2>On the mats now</h2><span class="pill"><span class="dot"></span>Live</span></div>
+    <div class="section-title"><span class="pill"><span class="dot"></span>Live</span></div>
     <div class="grid" use:phoneLimit={3} style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));">
       {#each live as fight (fight.id)}
         <div class="card slide-in reveal-item" style="border-color:var(--brand-primary);">
@@ -158,7 +157,7 @@
 
   <section class="phone-section view-enter class:active={phoneSection === 'next'}">
     <Card title="Next up — report to your mat" eyebrow="Upcoming" expandable preview={upcoming.length ? `${upcoming.length} bout${upcoming.length === 1 ? '' : 's'}` : 'Schedule is clear'}>
-    <div class="section-title"><h2>Next up — report to your mat</h2><span class="muted small">{upcoming.length} upcoming</span></div>
+    <div class="section-title"><span class="muted small">{upcoming.length} upcoming</span></div>
     <div class="grid" use:phoneLimit={4} style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));">
       {#each upcoming as fight (fight.id)}
         <div class="stat flash reveal-item">
@@ -179,7 +178,7 @@
 
   <section class="phone-section view-enter class:active={phoneSection === 'table'}">
     <Card title="Leaderboard" eyebrow="Standings" expandable preview={leaders.length ? `#1 ${leaders[0]?.name ?? '—'}` : 'No standings yet'}>
-    <div class="section-title"><h2>Leaderboard</h2><span class="muted small">Points: 3 per win, 1 per draw</span></div>
+    <div class="section-title"><span class="muted small">Points: 3 per win, 1 per draw</span></div>
     <div class="card">
       <table style="width:100%; border-collapse:collapse; font-size:clamp(.9rem,1.2vw,1.3rem);">
         <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">#</th><th>Fighter</th><th>Category</th><th>Club</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead>
@@ -203,7 +202,7 @@
 
   <section class="phone-section view-enter class:active={phoneSection === 'results'}">
     <Card title="Recent results" eyebrow="Finished" expandable preview={finished.length ? `Last: ${finished[finished.length-1]?.red.name ?? '—'} vs ${finished[finished.length-1]?.blue.name ?? '—'}` : 'No results yet'}>
-    <div class="section-title"><h2>Recent results</h2></div>
+    <div class="section-title"></div>
     <div class="grid" use:phoneLimit={4} style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));">
       {#each finished.slice(-8) as fight (fight.id)}
         <div class="stat small reveal-item">
