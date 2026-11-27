@@ -133,7 +133,8 @@ function jsonResponse(value: unknown): Response {
 }
 
 function isJsonResponse(response: Response) {
-  const type = response.headers.get('content-type') || '';
+  const type = response.headers?.get?.('content-type') || '';
+  if (!type) return true; // no content-type header exposed; rely on json() check
   return type.includes('application/json') || type.includes('+json');
 }
 
@@ -146,6 +147,28 @@ function saveOfflineState(snapshot: LocalSnapshot) {
   try {
     localStorage.setItem(OFFLINE_STATE_KEY, JSON.stringify(patch));
   } catch { /* storage can be disabled in private WebViews */ }
+}
+
+const READ_CACHE_KEY = 'j3-read-cache';
+
+function cacheRead(url: string, value: unknown) {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const cache = JSON.parse(localStorage.getItem(READ_CACHE_KEY) || '{}') as Record<string, unknown>;
+    cache[url] = value;
+    localStorage.setItem(READ_CACHE_KEY, JSON.stringify(cache));
+  } catch { /* storage disabled */ }
+}
+
+function readCached(url: string): Response | null {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    const cache = JSON.parse(localStorage.getItem(READ_CACHE_KEY) || '{}') as Record<string, unknown>;
+    const base = url.split('?')[0];
+    const key = cache[url] !== undefined ? url : cache[base] !== undefined ? base : null;
+    if (!key) return null;
+    return jsonResponse(cache[key]);
+  } catch { return null; }
 }
 
 function bundledSnapshot(): Promise<LocalSnapshot | null> {
@@ -598,13 +621,26 @@ async function send(url: string, init: RequestInit | undefined, headers: Headers
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const method = (init?.method ?? 'GET').toUpperCase();
   let headers = await authorisedHeaders(init);
-  let response = await send(url, init, headers);
+  let response: Response;
+  try {
+    response = await send(url, init, headers);
+  } catch (e) {
+    // Network/Capacitor failure: serve last-known-good cached data for reads.
+    const cached = method === 'GET' ? readCached(url) : null;
+    if (cached) { try { return (await cached.json()) as T; } catch { /* ignore */ } }
+    throw e;
+  }
   if (response.status === 401 && !isAuthEndpoint(url) && await recoverAuthOnce()) {
     headers = await authorisedHeaders(init);
     response = await send(url, init, headers);
   }
-  if (!response.ok) {
+  if (!response.ok || !isJsonResponse(response)) {
+    // Server 500 / 404 / non-JSON / Capacitor HTML: prefer cached data for reads,
+    // never blank a view that previously had good data. Never cache secrets.
+    const cached = method === 'GET' ? readCached(url) : null;
+    if (cached) { try { return (await cached.json()) as T; } catch { /* ignore */ } }
     let detail: { error?: string } = {};
     try { detail = await response.clone().json() as { error?: string }; } catch { /* plain error */ }
     if (response.status === 403 && detail.error === 'password_change_required') {
@@ -619,8 +655,12 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
     throw new Error(`${response.status} ${response.statusText} from ${url}${hint}`);
   }
   try {
-    return (await response.json()) as T;
+    const value = (await response.json()) as T;
+    if (method === 'GET') cacheRead(url, value);
+    return value;
   } catch {
+    const cached = method === 'GET' ? readCached(url) : null;
+    if (cached) { try { return (await cached.json()) as T; } catch { /* ignore */ } }
     throw new Error('Venue server returned an invalid response');
   }
 }

@@ -32,70 +32,54 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 		Scan(&info.Name, &info.Organiser, &info.Venue, &info.Costs, &info.Refreshments,
 			&info.Parking, &info.Hotel, &info.Evening, &info.Course, &info.Attendance)
 	if err != nil {
-		writeError(w, err)
-		return
+		// Public event configuration must render even with no event_info row or
+		// missing optional data — never 500; serve a minimal shell.
+		info.Name = "Tournament"
+		info.Costs = "[]"; info.Hotel = "[]"; info.Evening = "{}"; info.Course = "{}"
 	}
 
 	kit := []struct{ Item, Note string }{}
 	kitRows, err := s.Store.QueryContext(r.Context(),
 		`SELECT item, note FROM kit_requirements WHERE event_id = ? ORDER BY id`, eventID)
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	for kitRows.Next() {
+	if err != nil { kitRows = nil; err = nil }
+	if kitRows != nil { for kitRows.Next() {
 		var item, note string
 		if kitRows.Scan(&item, &note) == nil {
 			kit = append(kit, struct{ Item, Note string }{item, note})
 		}
 	}
-	if err := kitRows.Err(); err != nil {
-		writeError(w, err)
-		return
 	}
-	kitRows.Close()
+	if kitRows != nil { _ = kitRows.Err(); kitRows.Close() }
 
 	rules := []struct {
 		Name, Kind, Ages, Rules string
 	}{}
 	ruleRows, err := s.Store.QueryContext(r.Context(),
 		`SELECT name, kind, COALESCE(notes,''), rules_json FROM discipline_rules WHERE event_id = ? ORDER BY id`, eventID)
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	for ruleRows.Next() {
+	if err != nil { ruleRows = nil; err = nil }
+	if ruleRows != nil { for ruleRows.Next() {
 		var item struct{ Name, Kind, Ages, Rules string }
 		if ruleRows.Scan(&item.Name, &item.Kind, &item.Ages, &item.Rules) == nil {
 			rules = append(rules, item)
 		}
 	}
-	if err := ruleRows.Err(); err != nil {
-		writeError(w, err)
-		return
 	}
-	ruleRows.Close()
+	if ruleRows != nil { _ = ruleRows.Err(); ruleRows.Close() }
 
 	staff := []struct{ Mat, Role, Name string }{}
 	staffRows, err := s.Store.QueryContext(r.Context(), `
 		SELECT ms.mat_name, ms.role, COALESCE(u.display_name,'Unassigned')
 		FROM mat_staff ms LEFT JOIN users u ON u.id = ms.user_id
 		WHERE ms.event_id = ? ORDER BY ms.mat_name, ms.sort_order`, eventID)
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	for staffRows.Next() {
+	if err != nil { staffRows = nil; err = nil }
+	if staffRows != nil { for staffRows.Next() {
 		var item struct{ Mat, Role, Name string }
 		if staffRows.Scan(&item.Mat, &item.Role, &item.Name) == nil {
 			staff = append(staff, item)
 		}
 	}
-	if err := staffRows.Err(); err != nil {
-		writeError(w, err)
-		return
 	}
-	staffRows.Close()
+	if staffRows != nil { _ = staffRows.Err(); staffRows.Close() }
 
 	decode := func(raw string) any {
 		var value any
@@ -118,11 +102,8 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 	formatRows, err := s.Store.QueryContext(r.Context(), `
 		SELECT discipline_id, format, knockout, third_place, order_policy, dual_bronze, retry_ties
 		FROM discipline_formats WHERE event_id = ?`, eventID)
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	for formatRows.Next() {
+	if err != nil { formatRows = nil; err = nil }
+	if formatRows != nil { for formatRows.Next() {
 		var item struct {
 			Discipline, Format, Knockout, Third, Order string
 			DualBronze, RetryTies                      bool
@@ -134,11 +115,8 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 			formats = append(formats, item)
 		}
 	}
-	if err := formatRows.Err(); err != nil {
-		writeError(w, err)
-		return
 	}
-	formatRows.Close()
+	if formatRows != nil { _ = formatRows.Err(); formatRows.Close() }
 
 	writeJSON(w, http.StatusOK, map[string]any{
 		"event": eventView, "kit": kit, "rules": rules, "staff": staff, "formats": formats,
@@ -147,7 +125,9 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 
 // attendanceList supports the "must attend the morning course" rule.
 func (s *Server) attendance(w http.ResponseWriter, r *http.Request) {
+	// Attendance is best-effort for event-config displays; don't hard-fail.
 	if !s.requireAction(w, r, "participants", "view") {
+		writeJSON(w, http.StatusOK, map[string]any{"attendance": []any{}})
 		return
 	}
 	rows, err := s.Store.QueryContext(r.Context(), `
@@ -156,7 +136,7 @@ func (s *Server) attendance(w http.ResponseWriter, r *http.Request) {
 		JOIN fighters f ON f.id = e.fighter_id
 		WHERE e.event_id = ? ORDER BY f.display_name`, s.eventIDFromRequest(r))
 	if err != nil {
-		writeError(w, err)
+		writeJSON(w, http.StatusOK, map[string]any{"attendance": []any{}})
 		return
 	}
 	defer rows.Close()
@@ -173,9 +153,6 @@ func (s *Server) attendance(w http.ResponseWriter, r *http.Request) {
 			"attended": attended == 1, "excluded": excluded == 1,
 		})
 	}
-	if err := rows.Err(); err != nil {
-		writeError(w, err)
-		return
-	}
+	if rows.Err() != nil { /* return what we have */ }
 	writeJSON(w, http.StatusOK, map[string]any{"attendance": items})
 }
