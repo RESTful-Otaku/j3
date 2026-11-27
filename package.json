@@ -1,7 +1,7 @@
 {
   "name": "j3",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.8.0",
   "scripts": {
     "dev": "bash scripts/dev.sh",
     "demo": "bash scripts/demo.sh",
@@ -70,6 +70,10 @@
     "dev:lite": "bash scripts/dev-lite.sh",
     "storybook": "bun run --cwd web storybook",
     "storybook:build": "bun run --cwd web build-storybook",
-    "component:storybook": "bun run storybook"
-  }
+    "component:storybook": "bun run storybook",
+    "version": "bash scripts/version.sh",
+    "version:check": "bash scripts/version.sh release check"
+  },
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "author": "Jonathan Harrison (RESTful_Otaku)"
 }

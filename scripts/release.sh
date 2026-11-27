@@ -9,7 +9,7 @@ source scripts/build-paths.sh
 j3_prepare_build_dirs
 
 echo "🧩 Building cross-platform server executables → $J3_BUILD_SERVER"
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o "$J3_BUILD_SERVER/j3d-linux-amd64" ./cmd/j3d
+J3_VERSION="$(bash scripts/version.sh release core)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o "$J3_BUILD_SERVER/j3d-linux-amd64" ./cmd/j3d
 CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o "$J3_BUILD_SERVER/j3d-linux-arm64" ./cmd/j3d
 CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o "$J3_BUILD_SERVER/j3d-darwin-arm64" ./cmd/j3d
 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o "$J3_BUILD_SERVER/j3d-windows-amd64.exe" ./cmd/j3d

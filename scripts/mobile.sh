@@ -114,7 +114,10 @@ build_apk() {
   prepare_flavor "$flavor" || return 1
   build_web_bundle || return 1
   (cd web && bunx cap sync android) >/dev/null || return 1
-  (cd web/android && ./gradlew assembleDebug --no-daemon) || return 1
+  local channel="${J3_VERSION_CHANNEL:-release}"
+  local version_name="${J3_VERSION_NAME:-$(bash scripts/version.sh "$channel" name 2>/dev/null || echo 0.8.0)}"
+  local version_code="${J3_VERSION_CODE:-$(bash scripts/version.sh "$channel" code 2>/dev/null || echo 8002)}"
+  (cd web/android && J3_VERSION_NAME="$version_name" J3_VERSION_CODE="$version_code" ./gradlew assembleDebug --no-daemon) || return 1
 
   j3_prepare_build_dir "$J3_BUILD_ANDROID"
   case "$flavor" in

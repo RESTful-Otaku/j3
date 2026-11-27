@@ -1,7 +1,7 @@
 {
   "name": "j3-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.8.0",
   "type": "module",
   "imports": {
     "$lib": "./src/lib/index.ts",
@@ -47,5 +47,7 @@
     "@vitest/browser-playwright": "5.1.1",
     "@vitest/coverage-v8": "5.1.1",
     "playwright": "latest"
-  }
+  },
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "author": "Jonathan Harrison (RESTful_Otaku)"
 }

@@ -112,7 +112,7 @@ jobs:
           VERSION="${{ inputs.version }}"
           VERSION="${VERSION#v}"
           if [ -z "$VERSION" ]; then VERSION="$(jq -r .version web/package.json)"; fi
-          CODE="$(printf '%s' "$VERSION" | awk -F. '{printf "%d%02d%02d", $1, $2, $3}')"
+          CODE="$(printf '%s' "$VERSION" | sed -E 's/[a-zA-Z-].*$//' | awk -F. '{p=$3+0; printf "%d%02d%02d", $1, $2, p}')"
           echo "name=$VERSION" >> "$GITHUB_OUTPUT"
           echo "code=$CODE" >> "$GITHUB_OUTPUT"
           echo "Android client version $VERSION ($CODE)"
@@ -185,6 +185,7 @@ jobs:
             echo "::warning::ANDROID_KEYSTORE secrets not set; generated the standard debug keystore for the release APK"
           fi
           export J3_VERSION_NAME="${{ steps.version.outputs.name }}"
+          export J3_VERSION_CODE="${{ steps.version.outputs.code }}"
           export J3_VERSION_CODE="${{ steps.version.outputs.code }}"
           cd web/android
           chmod +x ./gradlew
@@ -283,7 +284,7 @@ jobs:
           VERSION="${{ inputs.version }}"
           VERSION="${VERSION#v}"
           if [ -z "$VERSION" ]; then VERSION="$(jq -r .version web/package.json)"; fi
-          CODE="$(printf '%s' "$VERSION" | awk -F. '{printf "%d%02d%02d", $1, $2, $3}')"
+          CODE="$(printf '%s' "$VERSION" | sed -E 's/[a-zA-Z-].*$//' | awk -F. '{p=$3+0; printf "%d%02d%02d", $1, $2, p}')"
           echo "name=$VERSION" >> "$GITHUB_OUTPUT"
           echo "code=$CODE" >> "$GITHUB_OUTPUT"
           echo "iOS client version $VERSION ($CODE)"

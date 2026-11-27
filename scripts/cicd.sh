@@ -6,6 +6,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 bun run check:workflows
+bash scripts/version.sh release check
 # Load suite needs a live venue server; start one for the local CI run.
 go build -o /tmp/j3-cicd-bin ./cmd/j3d
 /tmp/j3-cicd-bin -addr 127.0.0.1:8787 -db /tmp/j3-cicd.db -seed > /tmp/j3-cicd-server.log 2>&1 &
@@ -24,4 +25,5 @@ bun run smoke:full
 bun run load
 bun run e2e
 bun run build
+bun run storybook:build
 echo "✅ All CI/CD checks passed locally"

@@ -47,11 +47,14 @@ jobs:
           bun-version: 1.4.5
       - name: Validate workflow YAML and reusable workflow references
         run: bun run check:workflows
+      - name: Validate semver version
+        run: bash scripts/version.sh release check
       - name: Exercise every TUI menu action
         run: bun run test:tui
 
   go:
     name: Go venue server
+    needs: [workflows]
     if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -76,6 +79,7 @@ jobs:
 
   web:
     name: Web (Bun)
+    needs: [workflows]
     if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -95,6 +99,8 @@ jobs:
           git diff --exit-code -- web/src/lib/api-types.d.ts
       - name: Production build
         run: bun run --cwd web build
+      - name: Storybook build
+        run: bun run --cwd web build-storybook
       - uses: actions/upload-artifact@v7
         with:
           name: web-build-${{ github.sha }}
@@ -102,6 +108,7 @@ jobs:
 
   smoke:
     name: End-to-end smoke
+    needs: [workflows, go, web]
     if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     steps:
@@ -118,6 +125,7 @@ jobs:
 
   load:
     name: Load & stability
+    needs: [workflows, go]
     if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -144,6 +152,7 @@ jobs:
 
   e2e:
     name: Browser E2E + accessibility
+    needs: [workflows, web]
     if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 20
