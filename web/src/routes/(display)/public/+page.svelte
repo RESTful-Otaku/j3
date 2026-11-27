@@ -5,6 +5,7 @@
   import { phoneLimit, phoneRows } from '../../../lib/responsive';
   import Card from '../../../lib/components/Card.svelte';
   import FighterPortrait from '../../../lib/components/FighterPortrait.svelte';
+  import VersusCard from '../../../lib/components/VersusCard.svelte';
   import { api, livePoll, type DemoFight, type EventDisplayInfo, type StandingRow, type ScheduleItem } from '../../../lib/api';
   import { eventTitle } from '../../../lib/event-title';
   import { replaySnapshot } from '../../../lib/demo-replay';
@@ -59,6 +60,12 @@
   }
   function formatTime(value: string) {
     return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  function score(fight: DemoFight, corner: 'red' | 'blue') {
+    return (fight.events ?? []).filter((e) => {
+      const p = (e as any).payload ?? e;
+      return e.kind === 'score' && (p as any).corner === corner;
+    }).reduce((sum, e) => sum + Number((((e as any).payload ?? e) as any).points ?? 0), 0);
   }
 </script>
 
@@ -135,31 +142,17 @@
     <div class="section-title"><span class="pill"><span class="dot"></span>Live</span></div>
     <div class="grid" use:phoneLimit={3} style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));">
       {#each live as fight (fight.id)}
-        <div class="card slide-in reveal-item" style="border-color:var(--brand-primary);">
-          <div class="meta">{fight.mat} · {fight.category} · {fight.round}</div>
-          <div class="live-duel">
-            <div class="duel-side red">
-              <FighterPortrait
-                src={fight.red.avatarPath}
-                label={fight.red.name}
-                size="34px"
-                fallback={initials(fight.red.name)}
-                clubColour={fight.red.clubColour}
-              />
-              <strong class="duel-name">{fight.red.name}</strong>
-            </div>
-            <span class="vs">vs</span>
-            <div class="duel-side blue">
-              <strong class="duel-name">{fight.blue.name}</strong>
-              <FighterPortrait
-                src={fight.blue.avatarPath}
-                label={fight.blue.name}
-                size="34px"
-                fallback={initials(fight.blue.name)}
-                clubColour={fight.blue.clubColour}
-              />
-            </div>
-          </div>
+        <div class="reveal-item">
+          <VersusCard
+            event={event?.name ?? ''}
+            category={fight.category}
+            mat={fight.mat}
+            red={fight.red}
+            blue={fight.blue}
+            redScore={score(fight, 'red')}
+            blueScore={score(fight, 'blue')}
+            state={fight.round + ' · ' + fight.state}
+          />
         </div>
       {:else}
         <div class="placeholder">No live contests at this moment.</div>
@@ -328,7 +321,7 @@
     .duel-side { gap:6px; }
     .small-portrait { width:34px; height:34px; border-radius:10px; font-size:.68rem; }
     .duel-name { font-size:.94rem; line-height:1.15; }
-    .live-duel .vs { display:none; }
+    
     .matchup { font-size:.92rem; gap:4px; }
     .matchup.compact { font-size:.84rem; }
     /* Phone board: compact the hero clock and banner so the actual fights land

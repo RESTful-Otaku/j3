@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN photo_path TEXT NOT NULL DEFAULT '';

@@ -219,6 +219,34 @@
         </label>
       </div>
       <label class="check"><input type="checkbox" on:change={(e) => setAccessibility({ dyslexic: (e.target as HTMLInputElement).checked })} /> Dyslexic-friendly reading (spacing + type)</label>
+      <div class="field-row">
+        <label class="field">Cards default
+          <select on:change={(e) => setAccessibility({ cardExpandedDefault: (e.target as HTMLSelectElement).value === 'expanded' })}>
+            <option value="shrunk">Shrunk (minimal)</option>
+            <option value="expanded">Expanded</option>
+          </select>
+        </label>
+        <label class="field">Fighter cards default
+          <select on:change={(e) => setAccessibility({ fighterCardDefault: (e.target as HTMLSelectElement).value === 'expanded' })}>
+            <option value="shrunk">Shrunk</option>
+            <option value="expanded">Expanded</option>
+          </select>
+        </label>
+        <label class="field">Density
+          <select on:change={(e) => setAccessibility({ density: (e.target as HTMLSelectElement).value as any })}>
+            <option value="comfortable">Comfortable</option>
+            <option value="compact">Compact</option>
+          </select>
+        </label>
+        <label class="field">Versus layout
+          <select on:change={(e) => setAccessibility({ versusLayout: (e.target as HTMLSelectElement).value as any })}>
+            <option value="side">Side-by-side</option>
+            <option value="stack">Stacked</option>
+          </select>
+        </label>
+      </div>
+      <label class="check"><input type="checkbox" checked on:change={(e) => setAccessibility({ showClubLogos: (e.target as HTMLInputElement).checked })} /> Show club logos</label>
+      <label class="check"><input type="checkbox" checked on:change={(e) => setAccessibility({ showFighterPhotos: (e.target as HTMLInputElement).checked })} /> Show fighter photos</label>
     </section>
 
     <section class="card">

@@ -9,9 +9,10 @@ import (
 )
 
 type displayOfficial struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Role string `json:"role"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Role      string `json:"role"`
+	PhotoPath string `json:"photoPath"`
 }
 
 type eventDisplayInfo struct {
@@ -78,7 +79,7 @@ func (s *Server) eventDisplay(w http.ResponseWriter, r *http.Request) {
 func (s *Server) displayOfficials(w http.ResponseWriter, r *http.Request) {
 	fightID := r.URL.Query().Get("fightId")
 	query := `
-		SELECT u.id, u.display_name, fo.role
+		SELECT u.id, u.display_name, fo.role, COALESCE(u.photo_path,'')
 		FROM fight_officials fo JOIN users u ON u.id = fo.user_id`
 	args := []any{}
 	if fightID != "" {
@@ -95,7 +96,7 @@ func (s *Server) displayOfficials(w http.ResponseWriter, r *http.Request) {
 	officials := []displayOfficial{}
 	for rows.Next() {
 		var o displayOfficial
-		if err := rows.Scan(&o.ID, &o.Name, &o.Role); err != nil {
+		if err := rows.Scan(&o.ID, &o.Name, &o.Role, &o.PhotoPath); err != nil {
 			writeError(w, err)
 			return
 		}

@@ -43,6 +43,13 @@ var (
 )
 
 // Ensure inserts demo data idempotently; safe to call on every boot.
+func userPhotoPath(id string) string {
+	n := 0
+	for _, c := range id { if c >= '0' && c <= '9' { n = n*10 + int(c-'0') } }
+	if n == 0 { n = len(id) }
+	return fmt.Sprintf("/media/fighter_%d.jpg", n%6+1)
+}
+
 func Ensure(store *db.DB) error {
 	tx, err := store.Begin()
 	if err != nil {
@@ -96,16 +103,16 @@ func Ensure(store *db.DB) error {
 	demoHash, _ := bcrypt.GenerateFromPassword([]byte("demo"), bcrypt.DefaultCost)
 	addUser := func(id, name, email, role, clubID, source string) {
 		add(`INSERT OR IGNORE INTO users
-			(id, tenant_id, club_id, role, display_name, email, password_hash, source, status)
-			VALUES (?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?, 'active')`,
-			id, tenantID, clubID, role, name, email, string(demoHash), source)
+			(id, tenant_id, club_id, role, display_name, email, password_hash, source, status, photo_path)
+			VALUES (?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?, 'active', ?)`,
+			id, tenantID, clubID, role, name, email, string(demoHash), source, userPhotoPath(id))
 	}
 	// Owner/admin: a flagged runner so the original role CHECK stays valid.
 	// This account can invite other admins, runners, officials and club owners.
 	add(`INSERT OR IGNORE INTO users
-		(id, tenant_id, role, is_admin, display_name, email, password_hash, source, status)
+		(id, tenant_id, role, is_admin, display_name, email, password_hash, source, status, photo_path)
 		VALUES ('u-owner', ?, 'tournament_runner', 1, 'J3 Owner (Admin)',
-		        'owner@demo.j3', ?, 'independent', 'active')`, tenantID, string(demoHash))
+		        'owner@demo.j3', ?, 'independent', 'active', '/media/fighter_1.jpg')`, tenantID, string(demoHash))
 
 	addUser("u-runner", "Aiko Tanaka (Runner)", "runner@demo.j3", "tournament_runner", "", "independent")
 	addUser("u-runner-2", "Marcus Bell (Runner)", "runner2@demo.j3", "tournament_runner", "", "independent")

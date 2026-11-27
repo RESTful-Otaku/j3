@@ -10,11 +10,19 @@ export type Accessibility = {
   colourMode: ColourMode;
   dyslexic: boolean;
   motion: Motion;
+  cardExpandedDefault: boolean;
+  fighterCardDefault: boolean;
+  showClubLogos: boolean;
+  showFighterPhotos: boolean;
+  density: 'comfortable' | 'compact';
+  versusLayout: 'side' | 'stack';
 };
 
 const KEY = 'j3-accessibility';
 export const accessibility = writable<Accessibility>({
   fontScale: 'normal', contrast: 'normal', colourMode: 'colour', dyslexic: false, motion: 'system',
+  cardExpandedDefault: false, fighterCardDefault: false, showClubLogos: true, showFighterPhotos: true,
+  density: 'comfortable', versusLayout: 'side',
 });
 
 function apply(a: Accessibility) {
@@ -25,6 +33,12 @@ function apply(a: Accessibility) {
   root.dataset.colourMode = a.colourMode;
   root.dataset.dyslexic = a.dyslexic ? 'on' : 'off';
   root.dataset.motion = a.motion;
+  root.dataset.cardDefault = a.cardExpandedDefault ? 'expanded' : 'shrunk';
+  root.dataset.fighterCardDefault = a.fighterCardDefault ? 'expanded' : 'shrunk';
+  root.dataset.showClubLogos = a.showClubLogos ? 'on' : 'off';
+  root.dataset.showFighterPhotos = a.showFighterPhotos ? 'on' : 'off';
+  root.dataset.density = a.density;
+  root.dataset.versusLayout = a.versusLayout;
 }
 
 export function initAccessibility(): void {

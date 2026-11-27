@@ -537,3 +537,8 @@ td::before, .stat .label, .eyebrow { text-transform: none; }
 .kit-text strong { font-weight:700; }
 @media (prefers-contrast: more) { :root { --brand-border: rgba(226,232,240,.7); } }
 @media (forced-colors: active) { .card,.stat,.btn { border:1px solid CanvasText; } }
+html[data-density='compact'] .card, html[data-density='compact'] .stat { padding: 12px; }
+html[data-density='compact'] p { line-height:1.4; }
+html[data-show-club-logos='off'] .club-logo, html[data-show-club-logos='off'] .club-crest { display:none; }
+html[data-show-fighter-photos='off'] .portrait-photo, html[data-show-fighter-photos='off'] .fighter-photo { display:none; }
+html[data-versus-layout='stack'] .versus-row { grid-template-columns:1fr !important; }

@@ -431,7 +431,7 @@
         </div>
         {#if actor}
           <div style="margin-top:22px;">
-            <Card title="Permission check · {actor.roleLabel}" eyebrow="Allowed actions" expandable preview={`${capabilities.length} active`}>
+            <Card title="Permission check · {actor.roleLabel}" eyebrow="Allowed actions" expandable={false}>
               <div class="capabilities">
                 {#each allActions as action}
                   <span class="cap" class:on={capabilities.includes(action)} class:off={!capabilities.includes(action)}>

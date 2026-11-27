@@ -1,10 +1,12 @@
 <script lang="ts">
   import { isPhoneWidth } from '../nav';
+  import { onMount } from 'svelte';
+  import { accessibility } from '../accessibility';
 
   export let title = '';
   export let eyebrow = '';
   export let expandable = true;
-  export let expanded = true;
+  export let expanded = false;
   export let preview = '';
 
   let isPhone = false;
@@ -21,6 +23,7 @@
     }
   }
 
+  onMount(() => accessibility.subscribe((a) => { if (expandable && !a.cardExpandedDefault) expanded = false; else if (expandable && a.cardExpandedDefault) expanded = true; }));
   $: shouldShow = !expandable || expanded;
 </script>
 

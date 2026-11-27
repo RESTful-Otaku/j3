@@ -151,9 +151,8 @@
       <div class="fighter-row">
         <section class="fighter-hero" class:celebrate={celebrate && method(selected, 'red').startsWith('W')}>
           <div class="portrait">
-            {initials(selected.red.name || 'TBD')}
-            {#if selected.red.logoPath}<img src={selected.red.logoPath} alt="" />{/if}
-            <span class="club-crest" style="background:{selected.red.clubColour};">{initials(selected.red.club || 'IND')}</span>
+            {#if selected.red.avatarPath}<img class="fighter-photo" src={selected.red.avatarPath} alt={selected.red.name} />{:else}{initials(selected.red.name || 'TBD')}{/if}
+            <span class="club-crest" style="background:{selected.red.clubColour};">{#if selected.red.logoPath}<img src={selected.red.logoPath} alt="" />{:else}{initials(selected.red.club || 'IND')}{/if}</span>
           </div>
           <div class="who">
             <div class="name">{selected.red.name || 'TBD'}</div>
@@ -199,9 +198,8 @@
             </div>
           </div>
           <div class="portrait">
-            {initials(selected.blue.name || 'TBD')}
-            {#if selected.blue.logoPath}<img src={selected.blue.logoPath} alt="" />{/if}
-            <span class="club-crest" style="background:{selected.blue.clubColour};">{initials(selected.blue.club || 'IND')}</span>
+            {#if selected.blue.avatarPath}<img class="fighter-photo" src={selected.blue.avatarPath} alt={selected.blue.name} />{:else}{initials(selected.blue.name || 'TBD')}{/if}
+            <span class="club-crest" style="background:{selected.blue.clubColour};">{#if selected.blue.logoPath}<img src={selected.blue.logoPath} alt="" />{:else}{initials(selected.blue.club || 'IND')}{/if}</span>
           </div>
         </section>
       </div>
@@ -210,7 +208,7 @@
     <div class="officials-strip">
       {#each officials as official (official.id + official.role)}
         <div class="official slide-in">
-          <span class="face">{initials(official.name)}</span>
+          <span class="face">{#if (official as any).photoPath}<img src={(official as any).photoPath} alt="" />{:else}{initials(official.name)}{/if}</span>
           <span><span class="role">{official.role}</span><br /><span class="name">{official.name}</span></span>
         </div>
       {:else}

@@ -20,10 +20,6 @@ header() {
   echo "  │      keyboard-navigable developer console       │"
   echo "  ╰────────────────────────────────────────────────╯"
   echo "   ${DIM}J3${NC}${CYAN}${BOLD} ─ build · QA · run · verify · release${NC}"
-  echo "   ${DIM}ASCII:  __  _____      __  →  J3  🥋${NC}"
-  echo "   ${DIM}   | |/   |__/ __| ___ _ _ ___ ___ _ _  _| |_${NC}"
-  echo "   ${DIM}  _|_|    |__\\__ \/ _ \ '_/ -_) _ \ ' \/ _|  _|${NC}"
-  echo "   ${DIM} |____|      |___/\\___/_| \\___\\___/_||_\\__|\\__|${NC}"
   echo ""
 }
 
@@ -33,48 +29,75 @@ menu_gap() { # ensure a space between leading emoji and label
   printf '%s' "$item" | sed -E 's/^([^[:space:]]+)([A-Za-z])/\1 \2/'
 }
 
-menu_desc() { # short description shown under each option
+menu_desc() { # rich description shown in the static box under the list
   case "$1" in
-    *Run\ full\ local\ demo*) echo "Seeded local venue + web; no rebuild." ;;
-    *Run\ fully\ seeded\ tournament*) echo "Okami mid-event full seed; brackets/tables/kata/medals/audit populated." ;;
-    *QA\ \&\ verification*|*QA\ and\ verification*) echo "Checks, smoke, E2E+axe, load, component QA, CI." ;;
-    *Run\ all\ QA\ checks*) echo "Go+web+smoke+E2E+load+build." ;;
-    *Demo\ data*|*Demo\ data\ \&\ state*) echo "Fresh / reseeded / full / keep-existing DB." ;;
-    *Build\ \&\ deploy*|*Build\ \&\ deploy\ \>*|*Build\ \&\ Deploy*) echo "Flavors, release, CI/CD, deploy dev/staging/prod." ;;
+    *Run\ full\ local\ demo*)
+      echo "Run the full local J3 venue server (seeded demo data on :8787) plus Vite web on :5173. No rebuild. Open http://localhost:5173." ;;
+    *Run\ fully\ seeded\ tournament*)
+      echo "Reset + fully seed Okami mid-event (brackets, tables, kata, medals, audit, schedule, pools, officials) then start venue + web. Best for end-to-end QA." ;;
+    *QA\ \&\ verification*|*QA\ and\ verification*)
+      echo "Run every QA check: Go tests+vet, svelte-check, web unit, smoke, full smoke, E2E+axe, component QA, load, workflows, production build. Metrics + logs." ;;
+    *Run\ all\ QA\ checks*) echo "Full local gauntlet: Go, vet, types, unit, smoke, E2E+axe, component QA, load, workflows, build. Summary pass/warn/fail + timing." ;;
+    *Full-stack\ smoke*) echo "Seeded API + UI smoke suite (81 checks; smoke:full adds full data)." ;;
+    *Full-data\ smoke*|*Full-data*) echo "Full-seed smoke: verify every seeded view + API with realistic data." ;;
+    *Browser\ E2E\ +\ accessibility*|*Browser\ E2E*) echo "Playwright + axe across all routes, mobile/tablet, 320px, safe-area, components." ;;
+    *Component\ QA*) echo "Svelte /ui + Storybook component checks." ;;
+    *Load\ test*) echo "200 concurrent requests stress." ;;
+    *Verify\ GitHub\ Actions*|*GitHub\ Actions*) echo "Recent hosted CI/Mobile/Release runs." ;;
+    *Demo\ data*|*Demo\ data\ \&\ state*) echo "Fresh purge, reseed, full rebuild, or keep an existing SQLite database." ;;
+    *Reset\ demo\ data*) echo "j3d reset -okami; purge + reseed local QA DB." ;;
+    *Seed\ demo\ data*) echo "Seed into existing DB (no purge)." ;;
+    *Seed\ full\ tournament*) echo "Fresh + full verifiable tournament." ;;
+    *Fresh\ DB*) echo "Purge SQLite + -wal + -shm only." ;;
+    *Reseed*) echo "Purge then fresh reseed." ;;
+    *Rebuild\ full*) echo "Purge + full rebuild." ;;
+    *Keep\ existing*) echo "No DB change." ;;
+    *Run\ live\ executable*) echo "Run on a separate live DB." ;;
+    *Build\ \&\ deploy*|*Build\ \&\ deploy\ \>*|*Build\ \&\ Deploy*) echo "Build explicit dev/QA/prod flavours, release, run CI/CD, deploy dev/staging/prod." ;;
+    *Build\ live\ executable\ +\ static\ UI*) echo "go server + vite web -> build/web + build/server." ;;
     *Build\ live\ executable*) echo "Go server + static UI into build/." ;;
-    *Build\ release*) echo "Server+web+API+docs release." ;;
-    *Run\ full\ CI/CD*) echo "Local full CI/CD suite." ;;
-    *Deploy\ to\ development*) echo "deploy.sh development." ;;
-    *Deploy\ to\ staging*) echo "deploy.sh staging." ;;
-    *Deploy\ to\ production*) echo "deploy.sh production (confirm)." ;;
+    *Build\ release*) echo "server + web + API + docs release." ;;
+    *Build\ release\ \(*server*|*Build\ release\ \(*server+web*|*Build\ release\ \(*server\ +\ web*) echo "server + web + API + docs release." ;;
+    *Run\ full\ CI/CD*) echo "Local full CI/CD sequence (checks + build + test + workflows)." ;;
+    *Deploy\ to\ development*) echo "scripts/deploy.sh development dist." ;;
+    *Deploy\ to\ staging*) echo "scripts/deploy.sh staging dist." ;;
+    *Deploy\ to\ production*) echo "scripts/deploy.sh production dist (confirm before proceeding)." ;;
+    *Build\ +\ deploy\ staging\ \(one\ step\)*) echo "Release then deploy staging in one command." ;;
+    *Build\ +\ deploy\ production\ \(one\ step\)*) echo "Release then deploy production in one command." ;;
     *Build\ +\ deploy\ staging*) echo "Release then deploy staging." ;;
     *Build\ +\ deploy\ production*) echo "Release then deploy production." ;;
-    *Mobile*) echo "Android/iOS build+install, emulator, hosted HTTPS." ;;
-    *Build\ demo\ APK*) echo "Standalone offline QA APK." ;;
-    *Start\ Pixel*) echo "Pixel AVD." ;;
-    *Install\ \&\ launch*) echo "Install + launch on device." ;;
-    *Build\ +\ install*) echo "Build then install+launch." ;;
-    *Show\ phone\ server\ URL*) echo "LAN URL for phone." ;;
-    *Run\ venue\ server\ for\ phone*) echo "0.0.0.0 + CORS + demo." ;;
-    *Build\ iOS*) echo "iOS simulator app." ;;
-    *Build\ APK\ for\ hosted*) echo "Prompts HTTPS API; J3_SERVER_URL." ;;
-    *Docker\ QA*) echo "Container QA stack." ;;
-    *Full\ seeded\ tournament*) echo "Docker full seed." ;;
+    *Mobile\ \(Android\ /\ iOS\)*|*Mobile*) echo "Android/iOS QA + production builds, emulator, install, hosted HTTPS server." ;;
+    *Build\ demo\ APK*) echo "Standalone offline seeded QA APK (bundled DB + snapshot, QA autologin, full-phone unlock)." ;;
+    *Start\ Pixel\ 10\ Pro\ emulator*|*Start\ Pixel*) echo "Boot the Pixel 10 Pro Android 36 AVD." ;;
+    *Install\ \&\ launch\ APK*) echo "adb install + launch on device/emulator." ;;
+    *Build\ +\ install\ +\ launch*) echo "build-qa then install + launch." ;;
+    *Build\ +\ install\ +\ launch\ \(one\ step\)*) echo "build-qa then install + launch." ;;
+    *Show\ phone\ server\ URL*) echo "Print LAN URL for phone builds." ;;
+    *Run\ venue\ server\ for\ phone*) echo "Bind 0.0.0.0:8787 + CORS + demo for phone QA." ;;
+    *Build\ iOS\ .app*) echo "Sync + Xcode simulator .app (staged seeded data; Xcode on macOS)." ;;
+    *Build\ iOS\ \.app*) echo "Sync + Xcode simulator .app (staged seeded data; Xcode on macOS)." ;;
+    *Build\ APK\ for\ hosted\ HTTPS\ server*|*Build\ APK\ for\ hosted*) echo "Prompt HTTPS API; build prod APK with J3_SERVER_URL; participant scope." ;;
+    *Docker\ QA*|*Docker\ QA\ demo*) echo "Containerised QA stack full/okami/clean/light/dev + build + reset." ;;
+    *Full\ seeded\ tournament*|*Full\ seeded*) echo "Docker full seed." ;;
     *Okami\ mid-event*) echo "Docker Okami." ;;
     *Clean\ base\ seed*) echo "Docker clean." ;;
-    *Light\ 24-fighter*) echo "Docker light." ;;
-    *Dev\ hot\ reload*) echo "Docker dev." ;;
-    *Build\ container\ images*|*Build\ Container\ Images*|*Build\ container*) echo "Docker/Podman images." ;;
-    *Stop\ containers*) echo "Docker down." ;;
-    *Reset\ QA\ data*) echo "Docker reset." ;;
-    *Docs*) echo "Docs/API/guides." ;;
-    *Fresh\ DB*) echo "Purge SQLite." ;;
-    *Reseed*) echo "Fresh + seeded." ;;
-    *Rebuild\ full*) echo "Fresh full." ;;
-    *Keep\ existing*) echo "No DB change." ;;
+    *Light\ 24-fighter\ demo*) echo "Docker light." ;;
+    *Dev\ hot\ reload*) echo "Docker dev hot reload." ;;
+    *Build\ container\ images*|*Build\ Container\ Images*|*Build\ container*) echo "Build Docker/Podman QA images." ;;
+    *Stop\ containers*) echo "Docker/Podman down." ;;
+    *Reset\ QA\ data*) echo "Reset container QA data." ;;
+    *Docs\ \&\ guides*|*Docs\ \&\ developer\ guides*|*Docs*) echo "Docs site, API reference, guides, CI, hosting, refresh index." ;;
+    *Open\ documentation\ site*) echo "Local docs server." ;;
+    *API\ reference*) echo "OpenAPI /docs/api." ;;
+    *Organiser\ guide*) echo "Organiser guide." ;;
+    *Developer\ guide*) echo "Developer guide." ;;
+    *CI\ \&\ releases*) echo "CI/CD + release docs." ;;
+    *Free\ hosting\ plan*) echo "Free Oracle hosting." ;;
+    *Hands-on\ guides*) echo "Guided walkthroughs." ;;
+    *Refresh\ generated\ API\ index*) echo "sync-api-docs." ;;
     *Exit*) echo "Quit." ;;
-    *Back*) echo "Back." ;;
-    *) echo "" ;;
+    *Back*|*←\ Back*) echo "Back." ;;
+    *) echo "Select this option." ;;
   esac
 }
 
@@ -88,15 +111,20 @@ select_menu() {
     echo ""
     for i in "${!items[@]}"; do
       local label; label="$(menu_gap "${items[$i]}")"
-      local desc; desc="$(menu_desc "${items[$i]}")"
       if [ "$i" -eq "$selected" ]; then
-        printf "  %b➜  %s%b %s%s%b\n" "$GREEN$BOLD" "$label" "$NC" "$CYAN" "" "$NC"
-        if [ -n "$desc" ]; then printf "      %b%s%b\n" "$DIM" "$desc" "$NC"; fi
+        printf "  %b➜  %s%b\n" "$GREEN$BOLD" "$label" "$NC"
       else
         printf "     %s\n" "$label"
-        if [ -n "$desc" ]; then printf "      %b%s%b\n" "$DIM" "$desc" "$NC"; fi
       fi
     done
+    local current_desc; current_desc="$(menu_desc "${items[$selected]}")"
+    echo ""
+    local bw=56 bline
+    printf "  %b╭%s╮%b\n" "$DIM" "$(printf '─%.0s' $(seq 1 "$bw"))" "$NC"
+    printf '%s\n' "${current_desc:-No description.}" | fold -s -w $((bw-4)) | while IFS= read -r bline; do
+      printf "  %b│  %-*s│%b\n" "$CYAN" $((bw-4)) "$bline" "$NC"
+    done
+    printf "  %b╰%s╯%b\n" "$DIM" "$(printf '─%.0s' $(seq 1 "$bw"))" "$NC"
     echo ""
     printf "  %b↑/↓ move  ·  Enter select  ·  Esc / q / b back  ·  1-9 shortcut%b\n" "$YELLOW" "$NC"
     read -rsn1 key

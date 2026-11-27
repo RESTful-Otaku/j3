@@ -96,23 +96,23 @@ func EnsureOkami(store *db.DB) error {
 	}
 
 	// Organiser and staff: 1 runner, 6 judges (3 per mat), 2 scorekeepers, 8 volunteers.
-	add(`INSERT OR IGNORE INTO users (id, tenant_id, club_id, role, display_name, email, status)
-	     VALUES ('u-tony','demo-tenant','okami','tournament_runner','Tony Jamieson','tony@okami.j3','active')`)
+	add(`INSERT OR IGNORE INTO users (id, tenant_id, club_id, role, display_name, email, status, photo_path)
+	     VALUES ('u-tony','demo-tenant','okami','tournament_runner','Tony Jamieson','tony@okami.j3','active','/media/fighter_1.jpg')`)
 	for i := 1; i <= 6; i++ {
-		add(`INSERT OR IGNORE INTO users (id, tenant_id, role, display_name, email, status)
-		     VALUES (?, 'demo-tenant','official',?,?,'active')`,
-			fmt.Sprintf("u-judge-%d", i), fmt.Sprintf("Judge %d", i), fmt.Sprintf("judge%d@okami.j3", i))
+		add(`INSERT OR IGNORE INTO users (id, tenant_id, role, display_name, email, status, photo_path)
+		     VALUES (?, 'demo-tenant','official',?,?,'active',?)`,
+			fmt.Sprintf("u-judge-%d", i), fmt.Sprintf("Judge %d", i), fmt.Sprintf("judge%d@okami.j3", i), fmt.Sprintf("/media/fighter_%d.jpg", i%6+1))
 	}
 	for i := 1; i <= 2; i++ {
-		add(`INSERT OR IGNORE INTO users (id, tenant_id, role, display_name, email, status)
-		     VALUES (?, 'demo-tenant','official',?,?,'active')`,
-			fmt.Sprintf("u-keeper-%d", i), fmt.Sprintf("Scorekeeper Mat %d", i), fmt.Sprintf("keeper%d@okami.j3", i))
+		add(`INSERT OR IGNORE INTO users (id, tenant_id, role, display_name, email, status, photo_path)
+		     VALUES (?, 'demo-tenant','official',?,?,'active',?)`,
+			fmt.Sprintf("u-keeper-%d", i), fmt.Sprintf("Scorekeeper Mat %d", i), fmt.Sprintf("keeper%d@okami.j3", i), fmt.Sprintf("/media/fighter_%d.jpg", i%6+1))
 	}
 	volunteerRoles := []string{"Finding participants", "Belt tying", "Directing attendees", "Awarding medals", "Mat assistant", "Course assistant", "Weigh-in helper", "General duties"}
 	for i, duty := range volunteerRoles {
-		add(`INSERT OR IGNORE INTO users (id, tenant_id, role, display_name, email, status)
-		     VALUES (?, 'demo-tenant','official',?,?,'active')`,
-			fmt.Sprintf("u-volunteer-%d", i+1), fmt.Sprintf("Volunteer %d · %s", i+1, duty), fmt.Sprintf("volunteer%d@okami.j3", i+1))
+		add(`INSERT OR IGNORE INTO users (id, tenant_id, role, display_name, email, status, photo_path)
+		     VALUES (?, 'demo-tenant','official',?,?,'active',?)`,
+			fmt.Sprintf("u-volunteer-%d", i+1), fmt.Sprintf("Volunteer %d · %s", i+1, duty), fmt.Sprintf("volunteer%d@okami.j3", i+1), fmt.Sprintf("/media/fighter_%d.jpg", i%6+1))
 	}
 
 	// 40 fighters across four clubs and four age bands, with believable belts.
@@ -140,9 +140,9 @@ func EnsureOkami(store *db.DB) error {
 		if i%3 == 0 {
 			gender = "female"
 		}
-		add(`INSERT OR IGNORE INTO users (id, tenant_id, club_id, role, display_name, email, status)
-		     VALUES (?, 'demo-tenant', ?, 'fighter', ?, ?, 'active')`,
-			"ok-u"+id[2:], club, name, fmt.Sprintf("fighter%s@okami.j3", id[2:]))
+		add(`INSERT OR IGNORE INTO users (id, tenant_id, club_id, role, display_name, email, status, photo_path)
+		     VALUES (?, 'demo-tenant', ?, 'fighter', ?, ?, 'active', ?)`,
+			"ok-u"+id[2:], club, name, fmt.Sprintf("fighter%s@okami.j3", id[2:]), fmt.Sprintf("/media/fighter_%d.jpg", i%6+1))
 		add(`INSERT OR IGNORE INTO fighters
 		     (id, tenant_id, user_id, club_id, belt_rank_id, display_name, date_of_birth, weight_kg, gender, avatar_path)
 		     VALUES (?, 'demo-tenant', ?, ?, ?, ?, ?, ?, ?, ?)`,

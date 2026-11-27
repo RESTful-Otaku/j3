@@ -21,6 +21,10 @@ type demoAccount struct {
 	Source    string        `json:"source"`
 	Status    string        `json:"status"`
 	Actions   []auth.Action `json:"actions"`
+	PhotoPath string        `json:"photoPath"`
+	AvatarPath string       `json:"avatarPath"`
+	ClubLogo  string        `json:"clubLogo"`
+	ClubColour string       `json:"clubColour"`
 }
 
 func roleLabel(role auth.Role) string {
@@ -116,7 +120,8 @@ func (s *Server) demoAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 	rows, err := s.Store.QueryContext(r.Context(), `
 		SELECT u.id, u.display_name, u.email, u.role, u.is_admin,
-		       COALESCE(c.name, ''), u.source, u.status
+		       COALESCE(c.name, ''), u.source, u.status,
+		       COALESCE(u.photo_path,''), COALESCE(c.logo_path,''), COALESCE(c.primary_colour,'#64748b')
 		FROM users u LEFT JOIN clubs c ON c.id = u.club_id
 		ORDER BY u.is_admin DESC, CASE u.role
 		  WHEN 'tournament_runner' THEN 0 WHEN 'official' THEN 1
@@ -132,14 +137,16 @@ func (s *Server) demoAccounts(w http.ResponseWriter, r *http.Request) {
 		var a demoAccount
 		var persisted string
 		var admin int
+		var photo, clubLogo, clubColour string
 		if err := rows.Scan(&a.ID, &a.Name, &a.Email, &persisted, &admin,
-			&a.ClubName, &a.Source, &a.Status); err != nil {
+			&a.ClubName, &a.Source, &a.Status, &photo, &clubLogo, &clubColour); err != nil {
 			writeError(w, err)
 			return
 		}
 		a.Role = effectiveStoredRole(persisted, admin)
 		a.RoleLabel = roleLabel(a.Role)
 		a.Actions = auth.Actions(a.Role)
+		a.PhotoPath = photo; a.AvatarPath = photo; a.ClubLogo = clubLogo; a.ClubColour = clubColour
 		accounts = append(accounts, a)
 	}
 	if err := rows.Err(); err != nil {
@@ -167,10 +174,12 @@ func (s *Server) demoView(w http.ResponseWriter, r *http.Request) {
 	var admin int
 	err := s.Store.QueryRowContext(r.Context(), `
 		SELECT u.id, u.display_name, u.email, u.role, u.is_admin,
-		       COALESCE(c.name, ''), u.source, u.status
+		       COALESCE(c.name, ''), u.source, u.status,
+		       COALESCE(u.photo_path,''), COALESCE(c.logo_path,''), COALESCE(c.primary_colour,'#64748b')
 		FROM users u LEFT JOIN clubs c ON c.id = u.club_id
 		WHERE u.id = ?`, actorID).
-		Scan(&a.ID, &a.Name, &a.Email, &persisted, &admin, &a.ClubName, &a.Source, &a.Status)
+		Scan(&a.ID, &a.Name, &a.Email, &persisted, &admin, &a.ClubName, &a.Source, &a.Status,
+			&a.PhotoPath, &a.ClubLogo, &a.ClubColour)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -178,6 +187,7 @@ func (s *Server) demoView(w http.ResponseWriter, r *http.Request) {
 	a.Role = effectiveStoredRole(persisted, admin)
 	a.RoleLabel = roleLabel(a.Role)
 	a.Actions = auth.Actions(a.Role)
+	a.AvatarPath = a.PhotoPath
 	counts, err := s.counts(r)
 	if err != nil {
 		writeError(w, err)
