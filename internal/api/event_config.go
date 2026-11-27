@@ -38,27 +38,41 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 		info.Costs = "[]"; info.Hotel = "[]"; info.Evening = "{}"; info.Course = "{}"
 	}
 
-	kit := []struct{ Item, Note string }{}
+	kit := []struct {
+		Item string `json:"item"`
+		Note string `json:"note"`
+	}{}
 	kitRows, err := s.Store.QueryContext(r.Context(),
 		`SELECT item, note FROM kit_requirements WHERE event_id = ? ORDER BY id`, eventID)
 	if err != nil { kitRows = nil; err = nil }
 	if kitRows != nil { for kitRows.Next() {
 		var item, note string
 		if kitRows.Scan(&item, &note) == nil {
-			kit = append(kit, struct{ Item, Note string }{item, note})
+			kit = append(kit, struct {
+			Item string `json:"item"`
+			Note string `json:"note"`
+		}{item, note})
 		}
 	}
 	}
 	if kitRows != nil { _ = kitRows.Err(); kitRows.Close() }
 
 	rules := []struct {
-		Name, Kind, Ages, Rules string
+		Name  string `json:"name"`
+		Kind  string `json:"kind"`
+		Ages  string `json:"ages"`
+		Rules string `json:"rules"`
 	}{}
 	ruleRows, err := s.Store.QueryContext(r.Context(),
 		`SELECT name, kind, COALESCE(notes,''), rules_json FROM discipline_rules WHERE event_id = ? ORDER BY id`, eventID)
 	if err != nil { ruleRows = nil; err = nil }
 	if ruleRows != nil { for ruleRows.Next() {
-		var item struct{ Name, Kind, Ages, Rules string }
+		var item struct {
+			Name  string `json:"name"`
+			Kind  string `json:"kind"`
+			Ages  string `json:"ages"`
+			Rules string `json:"rules"`
+		}
 		if ruleRows.Scan(&item.Name, &item.Kind, &item.Ages, &item.Rules) == nil {
 			rules = append(rules, item)
 		}
@@ -66,14 +80,22 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 	}
 	if ruleRows != nil { _ = ruleRows.Err(); ruleRows.Close() }
 
-	staff := []struct{ Mat, Role, Name string }{}
+	staff := []struct {
+		Mat  string `json:"mat"`
+		Role string `json:"role"`
+		Name string `json:"name"`
+	}{}
 	staffRows, err := s.Store.QueryContext(r.Context(), `
 		SELECT ms.mat_name, ms.role, COALESCE(u.display_name,'Unassigned')
 		FROM mat_staff ms LEFT JOIN users u ON u.id = ms.user_id
 		WHERE ms.event_id = ? ORDER BY ms.mat_name, ms.sort_order`, eventID)
 	if err != nil { staffRows = nil; err = nil }
 	if staffRows != nil { for staffRows.Next() {
-		var item struct{ Mat, Role, Name string }
+		var item struct {
+			Mat  string `json:"mat"`
+			Role string `json:"role"`
+			Name string `json:"name"`
+		}
 		if staffRows.Scan(&item.Mat, &item.Role, &item.Name) == nil {
 			staff = append(staff, item)
 		}

@@ -67,6 +67,9 @@
     "simulate:extended": "go run ./cmd/j3d stress",
     "stress": "bash scripts/stress.sh",
     "component:qa": "bash scripts/component-qa.sh",
-    "dev:lite": "bash scripts/dev-lite.sh"
+    "dev:lite": "bash scripts/dev-lite.sh",
+    "storybook": "bun run --cwd web storybook",
+    "storybook:build": "bun run --cwd web build-storybook",
+    "component:storybook": "bun run storybook"
   }
 }

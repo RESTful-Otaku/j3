@@ -80,11 +80,11 @@
           <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:.86rem;">
             <thead><tr class="muted small" style="text-align:left;"><th>Discipline</th><th>Format</th><th>Next stage</th><th>Third place</th><th>Order</th></tr></thead>
             <tbody use:phoneRows={5}>
-              {#each (config.formats ?? []) as format (format.Discipline)}
+              {#each (config.formats ?? []) as format, i (format.Discipline || format.Format || `format-${i}`)}
                 <tr style="border-top:1px solid var(--brand-border);">
-                  <td>{format.Discipline}</td><td>{format.Format}</td><td>{format.Knockout}</td>
-                  <td>{format.Third}{format.DualBronze ? ' · dual bronze' : ''}{format.RetryTies ? ' · retry ties' : ''}</td>
-                  <td>{format.Order}</td>
+                  <td>{format.Discipline ?? ''}</td><td>{format.Format ?? ''}</td><td>{format.Knockout ?? ''}</td>
+                  <td>{format.Third ?? ''}{format.DualBronze ? ' · dual bronze' : ''}{format.RetryTies ? ' · retry ties' : ''}</td>
+                  <td>{format.Order ?? ''}</td>
                 </tr>
               {/each}
             </tbody>
@@ -92,30 +92,30 @@
         </div>
       </div>
       <div class="grid" use:phoneLimit={5} style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
-        {#each (config.rules ?? []) as rule (rule.name)}
+        {#each (config.rules ?? []) as rule, i (rule.name || rule.kind || `rule-${i}`)}
           <div class="card slide-in">
-            <div class="eyebrow">{rule.kind} · {rule.ages}</div><h2>{rule.name}</h2>
+            <div class="eyebrow">{rule.kind ?? ''} · {rule.ages ?? ''}</div><h2>{rule.name ?? ''}</h2>
             <div class="stat small" style="margin-top:10px;">
-              {#each Object.entries(ruleData(rule.rules ?? '{}')) as [key, value]}
+              {#each Object.entries(ruleData((rule.rules ?? '{}'))) as [key, value]}
                 <div><strong>{key.replaceAll('_',' ')}</strong>: {JSON.stringify(value)}</div>
               {/each}
             </div>
           </div>
         {/each}
         <div class="card slide-in"><div class="eyebrow">Required kit</div><h2>Equipment</h2>
-          {#each (config.kit ?? []) as item}<div class="row"><strong>{item.item}</strong><span class="muted small">{item.note}</span></div>{/each}
+          {#each (config.kit ?? []) as item, i}<div class="row"><strong>{item.item ?? ''}</strong><span class="muted small">{item.note ?? ''}</span></div>{/each}
         </div>
       </div>
     {:else if tab === 'people'}
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
         <div class="card slide-in"><div class="eyebrow">Mat staffing</div><h2>Officials per mat</h2>
-          {#each (config.staff ?? []) as member (member.mat + member.role)}<div class="row"><strong>{member.mat}</strong><span>{member.role} · {member.name}</span></div>{/each}
+          {#each (config.staff ?? []) as member, i (member.mat + member.role + `-${i}` || `staff-${i}`)}<div class="row"><strong>{member.mat ?? ''}</strong><span>{member.role ?? ''} · {member.name ?? ''}</span></div>{/each}
         </div>
         <div class="card slide-in"><div class="eyebrow">Course rule</div><h2>Eligibility</h2><p class="muted">{config.event.attendanceRule}</p></div>
         <div class="card slide-in"><div class="eyebrow">Attendance</div><h2>Morning course</h2>
           <p class="muted small">{(attendance ?? []).filter((item) => item.attended).length} attended · {(attendance ?? []).filter((item) => item.excluded).length} excluded</p>
           <div style="max-height:300px; overflow:auto; margin-top:10px;">
-            {#each (attendance ?? []).filter((item) => item.excluded) as item (item.entrantId)}
+            {#each (attendance ?? []).filter((item) => item.excluded) as item, i (item.entrantId || `att-${i}`)}
               <div class="row"><strong>{item.name}</strong><span class="badge spectator">excluded</span></div>
             {/each}
           </div>
