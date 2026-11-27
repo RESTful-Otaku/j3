@@ -38,7 +38,7 @@ func (s *Server) sendAnnouncement(w http.ResponseWriter, r *http.Request) {
 	if body.Audience == "" {
 		body.Audience = "all"
 	}
-	audiences := map[string]bool{"all": true, "fighters": true, "officials": true, "clubs": true}
+	audiences := map[string]bool{"all": true, "fighters": true, "officials": true, "clubs": true, "guardians": true, "participants": true, "spectators": true, "admins": true}
 	channels := map[string]bool{}
 	for _, channel := range strings.Split(body.Channels, ",") {
 		channels[strings.TrimSpace(channel)] = true
@@ -69,8 +69,9 @@ func (s *Server) sendAnnouncement(w http.ResponseWriter, r *http.Request) {
 	s.audit(r, "announcement.send", "event", body.EventID,
 		fmt.Sprintf(`{"title":%q,"channels":%q,"audience":%q}`, body.Title, body.Channels, body.Audience))
 	s.Hub.broadcast(liveEvent{Type: "announcement", FightID: "", Payload: body})
+	delivered := s.fanoutNotifications(body.EventID, "announcement", body.Title, body.Body, body.Channels, body.Audience)
 	writeJSON(w, http.StatusCreated, map[string]any{
-		"id": id, "delivered": []string{"local"}, "channels": body.Channels,
+		"id": id, "delivered": delivered, "channels": body.Channels,
 	})
 }
 

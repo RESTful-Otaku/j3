@@ -200,7 +200,12 @@ states. Offline write outbox remains a future enhancement.
 | D-083 | Explicit local `dev`/`qa`/`prod` web flavours stage into `build/web-{dev,qa,prod}` with configurable API URLs; production is mirrored into `build/web` and `dist/web` so existing deploy commands are unchanged. |
 | D-084 | The same three flavours cover mobile: `dev` targets the local venue server, `qa` is standalone/seeded with autologin and full-phone QA routes, and `prod` requires `J3_SERVER_URL` with participant-only phone scope. Android stages `j3-{dev,qa,prod}.apk` (QA also as `j3-demo.apk`); iOS stages matching asset sets. |
 
+| D-085 | DB clean/purge/reseed/rebuild `scripts/db.sh` + `j3d reset/seed`; extended deterministic multi-user `j3d stress`/`RunExtended`; `scripts/stress.sh` gauntlet; Svelte `/ui` + `component-gallery.spec.ts` Storybook-equivalent; `Pagination`; pared-down `dev-lite`. |
+| D-086 | Offline reliable web+mobile: last-known-good read cache (not masking auth), `j3-write-outbox` replay on `online`, QA offline snapshot + offline writes; server authoritative; no secrets cached. |
+| D-087 | Notifications fan-out `notification_deliveries` (push/email/sms; all user types; kinds; `J3_NOTIFY_WEBHOOK_URL`; `notifySuccess(...,undo)`; `ConfirmDialog`); no fake external delivery. |
+
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
+
 
 ## 12. Open questions
 
@@ -214,6 +219,8 @@ Rationale and status for older decisions remain in git history; all listed decis
 8. Exact compatibility chains per federation? (configurable ranges + consent)
 
 ## 13. Change log (recent)
+
+- **2026-11-27 — QA/polish gauntlet**: DB clean/purge/reseed/rebuild; extended deterministic multi-user simulation + `scripts/stress.sh`; Svelte component QA; pagination; `dev-lite`; offline read-cache + **write outbox**; notification fan-out; docs `DB/OFFLINE_SYNC/NOTIFICATIONS/TESTING/AGENT_WORKFLOW`.
 
 - **2026-11-25 — Mobile minimal redesign (mobile-first overhaul)**: stripped back the phone UI for fighters, participants and club leaders. Removed the old-fashioned bottom tab bar — everything now lives in the collapsible hamburger drawer (top bar keeps J3 home mark + event title + hamburger). Reworked mobile cards, spacing, typography, buttons and forms for generous whitespace and larger touch targets (44px+), scoped to `<=700px` so tablets/desktops/LED are unchanged. Added a reusable animated `Card` component with expand/collapse on tap so informational containers stay compact until detail is wanted, plus view-slide and staggered-reveal animations. `/settings`, `/signup`, `/club` and `/public` are clean single-column or card-stack views. 9/9 mobile+nav E2E pass (drawer open/close/navigate, safe-area chrome, 320px name wrap, viewport fit, operator-screen gating). Card expand/collapse verified on-device via CDP.
 - **2026-11-25 — Uniform build flavours**: web and mobile now share `dev` (local venue server),

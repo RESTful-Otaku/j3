@@ -8,7 +8,7 @@
   import { afterNavigate, goto } from '$app/navigation';
   import { ensureQaFirstRun, syncRoleFromSession, uiRole } from '../lib/auth';
   import { setRole } from '../lib/nav';
-  import { apiUrl } from '../lib/api';
+  import { apiUrl, flushOutbox } from '../lib/api';
   import { notifySuccess } from '../lib/toast';
   import { canAccessPath, currentRole, isPhoneWidth, phoneHome } from '../lib/nav';
   import { labelTableRows } from '../lib/responsive';
@@ -53,6 +53,8 @@
     const onResize = () => { sync(); guard(); };
     const onPasswordRequired = () => { void goto('/login?password=1'); };
     window.addEventListener('resize', onResize);
+    const onOnline = () => { void flushOutbox().catch(() => {}); };
+    window.addEventListener('online', onOnline);
     window.addEventListener('j3-session-changed', guard);
     window.addEventListener('j3-password-change-required', onPasswordRequired);
 
@@ -84,6 +86,7 @@
     const labelTimer = setInterval(() => labelTableRows(), 1500);
     return () => {
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('online', onOnline);
       window.removeEventListener('j3-session-changed', guard);
       window.removeEventListener('j3-password-change-required', onPasswordRequired);
       clearInterval(healthTimer);

@@ -102,6 +102,36 @@ export class PasswordChangeRequiredError extends Error {
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined || '').replace(/\/+$/, '');
 const OFFLINE_DEMO = import.meta.env.VITE_OFFLINE_DEMO === '1';
 const OFFLINE_STATE_KEY = 'j3-offline-state';
+const OUTBOX_KEY = 'j3-write-outbox';
+
+export type OutboxEntry = { id: string; url: string; method: string; body: string | null; ts: string; headers?: Record<string,string> };
+
+export function loadOutbox(): OutboxEntry[] { try { return JSON.parse(localStorage.getItem(OUTBOX_KEY) || '[]') as OutboxEntry[]; } catch { return []; } }
+export function clearOutbox(): void { try { localStorage.removeItem(OUTBOX_KEY); } catch { /* ignore */ } }
+function saveOutbox(entries: OutboxEntry[]): void { try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(entries)); } catch { /* ignore */ } }
+function enqueueOfflineWrite(url: string, init?: RequestInit): void {
+  const method = (init?.method || 'GET').toUpperCase();
+  if (method === 'GET' || method === 'HEAD') return;
+  const entry: OutboxEntry = { id: `ow-${Date.now()}-${Math.random().toString(36).slice(2,8)}`, url, method, body: typeof init?.body === 'string' ? init.body : null, ts: new Date().toISOString() };
+  const entries = loadOutbox(); entries.push(entry); saveOutbox(entries);
+}
+
+export async function flushOutbox(): Promise<number> {
+  const entries = loadOutbox();
+  if (entries.length === 0) return 0;
+  const remaining: OutboxEntry[] = [];
+  for (const entry of entries) {
+    try {
+      const headers = await authorisedHeaders({ method: entry.method, body: entry.body ?? undefined });
+      const resp = await fetch(apiUrl(entry.url), { method: entry.method, headers, body: entry.body ?? undefined });
+      if (!resp.ok && resp.status !== 409) remaining.push(entry);
+    } catch { remaining.push(entry); }
+  }
+  saveOutbox(remaining);
+  return entries.length - remaining.length;
+}
+
+export function outboxSize(): number { return loadOutbox().length; }
 
 // Native builds ship a seeded mid-event snapshot plus the SQLite file it came
 // from. If the venue LAN is unreachable, read-only phone screens fall back to
@@ -606,6 +636,14 @@ async function send(url: string, init: RequestInit | undefined, headers: Headers
     if (local) return local;
     const write = await offlineWriteResponse(url, init);
     if (write) return write;
+    // Durable write outbox: queue non-GET for replay on reconnect.
+    if (!offlineDemoEnabled()) {
+      const m = (init?.method || 'GET').toUpperCase();
+      if (m !== 'GET' && m !== 'HEAD') {
+        enqueueOfflineWrite(url, init);
+        return jsonResponse({ ok: true, status: 'queued-offline', queued: true });
+      }
+    }
     throw new Error('Cannot reach the venue server — check that J3 is running');
   }
   // Capacitor answers unknown same-origin API paths with the SPA index (HTTP
@@ -617,6 +655,7 @@ async function send(url: string, init: RequestInit | undefined, headers: Headers
     const write = await offlineWriteResponse(url, init);
     if (write) return write;
   }
+  if (response.ok) { void flushOutbox().catch(() => {}); }
   return response;
 }
 
