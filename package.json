@@ -54,6 +54,19 @@
     "qa:docker:reset": "bash scripts/qa-docker.sh reset",
     "qa:docker:simulate": "bash scripts/qa-docker.sh simulate",
     "qa:docker:logs": "bash scripts/qa-docker.sh logs",
-    "qa:docker:url": "bash scripts/qa-docker.sh url"
+    "qa:docker:url": "bash scripts/qa-docker.sh url",
+    "db:fresh": "bash scripts/db.sh fresh",
+    "db:purge": "bash scripts/db.sh purge",
+    "db:seed": "bash scripts/db.sh seed",
+    "db:reset": "bash scripts/db.sh reset",
+    "db:reseed": "bash scripts/db.sh reseed",
+    "db:rebuild": "bash scripts/db.sh rebuild",
+    "db:full": "bash scripts/db.sh full",
+    "db:existing": "bash scripts/db.sh existing",
+    "db:backup": "bash scripts/db.sh backup",
+    "simulate:extended": "go run ./cmd/j3d stress",
+    "stress": "bash scripts/stress.sh",
+    "component:qa": "bash scripts/component-qa.sh",
+    "dev:lite": "bash scripts/dev-lite.sh"
   }
 }

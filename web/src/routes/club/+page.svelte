@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Card from '../../lib/components/Card.svelte';
+  import Pagination from '../../lib/components/Pagination.svelte';
+  import { paginate } from '../../lib/paginate';
   import { getJson, postJson, type InviteLink } from '../../lib/api';
   import { notifySuccess, notifyError } from '../../lib/toast';
   import { guideAction } from '../../lib/guide';
@@ -11,6 +13,7 @@
   let email = '';
   let lastInvite: InviteLink | null = null;
   let inviting = false;
+  let memberPage = 1; let memberPageSize = 10;
 
   async function copyInvite() {
     if (!lastInvite) return;
@@ -57,10 +60,11 @@
 
   <Card title="Club members" eyebrow="Your team" expandable preview={members.length ? `${members.length} fighter${members.length === 1 ? '' : 's'}` : 'No members yet'}>
     <div style="display:grid; gap:8px; margin-top:12px; max-height:520px; overflow:auto;">
-      {#each members.slice(0, 30) as member (member.id)}
+      {#each paginate(members, memberPage, memberPageSize) as member (member.id)}
         <div class="row reveal-item"><strong>{member.name}</strong><span class="muted small">{member.clubName || 'Independent'} · {member.status}</span></div>
       {:else}<span class="muted">No members loaded yet.</span>{/each}
     </div>
+    <Pagination total={members.length} page={memberPage} pageSize={memberPageSize} onChange={(p,s)=>{memberPage=p;memberPageSize=s;}} />
   </Card>
 
   <Card title="Invite a member" eyebrow="Grow your club" expandable={false}>

@@ -33,6 +33,9 @@ func main() {
 		case "simulate":
 			must(simulateCommand(os.Args[2:]))
 			return
+		case "stress":
+			must(stressCommand(os.Args[2:]))
+			return
 		}
 	}
 	serve()
@@ -139,6 +142,36 @@ func simulateCommand(args []string) error {
 		return err
 	}
 	result := simulator.Run(*seed, *fighters)
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	if *out == "" {
+		_, err = os.Stdout.Write(data)
+		return err
+	}
+	if dir := filepath.Dir(*out); dir != "." {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return err
+		}
+	}
+	return os.WriteFile(*out, data, 0o644)
+}
+
+// stressCommand runs an extended deterministic multi-user simulation test.
+func stressCommand(args []string) error {
+	flags := flag.NewFlagSet("stress", flag.ContinueOnError)
+	seed := flags.Int64("seed", 42, "simulation seed")
+	fighters := flags.Int("fighters", 50, "number of fighters")
+	users := flags.Int("users", 8, "number of concurrent synthetic users")
+	mutations := flags.Int("mutations", 0, "number of synthetic mutations (0=steps*users)")
+	steps := flags.Int("steps", 64, "number of simulated steps (hours of use compressed)")
+	out := flags.String("out", "", "write JSON to file (default stdout)")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	result := simulator.RunExtended(*seed, *fighters, *users, *mutations, *steps)
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		return err

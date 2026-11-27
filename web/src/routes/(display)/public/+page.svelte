@@ -295,6 +295,7 @@
   .matchup-fighter.red { flex:1; text-align:right; }
   .matchup-fighter.blue { flex:1; }
   .matchup-fighter .fighter-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  @media (max-width:480px) { .matchup { flex-wrap:wrap; gap:6px; } .matchup-fighter { flex:1 1 100%; } .matchup-fighter .fighter-name { white-space:normal; overflow-wrap:anywhere; } .matchup .sep { width:100%; text-align:center; } }
   .matchup .sep { flex:none; color:var(--brand-muted); font-size:.78rem; font-weight:600; }
   .matchup.compact { font-size:.92rem; }
   .club-logo { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; margin-right: 4px; vertical-align: middle; }
