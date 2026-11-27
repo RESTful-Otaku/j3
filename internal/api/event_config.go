@@ -122,8 +122,12 @@ func (s *Server) eventConfig(w http.ResponseWriter, r *http.Request) {
 		DualBronze, RetryTies                      bool
 	}{}
 	formatRows, err := s.Store.QueryContext(r.Context(), `
-		SELECT discipline_id, format, knockout, third_place, order_policy, dual_bronze, retry_ties
-		FROM discipline_formats WHERE event_id = ?`, eventID)
+		SELECT COALESCE(NULLIF(dr.name,''), NULLIF(disc.name,''), df.discipline_id),
+		       df.format, df.knockout, df.third_place, df.order_policy, df.dual_bronze, df.retry_ties
+		FROM discipline_formats df
+		LEFT JOIN discipline_rules dr ON dr.id = df.discipline_id AND dr.event_id = df.event_id
+		LEFT JOIN disciplines disc ON disc.id = df.discipline_id AND disc.event_id = df.event_id
+		WHERE df.event_id = ?`, eventID)
 	if err != nil { formatRows = nil; err = nil }
 	if formatRows != nil { for formatRows.Next() {
 		var item struct {

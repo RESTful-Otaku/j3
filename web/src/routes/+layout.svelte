@@ -14,6 +14,7 @@
   import { labelTableRows } from '../lib/responsive';
   import { loadEventBrand } from '../lib/event-brand';
   import { initTheme } from '../lib/theme';
+  import { initAccessibility } from '../lib/accessibility';
   import { initReplayUrl, syncReplayUrl } from '../lib/demo-replay';
 
   let mobile = false;
@@ -59,6 +60,7 @@
     window.addEventListener('j3-password-change-required', onPasswordRequired);
 
     initTheme();
+    initAccessibility();
     initReplayUrl();
     void loadEventBrand();
     // QA mobile builds start with seeded data and an admin identity. Hold the

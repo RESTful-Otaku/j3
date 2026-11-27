@@ -7,3 +7,5 @@
 **DB** see docs/DB.md. **Builds** `build:flavors`, `build:android:*`, `build-ios`, `release`. **TUI** `bun run dev`, `bun run dev:lite`. **CI/CD** `bun run cicd`, hosted CI/Mobile/Release/Deploy green; free-only public; visibility-gated.
 
 **Storybook** see docs/STORYBOOK.md.
+
+**Accessibility** docs/ACCESSIBILITY.md.

@@ -180,6 +180,14 @@ func EnsureOkami(store *db.DB) error {
 		{"Clean flip flops / slip-ons", "For all mat areas"},
 		{"Gum shield", "Mandatory for all contact sessions"},
 		{"Club licence book", "Must be presented at registration"},
+		{"Gi", "Clean pressed Gi required for fighting disciplines"},
+		{"Belt", "Correctly tied; no adjustments during contest"},
+		{"Mouth guard", "Mandatory for all contact sessions"},
+		{"Shin guards", "Instep / shin guards for Randori and sparring"},
+		{"Groin protection", "Males; females not required"},
+		{"Head guard", "Required for sparring and Randori; youth protection"},
+		{"Course booklet", "Provided at registration for morning course"},
+		{"Flip flops", "Clean slip-ons for mat areas"},
 	} {
 		add(`INSERT OR IGNORE INTO kit_requirements (id, event_id, item, note) VALUES (?, ?, ?, ?)`,
 			fmt.Sprintf("kit-%02d", kitIndex+1), okamiEvent, item.name, item.note)

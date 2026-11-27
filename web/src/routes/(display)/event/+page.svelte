@@ -37,6 +37,33 @@
   function ruleData(raw: string) {
     try { return JSON.parse(raw); } catch { return {}; }
   }
+  function humanizeKey(key: string): string {
+    return String(key)
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  function humanizeValue(value: unknown): string {
+    if (value === null || value === undefined) return '—';
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (Array.isArray(value)) return value.map(humanizeValue).join(', ');
+    if (typeof value === 'object') return Object.entries(value as Record<string, unknown>).map(([k, v]) => `${humanizeKey(k)}: ${humanizeValue(v)}`).join(' · ');
+    return String(value).replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  function kitIcon(item: string): string {
+    const t = item.toLowerCase();
+    if (t.includes('gi')) return '🥋';
+    if (t.includes('belt')) return '🥋';
+    if (t.includes('mouth')) return '🦷';
+    if (t.includes('head')) return '⛑️';
+    if (t.includes('shin') || t.includes('pad')) return '🦵';
+    if (t.includes('groin')) return '🛡️';
+    if (t.includes('licence') || t.includes('license') || t.includes('book')) return '📜';
+    if (t.includes('flip') || t.includes('slip')) return '👟';
+    if (t.includes('gum')) return '🛡️';
+    if (t.includes('water')) return '💧';
+    return '✅';
+  }
   function announce() { notifySuccess('Announcement sent to all connected displays'); }
 </script>
 
@@ -82,9 +109,9 @@
             <tbody use:phoneRows={5}>
               {#each (config.formats ?? []) as format, i (format.Discipline || format.Format || `format-${i}`)}
                 <tr style="border-top:1px solid var(--brand-border);">
-                  <td>{format.Discipline ?? ''}</td><td>{format.Format ?? ''}</td><td>{format.Knockout ?? ''}</td>
-                  <td>{format.Third ?? ''}{format.DualBronze ? ' · dual bronze' : ''}{format.RetryTies ? ' · retry ties' : ''}</td>
-                  <td>{format.Order ?? ''}</td>
+                  <td>{humanizeValue(format.Discipline ?? '')}</td><td>{humanizeValue(format.Format ?? '')}</td><td>{humanizeValue(format.Knockout ?? '')}</td>
+                  <td>{humanizeValue(format.Third ?? '')}{format.DualBronze ? ' · dual bronze' : ''}{format.RetryTies ? ' · retry ties' : ''}</td>
+                  <td>{humanizeValue(format.Order ?? '')}</td>
                 </tr>
               {/each}
             </tbody>
@@ -94,22 +121,22 @@
       <div class="grid" use:phoneLimit={5} style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
         {#each (config.rules ?? []) as rule, i (rule.name || rule.kind || `rule-${i}`)}
           <div class="card slide-in">
-            <div class="eyebrow">{rule.kind ?? ''} · {rule.ages ?? ''}</div><h2>{rule.name ?? ''}</h2>
+            <div class="eyebrow">{humanizeValue(rule.kind ?? '')} · {rule.ages ?? ''}</div><h2>{rule.name ?? ''}</h2>
             <div class="stat small" style="margin-top:10px;">
               {#each Object.entries(ruleData((rule.rules ?? '{}'))) as [key, value]}
-                <div><strong>{key.replaceAll('_',' ')}</strong>: {JSON.stringify(value)}</div>
+                <div><strong>{humanizeKey(key)}</strong>: {humanizeValue(value)}</div>
               {/each}
             </div>
           </div>
         {/each}
         <div class="card slide-in"><div class="eyebrow">Required kit</div><h2>Equipment</h2>
-          {#each (config.kit ?? []) as item, i}<div class="row"><strong>{item.item ?? ''}</strong><span class="muted small">{item.note ?? ''}</span></div>{/each}
+          {#each (config.kit ?? []) as item, i}<div class="kit-row"><span class="kit-icon">{kitIcon(item.item ?? '')}</span><span class="kit-text"><strong>{item.item ?? ''}</strong><span class="muted small">{item.note ?? ''}</span></span></div>{/each}
         </div>
       </div>
     {:else if tab === 'people'}
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
         <div class="card slide-in"><div class="eyebrow">Mat staffing</div><h2>Officials per mat</h2>
-          {#each (config.staff ?? []) as member, i (member.mat + member.role + `-${i}` || `staff-${i}`)}<div class="row"><strong>{member.mat ?? ''}</strong><span>{member.role ?? ''} · {member.name ?? ''}</span></div>{/each}
+          {#each (config.staff ?? []) as member, i (member.mat + member.role + `-${i}` || `staff-${i}`)}<div class="row"><strong>{member.mat ?? ''}</strong><span>{humanizeKey(member.role ?? '')} · {member.name ?? ''}</span></div>{/each}
         </div>
         <div class="card slide-in"><div class="eyebrow">Course rule</div><h2>Eligibility</h2><p class="muted">{config.event.attendanceRule}</p></div>
         <div class="card slide-in"><div class="eyebrow">Attendance</div><h2>Morning course</h2>

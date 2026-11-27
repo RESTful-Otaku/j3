@@ -489,3 +489,51 @@ textarea:focus-visible, [tabindex]:focus-visible, [role="button"]:focus-visible 
   /* Hover transforms are meaningless without a pointer. */
   .btn:hover, a.brand-mark:hover, .nav-item:hover { transform: none; }
 }
+
+/* ---- Accessibility modes (user settings; also respect OS prefs) ---- */
+html[data-font-scale='large'] { font-size: 112.5%; }
+html[data-font-scale='x-large'] { font-size: 125%; }
+html[data-contrast='high'] {
+  --brand-page: #000000; --brand-surface: #000000; --brand-surface-2: #0a0a0a; --brand-surface-3: #141414;
+  --brand-ink: #ffffff; --brand-muted: #f1f5f9; --brand-border: rgba(255,255,255,.7);
+  --brand-primary: #ffffff; --brand-on-primary: #000000; --brand-accent: #ffffff; --brand-on-accent: #000000;
+  --brand-primary-fill: #ffffff; --brand-accent-fill: #ffffff; --win:#4ade80; --loss:#f87171; --draw:#fbbf24;
+}
+[data-theme='light'] html[data-contrast='high'],
+html[data-theme='light'][data-contrast='high'] {
+  --brand-page:#ffffff; --brand-surface:#ffffff; --brand-surface-2:#ffffff; --brand-surface-3:#f1f5f9;
+  --brand-ink:#000000; --brand-muted:#1e293b; --brand-border:rgba(0,0,0,.7); --brand-primary:#000000; --brand-on-primary:#ffffff; --brand-accent:#000000; --brand-on-accent:#ffffff; --brand-primary-fill:#000000; --brand-accent-fill:#000000;
+}
+html[data-colour-mode='monochrome'] { filter: grayscale(1); }
+html[data-dyslexic='on'] {
+  --font: 'Atkinson Hyperlegible', 'OpenDyslexic', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  letter-spacing: .04em; word-spacing: .08em; line-height: 1.7;
+}
+html[data-dyslexic='on'] p, html[data-dyslexic='on'] .muted, html[data-dyslexic='on'] .small { line-height: 1.75; }
+html[data-motion='reduced'] *, html[data-motion='reduced'] *::before, html[data-motion='reduced'] *::after {
+  animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+
+/* Readable contrast on gradient/accent fills. */
+.eyebrow { color: var(--brand-accent); }
+[data-theme='street'] .eyebrow { color: var(--brand-ink); }
+[data-theme='street'] .tab.active,
+[data-theme='street'] .btn.primary {
+  color: var(--brand-on-primary, #160814);
+  text-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
+.brand-mark { color: var(--brand-on-primary, #fff); }
+/* h1/h2/h3 never on bright accent unless readable ink applied. */
+h1, h2, h3 { color: var(--brand-ink); }
+
+/* Normalise keyed tables: no camelCase/snake_case in rendered cells. */
+td::before, .stat .label, .eyebrow { text-transform: none; }
+
+/* Kit rows. */
+.kit-row { display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-top:1px solid var(--brand-border); }
+.kit-icon { font-size:1.15rem; line-height:1.4; flex:none; }
+.kit-text { display:grid; gap:3px; min-width:0; }
+.kit-text strong { font-weight:700; }
+@media (prefers-contrast: more) { :root { --brand-border: rgba(226,232,240,.7); } }
+@media (forced-colors: active) { .card,.stat,.btn { border:1px solid CanvasText; } }

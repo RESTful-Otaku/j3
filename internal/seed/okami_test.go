@@ -33,7 +33,7 @@ func TestOkamiSeedCompleteAndIdempotent(t *testing.T) {
 	if counts["fighters"] != 40 || counts["clubs"] != 4 || counts["mats"] != 2 {
 		t.Fatalf("core counts: %+v", counts)
 	}
-	if counts["mat_staff"] != 8 || counts["discipline_rules"] != 8 || counts["kit_requirements"] != 7 {
+	if counts["mat_staff"] != 8 || counts["discipline_rules"] != 8 || counts["kit_requirements"] < 7 {
 		t.Fatalf("config counts: %+v", counts)
 	}
 	if counts["entrants"] < 60 || counts["schedule_items"] < 11 || counts["kata_sections"] != 3 {

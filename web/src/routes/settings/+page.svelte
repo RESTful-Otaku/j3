@@ -5,6 +5,7 @@
   import { LOCALES, translate } from '../../lib/i18n';
   import { notifySuccess, notifyError } from '../../lib/toast';
   import { setTheme, themeChoice, type ThemeChoice } from '../../lib/theme';
+  import { setAccessibility } from '../../lib/accessibility';
 
   const KEY = 'j3-settings-v1';
   const locales = [
@@ -188,6 +189,39 @@
     </section>
 
     <section class="card">
+      <div class="eyebrow">Accessibility</div>
+      <h2>Reading & vision</h2>
+      <div class="field-row">
+        <label class="field">Text size
+          <select on:change={(e) => setAccessibility({ fontScale: (e.target as HTMLSelectElement).value as any })}>
+            <option value="normal">Normal</option>
+            <option value="large">Larger</option>
+            <option value="x-large">Extra large</option>
+          </select>
+        </label>
+        <label class="field">Contrast
+          <select on:change={(e) => setAccessibility({ contrast: (e.target as HTMLSelectElement).value as any })}>
+            <option value="normal">Normal</option>
+            <option value="high">High contrast</option>
+          </select>
+        </label>
+        <label class="field">Colour
+          <select on:change={(e) => setAccessibility({ colourMode: (e.target as HTMLSelectElement).value as any })}>
+            <option value="colour">Colour</option>
+            <option value="monochrome">Monochrome (vision-impaired)</option>
+          </select>
+        </label>
+        <label class="field">Motion
+          <select on:change={(e) => setAccessibility({ motion: (e.target as HTMLSelectElement).value as any })}>
+            <option value="system">System</option>
+            <option value="reduced">Reduced motion</option>
+          </select>
+        </label>
+      </div>
+      <label class="check"><input type="checkbox" on:change={(e) => setAccessibility({ dyslexic: (e.target as HTMLInputElement).checked })} /> Dyslexic-friendly reading (spacing + type)</label>
+    </section>
+
+    <section class="card">
       <div class="eyebrow">Media &amp; branding</div>
       <h2>Uploads</h2>
       <p class="muted small" style="margin:6px 0 12px;">
@@ -242,6 +276,7 @@
   :global(.settings-shell) .btn { min-height: 46px; padding: 0 22px; font-size: 1rem; font-weight: 800; }
   :global(.settings-shell) .btn.primary { background: var(--brand-primary-fill); color: var(--brand-on-primary); border: 0; border-radius: 12px; box-shadow: 0 10px 20px color-mix(in srgb, var(--brand-primary) 45%, transparent); }
   :global(.settings-shell) .muted.small { font-size: .75rem; }
+  :global(.settings-shell) .check { display:flex; gap:8px; align-items:center; margin-top:14px; font-size:.86rem; }
   @media (max-width: 700px) {
     :global(.settings-shell) { max-width: 100%; }
     :global(.settings-shell) .shell { padding: calc(10px + var(--safe-top)) 14px calc(96px + var(--safe-bottom)) 14px; }
