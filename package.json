@@ -72,7 +72,10 @@
     "storybook:build": "bun run --cwd web build-storybook",
     "component:storybook": "bun run storybook",
     "version": "bash scripts/version.sh",
-    "version:check": "bash scripts/version.sh release check"
+    "version:check": "bash scripts/version.sh release check",
+    "doctor": "bash scripts/doctor.sh",
+    "qa:docker:destroy": "bash scripts/qa-docker.sh destroy",
+    "qa:docker:teardown": "bash scripts/qa-docker.sh destroy"
   },
   "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Jonathan Harrison (RESTful_Otaku)"

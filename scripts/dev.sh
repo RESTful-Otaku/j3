@@ -331,7 +331,7 @@ docker_menu() {
     select_menu "Docker QA demo" \
       "🐳 Full seeded tournament" "🥋 Okami mid-event" "🧹 Clean base seed" \
       "💡 Light 24-fighter demo" "🔥 Dev hot reload" "🏗 Build Container Images" \
-      "🛑 Stop containers" "♻️ Reset QA data" "← Back"
+      "🛑 Stop containers" "♻️ Reset QA data" "🩺 Doctor / preflight" "🧨 Complete teardown (destroy)" "← Back"
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
@@ -343,7 +343,9 @@ docker_menu() {
       5) tui_log docker-build; spinner "Building QA images" bash scripts/qa-docker.sh build ;;
       6) tui_log docker-down; spinner "Stopping QA containers" bash scripts/qa-docker.sh down ;;
       7) tui_log docker-reset; spinner "Resetting QA data" bash scripts/qa-docker.sh reset ;;
-      8) tui_log docker-back; return ;;
+      8) tui_log docker-doctor; spinner "J3 doctor" bash scripts/doctor.sh ;;
+      9) tui_log docker-destroy; spinner "Destroying QA stack" bash scripts/qa-docker.sh destroy ;;
+      10) tui_log docker-back; return ;;
     esac
     pause
   done

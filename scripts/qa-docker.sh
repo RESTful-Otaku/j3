@@ -22,7 +22,14 @@ else
   for candidate in docker podman; do
     if runtime_works "$candidate"; then RUNTIME="$candidate"; break; fi
   done
-  [[ -n "$RUNTIME" ]] || die "no running container runtime found (tried docker and podman)"
+  if [[ -z "$RUNTIME" ]]; then
+    echo "no running container runtime; trying scripts/doctor.sh…" >&2
+    bash scripts/doctor.sh >&2 || true
+    for candidate in docker podman; do
+      if runtime_works "$candidate"; then RUNTIME="$candidate"; break; fi
+    done
+  fi
+  [[ -n "$RUNTIME" ]] || die "no running container runtime found (tried docker and podman; see doctor output above)"
 fi
 
 port_available() {
@@ -232,6 +239,15 @@ do_up() {
   print_urls
 }
 
+destroy_stack() {
+  stop_stack
+  log "Removing QA data volume + network + images"
+  "$RUNTIME" volume rm -f "$VOLUME" >/dev/null 2>&1 || true
+  "$RUNTIME" network rm "$NETWORK" >/dev/null 2>&1 || true
+  "$RUNTIME" image rm -f "$API_IMAGE" "$WEB_IMAGE" "$WEB_DEV_IMAGE" >/dev/null 2>&1 || true
+  log "QA stack destroyed (containers, volume, network, images)"
+}
+
 usage() {
   cat <<EOF
 J3 local QA demo (Docker with Podman fallback)
@@ -249,6 +265,7 @@ Lifecycle:
   build     Build the API and static web images
   down      Stop and remove the containers
   reset     Stop, then discard the database/simulation volume
+  destroy   Complete teardown: containers + volume + network + images
   simulate  Regenerate /data/simulation.json without restarting
   logs      Show recent API logs
   follow    Stream API logs
@@ -264,6 +281,7 @@ case "${1:-up}" in
   up|full|okami|clean|light|dev) do_up "$1" ;;
   build) ensure_api_image force; ensure_web_image prod force; ensure_web_image dev force ;;
   down) stop_stack; log "QA stack stopped" ;;
+  destroy|teardown|clean-all) destroy_stack ;;
   reset) stop_stack; reset_volume; log "QA data reset" ;;
   simulate)
     ensure_api_image; ensure_network; ensure_volume

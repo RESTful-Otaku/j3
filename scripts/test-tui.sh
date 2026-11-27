@@ -28,7 +28,7 @@ for menu in [3, 4, 5, 6, 7, 8]:
     elif menu == 4: count = 5     # data
     elif menu == 5: count = 9     # build
     elif menu == 6: count = 9     # mobile
-    elif menu == 7: count = 9     # Docker QA
+    elif menu == 7: count = 9     # Docker QA + doctor/destroy; q backs
     else: count = 9              # docs & guides
     for i in range(1, count + 1):
         action(i)
@@ -45,7 +45,7 @@ build-menu build-exec build-release build-cicd deploy-dev deploy-staging deploy-
 build-and-deploy-staging build-and-deploy-production menu-back \
 mobile-menu mobile-build-apk mobile-emulator mobile-install mobile-build-install mobile-url \
 run-demo-phone mobile-build-ios mobile-build-hosted mobile-back \
-docker-menu docker-full docker-okami docker-clean docker-light docker-dev docker-build docker-down docker-reset docker-back \
+docker-menu docker-full docker-okami docker-clean docker-light docker-dev docker-build docker-down docker-reset docker-doctor \
 docs-menu docs-home docs-api docs-guide docs-development docs-ci docs-hosting docs-guides \
 docs-refresh docs-back \
 exit"
