@@ -32,6 +32,7 @@
   let switching = false;
   let switchError = '';
   let qaOpen = false;
+  let openGroups = new Set<string>();
   let activePath = '';
   let navWidth = 244;
   let resizing = false;
@@ -125,6 +126,7 @@
     expanded = localStorage.getItem('j3-nav-expanded') === '1';
     navWidth = clampWidth(Number(localStorage.getItem('j3-nav-width')) || 244);
     qaOpen = localStorage.getItem('j3-nav-qa') === '1';
+    openGroups = new Set(NAV_GROUPS);
     activePath = window.location.pathname;
     syncViewport();
     syncNavWidth();
@@ -151,13 +153,24 @@
   function closeMobile() {
     mobileOpen = false;
   }
+  function normalizePath(p: string) {
+    return (p.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/');
+  }
   function isActive(href: string) {
-    const path = activePath || window.location.pathname;
-    return href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
+    const path = normalizePath(activePath || window.location.pathname);
+    const h = normalizePath(href);
+    return h === '/' ? path === '/' : path === h || path.startsWith(`${h}/`);
   }
   function toggleQa() {
     qaOpen = !qaOpen;
     localStorage.setItem('j3-nav-qa', qaOpen ? '1' : '0');
+  }
+  function toggleGroup(group: string) {
+    if (openGroups.has(group)) openGroups.delete(group); else openGroups.add(group);
+    openGroups = openGroups; // reactivity
+  }
+  function groupOpen(group: string) {
+    return openGroups.has(group);
   }
   function startTour() {
     mobileOpen = false;
@@ -210,9 +223,9 @@
             {#if group === 'QA tools'}
               <button class="group-toggle" aria-expanded={qaOpen} on:click={toggleQa}>{qaOpen ? '▾' : '▸'} {group}</button>
             {:else}
-              <div class="group-label">{group}</div>
+              <button class="group-toggle" aria-expanded={groupOpen(group)} on:click={() => toggleGroup(group)}>{groupOpen(group) ? '▾' : '▸'} {group}</button>
             {/if}
-            {#if group !== 'QA tools' || qaOpen}
+            {#if (group === 'QA tools' && qaOpen) || (group !== 'QA tools' && groupOpen(group))}
               {#each groupItemsForRole as item (item.href)}
                 <a class="drawer-item" class:active={isActive(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}
                   href={item.href} on:click={closeMobile}>
@@ -288,13 +301,15 @@
             {#if group === 'QA tools'}
               <button class="group-toggle" aria-expanded={qaOpen} on:click={toggleQa}>{qaOpen ? '▾' : '▸'} {group}</button>
             {:else}
-              <div class="group-label">{group}</div>
+              <button class="group-toggle" aria-expanded={groupOpen(group)} on:click={() => toggleGroup(group)}>{groupOpen(group) ? '▾' : '▸'} {group}</button>
             {/if}
           {:else}
             <div class="group-divider" aria-hidden="true"></div>
           {/if}
           {#if expanded && group === 'QA tools' && !qaOpen}
             <!-- collapsed by default: QA tools stay out of the event-day way -->
+          {:else if expanded && group !== 'QA tools' && !groupOpen(group)}
+            <!-- group collapsed by user -->
           {:else}
             {#each groupItemsForRole as item (item.href)}
               <a class="nav-item" class:icon-only={!expanded} class:active={isActive(item.href)}
@@ -372,7 +387,7 @@
   .hamburger { background:var(--brand-surface-3); border:1px solid var(--brand-border); color:var(--brand-ink); border-radius:9px; padding:8px 10px; cursor:pointer; line-height:1; font-size:1em; min-width:38px; }
   .nav-shell.collapsed .hamburger { margin:0 auto; }
   nav { display:grid; gap:2px; overflow-y:auto; flex:1; width:100%; scrollbar-width:thin; }
-  .group-label, .group-toggle { margin:12px 8px 4px; font-size:.65em; letter-spacing:.14em; text-transform:uppercase; color:var(--brand-muted); font-weight:900; }
+  .group-toggle { margin:12px 8px 4px; font-size:.65em; letter-spacing:.14em; text-transform:uppercase; color:var(--brand-muted); font-weight:900; }
   .group-toggle { width:calc(100% - 16px); text-align:left; background:none; border:0; cursor:pointer; padding:4px 0; }
   .group-toggle:hover { color:var(--brand-ink); }
   .group-divider { height:1px; background:var(--brand-border); margin:8px 10px 5px; }
@@ -409,8 +424,7 @@
   .drawer-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; padding-bottom:10px; border-bottom:1px solid var(--brand-border); margin-bottom:2px; }
   .drawer-head .drawer-title { flex:1; }
   .mobile-drawer nav { display:grid; gap:2px; overflow-y:auto; flex:1; }
-  .mobile-drawer .group-label { margin:14px 0 6px; font-size:.65rem; letter-spacing:.16em; text-transform:uppercase; color:var(--brand-muted); font-weight:900; }
-  .mobile-drawer .group-toggle { width:100%; text-align:left; background:none; border:0; cursor:pointer; padding:6px 0; color:var(--brand-muted); font-weight:800; font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+    .mobile-drawer .group-toggle { width:100%; text-align:left; background:none; border:0; cursor:pointer; padding:6px 0; color:var(--brand-muted); font-weight:800; font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; display:flex; align-items:center; gap:6px; }
   .mobile-drawer .group-toggle:hover { color:var(--brand-ink); }
   .drawer-item { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:52px; padding:12px 14px; border-radius:13px; color:var(--brand-muted); text-decoration:none; font-size:.95rem; font-weight:600; border:1px solid transparent; background:transparent; }
   .drawer-item .drawer-icon { font-size:1.2rem; width:26px; text-align:center; flex:none; }

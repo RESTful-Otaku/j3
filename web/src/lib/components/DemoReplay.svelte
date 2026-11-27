@@ -7,6 +7,17 @@
   let view: 'mat' | 'table' | 'bracket' | 'ceremony' = 'mat';
   let seed = 42;
   let fighters = 50;
+  let collapsed = false;
+
+  function toggleCollapsed() {
+    collapsed = !collapsed;
+    try { localStorage.setItem('j3-replay-collapsed', collapsed ? '1' : '0'); } catch { /* ignore */ }
+  }
+
+  // Restore collapsed preference.
+  (function initCollapsed() {
+    try { collapsed = localStorage.getItem('j3-replay-collapsed') === '1'; } catch { /* ignore */ }
+  })();
 
   function stageGroups(completed: typeof $replaySnapshot.bouts) {
     const groups = new Map<string, typeof completed>();
@@ -22,13 +33,21 @@
 </script>
 
 {#if $appMode === 'sim'}
+  {#if collapsed}
+    <button class="replay-chip" on:click={toggleCollapsed} aria-label="Show replay panel" title="Show replay panel">
+      🎬 <span>Replay · {state.index + 1}/{state.total}</span>
+    </button>
+  {:else}
   <section class="replay-panel" aria-label="Simulated tournament controls">
     <header>
       <div>
         <div class="eyebrow">Virtual event · global playback</div>
         <strong>🎬 Simulated tournament</strong>
       </div>
-      <button class="mini exit" on:click={() => setAppMode('live')} aria-label="Return to live mode">● Live</button>
+      <div class="header-actions">
+        <button class="mini" on:click={toggleCollapsed} aria-label="Minimize replay panel" title="Minimize replay panel">−</button>
+        <button class="mini exit" on:click={() => setAppMode('live')} aria-label="Return to live mode">● Live</button>
+      </div>
     </header>
 
     {#if state.loading}
@@ -117,6 +136,7 @@
       <p class="hint small">Seed {state.seed} · {state.fighters} fighters · {state.speed === 80 ? '8×' : state.speed === 160 ? '4×' : state.speed === 450 ? '1×' : state.speed === 900 ? '½×' : '¼×'} playback</p>
     {/if}
   </section>
+  {/if}
 {/if}
 
 <style>
@@ -139,6 +159,10 @@
   .wide-btn { width:100%; text-align:center; text-decoration:none; }
   .console-link { border-color:var(--brand-accent); color:var(--brand-accent); }
   .mini.exit { border-color:var(--win); }
+  .header-actions { display:flex; gap:6px; align-items:center; }
+  .replay-chip { position:fixed; right:calc(12px + var(--safe-right)); bottom:calc(52px + var(--safe-bottom)); z-index:890; display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; border:1px solid var(--brand-accent); background:var(--brand-surface-2); color:var(--brand-ink); font-size:.78rem; font-weight:800; cursor:pointer; box-shadow:var(--brand-shadow); }
+  .replay-chip:hover { border-color:var(--brand-primary); }
+  @media (max-width: 700px) { .replay-chip { right:calc(8px + var(--safe-right)); bottom:calc(132px + var(--safe-bottom)); } }
   .mini.primary { background:var(--brand-primary-fill); color:var(--brand-on-primary); border-color:transparent; }
   .timeline { display:grid; gap:4px; }
   .timeline-top { display:flex; justify-content:space-between; font-size:.72rem; color:var(--brand-muted); }
