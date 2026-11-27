@@ -251,4 +251,13 @@
     :global(.settings-shell) .field-row { gap: 8px; }
     :global(.settings-shell) .btn { min-height: 46px; width: 100%; justify-content: center; }
   }
+  /* Tablet (701–1024px): use the extra width, keep touch targets. */
+  @media (min-width: 701px) and (max-width: 1024px) {
+    :global(.settings-shell) { max-width: 720px; }
+    :global(.settings-shell) .shell { padding: 18px 22px calc(28px + var(--safe-bottom)) 22px; }
+    :global(.settings-shell) .field-row { grid-template-columns: 1fr 1fr; gap: 12px; }
+    :global(.settings-shell) .card { padding: 20px; }
+    :global(.settings-shell) .field input,
+    :global(.settings-shell) .field select { padding: 12px 14px; font-size: 1rem; min-height: 44px; }
+  }
 </style>

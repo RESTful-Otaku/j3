@@ -471,3 +471,21 @@ code {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* Consistent keyboard focus across all interactive elements (accessibility). */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid var(--brand-primary); outline-offset: 2px; border-radius: 6px;
+}
+
+/* Touch devices: enforce comfortable tap targets; don't rely on hover. */
+@media (hover: none) {
+  a, button, [role="button"], .tab, .btn, .nav-item, .drawer-item, .quick-item {
+    min-height: 44px;
+  }
+  .icon, .card-chevron, .close-btn, .hamburger, button[aria-label] {
+    min-width: 44px; min-height: 44px;
+  }
+  /* Hover transforms are meaningless without a pointer. */
+  .btn:hover, a.brand-mark:hover, .nav-item:hover { transform: none; }
+}
