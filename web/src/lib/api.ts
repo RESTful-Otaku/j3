@@ -637,12 +637,9 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
     response = await send(url, init, headers);
   }
   if (!response.ok || !isJsonResponse(response)) {
-    // Server 500 / 404 / non-JSON / Capacitor HTML: prefer cached data for reads,
-    // never blank a view that previously had good data. Never cache secrets.
-    const cached = method === 'GET' ? readCached(url) : null;
-    if (cached) { try { return (await cached.json()) as T; } catch { /* ignore */ } }
     let detail: { error?: string } = {};
     try { detail = await response.clone().json() as { error?: string }; } catch { /* plain error */ }
+    // Auth failures must not be masked by cached data.
     if (response.status === 403 && detail.error === 'password_change_required') {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(SESSION_KEY);
@@ -650,6 +647,16 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
         window.dispatchEvent(new Event('j3-password-change-required'));
       }
       throw new PasswordChangeRequiredError();
+    }
+    // Server 5xx / non-JSON / Capacitor HTML: prefer cached data for reads,
+    // never blank a view that previously had good data. Never serve cache for
+    // 401/403/404 or auth recovery. Never cache secrets.
+    const transient = method === 'GET' && (
+      (response.status >= 500) || response.status === 408 || response.status === 429 || !isJsonResponse(response)
+    ) && response.status !== 401 && response.status !== 403 && response.status !== 404;
+    if (transient) {
+      const cached = readCached(url);
+      if (cached) { try { return (await cached.json()) as T; } catch { /* ignore */ } }
     }
     const hint = response.status === 401 && lastAuthError ? `: ${lastAuthError}` : '';
     throw new Error(`${response.status} ${response.statusText} from ${url}${hint}`);
