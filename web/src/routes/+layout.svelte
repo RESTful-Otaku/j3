@@ -6,6 +6,7 @@
   import DemoReplay from '../lib/components/DemoReplay.svelte';
   import TourOverlay from '../lib/components/TourOverlay.svelte';
   import { afterNavigate, goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { ensureQaFirstRun, syncRoleFromSession, uiRole } from '../lib/auth';
   import { setRole } from '../lib/nav';
   import { apiUrl, flushOutbox } from '../lib/api';
@@ -59,6 +60,7 @@
     window.addEventListener('j3-session-changed', guard);
     window.addEventListener('j3-password-change-required', onPasswordRequired);
 
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) { navigator.serviceWorker.register(resolve('/') + 'service-worker.js').catch(() => {}); }
     initTheme();
     initAccessibility();
     initReplayUrl();

@@ -12,3 +12,6 @@ J3 is offline-first. Reads fall back; writes are queued; reconnect replays; serv
 - `flushOutbox()` on `online` + after a successful response; replays `fetch` with fresh auth. `409` treated as already-applied. Failed entries retained. `outboxSize`, `clearOutbox`.
 - **Not** queued on `401/403/404`/server `!ok` (server saw request); server remains authoritative; conflict resolution is server-side. QA `VITE_OFFLINE_DEMO` has richer `offlineWriteResponse` simulation + `j3-offline-state`.
 - Spinners/placeholders; no silent blanks; `aria-live`.
+
+## PWA / web app shell
+`web/src/service-worker.ts`, `manifest.webmanifest`, `app.html`, register `/service-worker.js`. SvelteKit 3 `$app/manifest`+`$app/env`+`resolve`. Cache app shell + assets; GET API network-first + cache; no `/api/v1/auth`, no mutations/secrets; offline `j3-read-cache` + `j3-write-outbox`.
