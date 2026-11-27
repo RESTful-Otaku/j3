@@ -207,6 +207,8 @@ states. Offline write outbox remains a future enhancement.
 Rationale and status for older decisions remain in git history; all listed decisions are accepted.
 
 
+| D-088 | Storybook 10 for SvelteKit (`@storybook/sveltekit`, addon-svelte-csf/a11y/docs/vitest) + J3 stories; `storybook`, `storybook:build`, `component:qa`, `test:storybook`; unit vs storybook Vitest projects. |
+
 ## 12. Open questions
 
 1. True double vs consolation double as default? (configurable either way)
@@ -219,6 +221,8 @@ Rationale and status for older decisions remain in git history; all listed decis
 8. Exact compatibility chains per federation? (configurable ranges + consent)
 
 ## 13. Change log (recent)
+
+- **2026-11-27 — /event + Storybook**: event-config JSON lowerCamel + safe keyed blocks; no 500/each_key; installed Svelte Storybook + J3 stories; `docs/STORYBOOK.md`.
 
 - **2026-11-27 — QA/polish gauntlet**: DB clean/purge/reseed/rebuild; extended deterministic multi-user simulation + `scripts/stress.sh`; Svelte component QA; pagination; `dev-lite`; offline read-cache + **write outbox**; notification fan-out; docs `DB/OFFLINE_SYNC/NOTIFICATIONS/TESTING/AGENT_WORKFLOW`.
 

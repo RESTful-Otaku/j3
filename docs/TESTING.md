@@ -5,3 +5,5 @@
 **Extended deterministic simulation** `j3d stress`, `RunExtended`, `bun run simulate:extended`. `scripts/stress.sh` `bun run stress` full gauntlet. Deterministic multi-user, multi-role, multi-mutation, compressed hours, `verifyOK`, periodic snapshots. Re-run same seed diff.
 
 **DB** see docs/DB.md. **Builds** `build:flavors`, `build:android:*`, `build-ios`, `release`. **TUI** `bun run dev`, `bun run dev:lite`. **CI/CD** `bun run cicd`, hosted CI/Mobile/Release/Deploy green; free-only public; visibility-gated.
+
+**Storybook** see docs/STORYBOOK.md.
