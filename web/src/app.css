@@ -32,8 +32,8 @@
   --brand-ink: #f8fafc;
   --brand-muted: #cbd5e1;
   --brand-border: rgba(226, 232, 240, 0.24);
-  --brand-radius: 16px;
-  --brand-radius-sm: 10px;
+  --brand-radius: 0px;
+  --brand-radius-sm: 0px;
   --brand-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
   --win: #4ade80;
   --loss: #fb7185;
@@ -111,7 +111,7 @@ html[data-nav='compact'] { --nav-width: 76px; }
   --brand-muted: #f0d9ff;
   --brand-border: rgba(255, 212, 0, 0.42);
   --brand-shadow: 0 16px 44px rgba(255, 45, 120, 0.28), 0 0 0 1px rgba(0, 229, 255, 0.16);
-  --brand-radius: 12px;
+  --brand-radius: 0px;
   --win: #4ade80;
   --loss: #fb7185;
   --draw: #ffd400;
@@ -542,3 +542,24 @@ html[data-density='compact'] p { line-height:1.4; }
 html[data-show-club-logos='off'] .club-logo, html[data-show-club-logos='off'] .club-crest { display:none; }
 html[data-show-fighter-photos='off'] .portrait-photo, html[data-show-fighter-photos='off'] .fighter-photo { display:none; }
 html[data-versus-layout='stack'] .versus-row { grid-template-columns:1fr !important; }
+
+
+/* User requirement: squared-off containers/buttons, no rounded edges. */
+.card, .stat, .btn, .tab, .pill, .badge, .notice, .placeholder, .toast, .dialog, .canvas,
+.canvas-item, .palette, .entry, .stat.small, .fighter-card, .versus-card, .brand-mark,
+.kit-row, .kit-icon, .club-logo, .field input, .field select, .field textarea,
+.page-btn, .size select, .drawer-item, .nav-item, .help-btn, .mode-switch, .mode-switch button,
+.invite-result, .event-card, .brand-banner, .bracket-match, .bracket-slot, .replay-chip {
+  border-radius: 0 !important;
+}
+.card + .card { margin-top: 0; }
+.card + .card { border-top-width: 0; }
+/* No gap between containers unless layout spacing explicitly needed; tighten card stacks. */
+.card-stack, .no-gap { gap: 0 !important; }
+/* Orange/accent headers: dark readable ink + larger size. */
+.eyebrow, .event-mark, .event-mark .crest, h1, h2, h3,
+[data-theme='street'] .eyebrow { color: var(--brand-ink); }
+.eyebrow { font-size: .8rem; font-weight: 900; }
+[data-theme='street'] .tab.active, [data-theme='street'] .btn.primary { color: var(--brand-on-primary, #160814); text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+h1, h2, h3 { color: var(--brand-ink); }
+.brand-name { color: var(--brand-ink); }

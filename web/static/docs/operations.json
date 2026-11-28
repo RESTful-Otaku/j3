@@ -12,6 +12,25 @@
   },
   {
     "group": "Administration",
+    "method": "DELETE",
+    "path": "/api/v1/demo/admin/users/{id}",
+    "operationId": "deleteUser",
+    "title": "Delete a user account (admin; audited; confirmed UI)",
+    "description": "",
+    "auth": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "value": "fight-01"
+      }
+    ],
+    "body": ""
+  },
+  {
+    "group": "Administration",
     "method": "POST",
     "path": "/api/v1/demo/admin/users/{id}/reset",
     "operationId": "resetPassword",

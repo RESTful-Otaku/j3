@@ -99,6 +99,7 @@ func New(store *db.DB, version string) *Server {
 	mux.HandleFunc("GET /api/v1/demo/suggestions", s.suggestions)
 	mux.HandleFunc("GET /api/v1/demo/admin/users", s.adminUsers)
 	mux.HandleFunc("POST /api/v1/demo/admin/users/{id}/status", s.setUserStatus)
+	mux.HandleFunc("DELETE /api/v1/demo/admin/users/{id}", s.deleteUser)
 	mux.HandleFunc("POST /api/v1/demo/admin/users/{id}/reset", s.resetPassword)
 	mux.HandleFunc("GET /api/v1/demo/permissions", s.permissions)
 	mux.HandleFunc("POST /api/v1/demo/permissions", s.updatePermission)

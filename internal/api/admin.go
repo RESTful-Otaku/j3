@@ -72,6 +72,16 @@ func (s *Server) managedTarget(r *http.Request) (auth.Role, string, string, bool
 	return target, status, targetClub, true
 }
 
+func (s *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAction(w, r, "participants", "delete") { return }
+	_, _, _, ok := s.managedTarget(r)
+	if !ok { writeJSON(w, http.StatusForbidden, map[string]string{"error":"cannot manage this account"}); return }
+	id := r.PathValue("id")
+	if _, err := s.Store.ExecContext(r.Context(), `DELETE FROM users WHERE id = ?`, id); err != nil { writeError(w, err); return }
+	s.audit(r, "account.delete", "user", id, `{"deleted":true}`)
+	writeJSON(w, http.StatusOK, map[string]any{"deleted": true, "id": id})
+}
+
 func (s *Server) setUserStatus(w http.ResponseWriter, r *http.Request) {
 	if !s.requireAction(w, r, "participants", "edit") {
 		return

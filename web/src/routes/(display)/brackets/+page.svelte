@@ -16,6 +16,7 @@
   let pools: PoolView[] = [];
   let bracket: BracketNode[][] = [];
   let mode: 'official' | 'elimination' | 'roundRobin' = 'official';
+  let bracketOrientation: 'horizontal' | 'vertical' = 'horizontal'; // mobile default handled in CSS
   let serverStages: BracketStage[] = [];
   let pendingPromotion: DemoFight | null = null;
   let confirmOpen = false;
@@ -215,9 +216,10 @@
     <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
       <p class="muted small">Server-generated stages · results and promotion retained in every round</p>
       <button class="btn" on:click={() => askBuild(true)}>⚡ Direct elimination (BYEs)</button>
+      <button class="btn" on:click={() => (bracketOrientation = bracketOrientation === 'horizontal' ? 'vertical' : 'horizontal')}>↔️ {bracketOrientation === 'horizontal' ? 'Vertical' : 'Horizontal'}</button>
       <button class="btn primary" on:click={() => askBuild(false)}>⚙ Build official bracket</button>
     </div>
-    <div class="bracket-wrap" bind:this={bracketContainer}>
+    <div class="bracket-wrap" class:vertical={bracketOrientation === 'vertical'} bind:this={bracketContainer}>
       <svg class="bracket-lines" aria-hidden="true">
         {#each connectorPaths as path (path)}<path d={path} />{/each}
       </svg>
@@ -334,7 +336,8 @@
 />
 
 <style>
-  .bracket-wrap { position:relative; display:flex; gap:clamp(18px,2vw,44px); align-items:stretch; overflow-x:auto; padding:12px 0 32px; min-height:min(68vh, 720px); min-width:max-content; }
+  .bracket-wrap { position:relative; display:flex; gap:clamp(18px,2vw,44px); align-items:stretch; overflow-x:auto; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; padding:12px 0 32px; min-height:min(68vh, 720px); min-width:max-content; max-width:100%; }
+  .bracket-wrap.vertical { flex-direction:column; min-width:0; }
   .bracket-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }
   .bracket-lines path { fill:none; stroke:var(--brand-accent); stroke-width:2; opacity:.7; }
   .bracket-column { min-width:clamp(230px,19vw,330px); flex:1; position:relative; z-index:1; display:flex; flex-direction:column; }

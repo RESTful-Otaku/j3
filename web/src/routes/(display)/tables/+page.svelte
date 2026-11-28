@@ -163,7 +163,7 @@
           {#each filtered as row, i (row.fighterId)}
             <tr style="border-top:1px solid var(--brand-border);">
               <td style="padding:8px;">{i + 1}</td>
-              <td><FighterPortrait src={row.avatarPath} label={row.name} size="30px" fallback={initials(row.name)} clubColour={row.clubColour} /> <strong>{row.name}</strong></td>
+              <td><FighterPortrait src={row.avatarPath} label={row.name} size="30px" fallback={initials(row.name)} clubColour={row.clubColour} /> <strong>{row.name}</strong> <span class="move-arrow" title="Last movement" aria-label="movement">{i===0 ? '▲' : ''}</span></td>
               <td>{row.category}</td><td>{row.belt || '—'}</td>
               <td><span style="color:{row.clubColour};">●</span> {row.club}</td>
               <td style="color:var(--win);">{row.wins}</td><td style="color:var(--draw);">{row.draws}</td>

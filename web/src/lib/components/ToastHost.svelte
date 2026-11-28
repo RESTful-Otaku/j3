@@ -14,7 +14,7 @@
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<ToastDetail>).detail;
       toasts = [...toasts, detail];
-      setTimeout(() => dismiss(detail.id), detail.duration);
+      setTimeout(() => dismiss(detail.id), Math.max(detail.duration ?? 4000, 1500)); // cooldown min 1.5s; always dismissible
     };
     window.addEventListener('j3-toast', handler);
     return () => window.removeEventListener('j3-toast', handler);
@@ -42,15 +42,15 @@
 <style>
   .toast-stack {
     position: fixed; right: calc(18px + var(--safe-right)); bottom: calc(18px + var(--safe-bottom));
-    z-index: 1100; display: grid; gap: 10px; width: min(440px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
+    z-index: 100000; display: grid; gap: 10px; width: min(440px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
   }
   @media (max-width: 700px) {
     .toast-stack { right: calc(10px + var(--safe-right)); bottom: calc(84px + var(--safe-bottom)); width: calc(100vw - 20px - var(--safe-left) - var(--safe-right)); }
   }
   .toast {
     position: relative; display: flex; gap: 10px; align-items: center; overflow: hidden;
-    padding: 13px 15px 17px; border-radius: 12px; font-size: .9rem;
-    background: var(--brand-surface-2); color: var(--brand-ink);
+    padding: 13px 15px 17px; border-radius: 0; font-size: .9rem;
+    background: var(--brand-surface, #0b0d10); color: var(--brand-ink); opacity:1; backdrop-filter:none;
     border: 1px solid var(--brand-border); border-left: 4px solid var(--brand-primary);
     box-shadow: 0 18px 46px rgba(0,0,0,.4);
   }

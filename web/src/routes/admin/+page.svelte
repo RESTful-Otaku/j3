@@ -2,11 +2,19 @@
   import { onMount } from 'svelte';
   import { getJson, postJson, type InviteLink } from '../../lib/api';
   import { notifySuccess, notifyError } from '../../lib/toast';
+  import ConfirmDialog from '../../lib/components/ConfirmDialog.svelte';
+  import Pagination from '../../lib/components/Pagination.svelte';
+  import { paginate } from '../../lib/paginate';
 
   type Account = { id: string; name: string; email: string; role: string; status: string; club: string; roleRequest: string };
   let users: Account[] = [];
   let search = '';
   let role = '';
+  let selected = new Set<string>();
+  let confirmDeleteOpen = false;
+  let pendingDeleteIds: string[] = [];
+  let adminPage = 1; let adminPageSize = 15;
+  const PARTICIPANT_ROLES = ['fighter','spectator']; // Participant roles on UI
 
   let inviteName = '';
   let inviteEmail = '';
@@ -71,6 +79,11 @@
     } finally { inviting = false; }
   }
 
+  function toggleOne(id: string, on: boolean) { const n = new Set(selected); on ? n.add(id) : n.delete(id); selected = n; }
+  function toggleAll(on: boolean) { selected = on ? new Set(filtered.map(u=>u.id)) : new Set(); }
+  async function deleteUsers(ids: string[]) { for (const id of ids) { await fetch(`/api/v1/demo/admin/users/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } }).catch(()=>{}); } notifySuccess(`${ids.length} account(s) deleted`); selected = new Set(); await load(); }
+  function askDelete(ids: string[]) { pendingDeleteIds = ids; confirmDeleteOpen = true; }
+
   $: filtered = users.filter((user) =>
     (!role || user.role === role) &&
     `${user.name} ${user.email} ${user.club}`.toLowerCase().includes(search.toLowerCase()));
@@ -115,12 +128,20 @@
     <span class="pill">{filtered.length} shown</span>
   </div>
 
+  <div class="card" style="margin-bottom:12px;">
+    <span class="pill">{selected.size} of {filtered.length} selected</span>
+    <button class="btn" on:click={() => toggleAll(true)}>Select all</button>
+    <button class="btn" on:click={() => toggleAll(false)}>Clear</button>
+    <button class="btn warn" disabled={selected.size===0} on:click={() => askDelete([...selected])}>Delete selected</button>
+  </div>
+
   <div class="card" style="overflow-x:auto;">
     <table style="width:100%; border-collapse:collapse;">
-      <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;">Name</th><th>Email</th><th>Role</th><th>Club</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead><tr class="muted small" style="text-align:left;"><th style="padding:8px;"><input type="checkbox" aria-label="Select all" on:change={(e)=>toggleAll((e.target as HTMLInputElement).checked)} /></th><th style="padding:8px;">Name</th><th>Email</th><th>Role</th><th>Club</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody>
-        {#each filtered as user (user.id)}
+        {#each paginate(filtered, adminPage, adminPageSize) as user (user.id)}
           <tr style="border-top:1px solid var(--brand-border);">
+            <td style="padding:8px;"><input type="checkbox" checked={selected.has(user.id)} on:change={(e)=>toggleOne(user.id,(e.target as HTMLInputElement).checked)} aria-label={"Select "+user.name} /></td>
             <td style="padding:8px;"><strong>{user.name}</strong></td>
             <td>{user.email}</td><td>{user.role.replaceAll('_',' ')}</td><td>{user.club || 'Independent'}</td>
             <td><span class="badge {user.status === 'active' ? 'fighter' : 'spectator'}">{user.status}</span></td>
@@ -128,6 +149,7 @@
               {#if user.status === 'active'}<button class="tab" on:click={() => status(user.id, 'suspended')}>Suspend</button>{/if}
               {#if user.status !== 'active'}<button class="tab" on:click={() => status(user.id, 'active')}>Unlock</button>{/if}
               <button class="tab" on:click={() => reset(user.id)}>Reset password</button>
+              <button class="tab" on:click={() => askDelete([user.id])}>Delete</button>
               {#if user.roleRequest}<span class="muted small">requested {user.roleRequest}</span>{/if}
             </td>
           </tr>
@@ -135,7 +157,10 @@
       </tbody>
     </table>
   </div>
+  <Pagination total={filtered.length} page={adminPage} pageSize={adminPageSize} onChange={(p,s)=>{adminPage=p;adminPageSize=s;}} />
 </div>
+
+<ConfirmDialog bind:open={confirmDeleteOpen} title={pendingDeleteIds.length + " account(s) will be permanently deleted"} message="This cannot be undone. Temporary undo is not available after confirmation." confirmLabel="Delete" danger onConfirm={() => deleteUsers(pendingDeleteIds)} />
 
 <style>
   .invite-card { margin-bottom:16px; }

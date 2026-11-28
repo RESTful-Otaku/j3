@@ -57,13 +57,13 @@
 </div>
 
 <style>
-  .fighter-card { display:grid; gap:8px; padding:12px; border-radius:14px; border:1px solid var(--brand-border); background:var(--brand-surface-2); min-width:0; }
+  .fighter-card { display:grid; gap:8px; padding:12px; border-radius:0; border:1px solid var(--brand-border); background:var(--brand-surface-2); min-width:0; }
   .fighter-card.expanded { border-color:var(--brand-primary); }
-  .fighter-head { display:grid; gap:8px; justify-items:center; background:transparent; border:0; color:var(--brand-ink); cursor:pointer; padding:0; min-width:0; }
+  .fighter-head { display:grid; gap:8px; justify-items:center; align-items:center; background:transparent; border:0; color:var(--brand-ink); cursor:pointer; padding:0; min-width:0; }
   .profile-wrap { position:relative; }
-  .score-badge { position:absolute; top:-6px; right:-6px; min-width:24px; height:24px; padding:0 6px; border-radius:999px; background:var(--brand-primary); color:var(--brand-on-primary); font-weight:900; display:grid; place-items:center; font-size:.78rem; }
-  .club-line { display:flex; align-items:center; justify-content:center; gap:8px; min-width:0; }
-  .club-logo { width:28px; height:28px; border-radius:6px; object-fit:contain; border:1px solid var(--brand-border); background:var(--brand-surface-3); flex:none; }
+  .score-badge { min-width:24px; height:24px; padding:0 6px; border-radius:0; background:var(--brand-primary); color:var(--brand-on-primary); font-weight:900; display:grid; place-items:center; font-size:.78rem; }
+  .club-line { display:flex; align-items:center; justify-content:flex-start; gap:10px; min-width:0; width:100%; }
+  .club-logo { width:48px; height:48px; border-radius:0; object-fit:contain; border:1px solid var(--brand-border); background:var(--brand-surface-3); flex:none; }
   .name { font-weight:800; min-width:0; overflow-wrap:anywhere; text-align:left; }
   .state { font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--brand-muted); }
   .stats { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; border-top:1px solid var(--brand-border); padding-top:8px; }

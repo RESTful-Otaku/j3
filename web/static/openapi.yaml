@@ -1250,6 +1250,20 @@ paths:
       responses:
         '200':
           description: Accounts
+  /api/v1/demo/admin/users/{id}:
+    delete:
+      tags: [admin]
+      summary: Delete a user account (admin; audited; confirmed UI)
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': { description: deleted }
+        '403': { description: forbidden }
   /api/v1/demo/admin/users/{id}/status:
     post:
       operationId: setUserStatus

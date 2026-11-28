@@ -294,10 +294,11 @@
   .club-logo { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; margin-right: 4px; vertical-align: middle; }
   /* Host banner is full-bleed across the display content area — it belongs to the organiser/club, not a card. */
   .brand-banner {
-    height:clamp(90px,10vw,160px); width:100%; margin:0 0 16px; border-radius:0;
+    aspect-ratio: 1670 / 544; height:auto; width:100vw; max-width:100vw;
+    margin:0 calc(50% - 50vw) 16px; border-radius:0;
     border:0; border-bottom:1px solid var(--brand-border);
     background:var(--event-banner) center/contain no-repeat, var(--brand-primary-fill);
-    background-color:var(--brand-surface-2);
+    background-color:var(--brand-surface-2); background-size:contain; background-position:center;
   }
   .replay-strip { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 14px; margin-bottom:16px; border-radius:14px; border:1px solid var(--brand-accent); background:color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface-2)); }
   .clock-hero { display:flex; gap:clamp(14px,3vw,50px); align-items:center; flex-wrap:wrap; padding:clamp(16px,2vw,30px); border-radius:20px; border:1px solid var(--brand-primary); background:linear-gradient(135deg, rgba(59,130,246,.18), transparent), var(--brand-surface-2); box-shadow:var(--brand-shadow); }
@@ -326,7 +327,7 @@
     .matchup.compact { font-size:.84rem; }
     /* Phone board: compact the hero clock and banner so the actual fights land
        higher on the screen and there is far less scrolling before content. */
-    .brand-banner { height: clamp(56px, 7vw, 96px); width:100%; margin:0 0 12px; }
+    .brand-banner { aspect-ratio:1670/544; height:auto; width:100vw; max-width:100vw; margin:0 calc(50% - 50vw) 12px; }
     .clock-hero { padding: clamp(10px, 2vw, 18px); gap: clamp(10px, 3vw, 26px); }
     .big-clock { font-size: clamp(1.7rem, 9vw, 4.2rem); }
     .clock-hero .eyebrow { font-size: .7rem; }

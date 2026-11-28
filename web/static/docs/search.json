@@ -900,6 +900,12 @@
     "url": "/docs/api?path=/api/v1/demo/admin/users&method=GET"
   },
   {
+    "title": "DELETE /api/v1/demo/admin/users/{id}",
+    "section": "API reference",
+    "text": "Delete a user account (admin; audited; confirmed UI)",
+    "url": "/docs/api?path=/api/v1/demo/admin/users/{id}&method=DELETE"
+  },
+  {
     "title": "POST /api/v1/demo/admin/users/{id}/reset",
     "section": "API reference",
     "text": "Initiate a password reset for a user",
