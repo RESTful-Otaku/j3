@@ -17,8 +17,6 @@ reset_db() {
 reset_web_static() {
   log "Regenerate bundled web demo data"
   bash scripts/mobile-demo-data.sh
-  cp web/static/j3-demo.db web/static/j3-demo-data.json ./ 2>/dev/null || true
-  # restore tracked generated source after copy attempt
   git checkout -- web/static/j3-demo.db web/static/j3-demo-data.json 2>/dev/null || true
 }
 
