@@ -1,11 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api, type AuditEntry } from '../../lib/api';
+  import Pagination from '../../lib/components/Pagination.svelte';
+  import { paginate } from '../../lib/paginate';
 
   let entries: AuditEntry[] = [];
   let actor = '';
   let action = '';
   let expanded = 0;
+  let auditPage = 1; let auditPageSize = 15;
+  const PAGE_SIZES=[10,15,20,50];
 
   async function load() {
     try { entries = (await api.audit({ actor, action, limit: 250 })).entries; } catch { /* keep last frame */ }
@@ -36,7 +40,7 @@
       <button class="btn" on:click={() => void load()}>Refresh</button>
     </div>
     <div style="display:grid; gap:8px; margin-top:16px;">
-      {#each entries as entry (entry.id)}
+      {#each paginate(entries, auditPage, auditPageSize) as entry (entry.id)}
         <div class="entry">
           <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
             <div><strong>{entry.action}</strong> <span class="badge {entry.actorRole === 'tournament_runner' ? 'runner' : 'spectator'}">{entry.actorRole}</span></div>
@@ -50,6 +54,7 @@
         </div>
       {:else}<div class="placeholder">No audit entries match these filters.</div>{/each}
     </div>
+    <Pagination total={entries.length} page={auditPage} pageSize={auditPageSize} pageSizeOptions={PAGE_SIZES} onChange={(p,s)=>{auditPage=p;auditPageSize=s;}} />
   </div>
 </div>
 

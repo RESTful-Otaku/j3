@@ -3,6 +3,8 @@
   import { getJson, postJson } from '../../lib/api';
   import { notifySuccess, notifyError } from '../../lib/toast';
   import { phoneLimit } from '../../lib/responsive';
+  import Pagination from '../../lib/components/Pagination.svelte';
+  import { paginate } from '../../lib/paginate';
 
   type Announcement = { id: string; title: string; body: string; channels: string; audience: string; createdAt: string };
   type Suggestion = { Kind: string; Title: string; Reason: string };
@@ -12,6 +14,7 @@
   let body = '';
   let channels = 'push,email,sms';
   let audience = 'all';
+  let page = 1; let pageSize = 10;
 
   async function load() {
     try {
@@ -63,7 +66,7 @@
   <div class="card" style="margin-top:18px;">
     <h2>Recent announcements</h2>
     <div use:phoneLimit={6}>
-    {#each announcements as announcement (announcement.id)}
+    {#each paginate(announcements, page, pageSize) as announcement (announcement.id)}
       <div class="row"><strong>{announcement.title}</strong><span class="muted small">{announcement.channels} · {announcement.audience} · {announcement.createdAt}</span></div>
     {:else}<span class="muted">Nothing sent yet.</span>{/each}
     </div>
