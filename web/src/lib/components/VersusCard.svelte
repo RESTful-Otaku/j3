@@ -10,7 +10,7 @@
   export let blueScore = 0;
   export let state = '';
   export let expandable = true;
-  export let expanded = false; // default shrunk
+  export let expanded = false;
 
   function fighter(f: any) {
     return {
@@ -48,14 +48,27 @@
 </div>
 
 <style>
-  .versus-card { display:grid; gap:10px; padding:12px; border-radius:16px; border:1px solid var(--brand-border); background:var(--brand-surface-2); min-width:0; }
-  .versus-meta { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; background:transparent; border:0; color:var(--brand-ink); cursor:pointer; padding:0; }
+  .versus-card {
+    display:grid; gap:10px; padding:12px; border-radius:0;
+    border:1px solid var(--brand-border); background:var(--brand-surface-2); min-width:0;
+  }
+  .versus-meta {
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    background:transparent; border:0; color:var(--brand-ink);
+    cursor:pointer; padding:0;
+  }
   .versus-meta span { display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:.82rem; }
-  .versus-meta span span { font-size:.62rem; text-transform:uppercase; letter-spacing:.08em; color:var(--brand-muted); }
+  .versus-meta span span {
+    font-size:.62rem; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--brand-muted);
+  }
   .versus-row { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center; }
   .score-vs { display:grid; gap:4px; justify-items:center; }
   .scores { display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-size:1.8rem; font-weight:900; }
   .scores span { font-size:.8rem; color:var(--brand-muted); }
   .state { font-size:.66rem; text-transform:uppercase; letter-spacing:.06em; color:var(--brand-muted); }
-  @media (max-width:700px){ .versus-row{ grid-template-columns:1fr; } .score-vs{ order:0; } }
+  @media (max-width:700px){
+    .versus-row{ grid-template-columns:1fr; }
+    .score-vs{ order:0; }
+  }
 </style>

@@ -165,7 +165,7 @@
   .corner-label.red { color:var(--red-corner); }
   .corner-label.blue { color:var(--blue-corner); text-shadow:0 1px 3px rgba(15,23,42,.55); }
   .big-score { font-family:var(--font-display); font-size:clamp(3rem,8vw,7rem); font-weight:800; }
-  .clock { font-family:var(--font-display); font-size:clamp(3.2rem,9vw,6rem); font-weight:900; }
+  .clock { font-family:var(--font-display); font-size:clamp(4rem,14vw,7rem); font-weight:900; }
   .clock.paused { color:var(--draw); animation:pulse 1s infinite alternate; }
   .hold-badge { color:#fff; background:var(--brand-accent); border-radius:10px; padding:6px 10px; font-weight:800; }
   .control-grid { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
@@ -180,7 +180,7 @@
     }
     .corner-label { font-size:.86rem; line-height:1.2; overflow-wrap:anywhere; }
     .big-score { font-size:2.4rem; }
-    .clock { font-size:clamp(3rem,12vw,4.5rem); }
+    .clock { font-size:clamp(3rem,12vw,5rem); }
     .hold-badge { font-size:.74rem; padding:4px 8px; }
     .control-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); }
     .control-grid .btn { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

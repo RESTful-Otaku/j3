@@ -8,6 +8,7 @@
   import { afterNavigate, goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { ensureQaFirstRun, syncRoleFromSession, uiRole } from '../lib/auth';
+import { LOCALES } from '../lib/i18n';
   import { setRole } from '../lib/nav';
   import { apiUrl, flushOutbox } from '../lib/api';
   import { notifySuccess } from '../lib/toast';
@@ -23,6 +24,7 @@
   let ready = false;
   let online = true;
   let docsRoute = false;
+  let locale = 'en';
 
   function syncRoute() {
     const path = window.location.pathname;
@@ -101,6 +103,11 @@
 
 {#if !docsRoute}<NavShell />{/if}
 {#if !docsRoute}<DemoReplay />{/if}
+<label class="field" style="margin-left:14px; margin-right:8px;">Language</label>
+  <select bind:value={locale} on:change={(e)=>{document.documentElement.lang=e.target.value; document.documentElement.dir=(LOCALES.find(l=>l.id===e.target.value)?.dir)||"ltr";}}>
+    {#each LOCALES as l}<option value={l.id}>{l.label}</option>{/each}
+  </select>
+</label>
 <div class="link-status" aria-live="polite"><span class:down={!online}></span>{online ? 'Live link' : 'Offline'}</div>
 <ToastHost />
 {#if !docsRoute}<TourOverlay />{/if}

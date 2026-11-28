@@ -336,14 +336,14 @@
 />
 
 <style>
-  .bracket-wrap { position:relative; display:flex; gap:clamp(18px,2vw,44px); align-items:stretch; overflow-x:auto; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; padding:12px 0 32px; min-height:min(68vh, 720px); min-width:max-content; max-width:100%; }
-  .bracket-wrap.vertical { flex-direction:column; min-width:0; }
+  .bracket-wrap { position:relative; display:flex; gap:clamp(18px,2vw,44px); align-items:flex-start; overflow-x:auto; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; padding:12px 0 32px; min-height:min(68vh, 720px); min-width:max-content; max-width:100%; }
+  .bracket-wrap.vertical { flex-direction:column; min-width:0; gap:clamp(10px,2vw,24px); }
   .bracket-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }
   .bracket-lines path { fill:none; stroke:var(--brand-accent); stroke-width:2; opacity:.7; }
-  .bracket-column { min-width:clamp(230px,19vw,330px); flex:1; position:relative; z-index:1; display:flex; flex-direction:column; }
-  .bracket-matches { display:flex; flex-direction:column; justify-content:space-around; flex:1; gap:12px; margin-top:12px; }
-  .bracket-match { background:var(--brand-surface-2); border:1px solid var(--brand-border); border-radius:12px; padding:4px; box-shadow:var(--brand-shadow); }
-  .bracket-slot { display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; }
+  .bracket-column { width:clamp(230px,19vw,330px); flex:1; position:relative; z-index:1; display:flex; flex-direction:column; }
+  .bracket-matches { display:flex; flex-direction:column; justify-content:flex-start; flex:1; gap:12px; margin-top:12px; }
+  .bracket-match { background:var(--brand-surface-2); border:1px solid var(--brand-border); border-radius:0; padding:4px; box-shadow:var(--brand-shadow); }
+  .bracket-slot { display:flex; align-items:center; gap:8px; padding:8px; border-radius:0; }
   .bracket-slot + .bracket-slot { border-top:1px solid var(--brand-border); }
   .bracket-slot.advanced { background:rgba(34,197,94,.12); }
   .bracket-slot.out { opacity:.55; }
@@ -357,6 +357,7 @@
     .bracket-column { min-width:0; width:100%; }
     .bracket-lines { display:none; }
     .bracket-matches { justify-content:flex-start; }
+    .bracket-rounds { display:grid !important; grid-template-columns:1fr; }
     .bracket-rounds { display:grid !important; grid-template-columns:1fr; }
     .bracket-rounds > section { min-width:0; width:100%; }
     /* Touch controls move to their own line so fighter names keep the width. */

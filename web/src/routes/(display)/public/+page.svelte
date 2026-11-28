@@ -277,7 +277,7 @@
 </div>
 
 <style>
-  .small-portrait { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 800; }
+  .small-portrait { width: 54px; height: 54px; border-radius: 0; display: grid; place-items: center; color: #fff; font-weight: 800; }
   .live-duel { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-top:12px; }
   .duel-side { display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
   .duel-side.blue { justify-content:flex-end; }
@@ -291,8 +291,8 @@
   @media (max-width:480px) { .matchup { flex-wrap:wrap; gap:6px; } .matchup-fighter { flex:1 1 100%; } .matchup-fighter .fighter-name { white-space:normal; overflow-wrap:anywhere; } .matchup .sep { width:100%; text-align:center; } }
   .matchup .sep { flex:none; color:var(--brand-muted); font-size:.78rem; font-weight:600; }
   .matchup.compact { font-size:.92rem; }
-  .club-logo { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; margin-right: 4px; vertical-align: middle; }
-  /* Host banner is full-bleed across the display content area — it belongs to the organiser/club, not a card. */
+  .club-logo { width: 48px; height: 48px; object-fit: cover; border:1px solid var(--brand-border); background:var(--brand-surface-3); flex:none; }
+  /* Host banner — full-bleed across the full width, organiser/club owned. */
   .brand-banner {
     aspect-ratio: 1670 / 544; height:auto; width:100vw; max-width:100vw;
     margin:0 calc(50% - 50vw) 16px; border-radius:0;
@@ -300,8 +300,8 @@
     background:var(--event-banner) center/contain no-repeat, var(--brand-primary-fill);
     background-color:var(--brand-surface-2); background-size:contain; background-position:center;
   }
-  .replay-strip { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 14px; margin-bottom:16px; border-radius:14px; border:1px solid var(--brand-accent); background:color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface-2)); }
-  .clock-hero { display:flex; gap:clamp(14px,3vw,50px); align-items:center; flex-wrap:wrap; padding:clamp(16px,2vw,30px); border-radius:20px; border:1px solid var(--brand-primary); background:linear-gradient(135deg, rgba(59,130,246,.18), transparent), var(--brand-surface-2); box-shadow:var(--brand-shadow); }
+  .replay-strip { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 14px; margin-bottom:16px; border-radius:0; border:1px solid var(--brand-accent); background:color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface-2)); }
+  .clock-hero { display:flex; gap:clamp(14px,3vw,50px); align-items:center; flex-wrap:wrap; padding:clamp(16px,2vw,30px); border-radius:0; border:1px solid var(--brand-primary); background:linear-gradient(135deg, rgba(59,130,246,.18), transparent), var(--brand-surface-2); box-shadow:var(--brand-shadow); }
   .big-clock { font-family:var(--font-display); font-size:clamp(3rem,8vw,8rem); font-weight:800; line-height:1; letter-spacing:.02em; color:var(--brand-accent); }
   .phone-sections { display:none; }
   @media (max-width: 700px) {
@@ -320,13 +320,10 @@
     .phone-section.active { display:block; animation:sectionIn .22s ease-out; }
     .live-duel { gap:7px; margin-top:8px; }
     .duel-side { gap:6px; }
-    .small-portrait { width:34px; height:34px; border-radius:10px; font-size:.68rem; }
+    .small-portrait { width:34px; height:34px; border-radius:0; font-size:.68rem; }
     .duel-name { font-size:.94rem; line-height:1.15; }
-    
     .matchup { font-size:.92rem; gap:4px; }
     .matchup.compact { font-size:.84rem; }
-    /* Phone board: compact the hero clock and banner so the actual fights land
-       higher on the screen and there is far less scrolling before content. */
     .brand-banner { aspect-ratio:1670/544; height:auto; width:100vw; max-width:100vw; margin:0 calc(50% - 50vw) 12px; }
     .clock-hero { padding: clamp(10px, 2vw, 18px); gap: clamp(10px, 3vw, 26px); }
     .big-clock { font-size: clamp(1.7rem, 9vw, 4.2rem); }
