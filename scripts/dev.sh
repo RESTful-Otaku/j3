@@ -354,15 +354,17 @@ docker_menu() {
 data_menu() {
   while true; do
     select_menu "Demo data & state" \
-      "Reset demo data" "Seed demo data" "Seed full tournament" "Run live executable" "← Back"
+      "Reset demo data" "Seed demo data" "Seed full tournament" "Fully reset app DB + fresh seeded local demo (web + mobile)" "Fully reset + rebuild mobile QA APK" "Run live executable" "← Back"
     choice=$?
     [ "$choice" -eq 255 ] && return
     case "$choice" in
       0) tui_log data-reset; spinner "Resetting demo data" go run ./cmd/j3d reset -db ./data/j3-demo.db ;;
       1) tui_log data-seed; spinner "Seeding demo data" go run ./cmd/j3d seed -db ./data/j3-demo.db ;;
       2) tui_log data-seed-full; spinner "Seeding full tournament" go run ./cmd/j3d reset -full -db ./data/j3-demo.db ;;
-      3) tui_log data-run-live; if ! test_stub "run-live"; then J3_DB=./data/j3-live.db ./bin/j3d -addr 127.0.0.1:8787; fi ;;
-      4) tui_log menu-back; return ;;
+      3) tui_log data-reset-app; spinner "Fully resetting app + fresh seeded local demo" bash scripts/reset-app.sh local ;;
+      4) tui_log data-reset-mobile; spinner "Fully resetting + rebuilding mobile QA APK" bash scripts/reset-app.sh mobile ;;
+      5) tui_log data-run-live; if ! test_stub "run-live"; then J3_DB=./data/j3-live.db ./bin/j3d -addr 127.0.0.1:8787; fi ;;
+      6) tui_log menu-back; return ;;
     esac
     pause
   done

@@ -25,7 +25,7 @@ action(1); action(2)
 for menu in [3, 4, 5, 6, 7, 8]:
     action(menu)
     if menu == 3:  count = 7      # QA options + back
-    elif menu == 4: count = 5     # data
+    elif menu == 4: count = 7     # data + reset app/mobile + back
     elif menu == 5: count = 9     # build
     elif menu == 6: count = 9     # mobile
     elif menu == 7: count = 9     # Docker QA + doctor/destroy; q backs
@@ -40,7 +40,7 @@ PY
 J3_TUI_TEST=1 J3_TUI_LOG="$LOG" bash scripts/dev.sh < "$KEYS" > "$OUT" 2>&1
 
 expected="run-demo run-demo-full qa-menu qa-all qa-smoke qa-smoke-full qa-e2e qa-load qa-github qa-back \
-data-menu data-reset data-seed data-seed-full data-run-live menu-back \
+data-menu data-reset data-seed data-seed-full data-reset-app data-reset-mobile data-run-live menu-back \
 build-menu build-exec build-release build-cicd deploy-dev deploy-staging deploy-prod \
 build-and-deploy-staging build-and-deploy-production menu-back \
 mobile-menu mobile-build-apk mobile-emulator mobile-install mobile-build-install mobile-url \

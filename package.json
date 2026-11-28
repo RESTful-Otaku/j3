@@ -75,7 +75,11 @@
     "version:check": "bash scripts/version.sh release check",
     "doctor": "bash scripts/doctor.sh",
     "qa:docker:destroy": "bash scripts/qa-docker.sh destroy",
-    "qa:docker:teardown": "bash scripts/qa-docker.sh destroy"
+    "qa:docker:teardown": "bash scripts/qa-docker.sh destroy",
+    "reset:app": "bash scripts/reset-app.sh local",
+    "reset:app:mobile": "bash scripts/reset-app.sh mobile",
+    "reset:app:docker": "bash scripts/reset-app.sh docker",
+    "reset:app:all": "bash scripts/reset-app.sh all"
   },
   "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Jonathan Harrison (RESTful_Otaku)"

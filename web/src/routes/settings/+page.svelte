@@ -6,6 +6,7 @@
   import { notifySuccess, notifyError } from '../../lib/toast';
   import { setTheme, themeChoice, type ThemeChoice } from '../../lib/theme';
   import { setAccessibility } from '../../lib/accessibility';
+  import { resetAppToDefaults } from '../../lib/reset';
 
   const KEY = 'j3-settings-v1';
   const locales = [
@@ -280,6 +281,7 @@
 
     <div class="action-row" style="margin-top:24px; justify-content:flex-end;">
       <button class="btn primary" on:click={save} disabled={saving}>{saving ? 'Saving…' : 'Save settings'}</button>
+      <button class="btn warn" on:click={() => resetAppToDefaults(true)}>Reset app &amp; data to defaults</button>
     </div>
   </div>
 
